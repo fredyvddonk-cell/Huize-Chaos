@@ -39,7 +39,10 @@ function renderStock(arr) {
               ${memoHtml(x)}
               <div class="stock-edit-hint">Tik op product om te wijzigen</div>
             </div>
-            <button class="status ${x.status === 'Voldoende' ? 'good' : x.status === 'Aanvullen' ? 'low' : 'out'}" onclick="cycleStatus(${x.id})">${x.status}</button>
+            <div class="stock-actions">
+              <button class="small to-hutsel" type="button" onclick="moveStockToHutsel(${x.id})">→ Hutsel Frutsel</button>
+              <button class="status ${x.status === 'Voldoende' ? 'good' : x.status === 'Aanvullen' ? 'low' : 'out'}" onclick="cycleStatus(${x.id})">${x.status}</button>
+            </div>
           </div>`).join('')}</div>
       </section>`;
     }).join('');
@@ -61,5 +64,28 @@ window.cycleStatus = id => {
   }
 
   save();
+  render();
+};
+
+window.moveStockToHutsel = id => {
+  const x = products.find(p => p.id === id);
+  if (!x) return;
+  const choice = prompt(`Wanneer moet "${x.name}" op? Typ Vandaag of Morgen.`, 'Vandaag');
+  if (choice === null) return;
+  const value = choice.trim().toLowerCase();
+  if (value !== 'vandaag' && value !== 'morgen') {
+    alert('Kies Vandaag of Morgen.');
+    return;
+  }
+  hutselItems.push({
+    id: Date.now(),
+    name: x.name,
+    note: 'Uit voorraad',
+    useDate: value === 'morgen' ? tomorrowKey() : localDateKey()
+  });
+  // Verplaatsen: uit de gewone voorraad verwijderen. Niet naar boodschappenlijst.
+  products = products.filter(p => p.id !== id);
+  save();
+  saveHutsel();
   render();
 };
