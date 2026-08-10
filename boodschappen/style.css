@@ -165,3 +165,12 @@ html, body { background:#F5F1FA !important; }
 .hc-brand-image{display:flex;align-items:center;text-decoration:none;min-width:0}
 .hc-brand-image img{width:auto!important;height:58px!important;max-width:min(300px,72vw);object-fit:contain;object-position:left center;background:transparent}
 @media(max-width:430px){.hc-brand-image img{height:50px!important;max-width:70vw}}
+
+/* V1.1.4 - boodschappenicoon + echt woordmerk */
+.hc-brand-combo{display:flex;align-items:center;gap:8px;text-decoration:none;min-width:0}
+.hc-brand-combo .hc-shopping-icon{width:50px!important;height:50px!important;object-fit:contain;background:transparent}
+.hc-brand-combo .hc-wordmark-image{width:auto!important;height:39px!important;max-width:190px;object-fit:contain;background:transparent}
+@media(max-width:430px){
+ .hc-brand-combo .hc-shopping-icon{width:45px!important;height:45px!important}
+ .hc-brand-combo .hc-wordmark-image{height:35px!important;max-width:165px}
+}
