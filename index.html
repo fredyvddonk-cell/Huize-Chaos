@@ -1,67 +1,41 @@
 <!doctype html>
 <html lang="nl">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#957AC1" />
-    <title>Huize Chaos V1.0</title>
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="icon" href="icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="icons/icon-192.png" />
-    <link rel="stylesheet" href="style.css?v=0.1" />
-  </head>
-  <body>
-    <main class="home">
-      <header class="hero">
-        <img src="icons/icon-192.png" class="logo" alt="" />
-        <div>
-          <h1>Huize Chaos</h1>
-          <p>Een beetje orde in de chaos.</p>
-        </div>
-      </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#957AC1">
+  <title>Huize Chaos</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css?v=1.1">
+</head>
+<body>
+  <main class="home">
+    <header class="hero">
+      <img src="icons/icon-192.png" class="hero-logo" alt="Huize Chaos">
+      <div class="hero-copy">
+        <h1><span class="huize">Huize</span> <span class="chaos">Chaos</span></h1>
+        <p>Een beetje orde in de chaos.</p>
+      </div>
+    </header>
 
-      <section class="grid" aria-label="Onderdelen">
-        <a class="tile active" href="boodschappen/">
-          <span class="emoji">🛒</span>
-          <span
-            ><strong>Voorraad &amp; Boodschappen</strong
-            ><small
-              >Voorraad, boodschappen, Hutsel Frutsel en
-              diepvriesmaaltijden</small
-            ></span
-          >
-          <span class="arrow">›</span>
-        </a>
-
-        <div class="tile future" aria-disabled="true">
-          <span class="emoji">📅</span>
-          <span><strong>Gezinsplanner</strong><small>Komt later</small></span>
-        </div>
-
-        <div class="tile future" aria-disabled="true">
-          <span class="emoji">📖</span>
-          <span><strong>Recepten</strong><small>Komt later</small></span>
-        </div>
-
-        <div class="tile future" aria-disabled="true">
-          <span class="emoji">🎉</span>
-          <span
-            ><strong>Feestdagen &amp; gelegenheden</strong
-            ><small>Komt later</small></span
-          >
-        </div>
-      </section>
-      <footer>Voorlopige versie · V0.1</footer>
-    </main>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () =>
-          navigator.serviceWorker.register("./service-worker.js"),
-        );
-      }
-    </script>
-  </body>
+    <section class="module-grid" aria-label="Onderdelen">
+      <a class="module-card available" href="boodschappen/">
+        <img src="boodschappen/assets/shopping-icon.png" class="module-icon" alt="">
+        <div><strong>Voorraad &amp; Boodschappen</strong><small>Boodschappen, voorraad, Hutsel Frutsel en diepvriesmaaltijden</small></div>
+        <span class="go">›</span>
+      </a>
+      <div class="module-card future"><span class="placeholder-icon">📅</span><div><strong>Gezinsplanner</strong><small>Komt later</small></div></div>
+      <div class="module-card future"><span class="placeholder-icon">📖</span><div><strong>Recepten</strong><small>Komt later</small></div></div>
+      <div class="module-card future"><span class="placeholder-icon">🎉</span><div><strong>Feestdagen &amp; gelegenheden</strong><small>Komt later</small></div></div>
+    </section>
+    <footer>Huize Chaos · V1.1</footer>
+  </main>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+}
+</script>
+</body>
 </html>

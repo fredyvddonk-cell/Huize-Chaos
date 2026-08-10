@@ -65,8 +65,8 @@ function renderShopping(allProducts) {
   const done = arr.filter(x => x.done).length;
 
   $('#count').textContent = `${arr.length} boodschappen · ${done} afgevinkt`;
-  $('#clearDone').style.display = done ? 'inline-block' : 'none';
-  $('#clearDone').textContent = done ? `Afgevinkte verwerken (${done})` : 'Afgevinkte verwerken';
+  $('#processDoneBar').classList.toggle('visible', done > 0);
+  $('#clearDone').textContent = done ? `✓ Boodschappen verwerken (${done})` : '✓ Boodschappen verwerken';
 
   document.querySelectorAll('[data-group]').forEach(button => {
     button.classList.toggle('active', button.dataset.group === group);

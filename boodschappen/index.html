@@ -3,20 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#957AC1">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=4.2.1">
+  <link rel="stylesheet" href="style.css?v=1.1">
 </head>
 <body>
-  <a href="../" class="hc-back" aria-label="Terug naar Huize Chaos">‹ Huize Chaos</a>
   <main class="app">
     <header class="fixed-head">
-    <div class="top">
-      <h1 id="title">Boodschappen</h1>
-      <div class="top-actions"><span class="version">V4.2.1</span><button class="icon" aria-label="Instellingen">⚙</button></div>
+    <div class="top hc-module-top">
+      <a class="hc-brand" href="../" aria-label="Terug naar Huize Chaos">
+        <img src="assets/shopping-icon.png" alt="">
+        <span class="hc-wordmark"><span class="hc-huize">Huize</span> <span class="hc-chaos">Chaos</span></span>
+      </a>
+      <span id="title" class="sr-only">Boodschappen</span>
+      <div class="top-actions"><span class="version">V1.1</span><button class="icon" aria-label="Instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -32,13 +31,12 @@
         <input id="search" class="search" placeholder="Zoek product...">
         <button id="clearSearch" class="search-clear" type="button" aria-label="Zoekveld leegmaken">×</button>
       </div>
-      <button id="add" class="plus" aria-label="Product toevoegen">+</button>
+      <button id="add" class="plus add-labelled" aria-label="Product toevoegen">+ Toevoegen</button>
     </div>
 
     <div id="listControls">
       <div class="summary">
         <span id="count"></span>
-        <button id="clearDone" class="clear">Afgevinkte verwijderen</button>
       </div>
       <div class="list-options">
         <div class="group">
@@ -50,6 +48,9 @@
     </div>
 
     <section id="content"></section>
+    <div id="processDoneBar" class="process-done-bar">
+      <button id="clearDone" class="process-done-btn" type="button">✓ Boodschappen verwerken</button>
+    </div>
   </main>
 
   
@@ -145,14 +146,9 @@
     </form>
   </div>
 
-  <script src="js/app.js?v=4.2.1"></script>
-  <script src="js/shopping.js?v=4.2.1"></script>
-  <script src="js/stock.js?v=4.2.1"></script>
-  <script src="js/hutsel.js?v=4.2.1"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
-    }
-  </script>
+  <script src="js/app.js?v=1.1"></script>
+  <script src="js/shopping.js?v=1.1"></script>
+  <script src="js/stock.js?v=1.1"></script>
+  <script src="js/hutsel.js?v=1.1"></script>
 </body>
 </html>
