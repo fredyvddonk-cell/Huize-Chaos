@@ -1,3 +1,4 @@
+let shoppingStoreFilter = 'Alle';
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
 
 function saveShoppingExpansion() {
@@ -61,7 +62,20 @@ window.collapseAllShopping = () => {
 };
 
 function renderShopping(allProducts) {
-  const arr = allProducts.filter(x => x.shopping);
+  const allShopping = allProducts.filter(x => x.shopping);
+  const storeNames = [...new Set(allShopping.map(x => x.store || 'Overig'))];
+  const orderedStores = storeNames.sort((a,b) =>
+    (stores.indexOf(a) < 0 ? 999 : stores.indexOf(a)) -
+    (stores.indexOf(b) < 0 ? 999 : stores.indexOf(b)) || a.localeCompare(b,'nl')
+  );
+  const filters = ['Alle', ...orderedStores];
+  if (!filters.includes(shoppingStoreFilter)) shoppingStoreFilter = 'Alle';
+  const filterEl = $('#storeFilters');
+  if (filterEl) filterEl.innerHTML = filters.map(name => {
+    const count = name === 'Alle' ? allShopping.length : allShopping.filter(x => (x.store || 'Overig') === name).length;
+    return `<button type="button" class="store-filter ${shoppingStoreFilter===name?'active':''}" onclick="setShoppingStoreFilter('${encodeURIComponent(name)}')">${esc(name)} (${count})</button>`;
+  }).join('');
+  const arr = shoppingStoreFilter === 'Alle' ? allShopping : allShopping.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
   const done = arr.filter(x => x.done).length;
 
   $('#count').textContent = `${arr.length} boodschappen · ${done} afgevinkt`;
@@ -87,7 +101,10 @@ function renderShopping(allProducts) {
         ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
         ${memoHtml(x)}
       </div>
-      <button class="small shopping-remove" type="button" onclick="removeFromShopping(${x.id})">Verwijder</button>
+      <div class="shopping-row-actions">
+        <button class="small shopping-edit" type="button" onclick="editProduct(${x.id})">Wijzig</button>
+        <button class="small shopping-remove" type="button" onclick="removeFromShopping(${x.id})">Verwijder</button>
+      </div>
     </div>`;
 
   let html = '';
@@ -99,6 +116,12 @@ function renderShopping(allProducts) {
   }
   content.innerHTML = html;
 }
+
+
+window.setShoppingStoreFilter = encodedName => {
+  shoppingStoreFilter = decodeURIComponent(encodedName);
+  render();
+};
 
 window.markBought = (id, checked) => {
   const x = products.find(x => x.id === id);

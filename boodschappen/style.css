@@ -94,3 +94,26 @@ body{background:linear-gradient(180deg,#f7f3fb 0,#fff 260px)}
 .process-done-btn{display:block;width:min(100%,690px);margin:auto;border:0;border-radius:15px;background:#957AC1;color:#fff;font-weight:800;font-size:15px;padding:14px 16px;box-shadow:0 7px 22px rgba(92,68,120,.22)}
 .hc-back{display:none!important}
 @media(max-width:430px){.hc-brand img{width:39px;height:39px}.hc-wordmark{font-size:20px}.fixed-head .tab{font-size:10.5px}.add-labelled{min-width:94px;padding:0 11px;font-size:13px}.list-options{gap:6px}.print-btn{padding:7px 8px}}
+
+/* Huize Chaos V1.2 */
+.hc-module-top{padding:7px 0 8px!important}
+.hc-brand{gap:10px}
+.hc-brand img{width:52px;height:58px;object-fit:contain;border-radius:0;background:transparent}
+.hc-wordmark{font-size:27px;letter-spacing:-1px}
+.hc-huize{color:#6840A3}.hc-chaos{color:#16AEB7}
+.store-filters{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 9px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.store-filters::-webkit-scrollbar{display:none}
+.store-filter{flex:0 0 auto;border:1px solid #ded7e7;background:#fff;color:var(--text);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:750}
+.store-filter.active{background:var(--lav);border-color:var(--lav);color:#fff}
+.shopping-group{border-color:#e9e2ef;box-shadow:0 2px 8px rgba(76,52,99,.035)}
+.shopping-group-head{background:linear-gradient(90deg,#faf6fd,#f4ecfa);padding-top:13px;padding-bottom:13px}
+.shopping-level-2>.shopping-group-head{background:#fbf9fd}
+.shopping-row-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.shopping-row-actions .small{background:transparent;color:#6540a0;font-weight:700}
+.process-done-btn{border-radius:18px;background:linear-gradient(90deg,#7141b3,#6130a5);font-size:16px}
+@media(max-width:430px){
+  .hc-brand img{width:46px;height:51px}.hc-wordmark{font-size:23px}
+  .store-filter{padding:8px 11px;font-size:12px}
+  .shopping-row-actions{gap:1px}
+  .shopping-row-actions .small{font-size:11px;padding:6px 5px}
+}
