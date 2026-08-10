@@ -1,0 +1,72 @@
+:root{--lav:#957AC1;--lav2:#E9E2F4;--lav3:#F5F1FA;--text:#2D2D37;--line:#E3E3E8;--green:#D3ECD6;--greent:#2E7343;--warn:#FFF0C9;--warnt:#8A6418;--out:#F8DCDC;--outt:#9A3F3F}*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.app{max-width:720px;margin:auto;padding:20px 16px 90px}.top{display:flex;align-items:center;justify-content:space-between}.top h1{font-size:28px;margin:0}.icon{border:0;background:transparent;font-size:23px;padding:8px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.tab,.group button{border:0;border-radius:12px;background:var(--lav3);color:var(--text);font-weight:700;padding:12px}.tab.active,.group button.active{background:var(--lav);color:white}.toolbar{display:flex;gap:9px;margin:14px 0}.search{flex:1;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-size:16px;min-width:0}.plus{width:48px;height:48px;border:0;border-radius:50%;background:var(--lav);color:white;font-size:28px}.summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 12px;font-size:14px}.clear{border:0;border-radius:10px;padding:9px 11px;background:var(--lav3);color:var(--text)}.group{display:flex;gap:7px;margin-bottom:18px}.group button{padding:8px 12px;font-size:13px}.section{margin:22px 0 8px;font-size:16px}.item{display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);padding:12px 2px}.check{width:22px;height:22px;accent-color:var(--lav)}.main{flex:1;min-width:0}.name{font-weight:700;overflow-wrap:anywhere}.meta{font-size:13px;color:#73737d;margin-top:3px}.done .name{text-decoration:line-through;color:#9a9aa2}.done .meta{opacity:.6}.status{border:0;border-radius:999px;padding:8px 10px;font-weight:700;white-space:nowrap}.good{background:var(--green);color:var(--greent)}.low{background:var(--warn);color:var(--warnt)}.out{background:var(--out);color:var(--outt)}.actions{display:flex;gap:5px}.small{border:0;background:var(--lav3);border-radius:9px;padding:7px 9px}.empty{padding:32px 10px;text-align:center;color:#777}.modal{position:fixed;inset:0;background:#0005;display:none;align-items:flex-end;justify-content:center;padding:12px}.modal.open{display:flex}.card{background:white;width:min(100%,620px);border-radius:20px;padding:18px;max-height:90vh;overflow:auto}.card h2{margin:0 0 14px}.field{margin:11px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:700}.primary{background:var(--lav);color:white}.secondary{background:var(--lav3)}@media(max-width:420px){.app{padding-left:12px;padding-right:12px}.top h1{font-size:25px}.item{gap:8px}.status{font-size:12px;padding:7px 8px}}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;font-family:inherit;resize:vertical}.memo{font-size:13px;color:#666674;margin-top:5px;overflow-wrap:anywhere}.memo::before{content:"Memo: ";font-weight:700}@media(max-width:420px){.field-row{grid-template-columns:1fr 1fr;gap:8px}}
+.manage-block{margin-top:20px}.manage-add{display:flex;gap:8px;margin-bottom:8px}.manage-add input{flex:1;min-width:0;border:1px solid var(--line);border-radius:11px;padding:10px;font-size:15px}.manage-add button,.manage-row button{border:0;background:var(--lav3);border-radius:9px;padding:8px 10px}.manage-row{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:9px 2px}.manage-row span{flex:1;overflow-wrap:anywhere}
+
+
+/* Laatste testversie: beheer, categorievolgorde en print */
+.list-options{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}.list-options .group{margin-bottom:0}.print-btn{border:0;border-radius:10px;padding:8px 12px;background:var(--lav3);color:var(--text);font-weight:700}.accordion{border-bottom:1px solid var(--line)}.accordion-head{width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:#fff;padding:16px 2px;font-size:17px;font-weight:800;color:var(--text);text-align:left}.chevron{font-size:22px;transition:transform .18s}.accordion.open .chevron{transform:rotate(180deg)}.accordion-body{display:none;padding:0 0 14px}.accordion.open .accordion-body{display:block}.manage-help{font-size:12px;color:#73737d;margin:4px 0 8px}.drag-handle{cursor:grab;font-size:18px;touch-action:none}.category-order.dragging{opacity:.45}.manage-row button:disabled{opacity:.25}.category-order span{min-width:0}
+@media(max-width:480px){.category-order{gap:4px}.category-order button{padding:7px 7px;font-size:12px}.drag-handle{font-size:17px}.list-options{align-items:flex-start}.print-btn{white-space:nowrap}}
+@media print{
+  body{background:#fff;color:#000;font-family:Arial,sans-serif}.app{max-width:none;padding:0;margin:0}.top,.tabs,.toolbar,.summary,.print-btn{display:none!important}#listControls{display:block!important}.group{display:none!important}#content{display:block}.section{font-size:16pt;margin:18pt 0 5pt;break-after:avoid}.item{padding:5pt 0;border-bottom:1px solid #bbb;break-inside:avoid}.item.done{display:none!important}.check{appearance:none;-webkit-appearance:none;width:13pt;height:13pt;border:1px solid #000;margin:0 7pt 0 0}.name{font-size:11pt}.meta,.memo{font-size:9pt;color:#333}.status,.actions{display:none!important}@page{size:A4;margin:14mm}
+}
+
+.direct-buy-option{display:flex;align-items:flex-start;gap:10px;margin:14px 0;padding:12px;border-radius:12px;background:var(--lav3);cursor:pointer}.direct-buy-option input{width:20px;height:20px;margin-top:1px;accent-color:var(--lav);flex:0 0 auto}.direct-buy-option span{display:flex;flex-direction:column;gap:3px;font-size:14px}.direct-buy-option small{font-size:12px;color:#73737d;font-weight:400}.urgent-block{background:#fff8e8;border-radius:14px;padding:0 10px 4px;margin:8px 0 20px}.urgent-title{color:#7b5714;margin-top:12px}.urgent-block .item:last-child{border-bottom:0}
+
+/* Update: snellere voorraadcontrole en dubbele groepering boodschappen */
+.list-action-buttons{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.shopping-group,.stock-category{border-bottom:1px solid var(--line)}
+.shopping-group-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:#fff;color:var(--text);padding:14px 2px;font-size:16px;font-weight:800;text-align:left}
+.shopping-level-2{margin-left:14px;border-bottom:0;border-top:1px solid #f0eef4}
+.shopping-level-2>.shopping-group-head{font-size:14px;padding:11px 4px;color:#55515e}
+.shopping-group-body{display:block}
+.shopping-group.collapsed>.shopping-group-body,.stock-category.collapsed>.shopping-group-body{display:none}
+.shopping-group.collapsed>.shopping-group-head .chevron,.stock-category.collapsed>.shopping-group-head .chevron{transform:rotate(-90deg)}
+.shopping-group-head .chevron{transition:transform .15s;font-size:20px}
+.stock-tools{display:flex;justify-content:flex-end;margin:2px 0 8px}
+.stock-category-head{font-size:17px;padding:15px 2px}
+.stock-item .main{cursor:pointer;padding:2px 0}
+.stock-edit-hint{font-size:11px;color:#8b8791;margin-top:4px}
+@media(max-width:480px){.list-options{gap:7px}.list-action-buttons{gap:5px}.print-btn{padding:8px 9px;font-size:12px}.shopping-level-2{margin-left:10px}.stock-edit-hint{font-size:10px}}
+@media print{.list-action-buttons{display:none!important}.shopping-group-body{display:block!important}.shopping-group-head{font-size:16pt;padding:10pt 0 4pt}.shopping-level-2{margin-left:10pt}.shopping-level-2>.shopping-group-head{font-size:12pt}}
+
+/* Update: gekocht = voldoende; los verwijderen van boodschappenlijst */
+.shopping-item .shopping-remove{flex:0 0 auto;font-size:12px;padding:7px 9px}.shopping-item .main{min-width:0}@media(max-width:420px){.shopping-item{align-items:flex-start}.shopping-item .shopping-remove{margin-top:0;padding:7px 8px}}
+
+/* V4 */
+.top-actions{display:flex;align-items:center;gap:4px}.version{font-size:12px;font-weight:800;color:#73737d;background:var(--lav3);border-radius:999px;padding:5px 8px}
+.search-wrap{position:relative;display:flex;flex:1;min-width:0}.search-wrap .search{width:100%;padding-right:42px}.search-clear{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:#73737d;font-size:24px;line-height:1;display:none;align-items:center;justify-content:center}.search-clear.visible{display:flex}.search-clear:active{background:var(--lav3)}
+
+/* V4.1 - compacte vaste bovenkant */
+.fixed-head{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:#fff;
+  padding-top:max(6px, env(safe-area-inset-top));
+  border-bottom:1px solid var(--line);
+}
+.fixed-head .top{min-height:42px;padding:2px 0}
+.fixed-head .top h1{font-size:21px;line-height:1.15}
+.fixed-head .icon{padding:6px;font-size:21px}
+.fixed-head .tabs{margin:4px 0 7px;gap:6px}
+.fixed-head .tab{padding:8px 7px;border-radius:10px;font-size:13px}
+.app{padding-top:0}
+@media(max-width:420px){
+  .fixed-head .top h1{font-size:20px}
+  .fixed-head .tabs{margin:3px 0 6px}
+  .fixed-head .tab{padding:7px 5px}
+}
+
+.category-input-wrap{position:relative;display:flex}.category-input-wrap input{padding-right:42px}.field-clear{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:#73737d;font-size:24px;line-height:1}.field-clear:active{background:var(--lav3)}
+
+/* V4.2 Hutsel Frutsel */
+.tabs{grid-template-columns:repeat(4,1fr)}
+@media(max-width:420px){.fixed-head .tab{font-size:11px;padding:7px 3px}.tabs{gap:4px}}
+.hutsel-intro{display:flex;flex-direction:column;gap:3px;background:var(--lav3);border-radius:14px;padding:12px 14px;margin:12px 0}.hutsel-intro span{font-size:13px;color:#73737d}
+.hutsel-section{margin-top:18px}.hutsel-section .section{display:flex;align-items:center;gap:7px;margin-bottom:5px}.hutsel-count{font-size:12px;background:var(--lav2);border-radius:999px;padding:3px 7px}.hutsel-done{width:38px;height:38px;border:0;border-radius:50%;background:var(--green);color:var(--greent);font-size:20px;font-weight:800;flex:0 0 auto}.hutsel-empty{font-size:14px;color:#777;padding:10px 2px 14px;border-bottom:1px solid var(--line)}.hutsel-day-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hutsel-day-choice label{display:flex;align-items:center;gap:8px;background:var(--lav3);border-radius:12px;padding:11px}.hutsel-day-choice input{accent-color:var(--lav)}
+
+/* V4.2.1 diepvriesmaaltijden binnen Hutsel Frutsel */
+.freezer-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.freezer-heading .section{margin:0}.freezer-add{white-space:nowrap}.freezer-section{margin-top:28px;padding-top:16px;border-top:2px solid var(--lav2)}.freezer-take{border:0;border-radius:10px;background:var(--lav2);color:var(--text);font-weight:700;padding:8px;max-width:82px;line-height:1.15}
+
+.hc-back{position:fixed;right:10px;bottom:12px;z-index:9999;background:#2D2D37;color:#fff;text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;box-shadow:0 3px 12px #0003}

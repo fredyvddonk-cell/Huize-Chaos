@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#957AC1">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Boodschappen</title>
+  <link rel="stylesheet" href="style.css?v=4.2.1">
+</head>
+<body>
+  <a href="../" class="hc-back" aria-label="Terug naar Huize Chaos">‹ Huize Chaos</a>
+  <main class="app">
+    <header class="fixed-head">
+    <div class="top">
+      <h1 id="title">Boodschappen</h1>
+      <div class="top-actions"><span class="version">V4.2.1</span><button class="icon" aria-label="Instellingen">⚙</button></div>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab active" data-page="list">Lijst</button>
+      <button class="tab" data-page="stock">Voorraad</button>
+      <button class="tab" data-page="hutsel">Hutsel Frutsel</button>
+      <button class="tab" data-page="manage">Beheer</button>
+    </nav>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input id="search" class="search" placeholder="Zoek product...">
+        <button id="clearSearch" class="search-clear" type="button" aria-label="Zoekveld leegmaken">×</button>
+      </div>
+      <button id="add" class="plus" aria-label="Product toevoegen">+</button>
+    </div>
+
+    <div id="listControls">
+      <div class="summary">
+        <span id="count"></span>
+        <button id="clearDone" class="clear">Afgevinkte verwijderen</button>
+      </div>
+      <div class="list-options">
+        <div class="group">
+          <button data-group="store" class="active">Winkel</button>
+          <button data-group="category">Categorie</button>
+        </div>
+        <div class="list-action-buttons"><button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button><button id="printList" class="print-btn" type="button">Printen</button></div>
+      </div>
+    </div>
+
+    <section id="content"></section>
+  </main>
+
+  
+
+  
+  <div id="freezerModal" class="modal">
+    <form id="freezerForm" class="card">
+      <h2 id="freezerModalTitle">Diepvriesmaaltijd toevoegen</h2>
+      <input type="hidden" id="freezerEditId">
+      <div class="field"><label for="freezerName">Maaltijd *</label><input id="freezerName" required placeholder="Bijv. bolognesesaus"></div>
+      <div class="field"><label for="freezerPortions">Aantal porties</label><input id="freezerPortions" type="number" inputmode="numeric" min="1" step="1" value="1"></div>
+      <div class="field"><label for="freezerDate">Ingevroren op</label><input id="freezerDate" type="date"></div>
+      <div class="field"><label for="freezerNote">Notitie</label><input id="freezerNote" placeholder="Optioneel"></div>
+      <div class="modal-actions"><button type="button" id="freezerCancel" class="btn secondary">Annuleren</button><button class="btn primary">Opslaan</button></div>
+    </form>
+  </div>
+
+  <div id="hutselModal" class="modal">
+    <form id="hutselForm" class="card">
+      <h2>Restje toevoegen</h2>
+      <input type="hidden" id="hutselEditId">
+      <div class="field">
+        <label for="hutselName">Naam *</label>
+        <input id="hutselName" required placeholder="Bijv. pasta met saus">
+      </div>
+      <div class="field">
+        <label for="hutselNote">Hoeveelheid / toelichting</label>
+        <input id="hutselNote" placeholder="Bijv. 1 portie">
+      </div>
+      <div class="field">
+        <label>Wanneer opmaken?</label>
+        <div class="hutsel-day-choice">
+          <label><input type="radio" name="hutselDay" value="today" checked> Vandaag</label>
+          <label><input type="radio" name="hutselDay" value="tomorrow"> Morgen</label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="hutselCancel" class="btn secondary">Annuleren</button>
+        <button class="btn primary">Opslaan</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="modal" class="modal">
+    <form id="form" class="card">
+      <h2 id="modalTitle">Product toevoegen</h2>
+      <input type="hidden" id="editId">
+
+      <div class="field">
+        <label for="productName">Productnaam *</label>
+        <input id="productName" required>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="quantity">Hoeveelheid</label>
+          <input id="quantity" inputmode="decimal" placeholder="Bijv. 2 of 500">
+        </div>
+        <div class="field">
+          <label for="unit">Eenheid</label>
+          <select id="unit"></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="store">Winkel</label>
+        <select id="store"></select>
+      </div>
+
+      <div class="field">
+        <label for="category">Categorie</label>
+        <div class="category-input-wrap">
+          <input id="category" list="categories">
+          <button id="clearCategory" class="field-clear" type="button" aria-label="Categorie leegmaken">×</button>
+        </div>
+        <datalist id="categories"></datalist>
+      </div>
+
+      <label class="direct-buy-option" for="buyDirectWhenOut">
+        <input type="checkbox" id="buyDirectWhenOut">
+        <span><strong>Direct kopen als dit product op is</strong><small>Als de voorraadstatus Op is, komt dit product bovenaan de boodschappenlijst onder Direct nodig.</small></span>
+      </label>
+
+      <div class="field">
+        <label for="memo">Memo</label>
+        <textarea id="memo" rows="3" placeholder="Bijv. halfvol, aanbieding, voor recept..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="cancel" class="btn secondary">Annuleren</button>
+        <button class="btn primary">Opslaan</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="js/app.js?v=4.2.1"></script>
+  <script src="js/shopping.js?v=4.2.1"></script>
+  <script src="js/stock.js?v=4.2.1"></script>
+  <script src="js/hutsel.js?v=4.2.1"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+    }
+  </script>
+</body>
+</html>
