@@ -1,5 +1,5 @@
-let shoppingStoreFilter = 'Alle';
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
+let shoppingStoreFilter = localStorage.getItem('household-shopping-store-filter') || 'all';
 
 function saveShoppingExpansion() {
   localStorage.setItem('household-expanded-shopping', JSON.stringify([...expandedShoppingGroups]));
@@ -62,20 +62,7 @@ window.collapseAllShopping = () => {
 };
 
 function renderShopping(allProducts) {
-  const allShopping = allProducts.filter(x => x.shopping);
-  const storeNames = [...new Set(allShopping.map(x => x.store || 'Overig'))];
-  const orderedStores = storeNames.sort((a,b) =>
-    (stores.indexOf(a) < 0 ? 999 : stores.indexOf(a)) -
-    (stores.indexOf(b) < 0 ? 999 : stores.indexOf(b)) || a.localeCompare(b,'nl')
-  );
-  const filters = ['Alle', ...orderedStores];
-  if (!filters.includes(shoppingStoreFilter)) shoppingStoreFilter = 'Alle';
-  const filterEl = $('#storeFilters');
-  if (filterEl) filterEl.innerHTML = filters.map(name => {
-    const count = name === 'Alle' ? allShopping.length : allShopping.filter(x => (x.store || 'Overig') === name).length;
-    return `<button type="button" class="store-filter ${shoppingStoreFilter===name?'active':''}" onclick="setShoppingStoreFilter('${encodeURIComponent(name)}')">${esc(name)} (${count})</button>`;
-  }).join('');
-  const arr = shoppingStoreFilter === 'Alle' ? allShopping : allShopping.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
+  const arr = allProducts.filter(x => x.shopping);
   const done = arr.filter(x => x.done).length;
 
   $('#count').textContent = `${arr.length} boodschappen · ${done} afgevinkt`;
@@ -93,6 +80,13 @@ function renderShopping(allProducts) {
 
   const urgent = arr.filter(x => x.status === 'Op' && x.buyDirectWhenOut);
   const normal = arr.filter(x => !(x.status === 'Op' && x.buyDirectWhenOut));
+  const stores = groups(arr, 'store');
+  const chips = document.getElementById('storeChips');
+  if (chips) {
+    chips.innerHTML = `<button class="store-chip ${shoppingStoreFilter === 'all' ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('all')">Alle (${arr.length})</button>` +
+      stores.map(([storeName, items]) => `<button class="store-chip ${shoppingStoreFilter === storeName ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('${encodeURIComponent(storeName)}')">${esc(storeName)} (${items.length})</button>`).join('');
+  }
+
   const row = x => `
     <div class="item shopping-item ${x.done ? 'done' : ''}">
       <input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done ? 'checked' : ''} onchange="markBought(${x.id}, this.checked)">
@@ -112,14 +106,22 @@ function renderShopping(allProducts) {
     html += `<div class="urgent-block"><h2 class="section urgent-title">Direct nodig</h2>${urgent.sort(sortProducts).map(row).join('')}</div>`;
   }
   if (normal.length) {
-    html += groups(normal, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
+    let visibleNormal = normal;
+    if (group === 'store' && shoppingStoreFilter !== 'all') {
+      visibleNormal = normal.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
+    }
+    if (visibleNormal.length) {
+      html += groups(visibleNormal, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
+    }
   }
   content.innerHTML = html;
 }
 
 
-window.setShoppingStoreFilter = encodedName => {
-  shoppingStoreFilter = decodeURIComponent(encodedName);
+window.setShoppingStoreFilter = encodedStore => {
+  const store = encodedStore === 'all' ? 'all' : decodeURIComponent(encodedStore);
+  shoppingStoreFilter = store;
+  localStorage.setItem('household-shopping-store-filter', store);
   render();
 };
 

@@ -95,59 +95,60 @@ body{background:linear-gradient(180deg,#f7f3fb 0,#fff 260px)}
 .hc-back{display:none!important}
 @media(max-width:430px){.hc-brand img{width:39px;height:39px}.hc-wordmark{font-size:20px}.fixed-head .tab{font-size:10.5px}.add-labelled{min-width:94px;padding:0 11px;font-size:13px}.list-options{gap:6px}.print-btn{padding:7px 8px}}
 
-/* Huize Chaos V1.2 */
-.hc-module-top{padding:7px 0 8px!important}
-.hc-brand{gap:10px}
-.hc-brand img{width:52px;height:58px;object-fit:contain;border-radius:0;background:transparent}
-.hc-wordmark{font-size:27px;letter-spacing:-1px}
-.hc-huize{color:#6840A3}.hc-chaos{color:#16AEB7}
-.store-filters{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 9px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.store-filters::-webkit-scrollbar{display:none}
-.store-filter{flex:0 0 auto;border:1px solid #ded7e7;background:#fff;color:var(--text);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:750}
-.store-filter.active{background:var(--lav);border-color:var(--lav);color:#fff}
-.shopping-group{border-color:#e9e2ef;box-shadow:0 2px 8px rgba(76,52,99,.035)}
-.shopping-group-head{background:linear-gradient(90deg,#faf6fd,#f4ecfa);padding-top:13px;padding-bottom:13px}
-.shopping-level-2>.shopping-group-head{background:#fbf9fd}
-.shopping-row-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
-.shopping-row-actions .small{background:transparent;color:#6540a0;font-weight:700}
-.process-done-btn{border-radius:18px;background:linear-gradient(90deg,#7141b3,#6130a5);font-size:16px}
+
+/* Huize Chaos V1.1 - telefoonproef nieuwe boodschappenstijl */
+:root{--hc-purple:#6f3fba;--hc-teal:#16aeb6;--hc-soft:#f7f2fb}
+body{background:#faf8fc}
+.app{max-width:720px;padding-left:12px;padding-right:12px}
+.fixed-head{box-shadow:0 1px 0 rgba(80,55,105,.05)}
+.hc-module-top{min-height:70px;padding:8px 4px 7px!important}
+.hc-brand{gap:9px}
+.hc-brand img{width:58px;height:58px;object-fit:contain}
+.hc-wordmark{font-family:"Segoe Print","Comic Sans MS",cursive;font-size:28px;font-weight:800;letter-spacing:-1.2px}
+.hc-huize{color:#7042b3}.hc-chaos{color:#10adb5}
+.top-actions .icon{width:42px;height:42px;border:1px solid #e7dfed;border-radius:50%;display:grid;place-items:center;color:#7042b3;background:#fff}
+.version{background:transparent;padding:2px 4px;color:#8b8291}
+
+.tabs{gap:0;margin:2px 0 8px;border:1px solid #e6dfea;border-radius:13px;overflow:hidden;background:#fff}
+.tab{border-radius:0!important;background:#fff!important;padding:10px 5px!important;border-right:1px solid #eee8f1!important}
+.tab:last-child{border-right:0!important}
+.tab.active{background:linear-gradient(135deg,#7d4ac7,#6333ad)!important;color:#fff!important}
+.toolbar{background:#fff;border:1px solid #eee8f1;border-radius:16px;padding:9px;margin:10px 0}
+.search-wrap{display:none}
+.add-labelled{margin-left:auto;background:#f4edf9;color:#6738aa;border:1px solid #e7dcf0;height:42px}
+.shopping-title-row{display:flex;align-items:center;margin:12px 3px 8px}
+.shopping-title-row h1{font-size:22px;line-height:1.15;margin:0;font-weight:800}
+.store-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 9px;scrollbar-width:none}
+.store-chips::-webkit-scrollbar{display:none}
+.store-chip{flex:0 0 auto;border:1px solid #e5deea;background:#fff;color:#292631;border-radius:12px;padding:9px 14px;font-weight:800;font-size:13px}
+.store-chip.active{background:linear-gradient(135deg,#7d4ac7,#6333ad);border-color:transparent;color:#fff}
+.summary{font-size:12px;color:#77717e;margin:1px 3px 8px}
+.list-options{padding:6px 7px;border-radius:12px;margin-bottom:10px}
+.group button{padding:7px 10px}
+.shopping-group{border-color:#ebe4ef;border-radius:14px;margin:9px 0;box-shadow:0 2px 8px rgba(84,55,105,.035)}
+.shopping-group-head{background:linear-gradient(90deg,#faf6fd,#f4edf9);padding:12px 12px;font-size:16px}
+.shopping-level-2{background:#fff}
+.item{padding:12px 10px;gap:10px}
+.name{font-size:15px}
+.meta{font-size:12px}
+.shopping-row-actions{display:flex;gap:5px;flex:0 0 auto}
+.shopping-row-actions .small{background:transparent;color:#6738aa;font-weight:700;padding:6px 5px}
+.process-done-btn{background:linear-gradient(135deg,#7d4ac7,#6333ad);border-radius:18px}
 @media(max-width:430px){
-  .hc-brand img{width:46px;height:51px}.hc-wordmark{font-size:23px}
-  .store-filter{padding:8px 11px;font-size:12px}
+  .hc-module-top{min-height:61px}
+  .hc-brand img{width:49px;height:49px}
+  .hc-wordmark{font-size:24px}
+  .top-actions .icon{width:38px;height:38px}
+  .shopping-title-row h1{font-size:20px}
+  .store-chip{padding:8px 12px;font-size:12px}
   .shopping-row-actions{gap:1px}
-  .shopping-row-actions .small{font-size:11px;padding:6px 5px}
+  .shopping-row-actions .small{font-size:11px;padding:6px 4px}
+  .item{padding-left:8px;padding-right:8px}
 }
 
-/* V1.3 compact rond modulelogo */
-.hc-brand img{
-  width:52px;height:52px;object-fit:cover;
-  border-radius:50%;
-  background:#F5F1FA;
-  border:2px solid #E9E2F4;
-  padding:3px;
-  box-shadow:0 2px 8px rgba(90,60,120,.10);
-}
-.stock-actions{display:flex;align-items:flex-end;flex-direction:column;gap:6px}
-.to-hutsel{white-space:nowrap;background:#F5F1FA!important;color:#6b439f!important;border:1px solid #E9E2F4!important}
-@media(max-width:430px){
- .hc-brand img{width:46px;height:46px}
- .to-hutsel{font-size:10px!important;padding:6px 7px!important}
-}
-
-/* V1.3 headercorrectie: los boodschappenicoon, zoals afgesproken */
-.hc-brand img{
-  width:52px !important;
-  height:58px !important;
-  object-fit:contain !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  border:0 !important;
-  padding:0 !important;
-  box-shadow:none !important;
-}
-@media(max-width:430px){
-  .hc-brand img{
-    width:46px !important;
-    height:51px !important;
-  }
-}
+/* Huize Chaos V1.1 - gekozen achtergrond en schoon modulelogo */
+html, body { background:#F5F1FA !important; }
+.app { background:transparent; }
+.fixed-head { background:rgba(245,241,250,.97) !important; }
+.hc-brand img { object-fit:contain; background:transparent; }
+.shopping-group, .toolbar { background:#FFFFFF; }
