@@ -8,3 +8,8 @@
 .hero{align-items:center;text-align:center}
 .home-full-logo{display:block;width:min(430px,94vw);height:auto;margin:0 auto}
 .home-wordmark{display:block;width:min(245px,65vw);height:auto;margin:4px auto 8px}
+
+/* V1.1.5 - startlogo: één volledig Huize Chaos-logo, zonder dubbele woordmerk-afbeelding */
+.hero{display:flex;justify-content:center;align-items:center;margin:6px 0 28px}
+.home-full-logo{display:block;width:min(373px,92vw);max-width:100%;height:auto;margin:0 auto}
+.home-wordmark{display:none}

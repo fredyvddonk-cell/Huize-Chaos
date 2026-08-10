@@ -1,5 +1,5 @@
-const CACHE='huize-chaos-v1-1-4';
-const ASSETS=["./", "./index.html", "./style.css?v=1.1", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./boodschappen/", "./boodschappen/index.html", "./boodschappen/style.css?v=1.1", "./boodschappen/js/app.js?v=1.1", "./boodschappen/js/shopping.js?v=1.1", "./boodschappen/js/stock.js?v=1.1", "./boodschappen/js/hutsel.js?v=1.1", "./boodschappen/assets/shopping-icon.png"];
+const CACHE='huize-chaos-v1-1-6';
+const ASSETS=["./", "./index.html", "./style.css?v=1.1.6", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./boodschappen/", "./boodschappen/index.html", "./boodschappen/style.css?v=1.1", "./boodschappen/js/app.js?v=1.1", "./boodschappen/js/shopping.js?v=1.1", "./boodschappen/js/stock.js?v=1.1", "./boodschappen/js/hutsel.js?v=1.1", "./boodschappen/assets/shopping-icon.png"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(CACHE).then(c=>c.put(e.request,cp));return r;}).catch(()=>caches.match(e.request).then(c=>c||caches.match('./index.html'))));});
