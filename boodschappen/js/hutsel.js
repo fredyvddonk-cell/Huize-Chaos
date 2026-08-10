@@ -114,7 +114,7 @@ function freezerHtml(q=''){
     <div class="freezer-heading"><h2 class="section">Diepvries <span class="hutsel-count">${arr.reduce((n,x)=>n+Number(x.portions||0),0)} porties</span></h2><button class="small freezer-add" type="button" onclick="openFreezerModal()">+ Maaltijd</button></div>
     ${arr.length?arr.sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(x=>`
       <div class="item hutsel-item">
-        <button class="freezer-take" type="button" onclick="takeFreezerMeal(${x.id})">Uit diepvries</button>
+        <button class="freezer-take" type="button" onclick="decrementFreezerMeal(${x.id})">−1</button>
         <div class="main" onclick="editFreezerMeal(${x.id})" role="button"><div class="name">${esc(x.name)}</div><div class="meta">${x.portions} ${Number(x.portions)===1?'portie':'porties'}${x.frozenDate?' · '+esc(x.frozenDate):''}${x.note?' · '+esc(x.note):''}</div></div>
         <button class="small" type="button" onclick="editFreezerMeal(${x.id})">Wijzig</button>
       </div>`).join(''):'<div class="hutsel-empty">Nog geen maaltijden in de diepvries.</div>'}
@@ -122,6 +122,12 @@ function freezerHtml(q=''){
 }
 window.openFreezerModal=openFreezerModal;
 window.editFreezerMeal=id=>openFreezerModal(freezerMeals.find(x=>x.id===id));
+window.decrementFreezerMeal=id=>{
+  const x=freezerMeals.find(x=>x.id===id); if(!x)return;
+  x.portions=Math.max(0,Number(x.portions||0)-1);
+  if(x.portions===0) freezerMeals=freezerMeals.filter(m=>m.id!==id);
+  saveFreezerMeals();render();
+};
 window.takeFreezerMeal=id=>{
   const x=freezerMeals.find(x=>x.id===id); if(!x)return;
   const choice=prompt('Wanneer wil je deze portie gebruiken? Typ Vandaag of Morgen.','Morgen');

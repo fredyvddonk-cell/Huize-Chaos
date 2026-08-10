@@ -55,8 +55,22 @@ window.toggleShoppingGroup = encodedKey => {
   render();
 };
 
-window.collapseAllShopping = () => {
-  expandedShoppingGroups.clear();
+window.toggleAllShopping = () => {
+  if (expandedShoppingGroups.size) {
+    expandedShoppingGroups.clear();
+  } else {
+    let arr = products.filter(x => x.shopping && !(x.status === 'Op' && x.buyDirectWhenOut));
+    if (group === 'store' && shoppingStoreFilter !== 'all') {
+      arr = arr.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
+    }
+    const secondaryKey = group === 'store' ? 'category' : 'store';
+    groups(arr, group).forEach(([mainName, mainItems]) => {
+      expandedShoppingGroups.add(shoppingGroupKey(1, '', mainName));
+      groups(mainItems, secondaryKey).forEach(([subName]) => {
+        expandedShoppingGroups.add(shoppingGroupKey(2, mainName, subName));
+      });
+    });
+  }
   saveShoppingExpansion();
   render();
 };
@@ -66,6 +80,8 @@ function renderShopping(allProducts) {
   const done = arr.filter(x => x.done).length;
 
   $('#count').textContent = `${arr.length} boodschappen · ${done} afgevinkt`;
+  const collapseBtn = $('#collapseShoppingBtn');
+  if (collapseBtn) collapseBtn.textContent = expandedShoppingGroups.size ? 'Alles inklappen' : 'Alles uitklappen';
   $('#processDoneBar').classList.toggle('visible', done > 0);
   $('#clearDone').textContent = done ? `✓ Boodschappen verwerken (${done})` : '✓ Boodschappen verwerken';
 
@@ -151,7 +167,7 @@ function bindShoppingEvents() {
     };
   });
 
-  $('#collapseShoppingBtn').onclick = collapseAllShopping;
+  $('#collapseShoppingBtn').onclick = toggleAllShopping;
   $('#printList').onclick = () => window.print();
 
   $('#clearDone').onclick = () => {

@@ -12,8 +12,12 @@ window.toggleStockCategory = encodedName => {
   render();
 };
 
-window.collapseAllStock = () => {
-  expandedStockCategories.clear();
+window.toggleAllStock = () => {
+  if (expandedStockCategories.size) {
+    expandedStockCategories.clear();
+  } else {
+    groups(products, 'category').forEach(([categoryName]) => expandedStockCategories.add(categoryName));
+  }
   saveStockExpansion();
   render();
 };
@@ -24,7 +28,7 @@ function renderStock(arr) {
     return;
   }
 
-  content.innerHTML = `<div class="stock-tools"><button class="clear" type="button" onclick="collapseAllStock()">Alles inklappen</button></div>` +
+  content.innerHTML = `<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size ? 'Alles inklappen' : 'Alles uitklappen'}</button></div>` +
     groups(arr, 'category').map(([categoryName, items]) => {
       const collapsed = !expandedStockCategories.has(categoryName);
       return `<section class="stock-category ${collapsed ? 'collapsed' : ''}">
