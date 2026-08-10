@@ -176,3 +176,7 @@ html, body { background:#F5F1FA !important; }
 }
 
 /* V1.1.6 - woordmerk boodschappenheader verder links gecropt */
+
+/* V1.1.7 - apart schoon woordmerk; geen CSS-crop van gecombineerd logo */
+.hc-brand-combo{gap:8px}
+.hc-brand-combo .hc-wordmark-image{object-fit:contain;object-position:left center;background:transparent}
