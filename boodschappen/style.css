@@ -160,3 +160,8 @@ html, body { background:#F5F1FA !important; }
   .stock-actions{flex-direction:column-reverse;align-items:flex-end;gap:4px}
   .to-hutsel{font-size:11px;padding:6px 7px}
 }
+
+/* V1.1.2 - gekozen Huize Chaos woordmerk exact als afbeelding */
+.hc-brand-image{display:flex;align-items:center;text-decoration:none;min-width:0}
+.hc-brand-image img{width:auto!important;height:58px!important;max-width:min(300px,72vw);object-fit:contain;object-position:left center;background:transparent}
+@media(max-width:430px){.hc-brand-image img{height:50px!important;max-width:70vw}}
