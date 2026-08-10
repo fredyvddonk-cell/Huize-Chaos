@@ -19,7 +19,7 @@
 .home-full-logo{width:min(300px,82vw);height:auto;object-fit:contain;background:transparent}
 
 
-/* V1.1.8 - startpagina: Huize Chaos app-icoon + los woordmerk */
+/* V1.1.9 - startpagina: Huize Chaos app-icoon + los woordmerk */
 .hero{display:block;margin:6px 0 28px}
 .home-brand{display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
 .home-brand-icon{width:92px;height:92px;object-fit:contain;border-radius:20px;flex:0 0 auto}
