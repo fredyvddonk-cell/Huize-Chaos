@@ -69,6 +69,7 @@ function save() {
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));
+  window.scheduleCloudSync?.();
 }
 
 function esc(value = '') {
@@ -255,6 +256,23 @@ function render() {
   else if (page === 'hutsel') renderHutsel();
   else renderManage(arr);
 }
+
+window.renderHuizeChaos = () => render();
+window.getHuizeChaosProducts = () => products;
+window.replaceHuizeChaosProducts = nextProducts => {
+  products = nextProducts.map(migrateProduct);
+  localStorage.setItem('household-products-v2', JSON.stringify(products));
+  render();
+};
+
+window.applyHuizeChaosRole = role => {
+  document.body.dataset.role = role || '';
+  if (role === 'member') {
+    page = 'list';
+    localStorage.setItem('household-page', page);
+  }
+  render();
+};
 
 window.removeProduct = id => {
   if (confirm('Product verwijderen?')) {

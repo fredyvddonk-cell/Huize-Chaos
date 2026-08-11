@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath() {
+      return /databases/$(database)/documents/households/huize-chaos/members/$(request.auth.uid);
+    }
+
+    function isMember() {
+      return signedIn() && exists(memberPath());
+    }
+
+    function isOwner() {
+      return isMember() && get(memberPath()).data.role == 'owner';
+    }
+
+    match /households/huize-chaos/members/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if isOwner();
+    }
+
+    match /households/huize-chaos/shoppingItems/{itemId} {
+      allow read: if isMember();
+      allow create: if isOwner() || (isMember()
+        && request.resource.data.addedBy == request.auth.uid
+        && request.resource.data.source == 'family');
+      allow update: if isOwner() || (isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done', 'updatedAt']));
+      allow delete: if isOwner() || (isMember() && resource.data.addedBy == request.auth.uid);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

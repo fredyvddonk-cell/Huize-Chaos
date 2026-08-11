@@ -109,6 +109,7 @@ function renderShopping(allProducts) {
       <div class="main">
         <div class="name">${esc(x.name)}</div>
         ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
+        ${x.cloudAddedByName ? `<div class="added-by">Toegevoegd door ${esc(x.cloudAddedByName)}</div>` : ''}
         ${memoHtml(x)}
       </div>
       <div class="shopping-row-actions">
@@ -171,12 +172,14 @@ function bindShoppingEvents() {
   $('#printList').onclick = () => window.print();
 
   $('#clearDone').onclick = () => {
-    products.forEach(x => {
+    products = products.filter(x => {
+      if (x.shopping && x.done && x.cloudSource === 'family') return false;
       if (x.shopping && x.done) {
         x.status = 'Voldoende';
         x.shopping = false;
         x.done = false;
       }
+      return true;
     });
     save();
     render();
