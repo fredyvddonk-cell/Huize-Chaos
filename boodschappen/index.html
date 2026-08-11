@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=1.1.12">
+  <link rel="stylesheet" href="style.css?v=1.2.1">
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span class="version">V1.1.12</span><button class="icon" aria-label="Instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.2.1</span><button class="icon" aria-label="Instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -54,6 +54,21 @@
       <button id="clearDone" class="process-done-btn" type="button">✓ Boodschappen verwerken</button>
     </div>
   </main>
+
+  <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <h2 id="authTitle">Gezamenlijke boodschappenlijst</h2>
+      <p id="authMessage">Meld je aan met Google om de gezamenlijke lijst te openen.</p>
+      <button id="googleSignIn" class="btn primary auth-primary" type="button">Aanmelden met Google</button>
+      <div id="accessCodeBox" class="access-code-box" hidden>
+        <strong>Nog geen toegang</strong>
+        <p>Stuur deze gebruikerscode naar de beheerder van Huize Chaos:</p>
+        <code id="accessUid"></code>
+        <button id="copyAccessUid" class="btn secondary" type="button">Code kopiëren</button>
+      </div>
+      <button id="googleSignOut" class="auth-link" type="button" hidden>Afmelden</button>
+    </div>
+  </div>
 
   
 
@@ -148,9 +163,10 @@
     </form>
   </div>
 
-  <script src="js/app.js?v=1.1.12"></script>
-  <script src="js/shopping.js?v=1.1.12"></script>
-  <script src="js/stock.js?v=1.1.12"></script>
-  <script src="js/hutsel.js?v=1.1.12"></script>
+  <script src="js/app.js?v=1.2.1"></script>
+  <script src="js/shopping.js?v=1.2.1"></script>
+  <script src="js/stock.js?v=1.2.1"></script>
+  <script src="js/hutsel.js?v=1.2.1"></script>
+  <script type="module" src="js/firebase.js?v=1.2.1"></script>
 </body>
 </html>
