@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.1">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.1">
+  <link rel="stylesheet" href="style.css?v=1.3.2">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.2">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <span class="version">V1.3.1</span>
+      <span class="version">V1.3.2</span>
     </header>
 
     <section class="day-heading">
@@ -23,6 +23,13 @@
       <h1>Vandaag</h1>
       <div id="todayDate" class="today-date"></div>
     </section>
+
+    <nav class="planner-tabs" aria-label="Gezinsplanner onderdelen">
+      <button class="active" type="button" data-planner-page="today">Vandaag</button>
+      <button type="button" data-planner-page="routines">Dagelijkse routines</button>
+    </nav>
+
+    <div id="todayPage">
 
     <section class="panel" aria-labelledby="appointmentsTitle">
       <div class="panel-heading">
@@ -48,7 +55,18 @@
       <div id="upcomingList" class="item-list"></div>
     </section>
 
-    <button class="add-button main-add" type="button" data-add="task">+ Toevoegen</button>
+      <button class="add-button main-add" type="button" data-add="task">+ Toevoegen</button>
+    </div>
+
+    <div id="routinesPage" hidden>
+      <section class="panel" aria-labelledby="routinesTitle">
+        <div class="panel-heading">
+          <div><span class="section-icon task">✓</span><h2 id="routinesTitle">Dagelijkse routines</h2></div>
+        </div>
+        <p class="routine-help">Morgen begint deze lijst automatisch opnieuw.</p>
+        <div id="routineList" class="item-list"></div>
+      </section>
+    </div>
   </main>
 
   <div id="entryModal" class="modal" aria-hidden="true">
@@ -99,6 +117,6 @@
     </form>
   </div>
 
-  <script src="app.js?v=1.3.1"></script>
+  <script src="app.js?v=1.3.2"></script>
 </body>
 </html>
