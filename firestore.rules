@@ -32,6 +32,18 @@ service cloud.firestore {
       allow delete: if isOwner() || (isMember() && resource.data.addedBy == request.auth.uid);
     }
 
+    match /households/huize-chaos/plannerItems/{itemId} {
+      allow read, write: if isMember();
+    }
+
+    match /households/huize-chaos/plannerSettings/{settingId} {
+      allow read, write: if isMember();
+    }
+
+    match /households/huize-chaos/members/{memberUid}/privatePlannerItems/{itemId} {
+      allow read, write: if isOwner() && request.auth.uid == memberUid;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
