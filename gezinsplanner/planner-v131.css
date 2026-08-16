@@ -12,6 +12,9 @@
 .deadline-badge.today,.deadline-badge.late{background:#fde1e5;color:#a22f43}
 .urgent-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#fde1e5;color:#a22f43;font-size:12px;font-weight:800}
 .private-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#eee8f7;color:var(--purple-dark);font-size:12px;font-weight:800}
+.school-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#e4f2fb;color:#286487;font-size:12px;font-weight:800}
+.work-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#e6f5f3;color:#277e79;font-size:12px;font-weight:800}
+.quick-section{margin:13px 0}.quick-section>span{display:block;margin-bottom:7px;font-size:14px;font-weight:700}.quick-buttons{display:flex;flex-wrap:wrap;gap:6px}.quick-buttons button{border:1px solid var(--line);border-radius:10px;padding:8px 9px;background:#fff;color:var(--text);font-size:12px;font-weight:700}.quick-buttons button.active{border-color:var(--green);background:var(--green-pale);color:#277e79}
 .task-option{display:flex;align-items:center;gap:9px;margin:13px 0;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--pale);font-weight:700;font-size:14px}
 .task-option input{width:20px;height:20px;accent-color:var(--purple)}
 

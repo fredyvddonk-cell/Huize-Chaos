@@ -1,4 +1,4 @@
-# Firebase instellen voor Huize Chaos V1.3.5
+# Firebase instellen voor Huize Chaos V1.2.1
 
 ## 1. GitHub Pages toestaan
 
@@ -13,7 +13,7 @@
 2. Vervang de bestaande regels door de volledige inhoud van `firestore.rules`.
 3. Klik op **Publish**.
 
-De regels zorgen ervoor dat alleen goedgekeurde gebruikers bij de gezamenlijke boodschappenlijst en gezinsplanner kunnen. Gezinsleden kunnen gezamenlijke taken en afspraken gebruiken. Alleen de eigenaar kan eigen privé-items bekijken. Alleen de eigenaar kan voorraadproducten verwerken en de leden beheren.
+De regels zorgen ervoor dat alleen goedgekeurde gebruikers bij de gezamenlijke boodschappenlijst kunnen. Gezinsleden kunnen een boodschap toevoegen en boodschappen afvinken. Alleen de eigenaar kan voorraadproducten verwerken en de leden beheren.
 
 ## 3. Eerste eigenaar toelaten zonder e-mailadres te delen
 
