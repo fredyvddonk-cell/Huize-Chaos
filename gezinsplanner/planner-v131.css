@@ -7,3 +7,9 @@
 .planner-tabs button.active{background:#fff;box-shadow:0 2px 8px rgba(70,54,82,.12)}
 .routine-help{margin:-2px 0 12px 37px;color:var(--muted);font-size:13px}
 .snooze-button{font-size:16px;color:var(--purple-dark)}
+.deadline-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#f3eef8;color:var(--purple-dark);font-size:12px;font-weight:750}
+.deadline-badge.soon{background:#fff0cf;color:#8a5b00}
+.deadline-badge.today,.deadline-badge.late{background:#fde1e5;color:#a22f43}
+.urgent-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#fde1e5;color:#a22f43;font-size:12px;font-weight:800}
+.task-option{display:flex;align-items:center;gap:9px;margin:13px 0;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--pale);font-weight:700;font-size:14px}
+.task-option input{width:20px;height:20px;accent-color:var(--purple)}

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.2">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.2">
+  <link rel="stylesheet" href="style.css?v=1.3.3">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.3">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <span class="version">V1.3.2</span>
+      <span class="version">V1.3.3</span>
     </header>
 
     <section class="day-heading">
@@ -95,6 +95,21 @@
         <input id="entryDate" type="date" required>
       </label>
 
+      <label id="hasDeadlineField" class="task-option">
+        <input id="entryHasDeadline" type="checkbox">
+        <span>Deze taak heeft een deadline</span>
+      </label>
+
+      <label id="deadlineField" class="field" hidden>
+        <span>Deadline</span>
+        <input id="entryDeadline" type="date">
+      </label>
+
+      <label id="urgentField" class="task-option">
+        <input id="entryUrgent" type="checkbox">
+        <span>Deze taak is urgent</span>
+      </label>
+
       <label id="repeatField" class="field">
         <span>Herhalen</span>
         <select id="entryRepeat">
@@ -117,6 +132,6 @@
     </form>
   </div>
 
-  <script src="app.js?v=1.3.2"></script>
+  <script src="app.js?v=1.3.3"></script>
 </body>
 </html>
