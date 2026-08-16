@@ -13,3 +13,12 @@
 .urgent-badge{display:inline-block;margin:5px 5px 0 0;padding:3px 7px;border-radius:8px;background:#fde1e5;color:#a22f43;font-size:12px;font-weight:800}
 .task-option{display:flex;align-items:center;gap:9px;margin:13px 0;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--pale);font-weight:700;font-size:14px}
 .task-option input{width:20px;height:20px;accent-color:var(--purple)}
+
+/* Houd lange invoerformulieren bruikbaar op kleine telefoons. */
+.modal{overflow-y:auto;place-items:start center;-webkit-overflow-scrolling:touch}
+.modal-card{max-height:calc(100dvh - 20px);overflow-y:auto;margin:auto 0}
+.modal-actions{position:sticky;bottom:-1px;z-index:2;background:#fff;padding-top:10px;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+@media(max-width:430px){
+  .modal{padding:8px}
+  .modal-card{max-height:calc(100dvh - 16px)}
+}
