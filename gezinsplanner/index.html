@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.4">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.4">
+  <link rel="stylesheet" href="style.css?v=1.3.5">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.5">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <span class="version">V1.3.4</span>
+      <div class="topbar-meta"><span class="version">V1.3.5</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
     </header>
 
     <section class="day-heading">
@@ -110,6 +110,11 @@
         <span>Deze taak is urgent</span>
       </label>
 
+      <label id="privateField" class="task-option" hidden>
+        <input id="entryPrivate" type="checkbox">
+        <span>Privé · alleen zichtbaar voor mij</span>
+      </label>
+
       <label id="repeatField" class="field">
         <span>Herhalen</span>
         <select id="entryRepeat">
@@ -132,6 +137,22 @@
     </form>
   </div>
 
-  <script src="app.js?v=1.3.4"></script>
+  <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <h2 id="authTitle">Gezamenlijke gezinsplanner</h2>
+      <p id="authMessage">Meld je aan met Google om de gezinsplanner te openen.</p>
+      <button id="googleSignIn" class="primary auth-primary" type="button">Aanmelden met Google</button>
+      <div id="accessCodeBox" class="access-code-box" hidden>
+        <strong>Nog geen toegang</strong>
+        <p>Stuur deze gebruikerscode naar de beheerder van Huize Chaos:</p>
+        <code id="accessUid"></code>
+        <button id="copyAccessUid" class="secondary" type="button">Code kopiëren</button>
+      </div>
+      <button id="googleSignOut" class="auth-link" type="button" hidden>Afmelden</button>
+    </div>
+  </div>
+
+  <script src="app.js?v=1.3.5"></script>
+  <script type="module" src="firebase.js?v=1.3.5"></script>
 </body>
 </html>

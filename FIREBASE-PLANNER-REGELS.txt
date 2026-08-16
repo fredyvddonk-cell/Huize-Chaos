@@ -1,0 +1,24 @@
+Voeg deze onderdelen toe binnen de bestaande Firestore-regel voor:
+match /households/{householdId} { ... }
+
+function isHouseholdMember() {
+  return request.auth != null
+    && exists(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid));
+}
+
+match /plannerItems/{itemId} {
+  allow read, write: if isHouseholdMember();
+}
+
+match /plannerSettings/{settingId} {
+  allow read, write: if isHouseholdMember();
+}
+
+match /members/{memberUid}/privatePlannerItems/{itemId} {
+  allow read, write: if isHouseholdMember()
+    && request.auth.uid == memberUid
+    && get(/databases/$(database)/documents/households/$(householdId)/members/$(request.auth.uid)).data.role == 'owner';
+}
+
+Belangrijk: vervang de bestaande regels niet blind. Voeg deze drie match-blokken toe
+aan de bestaande household-regels, zodat de boodschappenlijst toegang blijft houden.
