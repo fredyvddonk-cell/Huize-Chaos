@@ -25,3 +25,4 @@
 .home-brand-icon{width:92px;height:92px;object-fit:contain;border-radius:20px;flex:0 0 auto}
 .home-brand-wordmark{width:auto;height:48px;max-width:min(245px,58vw);object-fit:contain;object-position:left center;flex:0 1 auto}
 @media(max-width:430px){.home-brand{justify-content:flex-start;gap:10px}.home-brand-icon{width:76px;height:76px;border-radius:17px}.home-brand-wordmark{height:39px;max-width:58vw}}
+.planner-icon{background:#eaf7f7}

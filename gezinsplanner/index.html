@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#957AC1">
+  <title>Gezinsplanner · Huize Chaos</title>
+  <link rel="stylesheet" href="style.css?v=1.3.0">
+</head>
+<body>
+  <main class="planner-app">
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="Terug naar Huize Chaos">
+        <span class="calendar-icon" aria-hidden="true">📅</span>
+        <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
+      </a>
+      <span class="version">V1.3.0</span>
+    </header>
+
+    <section class="day-heading">
+      <p>Gezinsplanner</p>
+      <h1>Vandaag</h1>
+      <div id="todayDate" class="today-date"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="appointmentsTitle">
+      <div class="panel-heading">
+        <div><span class="section-icon appointment">●</span><h2 id="appointmentsTitle">Afspraken</h2></div>
+        <button class="add-button compact" type="button" data-add="appointment">+ Afspraak</button>
+      </div>
+      <div id="appointmentList" class="item-list"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="tasksTitle">
+      <div class="panel-heading">
+        <div><span class="section-icon task">✓</span><h2 id="tasksTitle">Taken</h2></div>
+        <button class="add-button compact" type="button" data-add="task">+ Taak</button>
+      </div>
+      <div id="taskProgress" class="progress-text"></div>
+      <div id="taskList" class="item-list"></div>
+    </section>
+
+    <button class="add-button main-add" type="button" data-add="task">+ Toevoegen</button>
+  </main>
+
+  <div id="entryModal" class="modal" aria-hidden="true">
+    <form id="entryForm" class="modal-card">
+      <h2 id="modalTitle">Taak toevoegen</h2>
+      <input id="entryId" type="hidden">
+      <input id="entryType" type="hidden" value="task">
+
+      <div class="type-switch" role="group" aria-label="Soort item">
+        <button type="button" data-type="task" class="active">Taak</button>
+        <button type="button" data-type="appointment">Afspraak</button>
+      </div>
+
+      <label class="field">
+        <span id="titleLabel">Wat moet er gebeuren? *</span>
+        <input id="entryTitle" required maxlength="100" autocomplete="off">
+      </label>
+
+      <label id="timeField" class="field" hidden>
+        <span>Tijd</span>
+        <input id="entryTime" type="time">
+      </label>
+
+      <label class="field">
+        <span>Extra informatie</span>
+        <textarea id="entryNote" rows="3" maxlength="240" placeholder="Optioneel"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button id="cancelEntry" class="secondary" type="button">Annuleren</button>
+        <button class="primary" type="submit">Opslaan</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="app.js?v=1.3.0"></script>
+</body>
+</html>
