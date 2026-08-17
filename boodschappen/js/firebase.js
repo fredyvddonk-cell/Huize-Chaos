@@ -230,6 +230,7 @@ function scheduleSync() {
 }
 
 window.scheduleCloudSync = scheduleSync;
+window.addEventListener('huize-chaos-products-changed', scheduleSync);
 
 async function openFor(currentUser) {
   const memberRef = doc(db, 'households', HOUSEHOLD_ID, 'members', currentUser.uid);

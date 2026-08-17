@@ -72,6 +72,12 @@ function save() {
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));
+  const status = document.getElementById('syncStatus');
+  if (status) {
+    status.textContent = 'Wacht op synchronisatie…';
+    status.className = 'sync-status';
+  }
+  window.dispatchEvent(new Event('huize-chaos-products-changed'));
   window.scheduleCloudSync?.();
 }
 
