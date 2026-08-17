@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { getFirestore, collection, deleteDoc, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import { getFirestore, collection, deleteDoc, doc, getDoc, getDocsFromServer, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',
@@ -25,6 +25,7 @@ let applyingCloud = false;
 let syncTimer = 0;
 let remoteItems = new Map();
 let stopItems = null;
+let serverRefreshTimer = 0;
 
 const gate = document.getElementById('authGate');
 const message = document.getElementById('authMessage');
@@ -131,6 +132,19 @@ function applySnapshot(snapshot) {
   if (role === 'owner' && products.some(x => x.shopping && !x.cloudId)) scheduleSync();
 }
 
+async function refreshItemsFromServer() {
+  if (!user || !role || document.visibilityState === 'hidden') return;
+  const snapshot = await getDocsFromServer(itemsRef);
+  applySnapshot(snapshot);
+}
+
+function startServerRefresh() {
+  clearInterval(serverRefreshTimer);
+  serverRefreshTimer = setInterval(() => {
+    refreshItemsFromServer().catch(error => console.error('Servercontrole boodschappen mislukt', error));
+  }, 15000);
+}
+
 async function syncNow() {
   if (!cloudReady || !user || applyingCloud) return;
   const products = window.getHuizeChaosProducts();
@@ -188,7 +202,21 @@ async function openFor(currentUser) {
     console.error(error);
     setSyncStatus('Geen verbinding', 'error');
   });
+  startServerRefresh();
+  refreshItemsFromServer().catch(error => {
+    console.error(error);
+    setSyncStatus('Geen verbinding', 'error');
+  });
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    refreshItemsFromServer().catch(error => console.error('Servercontrole boodschappen mislukt', error));
+  }
+});
+window.addEventListener('focus', () => {
+  refreshItemsFromServer().catch(error => console.error('Servercontrole boodschappen mislukt', error));
+});
 
 signInButton.addEventListener('click', async () => {
   try {
@@ -214,6 +242,7 @@ onAuthStateChanged(auth, currentUser => {
   cloudReady = false;
   stopItems?.();
   stopItems = null;
+  clearInterval(serverRefreshTimer);
   if (!currentUser) {
     role = '';
     showSignedOut();
