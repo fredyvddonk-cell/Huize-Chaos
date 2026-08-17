@@ -221,9 +221,11 @@ function bindCategoryDrag() {
 }
 
 function renderManage(arr) {
+  const hasSearch = Boolean(search.value.trim());
+  if (hasSearch) openManageSection = 'products';
   const productsHtml = arr.length ? arr.sort(sortProducts).map(x => `
     <div class="item"><div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${memoHtml(x)}</div>
-    <div class="actions"><button class="small" onclick="editProduct(${x.id})">Wijzig</button><button class="small" onclick="removeProduct(${x.id})">Verwijder</button></div></div>`).join('') : '<div class="empty">Nog geen producten.</div>';
+    <div class="actions"><button class="small" onclick="editProduct(${x.id})">Wijzig</button><button class="small" onclick="removeProduct(${x.id})">Verwijder</button></div></div>`).join('') : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;
 
   const cats = `<div class="manage-add"><input id="newCategory" placeholder="Nieuwe categorie"><button onclick="addCategory()">+</button></div><p class="manage-help">Sleep met ☰ of gebruik ↑ en ↓ om de volgorde te wijzigen. Overig blijft onderaan.</p>${categoryRows()}`;
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
@@ -243,13 +245,11 @@ function render() {
   });
 
   $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : 'Beheer';
+  document.body.classList.toggle('search-page', page === 'stock' || page === 'manage');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
 
-  const query = search.value.trim().toLowerCase();
-  const arr = products.filter(x =>
-    x.name.toLowerCase().includes(query) ||
-    x.memo.toLowerCase().includes(query)
-  );
+  const query = page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
+  const arr = products.filter(x => x.name.toLowerCase().includes(query));
 
   if (page === 'list') renderShopping(arr);
   else if (page === 'stock') renderStock(arr);
@@ -358,6 +358,10 @@ function initApp() {
   document.querySelectorAll('.tab').forEach(button => {
     button.onclick = () => {
       page = button.dataset.page;
+      if (page !== 'stock' && page !== 'manage') {
+        search.value = '';
+        updateSearchClear();
+      }
       localStorage.setItem('household-page', page);
       render();
     };

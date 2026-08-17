@@ -115,6 +115,7 @@ body{background:#faf8fc}
 .tab.active{background:linear-gradient(135deg,#7d4ac7,#6333ad)!important;color:#fff!important}
 .toolbar{background:#fff;border:1px solid #eee8f1;border-radius:16px;padding:9px;margin:10px 0}
 .search-wrap{display:none}
+.search-page .search-wrap{display:flex}
 .add-labelled{margin-left:auto;background:#f4edf9;color:#6738aa;border:1px solid #e7dcf0;height:42px}
 .shopping-title-row{display:flex;align-items:center;margin:12px 3px 8px}
 .shopping-title-row h1{font-size:22px;line-height:1.15;margin:0;font-weight:800}
