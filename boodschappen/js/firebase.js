@@ -90,7 +90,12 @@ function applySnapshot(snapshot) {
 
   nextRemote.forEach((data, cloudId) => {
     let product = products.find(x => x.cloudId === cloudId);
-    if (!product && data.localId) product = products.find(x => String(x.id) === String(data.localId) && x.shopping);
+    // Alleen eigen voorraadregels mogen via een lokaal nummer worden gekoppeld.
+    // Gezinsleden gebruiken op ieder toestel andere lokale nummers; koppelen daarop
+    // kan hun boodschap onbedoeld laten verdwijnen in een bestaand product.
+    if (!product && data.localId && data.source === 'stock') {
+      product = products.find(x => String(x.id) === String(data.localId) && x.shopping);
+    }
     if (!product) {
       product = { id: Date.now() + counter++, status: 'Voldoende', shopping: true, buyDirectWhenOut: false };
       products.push(product);
