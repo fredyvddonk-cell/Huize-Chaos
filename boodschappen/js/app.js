@@ -65,6 +65,7 @@ let group = localStorage.getItem('household-group') || 'store';
 const $ = selector => document.querySelector(selector);
 let content;
 let search;
+let pendingProductDelete = null;
 
 function save() {
   localStorage.setItem('household-products-v2', JSON.stringify(products));
@@ -250,6 +251,7 @@ function render() {
   });
 
   $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : 'Beheer';
+  document.body.classList.toggle('shopping-page', page === 'list');
   document.body.classList.toggle('search-page', page === 'stock' || page === 'manage');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
 
@@ -282,14 +284,30 @@ window.applyHuizeChaosRole = role => {
   render();
 };
 
-window.removeProduct = id => {
-  if (confirm('Product verwijderen?')) {
-    products = products.filter(x => x.id !== id);
-    save();
-    refreshCats();
-    render();
-  }
+window.requestProductDelete = (id, mode = 'product') => {
+  const product = products.find(x => x.id === id);
+  if (!product) return;
+  pendingProductDelete = { id, mode };
+  const fromShopping = mode === 'shopping';
+  $('#deleteTitle').textContent = fromShopping ? 'Boodschap verwijderen' : 'Product definitief verwijderen';
+  $('#deleteProductName').textContent = product.name;
+  $('#deleteMessage').textContent = fromShopping
+    ? product.temporary
+      ? 'Dit is een eenmalige boodschap. Het product wordt volledig verwijderd.'
+      : 'Het product wordt alleen van de boodschappenlijst verwijderd. Het blijft bewaard in Voorraad en Beheer.'
+    : 'Dit product wordt definitief verwijderd uit Voorraad en Beheer. Dit kan niet ongedaan worden gemaakt.';
+  $('#confirmDelete').textContent = fromShopping && !product.temporary ? 'Van lijst verwijderen' : 'Verwijderen';
+  $('#deleteModal').classList.add('open');
+  $('#deleteModal').setAttribute('aria-hidden', 'false');
 };
+
+function closeProductDelete() {
+  pendingProductDelete = null;
+  $('#deleteModal').classList.remove('open');
+  $('#deleteModal').setAttribute('aria-hidden', 'true');
+}
+
+window.removeProduct = id => requestProductDelete(id, 'product');
 
 window.editProduct = id => openModal(products.find(x => x.id === id));
 
@@ -348,6 +366,26 @@ function initApp() {
   $('#cancel').onclick = closeModal;
   $('#modal').onclick = event => {
     if (event.target.id === 'modal') closeModal();
+  };
+  $('#cancelDelete').onclick = closeProductDelete;
+  $('#deleteModal').onclick = event => {
+    if (event.target.id === 'deleteModal') closeProductDelete();
+  };
+  $('#confirmDelete').onclick = () => {
+    if (!pendingProductDelete) return;
+    const { id, mode } = pendingProductDelete;
+    const product = products.find(x => x.id === id);
+    if (!product) return closeProductDelete();
+    if (mode === 'shopping' && !product.temporary) {
+      product.shopping = false;
+      product.done = false;
+    } else {
+      products = products.filter(x => x.id !== id);
+    }
+    closeProductDelete();
+    save();
+    refreshCats();
+    render();
   };
   const updateSearchClear = () => {
     $('#clearSearch').classList.toggle('visible', Boolean(search.value));

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=1.2.3">
+  <link rel="stylesheet" href="style.css?v=1.2.4">
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.2.3</span><button class="icon" aria-label="Instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.2.4</span><button class="icon" aria-label="Instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -168,10 +168,23 @@
     </form>
   </div>
 
-  <script src="js/app.js?v=1.2.3"></script>
-  <script src="js/shopping.js?v=1.2.3"></script>
-  <script src="js/stock.js?v=1.2.3"></script>
-  <script src="js/hutsel.js?v=1.2.3"></script>
-  <script type="module" src="js/firebase.js?v=1.2.3"></script>
+  <div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="card delete-card" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <div class="delete-icon" aria-hidden="true">×</div>
+      <h2 id="deleteTitle">Product verwijderen</h2>
+      <div id="deleteProductName" class="delete-product-name"></div>
+      <p id="deleteMessage"></p>
+      <div class="modal-actions">
+        <button id="cancelDelete" class="btn secondary" type="button">Annuleren</button>
+        <button id="confirmDelete" class="btn danger-button" type="button">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=1.2.4"></script>
+  <script src="js/shopping.js?v=1.2.4"></script>
+  <script src="js/stock.js?v=1.2.4"></script>
+  <script src="js/hutsel.js?v=1.2.4"></script>
+  <script type="module" src="js/firebase.js?v=1.2.4"></script>
 </body>
 </html>

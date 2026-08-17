@@ -24,11 +24,8 @@ function firstName(value = '') {
 function renderShoppingGroup(title, items, level, parent, row) {
   const key = shoppingGroupKey(level, parent, title);
   const collapsed = !expandedShoppingGroups.has(key);
-  const secondaryKey = group === 'store' ? 'category' : 'store';
-  const inner = level === 1
-    ? groups(items, secondaryKey).map(([subName, subItems]) => renderShoppingGroup(subName, subItems, 2, title, row)).join('')
-    : [...items].sort(shoppingPrioritySort).map(row).join('');
-  return `<section class="shopping-group shopping-level-${level} ${collapsed ? 'collapsed' : ''}">
+  const inner = [...items].sort(shoppingPrioritySort).map(item => row(item)).join('');
+  return `<section class="shopping-group shopping-level-1 ${collapsed ? 'collapsed' : ''}">
     <button class="shopping-group-head" type="button" onclick="toggleShoppingGroup('${encodeURIComponent(key)}')">
       <span>${esc(title)}</span><span class="chevron">⌄</span>
     </button>
@@ -46,16 +43,6 @@ window.toggleShoppingGroup = encodedKey => {
   } else {
     expandedShoppingGroups.add(key);
 
-    // Bij het openen van een hoofdgroep meteen alle subgroepen openen.
-    if (level === 1) {
-      const parentName = parts.slice(3).join(':');
-      const arr = products.filter(x => x.shopping && !(x.status === 'Op' && x.buyDirectWhenOut));
-      const mainItems = arr.filter(x => (x[group] || 'Overig') === parentName);
-      const secondaryKey = group === 'store' ? 'category' : 'store';
-      groups(mainItems, secondaryKey).forEach(([subName]) => {
-        expandedShoppingGroups.add(shoppingGroupKey(2, parentName, subName));
-      });
-    }
   }
   saveShoppingExpansion();
   render();
@@ -69,12 +56,8 @@ window.toggleAllShopping = () => {
     if (group === 'store' && shoppingStoreFilter !== 'all') {
       arr = arr.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
     }
-    const secondaryKey = group === 'store' ? 'category' : 'store';
-    groups(arr, group).forEach(([mainName, mainItems]) => {
+    groups(arr, group).forEach(([mainName]) => {
       expandedShoppingGroups.add(shoppingGroupKey(1, '', mainName));
-      groups(mainItems, secondaryKey).forEach(([subName]) => {
-        expandedShoppingGroups.add(shoppingGroupKey(2, mainName, subName));
-      });
     });
   }
   saveShoppingExpansion();
@@ -109,24 +92,27 @@ function renderShopping(allProducts) {
       stores.map(([storeName, items]) => `<button class="store-chip ${shoppingStoreFilter === storeName ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('${encodeURIComponent(storeName)}')">${esc(storeName)} (${items.length})</button>`).join('');
   }
 
-  const row = x => `
+  const row = (x, showLocation = false) => `
     <div class="item shopping-item ${x.done ? 'done' : ''}">
       <input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done ? 'checked' : ''} onchange="markBought(${x.id}, this.checked)">
       <div class="main">
         <div class="name">${esc(x.name)}</div>
-        ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
+        ${[quantityText(x), showLocation ? x.store : '', showLocation ? x.category : ''].filter(Boolean).length ? `<div class="meta">${[quantityText(x), showLocation ? x.store : '', showLocation ? x.category : ''].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
         ${x.cloudSource === 'family' && x.cloudAddedByName ? `<div class="added-by">Toegevoegd door ${esc(firstName(x.cloudAddedByName))}</div>` : ''}
         ${memoHtml(x)}
       </div>
-      <div class="shopping-row-actions">
-        <button class="small shopping-edit" type="button" onclick="editProduct(${x.id})">Wijzig</button>
-        <button class="small shopping-remove" type="button" onclick="removeFromShopping(${x.id})">Verwijder</button>
-      </div>
+      <details class="shopping-item-menu">
+        <summary aria-label="Acties voor ${esc(x.name)}" title="Acties">⋮</summary>
+        <div class="shopping-item-menu-popover">
+          <button type="button" onclick="editProduct(${x.id})">Wijzigen</button>
+          <button class="delete" type="button" onclick="removeFromShopping(${x.id})">Verwijderen</button>
+        </div>
+      </details>
     </div>`;
 
   let html = '';
   if (urgent.length) {
-    html += `<div class="urgent-block"><h2 class="section urgent-title">Direct nodig</h2>${urgent.sort(sortProducts).map(row).join('')}</div>`;
+    html += `<div class="urgent-block"><h2 class="section urgent-title">Direct nodig</h2>${urgent.sort(sortProducts).map(x => row(x, true)).join('')}</div>`;
   }
   if (normal.length) {
     let visibleNormal = normal;
@@ -157,18 +143,7 @@ window.markBought = (id, checked) => {
 };
 
 window.removeFromShopping = id => {
-  const x = products.find(x => x.id === id);
-  if (!x) return;
-  if (x.temporary) {
-    products = products.filter(product => product.id !== id);
-    save();
-    render();
-    return;
-  }
-  x.shopping = false;
-  x.done = false;
-  save();
-  render();
+  requestProductDelete(id, 'shopping');
 };
 
 function bindShoppingEvents() {
@@ -182,6 +157,17 @@ function bindShoppingEvents() {
 
   $('#collapseShoppingBtn').onclick = toggleAllShopping;
   $('#printList').onclick = () => window.print();
+  document.addEventListener('click', event => {
+    document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => {
+      if (!menu.contains(event.target)) menu.removeAttribute('open');
+    });
+  });
+  document.addEventListener('toggle', event => {
+    if (!event.target.matches?.('.shopping-item-menu') || !event.target.open) return;
+    document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => {
+      if (menu !== event.target) menu.removeAttribute('open');
+    });
+  }, true);
 
   $('#clearDone').onclick = () => {
     products = products.filter(x => {
