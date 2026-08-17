@@ -121,18 +121,38 @@ function renderShopping(allProducts) {
   }
 
   const printable = arr.filter(x => !x.done);
-  const printHtml = groups(printable, 'category').map(([categoryName, items]) => `
-    <section class="print-category">
-      <h2>${esc(categoryName)}</h2>
-      ${[...items].sort(shoppingPrioritySort).map(x => {
+  const printCategories = groups(printable, 'category').map(([categoryName, items]) => {
+    let weight = 2;
+    const rows = [...items].sort(shoppingPrioritySort).map(x => {
         const isUrgent = x.status === 'Op' && x.buyDirectWhenOut;
         const details = [quantityText(x), x.memo].filter(Boolean).map(esc).join(' · ');
+        weight += 1 + (details ? .55 : 0) + (String(x.name).length > 28 ? .4 : 0) + (details.length > 36 ? .35 : 0);
         return `<div class="print-item ${isUrgent ? 'urgent-item' : ''}">
           <span class="print-check" aria-hidden="true"></span>
           <div><div class="print-name">${esc(x.name)}</div>${details ? `<div class="print-meta">${details}</div>` : ''}</div>
         </div>`;
-      }).join('')}
-    </section>`).join('');
+      }).join('');
+    return {
+      weight,
+      html: `<section class="print-category"><h2>${esc(categoryName)}</h2>${rows}</section>`
+    };
+  });
+
+  const totalWeight = printCategories.reduce((sum, category) => sum + category.weight, 0);
+  let splitAt = printCategories.length;
+  let runningWeight = 0;
+  let smallestDifference = Infinity;
+  for (let index = 1; index < printCategories.length; index += 1) {
+    runningWeight += printCategories[index - 1].weight;
+    const difference = Math.abs(totalWeight / 2 - runningWeight);
+    if (difference < smallestDifference) {
+      smallestDifference = difference;
+      splitAt = index;
+    }
+  }
+  const leftPrintColumn = printCategories.slice(0, splitAt).map(category => category.html).join('');
+  const rightPrintColumn = printCategories.slice(splitAt).map(category => category.html).join('');
+  const printHtml = `<div class="print-column">${leftPrintColumn}</div><div class="print-column">${rightPrintColumn}</div>`;
 
   content.innerHTML = `<div class="screen-shopping">${html}</div><div class="print-shopping">${printHtml}</div>`;
 }
