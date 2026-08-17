@@ -31,19 +31,21 @@ let applyingCloud=false;
 let syncing=false;
 let syncTimer=0;
 let stopListeners=[];
+const LEGACY_HOUSEHOLD_IDS=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
 
 function setStatus(text,state=''){syncStatus.textContent=text;syncStatus.className=`sync-status ${state}`.trim()}
 function stopAll(){stopListeners.forEach(stop=>stop());stopListeners=[]}
 function showSignedOut(){gate.classList.remove('ready');message.textContent='Meld je aan met Google om de gezamenlijke gezinsplanner te openen.';signInButton.hidden=false;signOutButton.hidden=true;accessBox.hidden=true;setStatus('Niet aangemeld')}
 function showWaiting(currentUser){gate.classList.remove('ready');message.textContent=`Je bent aangemeld als ${currentUser.displayName||currentUser.email||'Google-gebruiker'}, maar hebt nog geen toegang.`;signInButton.hidden=true;signOutButton.hidden=false;accessBox.hidden=false;accessUid.textContent=currentUser.uid;setStatus('Wacht op toegang')}
-function cleanData(item){return {localId:String(item.id),type:item.type==='appointment'?'appointment':'task',date:String(item.date||''),deadline:String(item.deadline||''),urgent:Boolean(item.urgent),category:['school','work'].includes(item.category)?item.category:'',title:String(item.title||''),time:String(item.time||''),endTime:String(item.endTime||''),personUid:String(item.personUid||''),personName:String(item.personName||''),note:String(item.note||''),done:Boolean(item.done),repeat:String(item.repeat||'none'),completedPeriods:Array.isArray(item.completedPeriods)?item.completedPeriods:[],createdAt:Number(item.createdAt||Date.now()),visibility:item.visibility==='private'?'private':'shared',addedBy:item.addedBy||user.uid,addedByName:item.addedByName||user.displayName||'Gezinslid'} }
+  function cleanData(item){return {localId:String(item.id),type:item.type==='appointment'?'appointment':'task',date:String(item.date||''),deadline:String(item.deadline||''),urgent:Boolean(item.urgent),category:['school','work','household'].includes(item.category)?item.category:'',title:String(item.title||''),time:String(item.time||''),endTime:String(item.endTime||''),personUid:String(item.personUid||''),personName:String(item.personName||''),note:String(item.note||''),done:Boolean(item.done),repeat:String(item.repeat||'none'),completedPeriods:Array.isArray(item.completedPeriods)?item.completedPeriods:[],createdAt:Number(item.createdAt||Date.now()),visibility:item.visibility==='private'?'private':'shared',addedBy:item.addedBy||user.uid,addedByName:item.addedByName||user.displayName||'Gezinslid'} }
 function fromCloud(data,cloudId,scope){return {...data,id:data.localId||cloudId,cloudId,cloudScope:scope,visibility:scope==='private'?'private':'shared',completedPeriods:Array.isArray(data.completedPeriods)?data.completedPeriods:[]} }
 
 function applyCombined(){
   if(!sharedReady||!privateReady)return;
   if(syncing)return;
   const local=window.getHuizeChaosPlannerEntries();
-  const remote=[...sharedItems].map(([id,data])=>fromCloud(data,id,'shared'));
+  const legacyRemote=[...sharedItems.values()].some(data=>LEGACY_HOUSEHOLD_IDS.has(data.localId));
+  const remote=[...sharedItems].map(([id,data])=>fromCloud(data,id,'shared')).filter(item=>!LEGACY_HOUSEHOLD_IDS.has(item.id));
   if(role==='owner')remote.push(...[...privateItems].map(([id,data])=>fromCloud(data,id,'private')));
   const unsaved=local.filter(item=>!item.cloudId&&(role==='owner'||(cloudReady&&item.visibility!=='private')));
   if(!remote.length&&unsaved.length){cloudReady=true;setStatus('Synchroniseren…');scheduleSync();return}
@@ -52,7 +54,7 @@ function applyCombined(){
   applyingCloud=false;
   cloudReady=true;
   setStatus('Gesynchroniseerd','online');
-  if(unsaved.length)scheduleSync();
+  if(unsaved.length||legacyRemote)scheduleSync();
 }
 
 async function syncNow(){

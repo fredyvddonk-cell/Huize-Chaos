@@ -1,17 +1,117 @@
 const STORAGE_KEY='huizeChaosPlannerV130';
 const SEED_KEY='huizeChaosCarTasksV131';
-const HOUSE_SEED_KEY='huizeChaosHouseTasksV132';
+const HOUSE_SEED_KEY='huizeChaosHouseTasksV138';
 const ROUTINE_KEY='huizeChaosDailyRoutinesV132';
 const BIG_STATE_KEY='huizeChaosBigChoreV132';
 const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
-const ROUTINES=['Keukenreset','Vaatwasser','Woonkamer opruimen','Was bijhouden'];
-const BIG_CHORES=['Ramen schoonmaken','Koelkast uitgebreid schoonmaken','Keukenkastjes schoonmaken','Deuren schoonmaken','Plinten schoonmaken'];
+const ROUTINES=['Keukenreset','Vaatwasser','Woonkamer opruimen','Was bijwerken'];
+const BIG_CHORES=[];
+const HOUSEHOLD_GROUPS={weekly:'Iedere week',biweekly:'Iedere twee weken',monthly:'Iedere maand',bimonthly:'Iedere twee maanden',quarterly:'Ieder kwartaal',semiannual:'Twee keer per jaar',yearly:'Ieder jaar',once:'Eenmalig'};
+const HOUSEHOLD_TASKS=[
+  ['floor-downstairs','Benedenverdieping stofzuigen en aansluitend dweilen','weekly','Vloeren'],
+  ['dust-downstairs','Bereikbare oppervlakken beneden afstoffen','weekly','Benedenverdieping'],
+  ['windowsill','Vensterbank afnemen','weekly','Benedenverdieping'],
+  ['cat-hair-seats','Kattenharen van banken en stoelen verwijderen waar nodig','weekly','Benedenverdieping'],
+  ['kitchen-deep','Aanrecht en achterwand grondig reinigen','weekly','Keuken'],
+  ['sink','Spoelbak en kraan reinigen','weekly','Keuken'],
+  ['hob','Kookplaat grondig reinigen','weekly','Keuken'],
+  ['kitchen-fronts-spots','Zichtbare vlekken van keukenfronten verwijderen','weekly','Keuken'],
+  ['bin-check','Pedaalemmer controleren en zo nodig reinigen','weekly','Keuken'],
+  ['fridge-food','Koelkast controleren op bedorven producten en restjes','weekly','Keuken'],
+  ['microwave-check','Magnetron vanbinnen controleren en zo nodig reinigen','weekly','Keuken'],
+  ['bath-sink','Wastafel en kraan reinigen','weekly','Badkamer'],
+  ['shower','Douche reinigen','weekly','Badkamer'],
+  ['bath-toilet','Toilet in de badkamer reinigen','weekly','Badkamer'],
+  ['mirror','Spiegel afnemen','weekly','Badkamer'],
+  ['bath-bin','Afvalbak in de badkamer legen','weekly','Badkamer'],
+  ['toilet-clean','Overige toilet reinigen','weekly','Toilet'],
+  ['plants','Planten controleren en zo nodig water geven','weekly','Overig'],
+  ['cat-litter','Kattenbak bijvullen en omgeving reinigen','weekly','Katten'],
+  ['waste','Papier, glas en ander afval wegbrengen wanneer nodig','weekly','Overig'],
+  ['appliance-alerts','Controleren of de apparatenapps onderhoud aangeven','weekly','Apparaten'],
+  ['coffee-alert','Controleren of het koffiezetapparaat een ontkalkingsmelding geeft','weekly','Apparaten'],
+  ['floor-upstairs','Bovenverdieping stofzuigen en aansluitend dweilen','biweekly','Vloeren'],
+  ['dust-upstairs','Bereikbare oppervlakken boven afstoffen','biweekly','Bovenverdieping'],
+  ['bedside','Nachtkastjes en vensterbanken afnemen','biweekly','Bovenverdieping'],
+  ['upstairs-handles','Deuren en handgrepen boven plaatselijk afnemen','biweekly','Bovenverdieping'],
+  ['bedding','Beddengoed verschonen','biweekly','Slaapkamers'],
+  ['under-beds','Onder bereikbare delen van de bedden stofzuigen','biweekly','Slaapkamers'],
+  ['cat-hair-upstairs','Kattenharen boven verwijderen waar nodig','biweekly','Slaapkamers'],
+  ['floor-whole-house','Hele huis inclusief zolder grondig stofzuigen en aansluitend dweilen','monthly','Vloeren'],
+  ['dust-high-low','Hele huis hoog en laag afstoffen','monthly','Hele huis'],
+  ['baseboards','Plinten afnemen','monthly','Hele huis'],
+  ['doors-spots','Deuren, deurposten en handgrepen afnemen','monthly','Hele huis'],
+  ['radiators-dust','Radiatoren en roosters stofvrij maken','monthly','Hele huis'],
+  ['living-touches','Afstandsbedieningen en veel aangeraakte oppervlakken reinigen','monthly','Woonkamer'],
+  ['kitchen-fronts','Keukenfronten volledig afnemen','monthly','Keuken'],
+  ['fridge-outside','Koelkast aan de buitenkant en bij de handgrepen reinigen','monthly','Keuken'],
+  ['fridge-shelves','Koelkastplanken plaatselijk reinigen','monthly','Keuken'],
+  ['oven-microwave','Magnetron of oven vanbinnen reinigen','monthly','Keuken'],
+  ['bin-deep','Pedaalemmer volledig reinigen','monthly','Keuken'],
+  ['small-appliances','Kleine apparaten aan de buitenkant afnemen','monthly','Keuken'],
+  ['hood-outside','Afzuigkap aan de buitenkant reinigen','monthly','Keuken'],
+  ['bath-tiles','Tegelwerk en voegen in badkamer en toilet grondig reinigen','monthly','Badkamer en toilet'],
+  ['limescale','Kalkaanslag verwijderen','monthly','Badkamer en toilet'],
+  ['shower-screen','Douchewand reinigen','monthly','Badkamer'],
+  ['drain','Afvoerputje controleren en reinigen','monthly','Badkamer'],
+  ['toilet-brush','Toiletborstel en houder reinigen','monthly','Toilet'],
+  ['bath-bins-deep','Afvalbakken badkamer en toilet volledig reinigen','monthly','Badkamer en toilet'],
+  ['vent-dust','Ventilatierooster stofvrij maken','monthly','Badkamer'],
+  ['inside-windows-check','Binnenzijde ramen beoordelen en zo nodig wassen','monthly','Ramen'],
+  ['pantry-check','Koelkast, vriezer en keukenkasten controleren op producten die op moeten','monthly','Keukenvoorraad'],
+  ['doors-deep','Deuren en sponningen in het hele huis afnemen','bimonthly','Hele huis'],
+  ['radiators-deep','Radiatoren en ventilatieroosters reinigen','bimonthly','Hele huis'],
+  ['baseboards-deep','Plinten grondig afnemen','bimonthly','Hele huis'],
+  ['hood-filter-check','Afzuigkapfilters controleren en zo nodig reinigen','bimonthly','Keuken'],
+  ['inside-windows','Ramen aan de binnenkant wassen als dit nodig is','bimonthly','Ramen'],
+  ['bins-deep','Veelgebruikte afvalbakken volledig reinigen','bimonthly','Hele huis'],
+  ['cobwebs','Plafonds en hoeken controleren op spinrag','quarterly','Hele huis'],
+  ['lights','Lampen en plafondarmaturen afstoffen','quarterly','Hele huis'],
+  ['behind-furniture','Achter en onder bereikbare grotere meubels stofzuigen','quarterly','Hele huis'],
+  ['fridge-deep','Koelkast volledig uitnemen en reinigen','quarterly','Keuken'],
+  ['freezer-stock','Vriezer controleren en inventariseren','quarterly','Keuken'],
+  ['mattress-turn','Matrassen keren of draaien als het type dit toestaat','quarterly','Slaapkamers'],
+  ['vents-deep','Ventilatieopeningen grondig reinigen','quarterly','Hele huis'],
+  ['showerhead','Douchekop ontkalken','quarterly','Badkamer'],
+  ['sealant','Kit- en voegranden controleren','quarterly','Badkamer'],
+  ['attic-tidy','Zolder nalopen en opruimen','quarterly','Zolder'],
+  ['front-garden','Voortuin vegen en opruimen','quarterly','Buiten'],
+  ['back-garden','Achtertuin vegen en opruimen','quarterly','Buiten'],
+  ['curtains','Gordijnen wassen volgens het wasvoorschrift','semiannual','Raambekleding'],
+  ['net-curtains','Vitrage wassen volgens het wasvoorschrift','semiannual','Raambekleding'],
+  ['roller-blinds','Rolgordijnen in de slaapkamers afstoffen en plaatselijk reinigen','semiannual','Raambekleding'],
+  ['bath-blinds','Lamellen in de badkamer grondig afnemen','semiannual','Raambekleding'],
+  ['attic-blinds','Luxaflex in beide ruimtes op zolder grondig afnemen','semiannual','Raambekleding'],
+  ['outside-windows','Ramen aan de buitenkant wassen','semiannual','Ramen'],
+  ['high-cupboards','Bovenkanten van hoge kasten reinigen','semiannual','Hele huis'],
+  ['duvets-pillows','Dekbedden en kussens wassen volgens het wasvoorschrift','semiannual','Slaapkamers'],
+  ['mattresses-vacuum','Matrassen grondig stofzuigen','semiannual','Slaapkamers'],
+  ['freezer-defrost','Vriezer ontdooien en reinigen wanneer nodig','semiannual','Keuken'],
+  ['oven-deep','Oven grondig reinigen','semiannual','Keuken'],
+  ['hood-deep','Afzuigkap en filters grondig reinigen','semiannual','Keuken'],
+  ['bath-descale','Badkamer en toilet volledig ontkalken','semiannual','Badkamer en toilet'],
+  ['chairs-dining','Eetkamerstoelen stofzuigen, inclusief naden en randen','semiannual','Zitmeubels'],
+  ['chairs-desk','Bureaustoelen stofzuigen, inclusief naden en randen','semiannual','Zitmeubels'],
+  ['leather-sofas','Leren banken onderhouden volgens het juiste onderhoudsadvies','semiannual','Zitmeubels'],
+  ['evaluate-list','Huishoudtaken en frequenties evalueren','yearly','Overig'],
+  ['unused-items','Ongebruikte spullen per ruimte nalopen','yearly','Opruimen'],
+  ['attic-review','Zolder volledig nalopen','yearly','Zolder'],
+  ['hard-to-reach','Moeilijk bereikbare plekken achter grote meubels schoonmaken','yearly','Hele huis'],
+  ['ventilation-service','Ventilatiesysteem onderhouden volgens het onderhoudsadvies','yearly','Onderhoud'],
+  ['heating-service','Cv-ketel of andere installatie laten onderhouden volgens het advies','yearly','Onderhoud'],
+  ['fire-safety','Brandveiligheid en vluchtroute controleren','yearly','Veiligheid'],
+  ['smoke-choose','Geschikte rookmelders bepalen','none','Eenmalig'],
+  ['smoke-buy','Nieuwe rookmelders kopen','none','Eenmalig'],
+  ['smoke-install','Rookmelders plaatsen en werking controleren','none','Eenmalig'],
+  ['leather-advice','Type leer en onderhoudsadvies van de banken achterhalen','none','Eenmalig'],
+  ['leather-product','Geschikt onderhoudsmiddel voor de banken kopen','none','Eenmalig']
+];
 const localDateKey=(date=new Date())=>{const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);return local.toISOString().slice(0,10)};
 const todayKey=()=>localDateKey();
 const uid=()=>`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 let entries=loadEntries();
 
-const els={date:document.getElementById('todayDate'),appointments:document.getElementById('appointmentList'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterWeek:document.getElementById('rosterWeek'),rosterDays:document.getElementById('rosterDays')};
+const els={date:document.getElementById('todayDate'),appointments:document.getElementById('appointmentList'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterWeek:document.getElementById('rosterWeek'),rosterDays:document.getElementById('rosterDays')};
 
 seedCarPlanning();
 seedHouseholdPlanning();
@@ -51,7 +151,9 @@ function seedCarPlanning(){
 }
 function seedHouseholdPlanning(){
   if(localStorage.getItem(HOUSE_SEED_KEY))return;
-  const planned=['Stofzuigen','Dweilen','Badkamer schoonmaken','Toilet schoonmaken','Beddengoed verschonen'].map((title,index)=>({id:`house-weekly-${index}`,type:'task',date:todayKey(),title,time:'',note:'Huishoudtaak zonder vaste dag',done:false,repeat:'weekly',completedPeriods:[],createdAt:1786900000100+index}));
+  const obsoleteIds=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
+  entries=entries.filter(item=>!obsoleteIds.has(item.id));
+  const planned=HOUSEHOLD_TASKS.map(([key,title,repeat,room],index)=>({id:`house-${key}`,type:'task',category:'household',visibility:'shared',date:todayKey(),title,time:'',note:room,done:false,repeat,completedPeriods:[],createdAt:1786901000000+index}));
   planned.forEach(item=>{if(!entries.some(entry=>entry.id===item.id||entry.title===item.title))entries.push(item)});
   persist();localStorage.setItem(HOUSE_SEED_KEY,'1');
 }
@@ -61,9 +163,10 @@ function seedOldCarDeadline(){
   persist();localStorage.setItem(DEADLINE_SEED_KEY,'1');
 }
 function showPlannerPage(page){
-  els.todayPage.hidden=page!=='today';els.routinesPage.hidden=page!=='routines';
+  els.todayPage.hidden=page!=='today';els.routinesPage.hidden=page!=='routines';els.householdPage.hidden=page!=='household';
   document.querySelectorAll('[data-planner-page]').forEach(button=>button.classList.toggle('active',button.dataset.plannerPage===page));
   if(page==='routines')renderRoutines();
+  if(page==='household')renderHousehold();
 }
 function tomorrowKey(){const date=new Date();date.setDate(date.getDate()+1);return localDateKey(date)}
 const SHIFTS={day:{title:'Dagdienst',start:'07:00',end:'13:30'},longday:{title:'Lange dagdienst',start:'07:00',end:'15:30'},shortday:{title:'Korte dagdienst',start:'07:00',end:'11:00'},evening:{title:'Avonddienst',start:'15:15',end:'22:45'},shortevening:{title:'Korte avonddienst',start:'16:30',end:'21:30'},free:{title:'Vrij',start:'',end:''}};
@@ -101,12 +204,26 @@ function getRoutineState(){
 function renderRoutines(){const state=getRoutineState();els.routines.innerHTML=ROUTINES.map((title,index)=>`<article class="planner-item${state.done[index]?' done':''}"><input class="check" type="checkbox" data-routine="${index}" aria-label="Routine afronden" ${state.done[index]?'checked':''}><div class="item-copy"><strong>${escapeHtml(title)}</strong></div></article>`).join('');document.querySelectorAll('[data-routine]').forEach(input=>input.addEventListener('change',()=>{const current=getRoutineState();current.done[input.dataset.routine]=input.checked;localStorage.setItem(ROUTINE_KEY,JSON.stringify(current));renderRoutines()}))}
 function escapeHtml(value=''){return String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
 function periodKey(repeat,date=new Date()){
+  if(repeat==='biweekly'){const week=periodKey('weekly',date);const number=Number(week.slice(-2));return `${week.slice(0,4)}-B${Math.ceil(number/2)}`}
   if(repeat==='monthly')return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
-  if(repeat==='seasonal')return `${date.getFullYear()}-S${Math.floor(date.getMonth()/3)+1}`;
+  if(repeat==='bimonthly')return `${date.getFullYear()}-B${Math.floor(date.getMonth()/2)+1}`;
+  if(repeat==='quarterly'||repeat==='seasonal')return `${date.getFullYear()}-K${Math.floor(date.getMonth()/3)+1}`;
+  if(repeat==='semiannual')return `${date.getFullYear()}-H${Math.floor(date.getMonth()/6)+1}`;
+  if(repeat==='yearly')return String(date.getFullYear());
   const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()+3-(d.getDay()+6)%7);const week1=new Date(d.getFullYear(),0,4);return `${d.getFullYear()}-W${String(1+Math.round(((d-week1)/86400000-3+(week1.getDay()+6)%7)/7)).padStart(2,'0')}`;
 }
 function isTaskDone(item){return item.repeat&&item.repeat!=='none'?(item.completedPeriods||[]).includes(periodKey(item.repeat)):Boolean(item.done)}
-function todayEntries(type){return entries.filter(item=>{if(item.type!==type)return false;if(type==='appointment')return item.date===todayKey();if(item.date>todayKey())return false;if(item.repeat&&item.repeat!=='none')return true;return item.date===todayKey()||!isTaskDone(item)})}
+function todayEntries(type){return entries.filter(item=>{if(item.type!==type||item.category==='household')return false;if(type==='appointment')return item.date===todayKey();if(item.date>todayKey())return false;if(item.repeat&&item.repeat!=='none')return true;return item.date===todayKey()||!isTaskDone(item)})}
+function householdItems(){return entries.filter(item=>item.type==='task'&&item.category==='household')}
+function renderHousehold(){
+  const items=householdItems();const due=items.filter(item=>!isTaskDone(item));
+  els.householdDue.innerHTML=due.length?Object.entries(HOUSEHOLD_GROUPS).map(([key,label])=>{const repeat=key==='once'?'none':key;const group=due.filter(item=>(item.repeat||'none')===repeat);if(!group.length)return '';const open=['weekly','biweekly','once'].includes(key)?' open':'';return `<details class="due-group"${open}><summary>${escapeHtml(label)} <span>${group.length}</span></summary><div class="due-list">${group.map(renderHouseholdTask).join('')}</div></details>`}).join(''):'<div class="empty">Alle huishoudtaken voor deze periode zijn gedaan</div>';
+  els.householdLibrary.innerHTML=Object.entries(HOUSEHOLD_GROUPS).map(([key,label])=>{const repeat=key==='once'?'none':key;const group=items.filter(item=>(item.repeat||'none')===repeat);if(!group.length)return '';return `<details><summary>${escapeHtml(label)} <span>${group.length}</span></summary><div class="library-list">${group.map(item=>`<div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.note||'')}</small></div>`).join('')}</div></details>`}).join('');
+  bindHouseholdActions();
+}
+function renderHouseholdTask(item){return `<article class="planner-item${isTaskDone(item)?' done':''}"><input class="check" type="checkbox" data-house-check="${item.id}" aria-label="Huishoudtaak afronden"><div class="item-copy"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.note||'')}</small><span class="repeat-badge">${escapeHtml(repeatLabel(item.repeat))}</span></div></article>`}
+function completeHousehold(item){item.completedPeriods=item.completedPeriods||[];if(item.repeat==='none')item.done=true;else{const key=periodKey(item.repeat);if(!item.completedPeriods.includes(key))item.completedPeriods.push(key)}if(item.id==='house-floor-whole-house'){['house-floor-downstairs','house-floor-upstairs'].forEach(id=>{const floor=entries.find(entry=>entry.id===id);if(!floor)return;floor.completedPeriods=floor.completedPeriods||[];const key=periodKey(floor.repeat);if(!floor.completedPeriods.includes(key))floor.completedPeriods.push(key)})}persist();renderHousehold()}
+function bindHouseholdActions(){document.querySelectorAll('[data-house-check]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.houseCheck);if(item&&input.checked)completeHousehold(item)}))}
 function deadlineInfo(item){
   if(!item.deadline)return '';
   const today=new Date(`${todayKey()}T12:00:00`);const deadline=new Date(`${item.deadline}T12:00:00`);const days=Math.round((deadline-today)/86400000);
@@ -130,7 +247,7 @@ function privacyBadge(item){return item.visibility==='private'?'<span class="pri
 function schoolBadge(item){return item.category==='school'?'<span class="school-badge">School</span>':''}
 function appointmentTime(item){return item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:'—'}
 function renderAppointment(item){return `<article class="planner-item"><span class="time-badge">${escapeHtml(appointmentTime(item))}</span><div class="item-copy"><strong>${escapeHtml(item.title)}</strong>${item.note?`<small>${escapeHtml(item.note)}</small>`:''}${item.category==='work'?`<span class="work-badge">Werk${item.personName?' · '+escapeHtml(item.personName):''}</span>`:''}${schoolBadge(item)}${privacyBadge(item)}</div>${actionButtons(item.id,false,Boolean(item.time))}</article>`}
-function repeatLabel(value){return ({weekly:'Deze week',monthly:'Deze maand',seasonal:'Dit seizoen'})[value]||''}
+function repeatLabel(value){return ({weekly:'Deze week',biweekly:'Deze twee weken',monthly:'Deze maand',bimonthly:'Deze twee maanden',quarterly:'Dit kwartaal',seasonal:'Dit seizoen',semiannual:'Dit halfjaar',yearly:'Dit jaar',none:'Eenmalig'})[value]||''}
 function renderTask(item){const done=isTaskDone(item);return `<article class="planner-item${done?' done':''}"><input class="check" type="checkbox" data-check="${item.id}" aria-label="Taak afronden" ${done?'checked':''}><div class="item-copy"><strong>${escapeHtml(item.title)}</strong>${item.note?`<small>${escapeHtml(item.note)}</small>`:''}${item.urgent?'<span class="urgent-badge">Urgent</span>':''}${schoolBadge(item)}${privacyBadge(item)}${deadlineInfo(item)}${item.repeat&&item.repeat!=='none'?`<span class="repeat-badge">${repeatLabel(item.repeat)}</span>`:''}</div>${item._big?bigActionButtons():actionButtons(item.id,true)}</article>`}
 function renderUpcoming(item){const date=new Date(`${item.date}T12:00:00`);const label=new Intl.DateTimeFormat('nl-NL',{weekday:'short',day:'numeric',month:'short'}).format(date);const details=item.time?`${appointmentTime(item)} uur${item.note?' · '+item.note:''}`:item.note||'';return `<article class="planner-item"><span class="upcoming-date">${escapeHtml(label)}</span><div class="item-copy"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(details)}</small>${item.category==='work'?`<span class="work-badge">Werk${item.personName?' · '+escapeHtml(item.personName):''}</span>`:''}${schoolBadge(item)}${privacyBadge(item)}${item.type==='task'?deadlineInfo(item):''}</div>${item._bigUpcoming?'':actionButtons(item.id,false,item.type==='appointment'&&Boolean(item.time))}</article>`}
 function actionButtons(id,snooze=false,calendar=false){return `<div class="item-actions">${snooze?`<button class="icon-button snooze-button" type="button" data-snooze="${id}" aria-label="Doorschuiven naar morgen" title="Doorschuiven naar morgen">↪</button>`:''}${calendar?`<button class="icon-button calendar-button" type="button" data-calendar="${id}" aria-label="In telefoonagenda zetten" title="In telefoonagenda zetten">▣</button>`:''}<button class="icon-button" type="button" data-edit="${id}" aria-label="Wijzigen">✎</button><button class="icon-button delete" type="button" data-delete="${id}" aria-label="Verwijderen">×</button></div>`}
@@ -150,6 +267,6 @@ function editEntry(id){const item=entries.find(entry=>entry.id===id);if(item)ope
 function saveEntry(event){event.preventDefault();const title=els.title.value.trim();if(!title)return;const deadline=els.type.value==='task'&&els.hasDeadline.checked?els.deadline.value:'';if(els.type.value==='task'&&els.hasDeadline.checked&&!deadline){alert('Kies een deadline.');return}if(deadline&&deadline<els.entryDate.value){alert('De deadline kan niet vóór de startdatum liggen.');return}const existing=entries.find(item=>item.id===els.id.value);const school=window.huizeChaosPlannerRole==='owner'&&els.school.checked;const category=school?'school':els.type.value==='appointment'&&els.category.value==='work'?'work':'';const visibility=window.huizeChaosPlannerRole==='owner'&&(els.private.checked||school)?'private':'shared';const value={id:existing?.id||uid(),cloudId:existing?.cloudId||'',cloudScope:existing?.cloudScope||'',type:els.type.value,date:els.entryDate.value,deadline,urgent:els.type.value==='task'&&els.urgent.checked,category,visibility,title,time:els.type.value==='appointment'?els.time.value:'',endTime:els.type.value==='appointment'?els.endTime.value:'',personUid:category==='work'?(existing?.personUid||window.huizeChaosPlannerUserUid||''):'',personName:category==='work'?(existing?.personName||window.huizeChaosPlannerUserName||'Gezinslid'):'',note:els.note.value.trim(),done:existing?.done||false,repeat:els.type.value==='task'?els.repeat.value:'none',completedPeriods:existing?.completedPeriods||[],createdAt:existing?.createdAt||Date.now()};if(existing)entries=entries.map(item=>item.id===existing.id?value:item);else entries.push(value);persist();closeModal();render()}
 
 window.getHuizeChaosPlannerEntries=()=>entries;
-window.replaceHuizeChaosPlannerEntries=next=>{entries=next;localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));render()};
+window.replaceHuizeChaosPlannerEntries=next=>{const obsoleteIds=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);entries=next.filter(item=>!obsoleteIds.has(item.id));localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));render()};
 window.applyHuizeChaosPlannerRole=role=>{window.huizeChaosPlannerRole=role;els.privateField.hidden=role!=='owner';els.schoolField.hidden=role!=='owner';if(role!=='owner'){els.private.checked=false;els.school.checked=false}};
 window.applyHuizeChaosBigState=state=>{localStorage.setItem(BIG_STATE_KEY,JSON.stringify(state));render()};

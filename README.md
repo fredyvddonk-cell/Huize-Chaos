@@ -2,6 +2,6 @@
 
 Gezinsplanner, recepten, voorraad en boodschappen.
 
-Versie 1.3.7 voegt een compact weekrooster toe. Per dag kan een vaste dienst, vrij of een afwijkende tijd worden gekozen en de hele week wordt in één keer opgeslagen. Werkdiensten en andere afspraken met een tijd kunnen naar de telefoonagenda worden geëxporteerd met een alarm één uur vooraf. Schoolitems blijven automatisch privé.
+Versie 1.3.8 voegt een gedeelde huishoudmodule toe. De planner toont alleen de huishoudtaken die in de huidige periode aan de beurt zijn en bewaart daarnaast de volledige takenbibliotheek. De wekelijkse benedenbeurt, tweewekelijkse bovenbeurt en maandelijkse hele-huisbeurt zijn gekoppeld om dubbel werk te voorkomen.
 
 Zie `FIREBASE-INSTELLEN.md` voor de eenmalige Firebase-instelling en het toevoegen van gezinsleden zonder e-mailadressen te delen.
