@@ -4,7 +4,7 @@ const HOUSE_SEED_KEY='huizeChaosHouseTasksV138';
 const ROUTINE_KEY='huizeChaosDailyRoutinesV132';
 const BIG_STATE_KEY='huizeChaosBigChoreV132';
 const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
-const ROUTINES=['Keukenreset','Vaatwasser','Woonkamer opruimen','Was bijwerken'];
+const ROUTINES=['Keuken opruimen en aanrecht afnemen','Vaatwasser in- of uitruimen','Woonkamer opruimen','Was bijwerken','Kattenbak controleren en zo nodig verschonen','Toilet kort reinigen: doekje en borstel'];
 const BIG_CHORES=[];
 const WASTE_SCHEDULES=[
   {type:'Papier',firstFriday:'2026-08-21',regular:'Deze week al het oud papier bij het oud papier leggen',lastDay:'Vandaag laatste dag: al het oud papier bij het oud papier leggen'},
@@ -146,6 +146,19 @@ document.querySelectorAll('[data-shift]').forEach(button=>button.addEventListene
 document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>showPlannerPage(button.dataset.plannerPage)));
 document.getElementById('openHouseholdFromTasks').addEventListener('click',()=>showPlannerPage('household'));
 document.getElementById('openRoster').addEventListener('click',openRosterModal);
+const maintenanceModal=document.getElementById('maintenanceModal');
+const maintenanceForm=document.getElementById('maintenanceForm');
+const maintenanceDevice=document.getElementById('maintenanceDevice');
+const maintenanceOtherDeviceField=document.getElementById('maintenanceOtherDeviceField');
+const maintenanceOtherDevice=document.getElementById('maintenanceOtherDevice');
+const maintenanceAction=document.getElementById('maintenanceAction');
+const maintenanceOtherActionField=document.getElementById('maintenanceOtherActionField');
+const maintenanceOtherAction=document.getElementById('maintenanceOtherAction');
+document.getElementById('openMaintenance').addEventListener('click',openMaintenanceModal);
+document.getElementById('cancelMaintenance').addEventListener('click',closeMaintenanceModal);
+maintenanceModal.addEventListener('click',event=>{if(event.target===maintenanceModal)closeMaintenanceModal()});
+maintenanceDevice.addEventListener('change',updateMaintenanceChoices);
+maintenanceForm.addEventListener('submit',saveMaintenanceTask);
 els.appointmentSearch.addEventListener('input',()=>{els.clearAppointmentSearch.hidden=!els.appointmentSearch.value;render()});
 els.clearAppointmentSearch.addEventListener('click',()=>{els.appointmentSearch.value='';els.clearAppointmentSearch.hidden=true;els.appointmentSearch.focus();render()});
 document.getElementById('cancelRoster').addEventListener('click',closeRosterModal);
@@ -157,6 +170,10 @@ els.rosterForm.addEventListener('submit',saveRoster);
 
 function loadEntries(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch{return []}}
 function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));window.schedulePlannerCloudSync?.()}
+function openMaintenanceModal(){maintenanceForm.reset();maintenanceOtherDeviceField.hidden=true;maintenanceOtherDevice.required=false;maintenanceOtherActionField.hidden=true;maintenanceOtherAction.required=false;maintenanceAction.disabled=true;maintenanceAction.innerHTML='<option value="">Kies eerst een apparaat</option>';document.getElementById('maintenanceDeadline').value=currentWeekEndKey();maintenanceModal.classList.add('open');maintenanceModal.setAttribute('aria-hidden','false');setTimeout(()=>maintenanceDevice.focus(),0)}
+function closeMaintenanceModal(){maintenanceModal.classList.remove('open');maintenanceModal.setAttribute('aria-hidden','true')}
+function updateMaintenanceChoices(){const other=maintenanceDevice.value==='Ander apparaat';maintenanceOtherDeviceField.hidden=!other;maintenanceOtherDevice.required=other;if(!other)maintenanceOtherDevice.value='';maintenanceOtherActionField.hidden=!other;maintenanceOtherAction.required=other;if(!other)maintenanceOtherAction.value='';const choices=maintenanceDevice.value==='Vaatwasser'?[['filter reinigen','Reiniging filter'],['glansspoelmiddel bijvullen','Glansspoelmiddel'],['zout bijvullen','Zout']]:maintenanceDevice.value==='Koffiezetapparaat'?[['ontkalken','Ontkalken']]:[];maintenanceAction.disabled=!choices.length;maintenanceAction.required=Boolean(choices.length);maintenanceAction.innerHTML=choices.length?'<option value="">Kies het onderhoud</option>'+choices.map(([value,label])=>`<option value="${value}">${label}</option>`).join(''):'<option value="">Zelf omschrijven</option>'}
+function saveMaintenanceTask(event){event.preventDefault();const other=maintenanceDevice.value==='Ander apparaat';const device=other?maintenanceOtherDevice.value.trim():maintenanceDevice.value;const action=other?maintenanceOtherAction.value.trim():maintenanceAction.value;const deadline=document.getElementById('maintenanceDeadline').value;if(!device||!action)return;entries.push({id:uid(),cloudId:'',cloudScope:'',type:'task',date:todayKey(),deadline,urgent:false,category:'household',visibility:'shared',title:`${device}: ${action}`,time:'',endTime:'',personUid:'',personName:'',participants:[],note:'Onderhoudsmelding van apparaat',done:false,repeat:'none',completedPeriods:[],createdAt:Date.now()});persist();closeMaintenanceModal();render()}
 function seedCarPlanning(){
   if(localStorage.getItem(SEED_KEY))return;
   const planned=[
