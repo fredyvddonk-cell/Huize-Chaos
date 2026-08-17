@@ -2,6 +2,6 @@
 
 Gezinsplanner, recepten, voorraad en boodschappen.
 
-Versie 1.3.37 herstelt een accountgebonden samenvoegfout in de gezamenlijke boodschappenlijst. Boodschappen van gezinsleden worden voortaan uitsluitend herkend aan hun unieke online ID en niet meer aan een lokaal productnummer. Daardoor kunnen nieuwe boodschappen niet meer onbedoeld opgaan in een bestaand voorraadproduct van de eigenaar. De extra servercontrole uit V1.3.36 blijft actief.
+Versie 1.3.38 voegt een zichtbaar accountvenster toe aan Voorraad & Boodschappen. Via het tandwiel is te zien met welk Google-account de gebruiker is aangemeld en kan veilig worden afgemeld. De accountknop is ook beschikbaar voor gezinsleden. Hierdoor kan van account worden gewisseld zonder browsergegevens of lokale voorraadgegevens te wissen.
 
 Zie `FIREBASE-INSTELLEN.md` voor de eenmalige Firebase-instelling en het toevoegen van gezinsleden zonder e-mailadressen te delen.

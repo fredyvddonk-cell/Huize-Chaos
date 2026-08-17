@@ -34,6 +34,11 @@ const signOutButton = document.getElementById('googleSignOut');
 const accessBox = document.getElementById('accessCodeBox');
 const accessUid = document.getElementById('accessUid');
 const syncStatus = document.getElementById('syncStatus');
+const accountButton = document.getElementById('accountButton');
+const accountModal = document.getElementById('accountModal');
+const currentAccountName = document.getElementById('currentAccountName');
+const closeAccountButton = document.getElementById('closeAccount');
+const accountSignOutButton = document.getElementById('accountSignOut');
 
 function setSyncStatus(text, state = '') {
   syncStatus.textContent = text;
@@ -236,6 +241,33 @@ signInButton.addEventListener('click', async () => {
 });
 
 signOutButton.addEventListener('click', () => signOut(auth));
+accountButton.addEventListener('click', () => {
+  if (!user) return;
+  currentAccountName.textContent = user.displayName || user.email || 'Google-account';
+  accountModal.classList.add('open');
+  accountModal.setAttribute('aria-hidden', 'false');
+});
+
+function closeAccountModal() {
+  accountModal.classList.remove('open');
+  accountModal.setAttribute('aria-hidden', 'true');
+}
+
+closeAccountButton.addEventListener('click', closeAccountModal);
+accountModal.addEventListener('click', event => {
+  if (event.target === accountModal) closeAccountModal();
+});
+accountSignOutButton.addEventListener('click', async () => {
+  accountSignOutButton.disabled = true;
+  accountSignOutButton.textContent = 'Afmelden…';
+  try {
+    await signOut(auth);
+    closeAccountModal();
+  } finally {
+    accountSignOutButton.disabled = false;
+    accountSignOutButton.textContent = 'Afmelden';
+  }
+});
 document.getElementById('copyAccessUid').addEventListener('click', async () => {
   await navigator.clipboard.writeText(accessUid.textContent);
   document.getElementById('copyAccessUid').textContent = 'Gekopieerd';

@@ -222,6 +222,9 @@ html, body { background:#F5F1FA !important; }
 .auth-card{width:min(100%,440px);background:#fff;border-radius:22px;padding:24px;box-shadow:0 18px 55px rgba(45,35,55,.25);text-align:center}
 .auth-card h2{margin:0 0 10px;font-size:22px}.auth-card p{color:#68626e;line-height:1.45}.auth-primary{width:100%;font-size:15px;padding:13px}.auth-link{margin-top:15px;border:0;background:transparent;color:#6f3fba;text-decoration:underline}.access-code-box{margin-top:16px;padding:14px;background:#f5f1fa;border-radius:14px;text-align:left}.access-code-box p{font-size:13px;margin:5px 0}.access-code-box code{display:block;overflow-wrap:anywhere;background:#fff;border:1px solid #e3e3e8;border-radius:9px;padding:9px;margin:8px 0;font-size:12px}
 .added-by{font-size:11px;color:#7d7285;margin-top:3px}
-body[data-role="member"] .tab:not([data-page="list"]),body[data-role="member"] .top-actions .icon,body[data-role="member"] .direct-buy-option,body[data-role="member"] #processDoneBar{display:none!important}
+body[data-role="member"] .tab:not([data-page="list"]),body[data-role="member"] .direct-buy-option,body[data-role="member"] #processDoneBar{display:none!important}
 body[data-role="member"] .tabs{grid-template-columns:1fr}
 body[data-role="member"] .shopping-edit,body[data-role="member"] .shopping-remove{display:none}
+
+/* V1.2.11 - zichtbaar accountvenster en veilig wisselen van Google-account */
+.account-card{text-align:center;max-width:420px}.account-icon{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--lav3);font-size:27px}.account-card h2{margin-bottom:6px}.account-card p{margin:0 0 5px;color:#73737d}.account-name{display:block;padding:10px 12px;border-radius:11px;background:var(--lav3);color:#5f4775;overflow-wrap:anywhere}.account-actions{justify-content:center}.account-actions .btn{min-width:108px}.account-actions .danger-button:disabled{opacity:.6}
