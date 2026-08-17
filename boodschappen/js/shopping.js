@@ -15,6 +15,12 @@ function shoppingPrioritySort(a, b) {
   return priority(a.status) - priority(b.status) || sortProducts(a, b);
 }
 
+function firstName(value = '') {
+  const name = String(value).trim();
+  if (!name) return '';
+  return name.split(/[\s@]+/)[0];
+}
+
 function renderShoppingGroup(title, items, level, parent, row) {
   const key = shoppingGroupKey(level, parent, title);
   const collapsed = !expandedShoppingGroups.has(key);
@@ -109,7 +115,7 @@ function renderShopping(allProducts) {
       <div class="main">
         <div class="name">${esc(x.name)}</div>
         ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
-        ${x.cloudAddedByName ? `<div class="added-by">Toegevoegd door ${esc(x.cloudAddedByName)}</div>` : ''}
+        ${x.cloudSource === 'family' && x.cloudAddedByName ? `<div class="added-by">Toegevoegd door ${esc(firstName(x.cloudAddedByName))}</div>` : ''}
         ${memoHtml(x)}
       </div>
       <div class="shopping-row-actions">
@@ -153,6 +159,12 @@ window.markBought = (id, checked) => {
 window.removeFromShopping = id => {
   const x = products.find(x => x.id === id);
   if (!x) return;
+  if (x.temporary) {
+    products = products.filter(product => product.id !== id);
+    save();
+    render();
+    return;
+  }
   x.shopping = false;
   x.done = false;
   save();
@@ -173,11 +185,12 @@ function bindShoppingEvents() {
 
   $('#clearDone').onclick = () => {
     products = products.filter(x => {
-      if (x.shopping && x.done && x.cloudSource === 'family') return false;
+      if (x.shopping && x.done && x.temporary) return false;
       if (x.shopping && x.done) {
         x.status = 'Voldoende';
         x.shopping = false;
         x.done = false;
+        if (x.cloudSource === 'family') x.cloudSource = 'stock';
       }
       return true;
     });

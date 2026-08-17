@@ -52,6 +52,7 @@ function migrateProduct(x) {
   product.shopping = Boolean(product.shopping);
   product.done = Boolean(product.done);
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
+  product.temporary = Boolean(product.temporary);
 
   delete product.amount;
   return product;
@@ -150,6 +151,10 @@ function openModal(x = null, prefillName = '') {
   $('#category').value = x?.category || '';
   $('#memo').value = x?.memo || '';
   $('#buyDirectWhenOut').checked = Boolean(x?.buyDirectWhenOut);
+  const fixedProductOption = $('#fixedProductOption');
+  const showFixedProductChoice = page === 'list';
+  fixedProductOption.hidden = !showFixedProductChoice;
+  $('#fixedProduct').checked = showFixedProductChoice ? Boolean(x && !x.temporary) : true;
   $('#modal').classList.add('open');
   setTimeout(() => $('#productName').focus(), 50);
   const categoryInput = $('#category');
@@ -249,7 +254,10 @@ function render() {
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
 
   const query = page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
-  const arr = products.filter(x => x.name.toLowerCase().includes(query));
+  const arr = products.filter(x =>
+    x.name.toLowerCase().includes(query) &&
+    ((page !== 'stock' && page !== 'manage') || !x.temporary)
+  );
 
   if (page === 'list') renderShopping(arr);
   else if (page === 'stock') renderStock(arr);
@@ -306,7 +314,8 @@ function initApp() {
       store: $('#store').value,
       category: $('#category').value.trim(),
       memo: $('#memo').value.trim(),
-      buyDirectWhenOut: $('#buyDirectWhenOut').checked
+      buyDirectWhenOut: $('#buyDirectWhenOut').checked,
+      temporary: page === 'list' && !$('#fixedProduct').checked
     };
 
     if (id) {

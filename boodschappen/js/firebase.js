@@ -68,6 +68,7 @@ function cloudData(product) {
     category: String(product.category || ''),
     memo: String(product.memo || ''),
     done: Boolean(product.done),
+    temporary: Boolean(product.temporary),
     source: product.cloudSource || (product.status === 'Voldoende' ? 'family' : 'stock'),
     addedBy: product.cloudAddedBy || user.uid,
     addedByName: product.cloudAddedByName || user.displayName || 'Gezinslid'
@@ -105,6 +106,7 @@ function applySnapshot(snapshot) {
       category: data.category || '',
       memo: data.memo || '',
       done: Boolean(data.done),
+      temporary: Boolean(data.temporary),
       shopping: true
     });
   });
