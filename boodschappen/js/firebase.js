@@ -86,9 +86,32 @@ function cloudChanged(current, next) {
   return Object.keys(next).some(key => current?.[key] !== next[key]);
 }
 
+const syncedFields = ['localId', 'name', 'quantity', 'unit', 'store', 'category', 'memo', 'done', 'temporary', 'source', 'addedBy', 'addedByName'];
+
+function sameRemoteItems(current, next) {
+  if (current.size !== next.size) return false;
+  for (const [cloudId, nextData] of next) {
+    const currentData = current.get(cloudId);
+    if (!currentData) return false;
+    if (syncedFields.some(field => currentData[field] !== nextData[field])) return false;
+  }
+  return true;
+}
+
 function applySnapshot(snapshot) {
   const nextRemote = new Map();
   snapshot.forEach(itemDoc => nextRemote.set(itemDoc.id, itemDoc.data()));
+
+  if (cloudReady && sameRemoteItems(remoteItems, nextRemote)) {
+    remoteItems = nextRemote;
+    const localProducts = window.getHuizeChaosProducts();
+    if (syncPending || localProducts.some(product => product.shopping && (!product.cloudId || product.cloudPending))) {
+      scheduleSync();
+    } else {
+      setSyncStatus('Gesynchroniseerd', 'online');
+    }
+    return;
+  }
 
   applyingCloud = true;
   let products = [...window.getHuizeChaosProducts()];
