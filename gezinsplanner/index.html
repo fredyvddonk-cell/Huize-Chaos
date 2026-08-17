@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.17">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.17">
+  <link rel="stylesheet" href="style.css?v=1.3.20">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.20">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <div class="topbar-meta"><span class="version">V1.3.17</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
+      <div class="topbar-meta"><span class="version">V1.3.20</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
     </header>
 
     <section class="day-heading">
@@ -42,6 +42,12 @@
         <div><span class="section-icon appointment">●</span><h2 id="appointmentsTitle">Afspraken</h2></div>
         <div class="heading-actions"><button class="add-button compact secondary-add" type="button" id="openRoster">Werkrooster</button><button class="add-button compact" type="button" data-add="appointment">+ Afspraak</button></div>
       </div>
+      <div class="appointment-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="appointmentSearch" type="search" placeholder="Zoek in alle afspraken" autocomplete="off" aria-label="Zoek in alle afspraken">
+        <button id="clearAppointmentSearch" type="button" aria-label="Zoekopdracht wissen" hidden>×</button>
+      </div>
+      <div id="appointmentSearchStatus" class="search-status"></div>
       <div id="appointmentList" class="item-list"></div>
     </section>
 
@@ -145,7 +151,7 @@
 
       <label id="schoolTaskField" class="task-option" hidden>
         <input id="entrySchoolTask" type="checkbox">
-        <span>Urgente taak ‘School informeren’ toevoegen</span>
+        <span>Urgente taak ‘School informeren dat hij wel naar school gaat’ toevoegen</span>
       </label>
 
       <label id="hasDeadlineField" class="task-option">
@@ -235,7 +241,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=1.3.17"></script>
-  <script type="module" src="firebase.js?v=1.3.17"></script>
+  <script src="app.js?v=1.3.20"></script>
+  <script type="module" src="firebase.js?v=1.3.20"></script>
 </body>
 </html>
