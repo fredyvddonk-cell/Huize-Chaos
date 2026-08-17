@@ -53,6 +53,7 @@ function migrateProduct(x) {
   product.done = Boolean(product.done);
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
   product.temporary = Boolean(product.temporary);
+  product.cloudPending = Boolean(product.cloudPending);
 
   delete product.amount;
   return product;

@@ -111,6 +111,7 @@ function applySnapshot(snapshot) {
       cloudSource: data.source || 'family',
       cloudAddedBy: data.addedBy || '',
       cloudAddedByName: data.addedByName || '',
+      cloudPending: false,
       name: data.name || '',
       quantity: data.quantity || '',
       unit: data.unit || '',
@@ -125,6 +126,7 @@ function applySnapshot(snapshot) {
 
   products = products.filter(product => {
     if (!product.cloudId || nextRemote.has(product.cloudId)) return true;
+    if (product.cloudPending) return true;
     if (product.cloudSource === 'stock') {
       product.shopping = false;
       product.done = false;
@@ -167,11 +169,15 @@ async function syncNow() {
       product.cloudSource = role === 'owner' && product.status !== 'Voldoende' ? 'stock' : 'family';
       product.cloudAddedBy = user.uid;
       product.cloudAddedByName = user.displayName || 'Gezinslid';
+      product.cloudPending = true;
+      localStorage.setItem('household-products-v2', JSON.stringify(products));
     }
     activeIds.add(product.cloudId);
     const nextData = cloudData(product);
-    if (!remoteItems.has(product.cloudId) || cloudChanged(remoteItems.get(product.cloudId), nextData)) {
+    if (product.cloudPending || !remoteItems.has(product.cloudId) || cloudChanged(remoteItems.get(product.cloudId), nextData)) {
       await setDoc(doc(itemsRef, product.cloudId), { ...nextData, updatedAt: serverTimestamp() }, { merge: true });
+      product.cloudPending = false;
+      remoteItems.set(product.cloudId, nextData);
     }
   }
 
@@ -196,6 +202,7 @@ function scheduleSync() {
   syncTimer = setTimeout(() => syncNow().catch(error => {
     console.error(error);
     setSyncStatus('Syncfout', 'error');
+    setTimeout(() => scheduleSync(), 5000);
   }), 250);
 }
 
