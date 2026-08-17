@@ -45,7 +45,7 @@
   .heading-actions{max-width:210px}
   .planner-tabs button{font-size:12px;padding-inline:4px}
   .heading-actions .compact{font-size:12px}
-  .week-navigation{grid-template-columns:1fr}.availability-day li{grid-template-columns:92px 1fr}
+  .week-navigation{grid-template-columns:repeat(3,1fr)}.week-navigation button{font-size:11px;padding:8px 3px}.availability-day li{grid-template-columns:92px 1fr}
   .roster-actions button{flex:1 1 140px}
 }
 .sync-status{font-size:10px;font-weight:800;color:#716a77;background:#fff;border:1px solid #e5deea;border-radius:999px;padding:4px 7px;white-space:nowrap}
