@@ -2,6 +2,6 @@
 
 Gezinsplanner, recepten, voorraad en boodschappen.
 
-Versie 1.3.6 voegt schoolitems en werkroosters toe aan de gezinsplanner. Schooltaken en schoolafspraken worden automatisch privé opgeslagen en zijn alleen zichtbaar voor de beheerder. Voor het gezamenlijke werkrooster zijn vijf snelknoppen beschikbaar voor de vaste dag- en avonddiensten. Taken en afspraken blijven via dezelfde gezinsleden als de boodschappenlijst gesynchroniseerd.
+Versie 1.3.7 voegt een compact weekrooster toe. Per dag kan een vaste dienst, vrij of een afwijkende tijd worden gekozen en de hele week wordt in één keer opgeslagen. Werkdiensten en andere afspraken met een tijd kunnen naar de telefoonagenda worden geëxporteerd met een alarm één uur vooraf. Schoolitems blijven automatisch privé.
 
 Zie `FIREBASE-INSTELLEN.md` voor de eenmalige Firebase-instelling en het toevoegen van gezinsleden zonder e-mailadressen te delen.
