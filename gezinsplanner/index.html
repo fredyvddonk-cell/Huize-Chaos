@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.27">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.27">
+  <link rel="stylesheet" href="style.css?v=1.3.28">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.28">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <div class="topbar-meta"><span class="version">V1.3.27</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
+      <div class="topbar-meta"><span class="version">V1.3.28</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
     </header>
 
     <section class="day-heading">
@@ -152,7 +152,7 @@
 
       <label id="schoolTaskField" class="task-option" hidden>
         <input id="entrySchoolTask" type="checkbox">
-        <span>Urgente taak ‘School informeren dat hij wel naar school gaat’ toevoegen</span>
+        <span>Urgente taak ‘School informeren over de ziekenhuisafspraak’ toevoegen</span>
       </label>
 
       <label id="hasDeadlineField" class="task-option">
@@ -280,6 +280,19 @@
     </form>
   </div>
 
+  <div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-card delete-card" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <div class="delete-icon" aria-hidden="true">!</div>
+      <h2 id="deleteTitle">Item verwijderen?</h2>
+      <p id="deleteText"></p>
+      <p id="deleteLinkedText" class="delete-linked" hidden>De gekoppelde schooltaak blijft staan en wordt aangepast omdat de ziekenhuisafspraak niet doorgaat.</p>
+      <div class="modal-actions">
+        <button id="cancelDelete" class="secondary" type="button">Annuleren</button>
+        <button id="confirmDelete" class="danger-button" type="button">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+
   <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="auth-card">
       <h2 id="authTitle">Gezamenlijke gezinsplanner</h2>
@@ -295,7 +308,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=1.3.27"></script>
-  <script type="module" src="firebase.js?v=1.3.27"></script>
+  <script src="app.js?v=1.3.28"></script>
+  <script type="module" src="firebase.js?v=1.3.28"></script>
 </body>
 </html>
