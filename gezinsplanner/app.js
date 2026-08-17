@@ -6,6 +6,10 @@ const BIG_STATE_KEY='huizeChaosBigChoreV132';
 const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
 const ROUTINES=['Keukenreset','Vaatwasser','Woonkamer opruimen','Was bijwerken'];
 const BIG_CHORES=[];
+const WASTE_SCHEDULES=[
+  {type:'Papier',firstFriday:'2026-08-21',regular:'Deze week al het oud papier in de papierkliko doen',lastDay:'Vandaag laatste dag: al het oud papier in de papierkliko doen'},
+  {type:'Restafval',firstFriday:'2026-09-11',regular:'Deze week al het restafval in de restafvalkliko doen',lastDay:'Vandaag laatste dag: al het restafval in de restafvalkliko doen'}
+];
 const HOUSEHOLD_GROUPS={weekly:'Iedere week',biweekly:'Iedere twee weken',monthly:'Iedere maand',bimonthly:'Iedere twee maanden',quarterly:'Ieder kwartaal',semiannual:'Twee keer per jaar',yearly:'Ieder jaar',once:'Eenmalig'};
 const HOUSEHOLD_TASKS=[
   ['floor-downstairs','Benedenverdieping stofzuigen en aansluitend dweilen','weekly','Vloeren'],
@@ -118,12 +122,13 @@ const todayKey=()=>localDateKey();
 const uid=()=>`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 let entries=loadEntries();
 
-const els={date:document.getElementById('todayDate'),appointments:document.getElementById('appointmentList'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterWeek:document.getElementById('rosterWeek'),rosterDays:document.getElementById('rosterDays')};
+const els={date:document.getElementById('todayDate'),wastePanel:document.getElementById('wasteReminderPanel'),wasteTitle:document.getElementById('wasteReminderTitle'),wasteText:document.getElementById('wasteReminderText'),appointments:document.getElementById('appointmentList'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterWeek:document.getElementById('rosterWeek'),rosterDays:document.getElementById('rosterDays')};
 
 seedCarPlanning();
 seedHouseholdPlanning();
 seedOldCarDeadline();
 els.date.textContent=new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+renderWasteReminder();
 render();
 
 document.querySelectorAll('[data-add]').forEach(button=>button.addEventListener('click',()=>openModal(button.dataset.add)));
@@ -176,6 +181,12 @@ function showPlannerPage(page){
   if(page==='household')renderHousehold();
 }
 function tomorrowKey(){const date=new Date();date.setDate(date.getDate()+1);return localDateKey(date)}
+function wasteReminderForDate(date=new Date()){
+  const day=date.getDay();if(day===0||day===5||day===6)return null;
+  const friday=new Date(date);friday.setHours(12,0,0,0);friday.setDate(date.getDate()+(5-day));
+  return WASTE_SCHEDULES.find(schedule=>{const first=new Date(`${schedule.firstFriday}T12:00:00`);const days=Math.round((friday-first)/86400000);return days>=0&&days%28===0})||null;
+}
+function renderWasteReminder(){const schedule=wasteReminderForDate();els.wastePanel.hidden=!schedule;if(!schedule)return;els.wasteTitle.textContent=`${schedule.type} wordt vrijdag opgehaald`;els.wasteText.textContent=new Date().getDay()===4?schedule.lastDay:schedule.regular}
 const SHIFTS={day:{title:'Dagdienst',start:'07:00',end:'13:30'},longday:{title:'Lange dagdienst',start:'07:00',end:'15:30'},shortday:{title:'Korte dagdienst',start:'07:00',end:'11:00'},evening:{title:'Avonddienst',start:'15:15',end:'22:45'},shortevening:{title:'Korte avonddienst',start:'16:30',end:'21:30'},free:{title:'Vrij',start:'',end:''}};
 function isoWeekValue(date=new Date()){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));const start=new Date(Date.UTC(d.getUTCFullYear(),0,1));return `${d.getUTCFullYear()}-W${String(Math.ceil((((d-start)/86400000)+1)/7)).padStart(2,'0')}`}
 function mondayFromWeek(value){const [year,week]=value.split('-W').map(Number);const jan4=new Date(year,0,4,12);const monday=new Date(jan4);monday.setDate(jan4.getDate()-(jan4.getDay()||7)+1+(week-1)*7);return monday}
