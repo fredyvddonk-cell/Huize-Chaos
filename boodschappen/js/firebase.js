@@ -22,6 +22,7 @@ let role = '';
 let user = null;
 let cloudReady = false;
 let applyingCloud = false;
+let syncPending = false;
 let syncTimer = 0;
 let remoteItems = new Map();
 let stopItems = null;
@@ -139,7 +140,7 @@ function applySnapshot(snapshot) {
   window.replaceHuizeChaosProducts(products);
   applyingCloud = false;
   setSyncStatus('Gesynchroniseerd', 'online');
-  if (role === 'owner' && products.some(x => x.shopping && !x.cloudId)) scheduleSync();
+  if (syncPending || products.some(x => x.shopping && !x.cloudId)) scheduleSync();
 }
 
 async function refreshItemsFromServer() {
@@ -180,11 +181,16 @@ async function syncNow() {
     }
   }
   localStorage.setItem('household-products-v2', JSON.stringify(products));
+  syncPending = false;
   setSyncStatus('Gesynchroniseerd', 'online');
 }
 
 function scheduleSync() {
-  if (!cloudReady || applyingCloud) return;
+  syncPending = true;
+  if (!cloudReady || applyingCloud) {
+    setSyncStatus('Wacht op synchronisatie…');
+    return;
+  }
   clearTimeout(syncTimer);
   setSyncStatus('Synchroniseren…');
   syncTimer = setTimeout(() => syncNow().catch(error => {
