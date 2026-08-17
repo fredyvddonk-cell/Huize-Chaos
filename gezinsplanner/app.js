@@ -7,7 +7,7 @@ const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
 const ROUTINES=['Keukenreset','Vaatwasser','Woonkamer opruimen','Was bijwerken'];
 const BIG_CHORES=[];
 const WASTE_SCHEDULES=[
-  {type:'Papier',firstFriday:'2026-08-21',regular:'Deze week al het oud papier in de papierkliko doen',lastDay:'Vandaag laatste dag: al het oud papier in de papierkliko doen'},
+  {type:'Papier',firstFriday:'2026-08-21',regular:'Deze week al het oud papier bij het oud papier leggen',lastDay:'Vandaag laatste dag: al het oud papier bij het oud papier leggen'},
   {type:'Restafval',firstFriday:'2026-09-11',regular:'Deze week al het restafval in de restafvalkliko doen',lastDay:'Vandaag laatste dag: al het restafval in de restafvalkliko doen'}
 ];
 const HOUSEHOLD_GROUPS={weekly:'Iedere week',biweekly:'Iedere twee weken',monthly:'Iedere maand',bimonthly:'Iedere twee maanden',quarterly:'Ieder kwartaal',semiannual:'Twee keer per jaar',yearly:'Ieder jaar',once:'Eenmalig'};
