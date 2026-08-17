@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#957AC1">
   <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.3.23">
-  <link rel="stylesheet" href="planner-v131.css?v=1.3.23">
+  <link rel="stylesheet" href="style.css?v=1.3.24">
+  <link rel="stylesheet" href="planner-v131.css?v=1.3.24">
 </head>
 <body>
   <main class="planner-app">
@@ -15,7 +15,7 @@
         <span class="calendar-icon" aria-hidden="true">📅</span>
         <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
-      <div class="topbar-meta"><span class="version">V1.3.23</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
+      <div class="topbar-meta"><span class="version">V1.3.24</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
     </header>
 
     <section class="day-heading">
@@ -48,6 +48,7 @@
         <button id="clearAppointmentSearch" type="button" aria-label="Zoekopdracht wissen" hidden>×</button>
       </div>
       <div id="appointmentSearchStatus" class="search-status"></div>
+      <button id="openFourWeek" class="availability-link" type="button"><span>Bekijk beschikbaarheid over 4 weken</span><span aria-hidden="true">›</span></button>
       <div id="appointmentList" class="item-list"></div>
     </section>
 
@@ -243,6 +244,22 @@
     </form>
   </div>
 
+  <div id="fourWeekModal" class="modal" aria-hidden="true">
+    <div class="modal-card four-week-card">
+      <div class="four-week-heading">
+        <div><h2>Beschikbaarheid over 4 weken</h2><p id="fourWeekRange"></p></div>
+        <button id="closeFourWeek" class="secondary small-close" type="button">Sluiten</button>
+      </div>
+      <div class="week-navigation">
+        <button id="previousFourWeek" class="secondary" type="button">‹ Vorige week</button>
+        <button id="resetFourWeek" class="secondary" type="button">Over 4 weken</button>
+        <button id="nextFourWeek" class="secondary" type="button">Volgende week ›</button>
+      </div>
+      <p class="roster-help">Bekijk daarnaast het actuele schoolrooster in Magister.</p>
+      <div id="fourWeekDays" class="four-week-days"></div>
+    </div>
+  </div>
+
   <div id="rosterModal" class="modal" aria-hidden="true">
     <form id="rosterForm" class="modal-card roster-card">
       <h2>Werkrooster invullen</h2>
@@ -278,7 +295,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=1.3.23"></script>
-  <script type="module" src="firebase.js?v=1.3.23"></script>
+  <script src="app.js?v=1.3.24"></script>
+  <script type="module" src="firebase.js?v=1.3.24"></script>
 </body>
 </html>

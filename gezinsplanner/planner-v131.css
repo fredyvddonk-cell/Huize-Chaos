@@ -36,6 +36,8 @@
 .modal{overflow-y:auto;place-items:start center;-webkit-overflow-scrolling:touch}
 .modal-card{max-height:calc(100dvh - 20px);overflow-y:auto;margin:auto 0}
 .modal-actions{position:sticky;bottom:-1px;z-index:2;background:#fff;padding-top:10px;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+.four-week-card{width:min(100%,620px)}.four-week-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.four-week-heading h2{margin-bottom:3px}.four-week-heading p{margin:0;color:var(--muted);font-size:13px}.small-close{border-radius:10px;padding:8px 10px}.week-navigation{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:14px 0 8px}.week-navigation button{border-radius:10px;padding:8px 5px;font-size:12px;font-weight:700}.four-week-days{display:grid;gap:7px}.availability-day{border:1px solid var(--line);border-radius:13px;padding:10px}.availability-day>div{display:flex;align-items:center;justify-content:space-between;gap:8px}.availability-day>div>strong{text-transform:capitalize}.availability-day button{border:0;border-radius:9px;padding:7px 9px;background:var(--purple);color:#fff;font-size:12px;font-weight:750}.availability-day ul{display:grid;gap:4px;margin:7px 0 0;padding:0;list-style:none}.availability-day li{display:grid;grid-template-columns:105px 1fr;gap:7px;color:var(--muted);font-size:13px}.availability-day li strong{color:var(--purple-dark)}.availability-day .free-day{display:block;color:#277e79}
+.availability-link{width:100%;display:flex;align-items:center;justify-content:space-between;margin:3px 0 10px;padding:8px 10px;border:0;border-radius:10px;background:var(--pale);color:var(--purple-dark);font-size:13px;font-weight:750;text-align:left}
 @media(max-width:430px){
   .modal{padding:8px}
   .modal-card{max-height:calc(100dvh - 16px)}
@@ -43,6 +45,7 @@
   .heading-actions{max-width:210px}
   .planner-tabs button{font-size:12px;padding-inline:4px}
   .heading-actions .compact{font-size:12px}
+  .week-navigation{grid-template-columns:1fr}.availability-day li{grid-template-columns:92px 1fr}
   .roster-actions button{flex:1 1 140px}
 }
 .sync-status{font-size:10px;font-weight:800;color:#716a77;background:#fff;border:1px solid #e5deea;border-radius:999px;padding:4px 7px;white-space:nowrap}
