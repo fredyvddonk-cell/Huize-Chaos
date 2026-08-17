@@ -11,11 +11,11 @@
   body{background:#fff;color:#000;font-family:Arial,sans-serif}.app{max-width:none;padding:0;margin:0}.top,.tabs,.toolbar,.summary,.print-btn{display:none!important}#listControls{display:block!important}.group{display:none!important}#content{display:block}.section{font-size:16pt;margin:18pt 0 5pt;break-after:avoid}.item{padding:5pt 0;border-bottom:1px solid #bbb;break-inside:avoid}.item.done{display:none!important}.check{appearance:none;-webkit-appearance:none;width:13pt;height:13pt;border:1px solid #000;margin:0 7pt 0 0}.name{font-size:11pt}.meta,.memo{font-size:9pt;color:#333}.status,.actions{display:none!important}@page{size:A4;margin:14mm}
 }
 
-.direct-buy-option{display:flex;align-items:flex-start;gap:10px;margin:14px 0;padding:12px;border-radius:12px;background:var(--lav3);cursor:pointer}.direct-buy-option input{width:20px;height:20px;margin-top:1px;accent-color:var(--lav);flex:0 0 auto}.direct-buy-option span{display:flex;flex-direction:column;gap:3px;font-size:14px}.direct-buy-option small{font-size:12px;color:#73737d;font-weight:400}.urgent-block{background:#fff8e8;border-radius:14px;padding:0 10px 4px;margin:8px 0 20px}.urgent-title{color:#7b5714;margin-top:12px}.urgent-block .item:last-child{border-bottom:0}
+.direct-buy-option{display:flex;align-items:flex-start;gap:10px;margin:14px 0;padding:12px;border-radius:12px;background:var(--lav3);cursor:pointer}.direct-buy-option input{width:20px;height:20px;margin-top:1px;accent-color:var(--lav);flex:0 0 auto}.direct-buy-option span{display:flex;flex-direction:column;gap:3px;font-size:14px}.direct-buy-option small{font-size:12px;color:#73737d;font-weight:400}
 .direct-buy-option[hidden]{display:none}
 .delete-card{text-align:center}.delete-icon{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 13px;border-radius:16px;background:#fde1e5;color:#a22f43;font-size:31px;font-weight:900}.delete-card h2{margin-bottom:8px}.delete-product-name{margin:9px 0;padding:10px 12px;border-radius:11px;background:var(--lav3);color:#6738aa;font-weight:800;overflow-wrap:anywhere}.delete-card>p{margin:0;color:#73737d;line-height:1.5}.danger-button{border:0;background:#b84f62;color:#fff}
 
-/* V1.3.31 - compacte boodschappenlijst zoals het PDF-overzicht */
+/* V1.3.32 - compacte boodschappenlijst en aparte PDF-weergave */
 .shopping-page .shopping-group{margin:0;border:0;border-bottom:1px solid #ddd8e2;border-radius:0;box-shadow:none;background:transparent}
 .shopping-page .shopping-group-head{min-height:36px;padding:7px 5px;background:transparent;color:#5f4775;font-size:13px;text-transform:uppercase;letter-spacing:.02em}
 .shopping-page .shopping-group-head .chevron{font-size:17px}
@@ -26,6 +26,7 @@
 .shopping-page .shopping-item .name{font-size:15px;line-height:1.2}
 .shopping-page .shopping-item .meta,.shopping-page .shopping-item .memo,.shopping-page .shopping-item .added-by{margin-top:2px;font-size:11px;line-height:1.25;color:#77717d}
 .shopping-page .shopping-item .memo::before{content:""}
+.shopping-page .shopping-item.urgent-item .name{color:#c62828;font-weight:800}
 .shopping-item-menu{position:relative;flex:0 0 auto}
 .shopping-item-menu>summary{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;color:#6738aa;cursor:pointer;font-size:22px;line-height:1;list-style:none}
 .shopping-item-menu>summary::-webkit-details-marker{display:none}
@@ -33,10 +34,14 @@
 .shopping-item-menu-popover button{border:0;border-radius:8px;padding:9px 10px;background:#fff;color:var(--text);text-align:left;font-size:13px}
 .shopping-item-menu-popover button:active{background:var(--lav3)}
 .shopping-item-menu-popover button.delete{color:#a22f43}
-.shopping-page .urgent-block{padding:0 7px 3px;margin:7px 0 13px;border:1px solid #f0dfb7;box-shadow:none}
-.shopping-page .urgent-title{margin:8px 4px 3px;font-size:16px}
 @media(max-width:430px){.shopping-page .shopping-group-head{font-size:12px}}
-@media print{.shopping-item-menu{display:none!important}}
+.print-shopping{display:none}
+@media print{
+  .screen-shopping{display:none!important}.print-shopping{display:block!important}.shopping-item-menu{display:none!important}
+  .print-category{margin:0 0 10pt;break-inside:avoid}.print-category h2{margin:0 0 3pt;color:#5f4775;font-size:10.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.02em;break-after:avoid}
+  .print-item{display:flex;align-items:flex-start;gap:5pt;padding:2.2pt 0;break-inside:avoid}.print-check{display:block;flex:0 0 10pt;width:10pt;height:10pt;margin-top:1pt;border:.8pt solid #777}.print-name{font-size:9.5pt;line-height:1.15;font-weight:400}.print-meta{margin-top:1pt;color:#444;font-size:8pt;line-height:1.15}.print-item.urgent-item .print-name{color:#c62828;font-weight:800}
+  @page{size:A4;margin:12mm}
+}
 
 /* Update: snellere voorraadcontrole en dubbele groepering boodschappen */
 .list-action-buttons{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}

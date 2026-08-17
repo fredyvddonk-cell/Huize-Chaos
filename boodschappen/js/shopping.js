@@ -83,8 +83,6 @@ function renderShopping(allProducts) {
     return;
   }
 
-  const urgent = arr.filter(x => x.status === 'Op' && x.buyDirectWhenOut);
-  const normal = arr.filter(x => !(x.status === 'Op' && x.buyDirectWhenOut));
   const stores = groups(arr, 'store');
   const chips = document.getElementById('storeChips');
   if (chips) {
@@ -92,8 +90,10 @@ function renderShopping(allProducts) {
       stores.map(([storeName, items]) => `<button class="store-chip ${shoppingStoreFilter === storeName ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('${encodeURIComponent(storeName)}')">${esc(storeName)} (${items.length})</button>`).join('');
   }
 
-  const row = (x, showLocation = false) => `
-    <div class="item shopping-item ${x.done ? 'done' : ''}">
+  const row = (x, showLocation = false) => {
+    const isUrgent = x.status === 'Op' && x.buyDirectWhenOut;
+    return `
+    <div class="item shopping-item ${x.done ? 'done' : ''} ${isUrgent ? 'urgent-item' : ''}">
       <input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done ? 'checked' : ''} onchange="markBought(${x.id}, this.checked)">
       <div class="main">
         <div class="name">${esc(x.name)}</div>
@@ -109,21 +109,32 @@ function renderShopping(allProducts) {
         </div>
       </details>
     </div>`;
+  };
 
   let html = '';
-  if (urgent.length) {
-    html += `<div class="urgent-block"><h2 class="section urgent-title">Direct nodig</h2>${urgent.sort(sortProducts).map(x => row(x, true)).join('')}</div>`;
+  let visibleItems = arr;
+  if (group === 'store' && shoppingStoreFilter !== 'all') {
+    visibleItems = arr.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
   }
-  if (normal.length) {
-    let visibleNormal = normal;
-    if (group === 'store' && shoppingStoreFilter !== 'all') {
-      visibleNormal = normal.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
-    }
-    if (visibleNormal.length) {
-      html += groups(visibleNormal, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
-    }
+  if (visibleItems.length) {
+    html = groups(visibleItems, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
   }
-  content.innerHTML = html;
+
+  const printable = arr.filter(x => !x.done);
+  const printHtml = groups(printable, 'category').map(([categoryName, items]) => `
+    <section class="print-category">
+      <h2>${esc(categoryName)}</h2>
+      ${[...items].sort(shoppingPrioritySort).map(x => {
+        const isUrgent = x.status === 'Op' && x.buyDirectWhenOut;
+        const details = [quantityText(x), x.memo].filter(Boolean).map(esc).join(' · ');
+        return `<div class="print-item ${isUrgent ? 'urgent-item' : ''}">
+          <span class="print-check" aria-hidden="true"></span>
+          <div><div class="print-name">${esc(x.name)}</div>${details ? `<div class="print-meta">${details}</div>` : ''}</div>
+        </div>`;
+      }).join('')}
+    </section>`).join('');
+
+  content.innerHTML = `<div class="screen-shopping">${html}</div><div class="print-shopping">${printHtml}</div>`;
 }
 
 
