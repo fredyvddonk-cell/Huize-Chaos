@@ -258,11 +258,12 @@ function render() {
   });
 
   $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : 'Beheer';
+  search.placeholder = page === 'list' ? 'Zoek boodschap...' : 'Zoek product...';
   document.body.classList.toggle('shopping-page', page === 'list');
-  document.body.classList.toggle('search-page', page === 'stock' || page === 'manage');
+  document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
 
-  const query = page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
+  const query = page === 'list' || page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
   const arr = products.filter(x =>
     x.name.toLowerCase().includes(query) &&
     ((page !== 'stock' && page !== 'manage') || !x.temporary)
@@ -412,7 +413,7 @@ function initApp() {
   document.querySelectorAll('.tab').forEach(button => {
     button.onclick = () => {
       page = button.dataset.page;
-      if (page !== 'stock' && page !== 'manage') {
+      if (page === 'hutsel') {
         search.value = '';
         updateSearchClear();
       }

@@ -1,6 +1,61 @@
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
 let shoppingStoreFilter = localStorage.getItem('household-shopping-store-filter') || 'all';
 
+
+function positionShoppingMenu(details) {
+  if (!details || !details.open) return;
+  const summary = details.querySelector('summary');
+  const popover = details.querySelector('.shopping-item-menu-popover');
+  if (!summary || !popover) return;
+
+  const anchor = summary.getBoundingClientRect();
+  popover.style.visibility = 'hidden';
+  popover.style.display = 'grid';
+  const menuRect = popover.getBoundingClientRect();
+  const margin = 8;
+
+  let top = anchor.top;
+  if (top + menuRect.height > window.innerHeight - margin) {
+    top = window.innerHeight - menuRect.height - margin;
+  }
+  top = Math.max(margin, top);
+
+  let left = anchor.right - menuRect.width;
+  left = Math.max(margin, Math.min(left, window.innerWidth - menuRect.width - margin));
+
+  popover.style.top = `${Math.round(top)}px`;
+  popover.style.left = `${Math.round(left)}px`;
+  popover.style.right = 'auto';
+  popover.style.visibility = 'visible';
+}
+
+document.addEventListener('toggle', event => {
+  const details = event.target.closest?.('.shopping-item-menu');
+  if (!details) return;
+  if (details.open) {
+    document.querySelectorAll('.shopping-item-menu[open]').forEach(other => {
+      if (other !== details) other.removeAttribute('open');
+    });
+    requestAnimationFrame(() => positionShoppingMenu(details));
+  }
+}, true);
+
+document.addEventListener('click', event => {
+  const active = event.target.closest('.shopping-item-menu');
+  document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => {
+    if (!active || menu !== active || event.target.closest('.shopping-item-menu-popover button')) {
+      menu.removeAttribute('open');
+    }
+  });
+});
+
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => menu.removeAttribute('open'));
+}, true);
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => positionShoppingMenu(menu));
+});
+
 function saveShoppingExpansion() {
   localStorage.setItem('household-expanded-shopping', JSON.stringify([...expandedShoppingGroups]));
 }

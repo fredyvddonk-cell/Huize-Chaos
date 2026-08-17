@@ -30,7 +30,7 @@
 .shopping-item-menu{position:relative;flex:0 0 auto}
 .shopping-item-menu>summary{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;color:#6738aa;cursor:pointer;font-size:22px;line-height:1;list-style:none}
 .shopping-item-menu>summary::-webkit-details-marker{display:none}
-.shopping-item-menu-popover{position:absolute;z-index:70;top:31px;right:0;display:grid;min-width:132px;padding:5px;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 8px 24px rgba(45,35,55,.18)}
+.shopping-item-menu-popover{position:fixed;z-index:70;top:0;left:0;right:auto;display:grid;min-width:132px;padding:5px;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 8px 24px rgba(45,35,55,.18)}
 .shopping-item-menu-popover button{border:0;border-radius:8px;padding:9px 10px;background:#fff;color:var(--text);text-align:left;font-size:13px}
 .shopping-item-menu-popover button:active{background:var(--lav3)}
 .shopping-item-menu-popover button.delete{color:#a22f43}
