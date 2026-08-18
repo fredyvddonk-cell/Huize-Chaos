@@ -1,7 +1,7 @@
 (() => {
 const CATS=['Vlees & vis','Maaltijden','Groente & fruit','Ontbijt & lunch','Dranken','Snacks & lekkers','Huishouden','Verzorging','Huisdieren','Overig'];
 const KEYWORDS={
-'Vlees & vis':['gehakt','kipfilet','kipdij','slavink','vlees','vis','kabeljauw','koolvis','zalm','worst','schnitzel','hamburger','biefstuk','spek','shoarma'],
+'Vlees & vis':['gehakt','kipfilet','kipdij','kipburger','kip ','kipshaslick','shaslick','dijlap','slavink','vlees','rund','vis','kabeljauw','koolvis','zalm','worst','braadworst','steak','schnitzel','hamburger','biefstuk','spek','shoarma'],
 'Groente & fruit':['paprika','tomaat','komkommer','sla','ui','wortel','appel','banaan','druif','kiwi','fruit','groente','avocado','courgette','prei','champignon','aardbei'],
 'Ontbijt & lunch':['brood','kaas','beleg','yoghurt','kwark','cruesli','muesli','havermout','melk','jam','hagelslag','smeerkaas','vleeswaar','beschuit','cracker'],
 'Dranken':['cola','fanta','sinas','sap','koffie','thee','drank','water','limonade','sprite','pepsi'],
@@ -40,7 +40,27 @@ function collectLines(){return [...document.querySelectorAll('.receipt-product-r
 function cleanText(text){return String(text||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()}
 function parseMoney(v){if(!v)return null;let s=String(v).replace(/\s/g,'').replace(/€/g,'').replace(/\.(?=\d{3}(?:\D|$))/g,'').replace(',','.');let n=Number(s);return Number.isFinite(n)?n:null}
 function detectStore(text){const t=text.toUpperCase();const stores=[['Albert Heijn',/ALBERT\s*HEIJN|\bAH\b/],['Jumbo',/\bJUMBO\b/],['Picnic',/\bPICNIC\b/],['Lidl',/\bLIDL\b/],['Aldi',/\bALDI\b/],['PLUS',/\bPLUS\b/],['Dirk',/\bDIRK\b/],['Kruidvat',/\bKRUIDVAT\b/],['Etos',/\bETOS\b/]];for(const [name,re] of stores)if(re.test(t))return name;return ''}
-function detectDate(text){const patterns=[/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/,/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/];for(let i=0;i<patterns.length;i++){const m=text.match(patterns[i]);if(!m)continue;let y,mo,d;if(i===0){d=+m[1];mo=+m[2];y=+m[3]}else{y=+m[1];mo=+m[2];d=+m[3]}if(y>=2020&&mo>=1&&mo<=12&&d>=1&&d<=31)return `${String(y).padStart(4,'0')}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}return ''}
+function detectDate(text){
+  const patterns=[/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/,/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/];
+  for(let i=0;i<patterns.length;i++){const m=text.match(patterns[i]);if(!m)continue;let y,mo,d;if(i===0){d=+m[1];mo=+m[2];y=+m[3]}else{y=+m[1];mo=+m[2];d=+m[3]}if(y>=2020&&mo>=1&&mo<=12&&d>=1&&d<=31)return `${String(y).padStart(4,'0')}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+  const months={januari:1,februari:2,maart:3,april:4,mei:5,juni:6,juli:7,augustus:8,september:9,oktober:10,november:11,december:12};
+  const word=text.match(/\b(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})\b/i);
+  if(word){const d=+word[1],mo=months[word[2].toLowerCase()],y=+word[3];if(d>=1&&d<=31)return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+  return ''
+}
+function moneyFromToken(token,{allowOcrDigits=false}={}){
+  let raw=String(token||'').trim().replace(/[€ ]/g,'').replace(/[Oo](?=\d)/g,'0');
+  if(!raw)return null;
+  if(/^-?\d{1,4}[,.]\d{2}$/.test(raw))return parseMoney(raw);
+  // OCR laat bij kassabonnen soms de komma weg: 275 -> 2,75 en 099 -> 0,99.
+  // Gebruik dit alleen voor het laatste prijsveld van een productregel.
+  if(allowOcrDigits&&/^-?\d{3,4}$/.test(raw)){
+    const neg=raw.startsWith('-'),digits=raw.replace('-','');
+    const n=Number(digits.slice(0,-2)+'.'+digits.slice(-2));
+    return Number.isFinite(n)?(neg?-n:n):null;
+  }
+  return null
+}
 function lineMoney(line){return [...String(line||'').matchAll(/-?\s*€?\s*\d{1,4}[,.]\d{2}/g)].map(m=>parseMoney(m[0])).filter(v=>v!==null)}
 function detectTotal(lines){
   // Kassabonnen bevatten veel bedragen. Kies alleen een bedrag dat expliciet bij
@@ -51,25 +71,49 @@ function detectTotal(lines){
   for(let i=lines.length-1;i>=0;i--){if(!/^totaal\b/i.test(lines[i])||/korting|btw/i.test(lines[i]))continue;const vals=lineMoney(lines[i]);if(vals.length)return vals[vals.length-1]}
   return null
 }
-function isReceiptNoise(line){return /^(?:producten?|jumbo extra'?s?|oud saldo|gespaard|ingewisseld|nieuw saldo|aantal|btw|bedrag excl|btw bedrag|btw totaal|subtotaal|totaal|te betalen|pin|betaald|contant|wisselgeld|transactie|kaart|terminal|bonnr|kassa|datum|tijd|klant|filiaal|bedankt|www\.|kvk|iban|bonus|koopzegel|zegels?|extra'?s? aanbieding)/i.test(line)}
+function isReceiptNoise(line){return /^(?:producten?|jumbo extra'?s?|oud saldo|gespaard|ingewisseld|nieuw saldo|aantal|btw|bedrag excl|btw bedrag|btw totaal|subtotaal|totaal|te betalen|pin|betaald|contant|wisselgeld|transactie|kaart|terminal|bonnr|kassa|datum|tijd|klant|filiaal|bedankt|www\.|kvk|iban|bonus|zegels?|extra'?s? aanbieding)/i.test(line)}
+function isQuantityLine(line){return /^\s*\d+(?:[,.]\d+)?\s*[xX]\s*\d+(?:[,.]\d{2}|\d{2})?(?:\s+€?\s*\d+(?:[,.]\d{2}|\d{2}))?\s*$/i.test(line)}
+function quantityLineTotal(line){
+  const compact=String(line||'').replace(/\s+/g,' ').trim();
+  const m=compact.match(/^\d+(?:[,.]\d+)?\s*[xX]\s*(\d+(?:[,.]\d{2}|\d{2})?)(?:\s+€?\s*(\d+(?:[,.]\d{2}|\d{2})))?$/i);
+  if(!m)return null;
+  if(m[2])return moneyFromToken(m[2],{allowOcrDigits:true});
+  const qty=Number(compact.match(/^\d+(?:[,.]\d+)?/)?.[0].replace(',','.'))||0;
+  const unit=moneyFromToken(m[1],{allowOcrDigits:true});
+  return qty&&unit!==null?+(qty*unit).toFixed(2):null
+}
+function splitProductAndPrice(line){
+  let s=String(line||'').replace(/\s{2,}/g,' ').trim();
+  // Normale prijs met komma/punt aan het eind.
+  let m=s.match(/^(.*?)(?:\s+€?\s*)(-?\d{1,4}[,.]\d{2})\s*[A-Z*]?$/i);
+  if(m){const name=m[1].trim(),price=moneyFromToken(m[2]);if(name&&price!==null)return{name,price}}
+  // OCR kan de komma in het laatste bedrag verliezen ("Jumbo Veg Braadworst 275").
+  // Alleen het LAATSTE token wordt dan als centenbedrag gelezen; getallen eerder in de naam blijven staan.
+  m=s.match(/^(.*\D)\s+(-?\d{3,4})$/);
+  if(m){const name=m[1].trim(),price=moneyFromToken(m[2],{allowOcrDigits:true});if(name&&price!==null)return{name,price}}
+  return null
+}
 function productLines(lines,total){
-  const out=[];let inProducts=false;
+  const out=[];let inProducts=false,pendingName='';const hasProductHeader=lines.some(x=>/^producten?$/i.test(x.trim()));
+  const push=(name,price)=>{name=String(name||'').replace(/\s{2,}/g,' ').trim();if(!name||price===null||price<0||price>500)return;if(/^\d+(?:[,.]\d+)?$/.test(name)||name.length<2||/^(?:€|eur)$/i.test(name))return;if(/^\d+\s*(?:g|gr|kg|ml|cl|l|st|stuks?)?$/i.test(name))return;out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});};
   for(let i=0;i<lines.length;i++){
-    let line=lines[i].trim();if(!line)continue;
-    if(/^producten?$/i.test(line)){inProducts=true;continue}
-    if(/totaal\s*\(\s*incl\.?\s*btw\s*\)/i.test(line)||/^jumbo extra'?s?/i.test(line)||/^btw[%\s]/i.test(line)){inProducts=false;continue}
-    if(!inProducts&&lines.some(x=>/^producten?$/i.test(x)))continue;
-    if(isReceiptNoise(line)||/actie\b|korting|aanbieding/i.test(line))continue;
-    // Hoeveelheidsregels zoals "2 x 5,00 10,00" horen bij het product erboven.
-    if(/^\d+(?:[,.]\d+)?\s*[xX]\s*\d+[,.]\d{2}/.test(line))continue;
-    let m=line.match(/^(.*?)(-?\s*€?\s*\d{1,4}[,.]\d{2})\s*(?:[A-Z*])?\s*$/i);
-    if(!m)continue;
-    let name=m[1].replace(/\s{2,}/g,' ').trim(),price=parseMoney(m[2]);
-    if(!name||price===null||price<0||price>500)continue;
-    if(/^\d+(?:[,.]\d+)?$/.test(name)||name.length<2||/^(?:€|eur)$/i.test(name))continue;
-    // Een regel die alleen een hoeveelheid/gewicht lijkt te zijn is geen product.
-    if(/^\d+\s*(?:g|gr|kg|ml|cl|l|st|stuks?)?$/i.test(name))continue;
-    out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});
+    const line=lines[i].trim();if(!line)continue;
+    if(/^producten?$/i.test(line)){inProducts=true;pendingName='';continue}
+    if(/totaal\s*\(\s*incl\.?\s*btw\s*\)/i.test(line)||/^jumbo extra'?s?/i.test(line)||/^btw[%\s]/i.test(line)){inProducts=false;pendingName='';continue}
+    if(!inProducts&&hasProductHeader)continue;
+    if(isReceiptNoise(line)){pendingName='';continue}
+    // Actie/kortingsregels zijn geen afzonderlijk gekocht product.
+    if(/actie\b|korting|aanbieding|kies\s*&?\s*mix/i.test(line)){continue}
+    if(isQuantityLine(line)){
+      // De hoeveelheid hoort bij de productnaam op de vorige regel.
+      if(pendingName){const price=quantityLineTotal(line);if(price!==null)push(pendingName,price);pendingName='';}
+      continue;
+    }
+    const parsed=splitProductAndPrice(line);
+    if(parsed){push(parsed.name,parsed.price);pendingName='';continue}
+    // Een tekstregel zonder bedrag kan de productnaam zijn. Bewaar hem totdat de volgende
+    // regel een hoeveelheid + regelbedrag bevat, bijvoorbeeld Houthakkersteak / 2 x 3,50 7,00.
+    if(/[A-Za-zÀ-ÿ]/.test(line)&&!/^[-€\d., xX]+$/.test(line))pendingName=line;
   }
   return out.slice(0,120)
 }
