@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=1.3.45">
+  <link rel="stylesheet" href="style.css?v=1.3.46">
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.45</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.46</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -169,20 +169,58 @@
     </form>
   </div>
 
-  <div id="receiptModal" class="modal" aria-hidden="true">
+  <div id="receiptModal" class="modal receipt-modal" aria-hidden="true">
     <form id="receiptForm" class="card receipt-card">
-      <h2>Bon toevoegen</h2>
+      <button type="button" id="receiptBack" class="receipt-back">‹ Terug naar Inzicht</button>
+      <h2 id="receiptTitle">Bon toevoegen</h2>
+      <p class="receipt-intro">Registreer een boodschappenbon. De gegevens worden alleen gebruikt voor inzicht.</p>
       <input type="hidden" id="receiptEditId">
-      <div class="field-row">
-        <div class="field"><label for="receiptStore">Winkel *</label><input id="receiptStore" required placeholder="Bijv. Jumbo"></div>
-        <div class="field"><label for="receiptDate">Datum *</label><input id="receiptDate" type="date" required></div>
-      </div>
-      <div class="field"><label for="receiptFile">Digitale bon of foto</label><input id="receiptFile" type="file" accept="image/*,.pdf,application/pdf"><small class="field-help">Het bestand wordt gebruikt als bron bij deze registratie. De gegevens kun je hieronder controleren en aanpassen.</small></div>
-      <div class="field"><label for="receiptTotal">Totaalbedrag</label><input id="receiptTotal" inputmode="decimal" placeholder="Bijv. 42,37"></div>
-      <div class="field"><label for="receiptLines">Producten</label><textarea id="receiptLines" rows="8" placeholder="Eén product per regel, bijvoorbeeld:
-Kipfilet | 8,49 | Vlees & vis
-Paprika | 1,29 | Groente & fruit"></textarea><small class="field-help">Formaat: product | bedrag | categorie. Een categorie mag leeg blijven en wordt dan zo goed mogelijk gekozen.</small></div>
-      <div class="modal-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button class="btn primary">Opslaan</button></div>
+
+      <div class="receipt-info"><span aria-hidden="true">i</span><p><strong>Deze registratie verandert niets aan je voorraad.</strong><br>Alleen voor inzicht in je uitgaven.</p></div>
+
+      <section class="receipt-step">
+        <h3>1. Winkel en datum</h3>
+        <div class="receipt-panel receipt-store-date">
+          <div class="field"><label for="receiptStore">Winkel *</label><input id="receiptStore" required placeholder="Bijv. Jumbo"></div>
+          <div class="field"><label for="receiptDate">Datum *</label><input id="receiptDate" type="date" required></div>
+        </div>
+      </section>
+
+      <section class="receipt-step">
+        <h3>2. Bon</h3>
+        <div class="receipt-panel">
+          <div class="receipt-source-grid" role="radiogroup" aria-label="Soort bon">
+            <button type="button" class="receipt-source active" data-source="digital" aria-pressed="true"><span class="source-radio"></span><span class="source-icon">▧</span><strong>Digitale bon (bestand)</strong><small>Kies een PDF, afbeelding of ander bonbestand op je apparaat.</small></button>
+            <button type="button" class="receipt-source" data-source="photo" aria-pressed="false"><span class="source-radio"></span><span class="source-icon">▣</span><strong>Foto van bon</strong><small>Maak een foto van je bon of kies uit je galerij.</small></button>
+          </div>
+          <div class="receipt-filebox">
+            <label>Bestand kiezen</label>
+            <div class="receipt-fileline"><label for="receiptFile" class="receipt-file-button">Bestand kiezen</label><span id="receiptFileName">Geen bestand gekozen</span></div>
+            <input id="receiptFile" class="receipt-file-input" type="file" accept="image/*,.pdf,application/pdf">
+            <small class="field-help">Het bestand wordt gebruikt als bron bij deze registratie. De gegevens kun je hieronder controleren en aanpassen.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="receipt-step">
+        <h3>3. Controleer en pas aan</h3>
+        <div class="receipt-panel receipt-review">
+          <div class="field"><label for="receiptTotal">Totaalbedrag *</label><div class="money-input"><span>€</span><input id="receiptTotal" inputmode="decimal" required placeholder="42,37"></div></div>
+          <div class="field"><label for="receiptNote">Opmerking <small>(optioneel)</small></label><input id="receiptNote" placeholder="Bijv. actiebon, zelfscan, opmerking voor later..."><small class="field-help">Alleen voor jezelf, niet zichtbaar in het overzicht.</small></div>
+        </div>
+      </section>
+
+      <section class="receipt-step">
+        <h3>4. Producten controleren</h3>
+        <p class="receipt-step-help">Controleer de producten. Pas aan indien nodig en kies per product de juiste categorie.</p>
+        <div class="receipt-products-wrap">
+          <div class="receipt-products-head" aria-hidden="true"><span>Product *</span><span>Bedrag *</span><span>Categorie</span><span>Acties</span></div>
+          <div id="receiptProductRows" class="receipt-product-rows"></div>
+        </div>
+        <button type="button" id="receiptAddLine" class="receipt-add-line">＋ Productregel toevoegen</button>
+      </section>
+
+      <div class="modal-actions receipt-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button class="btn primary">▣ Opslaan bon</button></div>
     </form>
   </div>
 
@@ -212,11 +250,11 @@ Paprika | 1,29 | Groente & fruit"></textarea><small class="field-help">Formaat: 
     </div>
   </div>
 
-  <script src="js/app.js?v=1.3.45"></script>
-  <script src="js/shopping.js?v=1.3.45"></script>
-  <script src="js/stock.js?v=1.3.45"></script>
-  <script src="js/hutsel.js?v=1.3.45"></script>
-  <script src="js/insight.js?v=1.3.45"></script>
-  <script type="module" src="js/firebase.js?v=1.3.45"></script>
+  <script src="js/app.js?v=1.3.46"></script>
+  <script src="js/shopping.js?v=1.3.46"></script>
+  <script src="js/stock.js?v=1.3.46"></script>
+  <script src="js/hutsel.js?v=1.3.46"></script>
+  <script src="js/insight.js?v=1.3.46"></script>
+  <script type="module" src="js/firebase.js?v=1.3.46"></script>
 </body>
 </html>
