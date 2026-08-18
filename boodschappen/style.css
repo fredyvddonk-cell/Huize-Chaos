@@ -351,7 +351,7 @@ body.insight-page #add::first-letter{font-size:0}
 .receipt-view-product>span{min-width:0}.receipt-view-product small{display:block;color:#817887;font-size:11px;margin-top:2px}
 @media(max-width:520px){.receipt-view-modal{padding:0;background:rgba(45,35,55,.35)}.receipt-view-card{margin:0;width:100%;min-height:100vh;border-radius:0 0 24px 24px;padding:16px 14px 20px}.receipt-view-card h2{font-size:24px}.receipt-view-meta{grid-template-columns:1fr}.receipt-view-product{padding:10px 0}}
 
-/* V1.3.52 - bonopties zichtbaar in Aankopen */
+/* V1.3.53 - bonopties zichtbaar in Aankopen */
 .receipt-row-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 42px;align-items:center;border-top:1px solid #eee8f1;background:#fff}
 .receipt-row-wrap:first-of-type{border-top:0}
 .receipt-row-wrap .receipt-row{border-top:0;padding-right:8px}

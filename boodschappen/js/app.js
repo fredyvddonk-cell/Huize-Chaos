@@ -278,6 +278,7 @@ function render() {
   else renderManage(arr);
 }
 
+window.setHuizeChaosPage = nextPage => { page = nextPage; localStorage.setItem('household-page', page); render(); };
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
