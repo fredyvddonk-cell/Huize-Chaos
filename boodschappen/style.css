@@ -317,3 +317,12 @@ body.insight-page #add::first-letter{font-size:0}
   .receipt-source{min-height:112px}
   .receipt-store-date{grid-template-columns:1fr}
 }
+
+/* V1.3.47 - automatische bonuitlezing */
+.receipt-read-status{margin-top:12px;padding:11px 12px;border-radius:12px;background:#f4f1f8;color:#4e4058;font-size:.9rem;line-height:1.35;border:1px solid #e2d9ea}
+.receipt-read-status.busy{display:flex;align-items:center;gap:9px}
+.receipt-read-status.busy::before{content:"";width:15px;height:15px;border:2px solid #c7b8d3;border-top-color:#765487;border-radius:50%;animation:hc-spin .8s linear infinite;flex:0 0 auto}
+.receipt-read-status.success{background:#f1f6f3;border-color:#d6e5db;color:#365443}
+.receipt-read-status.warning{background:#fbf7ef;border-color:#eadfc8;color:#6b5730}
+.receipt-read-status.error{background:#faf1f2;border-color:#ead2d6;color:#713d45}
+@keyframes hc-spin{to{transform:rotate(360deg)}}

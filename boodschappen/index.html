@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=1.3.46">
+  <link rel="stylesheet" href="style.css?v=1.3.47">
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.46</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.47</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -197,7 +197,8 @@
             <label>Bestand kiezen</label>
             <div class="receipt-fileline"><label for="receiptFile" class="receipt-file-button">Bestand kiezen</label><span id="receiptFileName">Geen bestand gekozen</span></div>
             <input id="receiptFile" class="receipt-file-input" type="file" accept="image/*,.pdf,application/pdf">
-            <small class="field-help">Het bestand wordt gebruikt als bron bij deze registratie. De gegevens kun je hieronder controleren en aanpassen.</small>
+            <small class="field-help">Na het kiezen wordt de bon automatisch uitgelezen. Controleer de gevonden gegevens hieronder.</small>
+            <div id="receiptReadStatus" class="receipt-read-status" role="status" aria-live="polite" hidden></div>
           </div>
         </div>
       </section>
@@ -220,7 +221,7 @@
         <button type="button" id="receiptAddLine" class="receipt-add-line">＋ Productregel toevoegen</button>
       </section>
 
-      <div class="modal-actions receipt-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button class="btn primary">▣ Opslaan bon</button></div>
+      <div class="modal-actions receipt-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button type="submit" class="btn primary">▣ Opslaan bon</button></div>
     </form>
   </div>
 
@@ -250,11 +251,13 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=1.3.46"></script>
-  <script src="js/shopping.js?v=1.3.46"></script>
-  <script src="js/stock.js?v=1.3.46"></script>
-  <script src="js/hutsel.js?v=1.3.46"></script>
-  <script src="js/insight.js?v=1.3.46"></script>
-  <script type="module" src="js/firebase.js?v=1.3.46"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="js/app.js?v=1.3.47"></script>
+  <script src="js/shopping.js?v=1.3.47"></script>
+  <script src="js/stock.js?v=1.3.47"></script>
+  <script src="js/hutsel.js?v=1.3.47"></script>
+  <script src="js/insight.js?v=1.3.47"></script>
+  <script type="module" src="js/firebase.js?v=1.3.47"></script>
 </body>
 </html>

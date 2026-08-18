@@ -1,3 +1,5 @@
+Versie 1.3.47 voegt echte bonuitlezing toe aan Boodschappen → Inzicht. Na het kiezen van een afbeelding/foto wordt OCR gestart; digitale PDF-bonnen worden eerst rechtstreeks op tekst uitgelezen en bij een scan zo nodig via OCR. Winkel, datum, totaalbedrag en herkende productregels worden automatisch ingevuld voor controle. Handmatig aanpassen blijft altijd mogelijk en de voorraad wordt niet gewijzigd.
+
 Versie 1.3.46 vernieuwt de indeling van Bon toevoegen in Boodschappen → Inzicht. De invoer is nu opgebouwd in vier duidelijke stappen: winkel en datum, soort bon, controle van totaal/opmerking en productregels met losse categorie-keuze. De werking blijft alleen voor inzicht en verandert de voorraad niet.
 
 Versie 1.3.46 voegt Boodschappen → Inzicht toe. Bonnen kunnen als digitale bon of foto worden geregistreerd, met winkel, datum, totaal en productregels. Uitgaven worden neutraal getoond per week/maand en verdeeld over 10 vaste inzichtcategorieën. Categorieën zijn handmatig aanpasbaar en voorraad wordt niet gewijzigd.
