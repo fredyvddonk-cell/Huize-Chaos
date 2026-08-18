@@ -326,3 +326,27 @@ body.insight-page #add::first-letter{font-size:0}
 .receipt-read-status.warning{background:#fbf7ef;border-color:#eadfc8;color:#6b5730}
 .receipt-read-status.error{background:#faf1f2;border-color:#ead2d6;color:#713d45}
 @keyframes hc-spin{to{transform:rotate(360deg)}}
+
+
+/* V1.3.50 - bon bekijken los van wijzigen */
+.receipt-view-modal{align-items:flex-start;padding:10px;overflow:auto}
+.receipt-view-card{width:min(100%,680px);max-width:680px;max-height:none;margin:8px auto 24px;border-radius:22px;padding:20px;overflow:visible}
+.receipt-view-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.receipt-view-menu-wrap{position:relative}
+.receipt-view-menu-button{width:40px;height:40px;border:1px solid #e2d9ea;border-radius:50%;background:#fff;color:#6032a9;font-size:25px;line-height:1;display:grid;place-items:center}
+.receipt-view-menu{position:absolute;right:0;top:45px;min-width:180px;background:#fff;border:1px solid #e6dfea;border-radius:12px;box-shadow:0 10px 30px rgba(45,30,55,.15);padding:5px;z-index:8}
+.receipt-view-menu button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:10px 11px;border-radius:8px;font:inherit;font-weight:700;color:#332d37}
+.receipt-view-menu button:hover{background:#f7f3fb}
+.receipt-view-menu .danger-text{color:#9a3347}
+.receipt-view-card h2{font-size:28px;line-height:1.12;margin:4px 0 14px}
+.receipt-view-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.receipt-view-meta>div,.receipt-view-note{border:1px solid #e6dfea;border-radius:14px;background:#fff;padding:13px}
+.receipt-view-meta small,.receipt-view-note small{display:block;color:#7b7280;font-size:11px;margin-bottom:3px}
+.receipt-view-meta strong{font-size:22px}.receipt-view-meta span{font-size:13px;word-break:break-word}
+.receipt-view-note{margin-bottom:12px}.receipt-view-note p{margin:2px 0 0}
+.receipt-view-products{border:1px solid #e6dfea;border-radius:14px;background:#fff;padding:13px}
+.receipt-view-products h3{margin:0 0 5px;color:#6737b4;font-size:16px}
+.receipt-view-product{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #eee9f0}
+.receipt-view-product:first-child{border-top:0}
+.receipt-view-product>span{min-width:0}.receipt-view-product small{display:block;color:#817887;font-size:11px;margin-top:2px}
+@media(max-width:520px){.receipt-view-modal{padding:0;background:rgba(45,35,55,.35)}.receipt-view-card{margin:0;width:100%;min-height:100vh;border-radius:0 0 24px 24px;padding:16px 14px 20px}.receipt-view-card h2{font-size:24px}.receipt-view-meta{grid-template-columns:1fr}.receipt-view-product{padding:10px 0}}
