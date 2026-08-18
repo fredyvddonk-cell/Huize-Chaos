@@ -257,11 +257,13 @@ function render() {
     button.classList.toggle('active', button.dataset.page === page);
   });
 
-  $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : 'Beheer';
+  $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : page === 'insight' ? 'Inzicht' : 'Beheer';
   search.placeholder = page === 'list' ? 'Zoek boodschap...' : 'Zoek product...';
   document.body.classList.toggle('shopping-page', page === 'list');
   document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
+  document.body.classList.toggle('insight-page', page === 'insight');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
+  $('#add').textContent = page === 'insight' ? '+ Bon toevoegen' : '+ Toevoegen';
 
   const query = page === 'list' || page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
   const arr = products.filter(x =>
@@ -272,6 +274,7 @@ function render() {
   if (page === 'list') renderShopping(arr);
   else if (page === 'stock') renderStock(arr);
   else if (page === 'hutsel') renderHutsel();
+  else if (page === 'insight') window.renderInsight ? window.renderInsight() : (content.innerHTML = '');
   else renderManage(arr);
 }
 
@@ -364,10 +367,8 @@ function initApp() {
   };
 
   $('#add').onclick = () => {
-    if (page === 'hutsel') {
-      openHutselModal();
-      return;
-    }
+    if (page === 'hutsel') { openHutselModal(); return; }
+    if (page === 'insight') { if (window.openReceiptModal) window.openReceiptModal(); return; }
     const prefillName = search.value.trim();
     openModal(null, prefillName);
   };

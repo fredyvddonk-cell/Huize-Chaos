@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
-  <link rel="stylesheet" href="style.css?v=1.3.43">
+  <link rel="stylesheet" href="style.css?v=1.3.45">
 </head>
 <body>
   <main class="app">
@@ -15,13 +15,14 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.43</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.45</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
       <button class="tab active" data-page="list">Lijst</button>
       <button class="tab" data-page="stock">Voorraad</button>
       <button class="tab" data-page="hutsel">Hutsel Frutsel</button>
+      <button class="tab" data-page="insight">Inzicht</button>
       <button class="tab" data-page="manage">Beheer</button>
     </nav>
     </header>
@@ -168,6 +169,23 @@
     </form>
   </div>
 
+  <div id="receiptModal" class="modal" aria-hidden="true">
+    <form id="receiptForm" class="card receipt-card">
+      <h2>Bon toevoegen</h2>
+      <input type="hidden" id="receiptEditId">
+      <div class="field-row">
+        <div class="field"><label for="receiptStore">Winkel *</label><input id="receiptStore" required placeholder="Bijv. Jumbo"></div>
+        <div class="field"><label for="receiptDate">Datum *</label><input id="receiptDate" type="date" required></div>
+      </div>
+      <div class="field"><label for="receiptFile">Digitale bon of foto</label><input id="receiptFile" type="file" accept="image/*,.pdf,application/pdf"><small class="field-help">Het bestand wordt gebruikt als bron bij deze registratie. De gegevens kun je hieronder controleren en aanpassen.</small></div>
+      <div class="field"><label for="receiptTotal">Totaalbedrag</label><input id="receiptTotal" inputmode="decimal" placeholder="Bijv. 42,37"></div>
+      <div class="field"><label for="receiptLines">Producten</label><textarea id="receiptLines" rows="8" placeholder="Eén product per regel, bijvoorbeeld:
+Kipfilet | 8,49 | Vlees & vis
+Paprika | 1,29 | Groente & fruit"></textarea><small class="field-help">Formaat: product | bedrag | categorie. Een categorie mag leeg blijven en wordt dan zo goed mogelijk gekozen.</small></div>
+      <div class="modal-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button class="btn primary">Opslaan</button></div>
+    </form>
+  </div>
+
   <div id="accountModal" class="modal account-modal" aria-hidden="true">
     <div class="card account-card" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
       <div class="account-icon" aria-hidden="true">👤</div>
@@ -194,10 +212,11 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=1.3.43"></script>
-  <script src="js/shopping.js?v=1.3.43"></script>
-  <script src="js/stock.js?v=1.3.43"></script>
-  <script src="js/hutsel.js?v=1.3.43"></script>
-  <script type="module" src="js/firebase.js?v=1.3.43"></script>
+  <script src="js/app.js?v=1.3.45"></script>
+  <script src="js/shopping.js?v=1.3.45"></script>
+  <script src="js/stock.js?v=1.3.45"></script>
+  <script src="js/hutsel.js?v=1.3.45"></script>
+  <script src="js/insight.js?v=1.3.45"></script>
+  <script type="module" src="js/firebase.js?v=1.3.45"></script>
 </body>
 </html>
