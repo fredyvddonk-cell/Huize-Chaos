@@ -41,8 +41,38 @@ function cleanText(text){return String(text||'').replace(/\r/g,'').replace(/[ \t
 function parseMoney(v){if(!v)return null;let s=String(v).replace(/\s/g,'').replace(/€/g,'').replace(/\.(?=\d{3}(?:\D|$))/g,'').replace(',','.');let n=Number(s);return Number.isFinite(n)?n:null}
 function detectStore(text){const t=text.toUpperCase();const stores=[['Albert Heijn',/ALBERT\s*HEIJN|\bAH\b/],['Jumbo',/\bJUMBO\b/],['Picnic',/\bPICNIC\b/],['Lidl',/\bLIDL\b/],['Aldi',/\bALDI\b/],['PLUS',/\bPLUS\b/],['Dirk',/\bDIRK\b/],['Kruidvat',/\bKRUIDVAT\b/],['Etos',/\bETOS\b/]];for(const [name,re] of stores)if(re.test(t))return name;return ''}
 function detectDate(text){const patterns=[/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/,/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/];for(let i=0;i<patterns.length;i++){const m=text.match(patterns[i]);if(!m)continue;let y,mo,d;if(i===0){d=+m[1];mo=+m[2];y=+m[3]}else{y=+m[1];mo=+m[2];d=+m[3]}if(y>=2020&&mo>=1&&mo<=12&&d>=1&&d<=31)return `${String(y).padStart(4,'0')}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}return ''}
-function detectTotal(lines){const priorities=[/te\s*betalen/i,/totaal\s*(?:eur|€)?/i,/grand\s*total/i,/total/i];for(const re of priorities){for(let i=lines.length-1;i>=0;i--){const line=lines[i];if(!re.test(line)||/subtotaal/i.test(line))continue;const vals=[...line.matchAll(/-?\d{1,4}[,.]\d{2}/g)].map(m=>parseMoney(m[0])).filter(v=>v!==null);if(vals.length)return vals[vals.length-1];if(i+1<lines.length){const n=parseMoney((lines[i+1].match(/-?\d{1,4}[,.]\d{2}/)||[])[0]);if(n!==null)return n}}}return null}
-function productLines(lines,total){const skip=/^(?:btw|subtotaal|totaal|te betalen|pin|betaald|contant|wisselgeld|transactie|kaart|terminal|bonnr|kassa|datum|tijd|klant|filiaal|bedankt|www\.|kvk|iban|bonus|koopzegel|zegels?)/i;const out=[];for(let i=0;i<lines.length;i++){let line=lines[i].trim();if(!line||skip.test(line))continue;let m=line.match(/^(.*?)(-?\s*\d{1,4}[,.]\d{2})\s*(?:[A-Z*])?\s*$/i);if(!m)continue;let name=m[1].replace(/\s{2,}/g,' ').replace(/^\d+\s*[xX]\s*/,'').trim();let price=parseMoney(m[2]);if(!name||price===null||Math.abs(price)>1000)continue;if(/^(?:€|eur)$/i.test(name))continue;if(name.length<2&&i>0)name=lines[i-1].trim();if(/korting|bonus|discount/i.test(name)&&price>0)price=-price;out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});}if(total!==null&&out.length){const sum=out.reduce((a,l)=>a+l.price,0),diff=+(total-sum).toFixed(2);if(Math.abs(diff)>=0.01&&Math.abs(diff)<=20)out.push({name:'Overig / verschil bon',price:diff,category:'Overig'});}return out.slice(0,120)}
+function lineMoney(line){return [...String(line||'').matchAll(/-?\s*€?\s*\d{1,4}[,.]\d{2}/g)].map(m=>parseMoney(m[0])).filter(v=>v!==null)}
+function detectTotal(lines){
+  // Kassabonnen bevatten veel bedragen. Kies alleen een bedrag dat expliciet bij
+  // het eindtotaal hoort; liever leeg dan een willekeurige productprijs.
+  const strong=[/totaal\s*\(\s*incl\.?\s*btw\s*\)/i,/eind\s*totaal/i,/te\s*betalen/i,/totaal\s*bedrag/i,/grand\s*total/i];
+  for(const re of strong){for(let i=lines.length-1;i>=0;i--){const line=lines[i];if(!re.test(line)||/korting|subtotaal|btw\s*totaal/i.test(line))continue;const vals=lineMoney(line);if(vals.length)return vals[vals.length-1];if(i+1<lines.length){const next=lineMoney(lines[i+1]);if(next.length)return next[next.length-1]}}}
+  // Alleen een kale "Totaal"-regel als tweede keus, nooit "Totaal korting".
+  for(let i=lines.length-1;i>=0;i--){if(!/^totaal\b/i.test(lines[i])||/korting|btw/i.test(lines[i]))continue;const vals=lineMoney(lines[i]);if(vals.length)return vals[vals.length-1]}
+  return null
+}
+function isReceiptNoise(line){return /^(?:producten?|jumbo extra'?s?|oud saldo|gespaard|ingewisseld|nieuw saldo|aantal|btw|bedrag excl|btw bedrag|btw totaal|subtotaal|totaal|te betalen|pin|betaald|contant|wisselgeld|transactie|kaart|terminal|bonnr|kassa|datum|tijd|klant|filiaal|bedankt|www\.|kvk|iban|bonus|koopzegel|zegels?|extra'?s? aanbieding)/i.test(line)}
+function productLines(lines,total){
+  const out=[];let inProducts=false;
+  for(let i=0;i<lines.length;i++){
+    let line=lines[i].trim();if(!line)continue;
+    if(/^producten?$/i.test(line)){inProducts=true;continue}
+    if(/totaal\s*\(\s*incl\.?\s*btw\s*\)/i.test(line)||/^jumbo extra'?s?/i.test(line)||/^btw[%\s]/i.test(line)){inProducts=false;continue}
+    if(!inProducts&&lines.some(x=>/^producten?$/i.test(x)))continue;
+    if(isReceiptNoise(line)||/actie\b|korting|aanbieding/i.test(line))continue;
+    // Hoeveelheidsregels zoals "2 x 5,00 10,00" horen bij het product erboven.
+    if(/^\d+(?:[,.]\d+)?\s*[xX]\s*\d+[,.]\d{2}/.test(line))continue;
+    let m=line.match(/^(.*?)(-?\s*€?\s*\d{1,4}[,.]\d{2})\s*(?:[A-Z*])?\s*$/i);
+    if(!m)continue;
+    let name=m[1].replace(/\s{2,}/g,' ').trim(),price=parseMoney(m[2]);
+    if(!name||price===null||price<0||price>500)continue;
+    if(/^\d+(?:[,.]\d+)?$/.test(name)||name.length<2||/^(?:€|eur)$/i.test(name))continue;
+    // Een regel die alleen een hoeveelheid/gewicht lijkt te zijn is geen product.
+    if(/^\d+\s*(?:g|gr|kg|ml|cl|l|st|stuks?)?$/i.test(name))continue;
+    out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});
+  }
+  return out.slice(0,120)
+}
 function parseReceiptText(text){const cleaned=cleanText(text);const lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);const total=detectTotal(lines);return{store:detectStore(cleaned),date:detectDate(cleaned),total,lines:productLines(lines,total),raw:cleaned}}
 async function ocrImage(input,onProgress){if(!window.Tesseract)throw new Error('OCR-module kon niet worden geladen. Controleer je internetverbinding.');const result=await window.Tesseract.recognize(input,'nld+eng',{logger:m=>{if(m.status==='recognizing text'&&onProgress)onProgress(Math.round((m.progress||0)*100))}});return result?.data?.text||''}
 function pdfItemsToLines(items){const rows=[];for(const item of items){const y=Math.round(item.transform?.[5]||0);let row=rows.find(r=>Math.abs(r.y-y)<=2);if(!row){row={y,items:[]};rows.push(row)}row.items.push({x:item.transform?.[4]||0,text:item.str||''})}return rows.sort((a,b)=>b.y-a.y).map(r=>r.items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n')}
