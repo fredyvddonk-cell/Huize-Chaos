@@ -1,1 +1,1 @@
-Versie 1.3.62 herstelt de volledige boninleesketen naar de stabiele parserbasis van V1.3.57, met behoud van de Inzicht-synchronisatie en zonder de bonviewer tijdens productcontrole.
+Versie 1.3.63 herstelt de boninleescode rechtstreeks vanuit de bekende werkende V1.3.56-parser. De latere Inzicht-synchronisatie en aangeleerde productcategorieën blijven behouden.
