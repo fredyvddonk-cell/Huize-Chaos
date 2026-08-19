@@ -191,29 +191,6 @@ function picnicPricesInRegion(items,highY,lowY){
   return picnicMoneyCandidates(region)
 }
 function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<400).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/(?:^|\s)(?:30%\s*korting|bundelbonus|korting|gratis)(?:\s|$)/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)(?:\s*[•·-]\s*\d+\s*x\s*\d+(?:[,.]\d+)?\s*(?:gram|g|kg|ml|cl|l|stuk|stuks)?)?$/i.test(text))return'';return text}
-function parsePicnicAdaptive(pageItems){
-  const out=[];
-  for(const items of pageItems){
-    const rows=groupPdfItems(items,5);
-    for(const r of rows){
-      const txt=r.text.replace(/\s+/g,' ').trim();
-      if(!/^\d{1,2}\s+/.test(txt))continue;
-      if(/\b(?:subtotaal|totaal|koopzegels|statiegeld|voordeel|picnic-tegoed)\b/i.test(txt))continue;
-      const qty=txt.match(/^(\d{1,2})\s+/)?.[1];
-      if(!qty)continue;
-      const prices=picnicMoneyCandidates(r.items);
-      let price=prices.length?[...prices].sort((a,b)=>b.value-a.value)[0].value:null;
-      let name=txt.replace(/^\d{1,2}\s+/,'').replace(/(?:€\s*)?[+-]?\d{1,4}[,.]\d{2}(?:\s+[A-Z])?\s*$/i,'').trim();
-      if(price===null){
-        const idx=rows.indexOf(r),below=rows.slice(idx+1,Math.min(rows.length,idx+4));
-        for(const br of below){const ps=picnicMoneyCandidates(br.items);if(ps.length){price=ps[0].value;break}}
-      }
-      name=name.replace(/\s+(?:gratis|bundelbonus|\d+%\s*korting|korting)$/i,'').trim();
-      if(name&&/\p{L}/u.test(name)&&price!==null&&price>=0&&price<500)out.push({name:`${qty} ${name}`,price:+price.toFixed(2),category:catFor(name)});
-    }
-  }
-  return out;
-}
 function isPicnicPdfText(text){return /\bpicnic\b/i.test(text)&&(/je\s*bonnetje/i.test(text)||/service\.picnic\.nl/i.test(text)||/picnic-tegoed/i.test(text))}
 function parsePicnicPdfPages(pageItems,rawText){
   const parsed=[];
@@ -225,9 +202,7 @@ function parsePicnicPdfPages(pageItems,rawText){
     const stopY=stop?stop.y+1:-Infinity;
     for(let i=0;i<badgeRows.length;i++){
       const startRow=badgeRows[i],nextY=i+1<badgeRows.length?badgeRows[i+1].y:stopY;
-      // Picnic zet het aantal vaak 8-12 PDF-punten lager dan de eerste regel van de productnaam.
-      // Een marge van 18 punten houdt de volledige (ook meerregelige) naam in hetzelfde productblok.
-      const blockRows=rows.filter(r=>r.y<=startRow.y+18&&r.y>Math.max(nextY+3,stopY));
+      const blockRows=rows.filter(r=>r.y<=startRow.y+6&&r.y>Math.max(nextY+3,stopY));
       const nameParts=[];
       for(const r of blockRows){
         const center=r.items.filter(it=>it.x>=195&&it.x<400).map(it=>it.text).join(' ').replace(/\s+/g,' ').trim();
@@ -254,7 +229,6 @@ function parsePicnicPdfPages(pageItems,rawText){
     const candidates=picnicPricesInRegion(items,totalRow.y+10,totalRow.y-12);
     if(candidates.length){const nearest=[...candidates].sort((a,b)=>Math.abs(a.y-totalRow.y)-Math.abs(b.y-totalRow.y))[0];total=nearest.value;break}
   }
-  if(!parsed.length){parsed.push(...parsePicnicAdaptive(pageItems))}
   const oneLine=rawText.replace(/\s+/g,' ');
   const delivery=oneLine.match(/bezorging\s+van\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
   let date='';
