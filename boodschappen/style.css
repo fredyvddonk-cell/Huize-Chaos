@@ -368,11 +368,4 @@ body.insight-page #add::first-letter{font-size:0}
 /* V1.3.58 - Inzicht synchronisatie via Firebase; geen visuele wijzigingen */
 
 
-/* V1.3.59 - bon bekijken tijdens controle + robuustere Picnic PDF parser */
-.receipt-preview-button{border:1px solid #8b62c5;background:#f7f1fb;color:#6535ad;border-radius:12px;padding:10px 16px;font-weight:700;margin:0 0 12px}
-.receipt-preview{border:1px solid #e1d9e8;border-radius:14px;background:#fff;overflow:hidden;margin:0 0 14px}
-.receipt-preview-top{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #eee8f1}
-.receipt-preview-top button{border:0;background:transparent;color:#6535ad;font-weight:700}
-.receipt-preview iframe{display:block;width:100%;height:58vh;border:0;background:#f5f5f5}
-.receipt-preview img{display:block;max-width:100%;max-height:65vh;margin:auto;object-fit:contain}
-@media(min-width:900px){.receipt-card:has(.receipt-preview:not([hidden])){max-width:1180px}.receipt-step:has(#receiptPreview:not([hidden])) .receipt-products-wrap{width:56%;display:inline-block;vertical-align:top}.receipt-preview:not([hidden]){width:42%;display:inline-block;vertical-align:top;position:sticky;top:10px;margin-right:1%}.receipt-preview iframe{height:70vh}}
+/* V1.3.60 - robuustere Picnic PDF parser */

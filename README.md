@@ -1,1 +1,1 @@
-Versie 1.3.59 maakt de originele bon tijdens het controleren direct beschikbaar en herstelt de Picnic PDF-productherkenning op mobiel en desktop. Meerregelige productnamen worden binnen hetzelfde productblok meegenomen. De bestaande Inzicht-synchronisatie van V1.3.58 blijft behouden.
+Versie 1.3.60 verwijdert de bonviewer tijdens Producten controleren. De productcontrole gebruikt weer de normale volledige layout. De Picnic PDF-productherkenning uit V1.3.59 en de bestaande Inzicht-synchronisatie blijven behouden.
