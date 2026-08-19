@@ -17,6 +17,7 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 const HOUSEHOLD_ID = 'huize-chaos';
 const itemsRef = collection(db, 'households', HOUSEHOLD_ID, 'shoppingItems');
+const insightRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'shared');
 
 let role = '';
 let user = null;
@@ -27,6 +28,10 @@ let syncTimer = 0;
 let remoteItems = new Map();
 let stopItems = null;
 let serverRefreshTimer = 0;
+let stopInsight = null;
+let insightCloudReady = false;
+let applyingInsightCloud = false;
+let insightSyncTimer = 0;
 
 const gate = document.getElementById('authGate');
 const message = document.getElementById('authMessage');
@@ -229,6 +234,51 @@ function scheduleSync() {
   }), 250);
 }
 
+
+function hasMeaningfulInsightData(data) {
+  return Boolean((data?.receipts?.length) || Number(data?.budgetWeek) || Number(data?.budgetMonth) || Object.keys(data?.categoryMemory || {}).length);
+}
+
+async function syncInsightNow() {
+  if (!user || !role || !insightCloudReady || applyingInsightCloud || !window.getHuizeChaosInsightData) return;
+  const data = window.getHuizeChaosInsightData();
+  await setDoc(insightRef, { ...data, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: false });
+}
+
+function scheduleInsightSync() {
+  if (!insightCloudReady || applyingInsightCloud) return;
+  clearTimeout(insightSyncTimer);
+  insightSyncTimer = setTimeout(() => syncInsightNow().catch(error => {
+    console.error('Synchronisatie Inzicht mislukt', error);
+    setSyncStatus('Syncfout', 'error');
+  }), 300);
+}
+
+async function startInsightSync() {
+  stopInsight?.();
+  insightCloudReady = false;
+  const first = await getDoc(insightRef);
+  const local = window.getHuizeChaosInsightData?.() || {};
+  if (first.exists()) {
+    applyingInsightCloud = true;
+    window.applyHuizeChaosInsightData?.(first.data());
+    applyingInsightCloud = false;
+  } else if (hasMeaningfulInsightData(local)) {
+    // Veilige eerste migratie: alleen een toestel met bestaande Inzicht-data mag
+    // de nog lege cloud vullen. Een lege laptop kan de telefoon dus niet wissen.
+    await setDoc(insightRef, { ...local, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: false });
+  }
+  insightCloudReady = true;
+  stopInsight = onSnapshot(insightRef, snapshot => {
+    if (!snapshot.exists()) return;
+    applyingInsightCloud = true;
+    window.applyHuizeChaosInsightData?.(snapshot.data());
+    applyingInsightCloud = false;
+  }, error => console.error('Inzicht live synchronisatie mislukt', error));
+}
+
+window.addEventListener('huize-chaos-insight-changed', scheduleInsightSync);
+
 window.scheduleCloudSync = scheduleSync;
 window.addEventListener('huize-chaos-products-changed', scheduleSync);
 
@@ -250,6 +300,7 @@ async function openFor(currentUser) {
     setSyncStatus('Geen verbinding', 'error');
   });
   startServerRefresh();
+  await startInsightSync();
   refreshItemsFromServer().catch(error => {
     console.error(error);
     setSyncStatus('Geen verbinding', 'error');
@@ -316,6 +367,9 @@ onAuthStateChanged(auth, currentUser => {
   cloudReady = false;
   stopItems?.();
   stopItems = null;
+  stopInsight?.();
+  stopInsight = null;
+  insightCloudReady = false;
   clearInterval(serverRefreshTimer);
   if (!currentUser) {
     role = '';

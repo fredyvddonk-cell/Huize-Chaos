@@ -22,6 +22,10 @@ service cloud.firestore {
       allow write: if isOwner();
     }
 
+    match /households/huize-chaos/insight/{documentId} {
+      allow read, write: if isMember();
+    }
+
     match /households/huize-chaos/shoppingItems/{itemId} {
       allow read: if isMember();
       allow create: if isOwner() || (isMember()
