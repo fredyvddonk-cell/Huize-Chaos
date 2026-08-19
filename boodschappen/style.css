@@ -363,4 +363,4 @@ body.insight-page #add::first-letter{font-size:0}
 .receipt-row-menu button{display:block;width:100%;border:0;background:#fff;text-align:left;padding:10px 12px;border-radius:8px;font:inherit;font-size:13px}
 .receipt-row-menu button:active{background:#f5f1f8}
 
-/* V1.3.54 - Picnic PDF-uitlezing; geen visuele wijzigingen */
+/* V1.3.55 - Picnic PDF-uitlezing en lege bonvelden; geen visuele wijzigingen */
