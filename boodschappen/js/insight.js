@@ -1,9 +1,10 @@
 (() => {
 const CATS=['Vlees & vis','Maaltijden','Groente & fruit','Ontbijt & lunch','Dranken','Snacks & lekkers','Huishouden','Verzorging','Huisdieren','Overig'];
 const KEYWORDS={
-'Vlees & vis':['gehakt','kipfilet','kipdij','kipburger','kip ','kipshaslick','shaslick','dijlap','slavink','vlees','rund','vis','kabeljauw','koolvis','zalm','worst','braadworst','steak','schnitzel','hamburger','biefstuk','spek','shoarma'],
-'Groente & fruit':['paprika','tomaat','komkommer','sla','ui','wortel','appel','banaan','druif','kiwi','fruit','groente','avocado','courgette','prei','champignon','aardbei'],
+'Vlees & vis':['gehakt','gehaktbal','gehaktballet','kipfilet','kipdij','kipburger','kip ','kipshaslick','shaslick','dijlap','slavink','vlees','rund','vis','kabeljauw','koolvis','zalm','worst','braadworst','steak','schnitzel','hamburger','biefstuk','spek','shoarma'],
+'Groente & fruit':['snijboon','snijbonen','tomatenblok','peterselie','broccoli','ijsbergsla','paprika','tomaat','komkommer','sla','gele ui','uien','ui','knoflook','wortel','appelmoes','appel','banaan','druif','kiwi','fruit','groente','avocado','courgette','prei','champignon','aardbei'],
 'Ontbijt & lunch':['brood','kaas','beleg','yoghurt','kwark','cruesli','muesli','havermout','melk','jam','hagelslag','smeerkaas','vleeswaar','beschuit','cracker'],
+'Maaltijden':['gele rijst','rijst','aardappelschijf','bami & nasi','bami','nasi','eiermie','mie','boemboe','gebakken uitjes','spaghetti','pasta'],
 'Dranken':['cola','fanta','sinas','sap','koffie','thee','drank','water','limonade','sprite','pepsi','wijn'],
 'Snacks & lekkers':['chips','snoep','koek','chocolade','ijs','snack','toast','drop','winegum','borrel'],
 'Huishouden':['wasmiddel','wasverzachter','vaatwas','afwas','wc papier','toiletpapier','keukenrol','vuilniszak','schoonmaak','allesreiniger'],
@@ -152,7 +153,7 @@ function picnicPricesInRegion(items,highY,lowY){
   const region=(items||[]).map(i=>({x:Number(i.transform?.[4]??i.x??0),y:Number(i.transform?.[5]??i.y??0),text:String(i.str??i.text??'')})).filter(i=>i.x>=400&&i.y<=highY&&i.y>=lowY);
   return picnicMoneyCandidates(region)
 }
-function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<400).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)$/i.test(text))return'';return text}
+function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<400).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/(?:^|\s)(?:30%\s*korting|bundelbonus|korting|gratis)(?:\s|$)/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)(?:\s*[•·-]\s*\d+\s*x\s*\d+(?:[,.]\d+)?\s*(?:gram|g|kg|ml|cl|l|stuk|stuks)?)?$/i.test(text))return'';return text}
 function isPicnicPdfText(text){return /\bpicnic\b/i.test(text)&&(/je\s*bonnetje/i.test(text)||/service\.picnic\.nl/i.test(text)||/picnic-tegoed/i.test(text))}
 function parsePicnicPdfPages(pageItems,rawText){
   const productRows=[],pageStops={};
