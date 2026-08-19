@@ -14,6 +14,7 @@ let mode=localStorage.getItem('hc-insight-mode')||'month';
 let offset=Number(localStorage.getItem('hc-insight-offset')||0);
 let receiptSource='digital';
 let readingReceipt=false;
+let receiptPreviewUrl='';
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const receipts=()=>JSON.parse(localStorage.getItem('hc-receipts-v1')||'[]');
 const notifyInsightChanged=()=>window.dispatchEvent(new CustomEvent('huize-chaos-insight-changed'));
@@ -50,8 +51,8 @@ function deleteReceipt(id){const targetId=String(id||'');const r=receiptById(tar
 function editReceipt(id){const targetId=String(id||'');const r=receiptById(targetId);if(!r)return;closeReceiptView();openModal(r)}
 function handleReceiptViewAction(action){const modal=document.querySelector('#receiptViewModal');const id=modal?.dataset.id||'';if(!id)return;if(action==='edit')editReceipt(id);if(action==='delete')deleteReceipt(id)}
 function isDuplicateReceipt(candidate,all,ignoreId=''){return all.find(r=>String(r.id)!==String(ignoreId)&&String(r.store||'').trim().toLowerCase()===String(candidate.store||'').trim().toLowerCase()&&r.date===candidate.date&&Math.abs((+r.total||0)-(+candidate.total||0))<0.005)}
-function openModal(r){const m=document.querySelector('#receiptModal');document.querySelector('#receiptTitle').textContent=r?'Bon aanpassen':'Bon toevoegen';document.querySelector('#receiptEditId').value=r?.id||'';document.querySelector('#receiptStore').value=r?.store||'';document.querySelector('#receiptDate').value=r?.date||new Date().toISOString().slice(0,10);document.querySelector('#receiptTotal').value=r?String(r.total).replace('.',','):'';document.querySelector('#receiptNote').value=r?.note||'';document.querySelector('#receiptFile').value='';m.dataset.fileName=r?.fileName||'';document.querySelector('#receiptFileName').textContent=r?.fileName||'Geen bestand gekozen';setReadStatus('');const rows=document.querySelector('#receiptProductRows');rows.innerHTML='';(r?.lines?.length?r.lines:[{}]).forEach(addProductRow);setSource(r?.source||'digital');m.classList.add('open');m.setAttribute('aria-hidden','false')}
-function close(){if(readingReceipt)return;let m=document.querySelector('#receiptModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}
+function openModal(r){clearReceiptPreview();const m=document.querySelector('#receiptModal');document.querySelector('#receiptTitle').textContent=r?'Bon aanpassen':'Bon toevoegen';document.querySelector('#receiptEditId').value=r?.id||'';document.querySelector('#receiptStore').value=r?.store||'';document.querySelector('#receiptDate').value=r?.date||new Date().toISOString().slice(0,10);document.querySelector('#receiptTotal').value=r?String(r.total).replace('.',','):'';document.querySelector('#receiptNote').value=r?.note||'';document.querySelector('#receiptFile').value='';m.dataset.fileName=r?.fileName||'';document.querySelector('#receiptFileName').textContent=r?.fileName||'Geen bestand gekozen';setReadStatus('');const rows=document.querySelector('#receiptProductRows');rows.innerHTML='';(r?.lines?.length?r.lines:[{}]).forEach(addProductRow);setSource(r?.source||'digital');m.classList.add('open');m.setAttribute('aria-hidden','false')}
+function close(){if(readingReceipt)return;clearReceiptPreview();let m=document.querySelector('#receiptModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}
 function collectLines(){return [...document.querySelectorAll('.receipt-product-row')].map(row=>{const name=row.querySelector('.receipt-line-name').value.trim(),price=parseFloat(row.querySelector('.receipt-line-price').value.replace(',','.'))||0,select=row.querySelector('.receipt-line-cat'),category=select.value||catFor(name);if(select.dataset.touched==='1')rememberCategory(name,category);return{name,price,category}}).filter(l=>l.name)}
 
 function cleanText(text){return String(text||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim()}
@@ -164,6 +165,9 @@ function parseAhReceiptText(cleaned){
 }
 function parseReceiptText(text){const cleaned=cleanText(text);if(isAhReceiptText(cleaned))return parseAhReceiptText(cleaned);const lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);const total=detectTotal(lines);return{store:detectStore(cleaned),date:detectDate(cleaned),total,lines:productLines(lines,total),raw:cleaned}}
 async function ocrImage(input,onProgress){if(!window.Tesseract)throw new Error('OCR-module kon niet worden geladen. Controleer je internetverbinding.');const result=await window.Tesseract.recognize(input,'nld+eng',{logger:m=>{if(m.status==='recognizing text'&&onProgress)onProgress(Math.round((m.progress||0)*100))}});return result?.data?.text||''}
+function clearReceiptPreview(){if(receiptPreviewUrl){URL.revokeObjectURL(receiptPreviewUrl);receiptPreviewUrl=''}const box=document.querySelector('#receiptPreview'),btn=document.querySelector('#receiptPreviewButton'),frame=document.querySelector('#receiptPreviewFrame'),img=document.querySelector('#receiptPreviewImage');if(box)box.hidden=true;if(btn)btn.hidden=true;if(frame)frame.removeAttribute('src');if(img){img.removeAttribute('src');img.hidden=true}}
+function setReceiptPreview(file){clearReceiptPreview();if(!file)return;receiptPreviewUrl=URL.createObjectURL(file);const btn=document.querySelector('#receiptPreviewButton');if(btn)btn.hidden=false;const frame=document.querySelector('#receiptPreviewFrame'),img=document.querySelector('#receiptPreviewImage');if(file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp)$/i.test(file.name)){if(img){img.src=receiptPreviewUrl;img.hidden=false}if(frame)frame.removeAttribute('src')}else{if(frame)frame.src=receiptPreviewUrl;if(img)img.hidden=true}}
+function toggleReceiptPreview(show){const box=document.querySelector('#receiptPreview');if(box)box.hidden=show===undefined?!box.hidden:!show}
 function pdfItemsToLines(items){const rows=[];for(const item of items){const y=Math.round(item.transform?.[5]||0);let row=rows.find(r=>Math.abs(r.y-y)<=2);if(!row){row={y,items:[]};rows.push(row)}row.items.push({x:item.transform?.[4]||0,text:item.str||''})}return rows.sort((a,b)=>b.y-a.y).map(r=>r.items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n')}
 function groupPdfItems(items,tolerance=3){const rows=[];for(const item of items){const text=String(item.str||'').trim();if(!text)continue;const x=Number(item.transform?.[4]||0),y=Number(item.transform?.[5]||0);let row=rows.find(r=>Math.abs(r.y-y)<=tolerance);if(!row){row={y,items:[]};rows.push(row)}row.items.push({x,y,text})}return rows.sort((a,b)=>b.y-a.y).map(r=>({...r,items:r.items.sort((a,b)=>a.x-b.x),text:r.items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim()}))}
 function picnicPriceFromRow(row){
@@ -191,6 +195,29 @@ function picnicPricesInRegion(items,highY,lowY){
   return picnicMoneyCandidates(region)
 }
 function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<400).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/(?:^|\s)(?:30%\s*korting|bundelbonus|korting|gratis)(?:\s|$)/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)(?:\s*[•·-]\s*\d+\s*x\s*\d+(?:[,.]\d+)?\s*(?:gram|g|kg|ml|cl|l|stuk|stuks)?)?$/i.test(text))return'';return text}
+function parsePicnicAdaptive(pageItems){
+  const out=[];
+  for(const items of pageItems){
+    const rows=groupPdfItems(items,5);
+    for(const r of rows){
+      const txt=r.text.replace(/\s+/g,' ').trim();
+      if(!/^\d{1,2}\s+/.test(txt))continue;
+      if(/\b(?:subtotaal|totaal|koopzegels|statiegeld|voordeel|picnic-tegoed)\b/i.test(txt))continue;
+      const qty=txt.match(/^(\d{1,2})\s+/)?.[1];
+      if(!qty)continue;
+      const prices=picnicMoneyCandidates(r.items);
+      let price=prices.length?[...prices].sort((a,b)=>b.value-a.value)[0].value:null;
+      let name=txt.replace(/^\d{1,2}\s+/,'').replace(/(?:€\s*)?[+-]?\d{1,4}[,.]\d{2}(?:\s+[A-Z])?\s*$/i,'').trim();
+      if(price===null){
+        const idx=rows.indexOf(r),below=rows.slice(idx+1,Math.min(rows.length,idx+4));
+        for(const br of below){const ps=picnicMoneyCandidates(br.items);if(ps.length){price=ps[0].value;break}}
+      }
+      name=name.replace(/\s+(?:gratis|bundelbonus|\d+%\s*korting|korting)$/i,'').trim();
+      if(name&&/\p{L}/u.test(name)&&price!==null&&price>=0&&price<500)out.push({name:`${qty} ${name}`,price:+price.toFixed(2),category:catFor(name)});
+    }
+  }
+  return out;
+}
 function isPicnicPdfText(text){return /\bpicnic\b/i.test(text)&&(/je\s*bonnetje/i.test(text)||/service\.picnic\.nl/i.test(text)||/picnic-tegoed/i.test(text))}
 function parsePicnicPdfPages(pageItems,rawText){
   const parsed=[];
@@ -202,7 +229,9 @@ function parsePicnicPdfPages(pageItems,rawText){
     const stopY=stop?stop.y+1:-Infinity;
     for(let i=0;i<badgeRows.length;i++){
       const startRow=badgeRows[i],nextY=i+1<badgeRows.length?badgeRows[i+1].y:stopY;
-      const blockRows=rows.filter(r=>r.y<=startRow.y+6&&r.y>Math.max(nextY+3,stopY));
+      // Picnic zet het aantal vaak 8-12 PDF-punten lager dan de eerste regel van de productnaam.
+      // Een marge van 18 punten houdt de volledige (ook meerregelige) naam in hetzelfde productblok.
+      const blockRows=rows.filter(r=>r.y<=startRow.y+18&&r.y>Math.max(nextY+3,stopY));
       const nameParts=[];
       for(const r of blockRows){
         const center=r.items.filter(it=>it.x>=195&&it.x<400).map(it=>it.text).join(' ').replace(/\s+/g,' ').trim();
@@ -229,6 +258,7 @@ function parsePicnicPdfPages(pageItems,rawText){
     const candidates=picnicPricesInRegion(items,totalRow.y+10,totalRow.y-12);
     if(candidates.length){const nearest=[...candidates].sort((a,b)=>Math.abs(a.y-totalRow.y)-Math.abs(b.y-totalRow.y))[0];total=nearest.value;break}
   }
+  if(!parsed.length){parsed.push(...parsePicnicAdaptive(pageItems))}
   const oneLine=rawText.replace(/\s+/g,' ');
   const delivery=oneLine.match(/bezorging\s+van\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
   let date='';
@@ -245,7 +275,7 @@ function resetReceiptRecognitionFields(){
   const rows=document.querySelector('#receiptProductRows');
   if(rows){rows.innerHTML='';addProductRow({})}
 }
-async function readReceiptFile(file){if(!file||readingReceipt)return;readingReceipt=true;const saveBtn=document.querySelector('#receiptForm button[type="submit"]');if(saveBtn)saveBtn.disabled=true;setReadStatus('Bon wordt uitgelezen…','busy');try{const extracted=await extractReceipt(file);const parsed=extracted&&extracted.__parsedReceipt?extracted:parseReceiptText(extracted);applyParsed(parsed);const found=[parsed.store&&'winkel',parsed.date&&'datum',parsed.total!==null&&'totaal',parsed.lines.length&&`${parsed.lines.length} productregels`].filter(Boolean);if(found.length)setReadStatus(`Uitgelezen: ${found.join(', ')}. Controleer de gegevens en pas ze zo nodig aan.`,'success');else setReadStatus('De bon is uitgelezen, maar er konden weinig gegevens automatisch worden herkend. Vul de ontbrekende gegevens handmatig aan.','warning');}catch(err){console.error('Bon uitlezen mislukt',err);setReadStatus(err?.message||'Bon uitlezen is niet gelukt. Je kunt de gegevens handmatig invullen.','error')}finally{readingReceipt=false;if(saveBtn)saveBtn.disabled=false}}
+async function readReceiptFile(file){if(!file||readingReceipt)return;setReceiptPreview(file);readingReceipt=true;const saveBtn=document.querySelector('#receiptForm button[type="submit"]');if(saveBtn)saveBtn.disabled=true;setReadStatus('Bon wordt uitgelezen…','busy');try{const extracted=await extractReceipt(file);const parsed=extracted&&extracted.__parsedReceipt?extracted:parseReceiptText(extracted);applyParsed(parsed);const found=[parsed.store&&'winkel',parsed.date&&'datum',parsed.total!==null&&'totaal',parsed.lines.length&&`${parsed.lines.length} productregels`].filter(Boolean);if(found.length)setReadStatus(`Uitgelezen: ${found.join(', ')}. Controleer de gegevens en pas ze zo nodig aan.`,'success');else setReadStatus('De bon is uitgelezen, maar er konden weinig gegevens automatisch worden herkend. Vul de ontbrekende gegevens handmatig aan.','warning');}catch(err){console.error('Bon uitlezen mislukt',err);setReadStatus(err?.message||'Bon uitlezen is niet gelukt. Je kunt de gegevens handmatig invullen.','error')}finally{readingReceipt=false;if(saveBtn)saveBtn.disabled=false}}
 
 async function takeSharedReceipt(){
   const url=new URL(window.location.href);
@@ -283,7 +313,7 @@ async function openSharedReceipt(){
 }
 
 window.renderInsight=render;window.openReceiptModal=()=>openModal();
-window.addEventListener('DOMContentLoaded',()=>{let form=document.querySelector('#receiptForm');if(!form)return;document.querySelector('#receiptCancel').onclick=close;document.querySelector('#receiptBack').onclick=close;document.querySelector('#receiptModal').onclick=e=>{if(e.target.id==='receiptModal')close()};document.querySelectorAll('.receipt-source').forEach(b=>b.onclick=()=>setSource(b.dataset.source));document.querySelector('#receiptAddLine').onclick=()=>addProductRow({});document.querySelector('#receiptFile').onchange=e=>{const file=e.target.files[0];document.querySelector('#receiptFileName').textContent=file?.name||document.querySelector('#receiptModal').dataset.fileName||'Geen bestand gekozen';if(file){resetReceiptRecognitionFields();readReceiptFile(file)}};
+window.addEventListener('DOMContentLoaded',()=>{let form=document.querySelector('#receiptForm');if(!form)return;document.querySelector('#receiptPreviewButton').onclick=()=>toggleReceiptPreview(true);document.querySelector('#receiptPreviewClose').onclick=()=>toggleReceiptPreview(false);document.querySelector('#receiptCancel').onclick=close;document.querySelector('#receiptBack').onclick=close;document.querySelector('#receiptModal').onclick=e=>{if(e.target.id==='receiptModal')close()};document.querySelectorAll('.receipt-source').forEach(b=>b.onclick=()=>setSource(b.dataset.source));document.querySelector('#receiptAddLine').onclick=()=>addProductRow({});document.querySelector('#receiptFile').onchange=e=>{const file=e.target.files[0];document.querySelector('#receiptFileName').textContent=file?.name||document.querySelector('#receiptModal').dataset.fileName||'Geen bestand gekozen';if(file){resetReceiptRecognitionFields();readReceiptFile(file)}};
 const viewModal=document.querySelector('#receiptViewModal'),viewMenu=document.querySelector('#receiptViewMenu'),viewMenuButton=document.querySelector('#receiptViewMenuButton');
 document.querySelector('#receiptViewBack').onclick=closeReceiptView;viewModal.onclick=e=>{if(e.target.id==='receiptViewModal')closeReceiptView()};viewMenuButton.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();viewMenu.hidden=!viewMenu.hidden;viewMenuButton.setAttribute('aria-expanded',String(!viewMenu.hidden))});viewMenu.addEventListener('click',e=>{const actionButton=e.target.closest('[data-receipt-action]');if(!actionButton)return;e.preventDefault();e.stopPropagation();const action=actionButton.dataset.receiptAction;viewMenu.hidden=true;viewMenuButton.setAttribute('aria-expanded','false');handleReceiptViewAction(action)});document.addEventListener('click',e=>{if(!e.target.closest('.receipt-view-menu-wrap')&&viewMenu&&!viewMenu.hidden){viewMenu.hidden=true;viewMenuButton.setAttribute('aria-expanded','false')}});
 form.onsubmit=e=>{e.preventDefault();if(readingReceipt)return;let all=receipts(),editingId=document.querySelector('#receiptEditId').value,id=editingId||String(Date.now()),lines=collectLines(),entered=parseFloat(document.querySelector('#receiptTotal').value.replace(',','.')),total=Number.isFinite(entered)?entered:lines.reduce((a,l)=>a+l.price,0),file=document.querySelector('#receiptFile').files[0],old=all.find(r=>String(r.id)===String(id)),obj={id,store:document.querySelector('#receiptStore').value.trim(),date:document.querySelector('#receiptDate').value,total,lines,note:document.querySelector('#receiptNote').value.trim(),source:receiptSource,fileName:file?.name||document.querySelector('#receiptModal').dataset.fileName||old?.fileName||''};const duplicate=isDuplicateReceipt(obj,all,editingId);if(duplicate&&!window.confirm(`Mogelijk is deze bon al toegevoegd:
