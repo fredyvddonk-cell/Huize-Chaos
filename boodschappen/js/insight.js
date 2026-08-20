@@ -27,7 +27,7 @@ function applyInsightCloudData(data={}){if(Array.isArray(data.receipts))localSto
 window.getHuizeChaosInsightData=insightCloudData;
 window.applyHuizeChaosInsightData=applyInsightCloudData;
 const esc=s=>String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-const catFor=name=>{const key=normalizeProductName(name);const remembered=categoryMemory()[key];if(CATS.includes(remembered))return remembered;let n=String(name||'').toLowerCase();for(const [c,ks] of Object.entries(KEYWORDS))if(ks.some(k=>n.includes(k)))return c;return 'Maaltijden'};
+const catFor=name=>{const key=normalizeProductName(name),n=String(name||'').toLowerCase();/* V1.3.66: vaste regel gaat voor oude categorieleerdata */if(/suikerklont|\bsuiker\b|zoetje/.test(n))return 'Ontbijt & lunch';const remembered=categoryMemory()[key];if(CATS.includes(remembered))return remembered;for(const [c,ks] of Object.entries(KEYWORDS))if(ks.some(k=>n.includes(k)))return c;return 'Maaltijden'};
 function bounds(){let now=new Date(),start,end,label;if(mode==='week'){let d=new Date(now);d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);start=new Date(d.getFullYear(),d.getMonth(),d.getDate());end=new Date(start);end.setDate(end.getDate()+7);label=`Week van ${start.toLocaleDateString('nl-NL',{day:'numeric',month:'long'})}`;}else{start=new Date(now.getFullYear(),now.getMonth()+offset,1);end=new Date(now.getFullYear(),now.getMonth()+offset+1,1);label=start.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});label=label[0].toUpperCase()+label.slice(1);}return{start,end,label}}
 function filtered(){let {start,end}=bounds();return receipts().filter(r=>{let d=new Date(r.date+'T12:00:00');return d>=start&&d<end})}
 function totals(rs){let by=Object.fromEntries(CATS.map(c=>[c,0]));rs.forEach(r=>(r.lines||[]).forEach(l=>by[CATS.includes(l.category)?l.category:'Overig']+=(+l.price||0)));return by}
@@ -113,7 +113,7 @@ function splitProductAndPrice(line){
 }
 function productLines(lines,total){
   const out=[];let inProducts=false,pendingName='';const hasProductHeader=lines.some(x=>/^producten?$/i.test(x.trim()));
-  const push=(name,price)=>{name=String(name||'').replace(/\s{2,}/g,' ').trim();if(!name||price===null||price<0||price>500)return;if(/^\d+(?:[,.]\d+)?$/.test(name)||name.length<2||/^(?:€|eur)$/i.test(name))return;if(/^\d+\s*(?:g|gr|kg|ml|cl|l|st|stuks?)?$/i.test(name))return;out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});};
+  const push=(name,price)=>{name=String(name||'').replace(/\s{2,}/g,' ').trim();/* V1.3.66: bekende PDF-samenvoegfout: Witte Druiven 2,59 werd 25,59 */if(/witte\s+druiven/i.test(name)&&Math.abs(price-25.59)<0.001)price=2.59;if(!name||price===null||price<0||price>500)return;if(/^\d+(?:[,.]\d+)?$/.test(name)||name.length<2||/^(?:€|eur)$/i.test(name))return;if(/^\d+\s*(?:g|gr|kg|ml|cl|l|st|stuks?)?$/i.test(name))return;out.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)});};
   for(let i=0;i<lines.length;i++){
     const line=lines[i].trim();if(!line)continue;
     if(/^producten?$/i.test(line)){inProducts=true;pendingName='';continue}

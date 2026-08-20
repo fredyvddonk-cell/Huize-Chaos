@@ -380,3 +380,12 @@ body.insight-page #add::first-letter{font-size:0}
 .receipt-amount-meta{display:grid;gap:4px;margin-top:8px;padding:9px 10px;border-radius:9px;background:#f7f4fa;font-size:11px;color:#6d6472}
 .receipt-amount-meta span{display:flex;justify-content:space-between;gap:10px}.receipt-amount-meta strong{color:#3f3943}
 @media(max-width:850px){.receipt-card{display:block;max-width:720px}.receipt-desktop-summary{display:none}}
+
+
+/* V1.3.66 - boncontrole: één scrollbar, meer ruimte voor producten, navigatie boven modal voorkomen */
+body:has(#receiptModal.open){overflow:hidden}
+#receiptModal.receipt-modal{z-index:100;overflow-y:auto;overflow-x:hidden}
+#receiptModal .receipt-card{width:min(calc(100% - 20px),1200px);max-width:1200px;grid-template-columns:minmax(0,1fr) 260px}
+#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(260px,2.1fr) minmax(82px,.55fr) minmax(150px,1fr) 44px}
+#receiptModal .receipt-desktop-summary{top:8px}
+@media(max-width:850px){#receiptModal .receipt-card{width:100%;max-width:720px}#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 88px 40px}}
