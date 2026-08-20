@@ -7,3 +7,8 @@ Nieuw:
 - Losse prijsregels kunnen aan de productnaam erboven worden gekoppeld.
 - Koopzegels, privacytekst, aantallen, medewerker- en winkelregels worden niet als producten opgenomen.
 - Bestaande Jumbo-, AH- en Picnic-PDF-inlezing blijft behouden.
+
+## V1.3.71
+- AH-koopzegels worden niet meer als productregel herkend.
+- Een detailregel zoals `39 X 0,10` wordt na `KOOPZEGELS PREMIUM` overgeslagen.
+- Het koopzegelbedrag blijft wel correct van het kassabedrag afgetrokken.
