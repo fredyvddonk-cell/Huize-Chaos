@@ -180,22 +180,41 @@ async function enhanceReceiptImage(file){
   ctx.putImageData(img,0,0);if(bitmap.close)bitmap.close();return canvas;
 }
 function receiptParseScore(p){return (p?.lines?.length||0)*12+(p?.store?5:0)+(p?.date?4:0)+(p?.total!==null?7:0)}
+async function cropJumboProductArea(file){
+  const bitmap=await createImageBitmap(file);
+  // Op een Jumbo-zelfscanbon staat het artikelblok in de bovenste helft.
+  // Door alleen dat deel sterk te vergroten krijgt OCR de gekreukte productregels
+  // veel beter te pakken en raakt het niet afgeleid door barcode/terminaltekst.
+  const sx=0,sy=Math.round(bitmap.height*.08),sw=bitmap.width,sh=Math.round(bitmap.height*.52);
+  const scale=Math.min(3.2,3600/sw);
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(sw*scale));canvas.height=Math.max(1,Math.round(sh*scale));
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;
+  for(let i=0;i<d.length;i+=4){const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];const v=g>190?255:g<115?0:Math.max(0,Math.min(255,(g-138)*2.45+138));d[i]=d[i+1]=d[i+2]=v}
+  ctx.putImageData(img,0,0);if(bitmap.close)bitmap.close();return canvas;
+}
+function mergeJumboPhotoProducts(best,productText){
+  const cleaned=cleanText(productText),lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);
+  // Alles vanaf KOOPZEGEL hoort niet meer bij het artikelblok.
+  const stop=lines.findIndex(x=>/koopzegel/i.test(x));const productPart=stop>=0?lines.slice(0,stop):lines;
+  const found=productLines(productPart,null).filter(l=>!/koopzegel|statiegeld|actie\b|korting/i.test(l.name));
+  if(found.length>(best.lines||[]).length)best={...best,lines:found,raw:`${best.raw||''}\n${cleaned}`};
+  return best;
+}
 async function parseReceiptImage(file){
   const raw=await ocrImage(file,pc=>setReadStatus(`Bon wordt uitgelezen… ${pc}%`,'busy'));let best=parseReceiptText(raw);
   if((best.lines||[]).length<4||best.total===null){
     try{setReadStatus('Bon wordt extra gecontroleerd…','busy');const canvas=await enhanceReceiptImage(file);const raw2=await ocrImage(canvas,pc=>setReadStatus(`Bon wordt extra gecontroleerd… ${pc}%`,'busy'));const alt=parseReceiptText(raw2);if(receiptParseScore(alt)>receiptParseScore(best))best=alt}catch(err){console.warn('Extra fotoherkenning overgeslagen',err)}
   }
-  // Jumbo zelfscanbonnen zijn vaak gekreukt of licht gefotografeerd. Als er nog
-  // weinig regels zijn gevonden, probeer een grotere zwart-wit versie.
-  if(detectStore(best.raw||'')==='Jumbo'&&((best.lines||[]).length<6||best.total===null)){
+  // Jumbo zelfscanbonnen zijn vaak gekreukt of licht gefotografeerd.
+  // Als de algemene OCR te weinig artikelen vindt, lees het artikelgedeelte apart.
+  if(detectStore(best.raw||raw)==='Jumbo'&&((best.lines||[]).length<6||best.total===null)){
     try{
-      setReadStatus('Jumbo-bon wordt extra gecontroleerd…','busy');
-      const bitmap=await createImageBitmap(file),scale=Math.min(2,3000/Math.max(bitmap.width,bitmap.height));
-      const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
-      const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-      const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;for(let i=0;i<d.length;i+=4){const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];const v=g>178?255:g<105?0:Math.max(0,Math.min(255,(g-128)*2.2+128));d[i]=d[i+1]=d[i+2]=v}ctx.putImageData(img,0,0);if(bitmap.close)bitmap.close();
-      const raw3=await ocrImage(canvas,pc=>setReadStatus(`Jumbo-bon wordt extra gecontroleerd… ${pc}%`,'busy')),alt3=parseReceiptText(raw3);if(receiptParseScore(alt3)>receiptParseScore(best))best=alt3;
-    }catch(err){console.warn('Extra Jumbo-fotoherkenning overgeslagen',err)}
+      setReadStatus('Jumbo-artikelen worden extra gecontroleerd…','busy');
+      const productCanvas=await cropJumboProductArea(file);
+      const productRaw=await ocrImage(productCanvas,pc=>setReadStatus(`Jumbo-artikelen worden extra gecontroleerd… ${pc}%`,'busy'));
+      best=mergeJumboPhotoProducts(best,productRaw);
+    }catch(err){console.warn('Extra Jumbo-artikelherkenning overgeslagen',err)}
   }
   best.__parsedReceipt=true;return best;
 }
