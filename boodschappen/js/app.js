@@ -60,7 +60,8 @@ function migrateProduct(x) {
 }
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
-let page = localStorage.getItem('household-page') || 'list';
+const wideDesktop=window.matchMedia('(min-width:851px)').matches;
+let page = wideDesktop ? (sessionStorage.getItem('hc-household-page-session') || 'list') : (localStorage.getItem('household-page') || 'list');
 let group = localStorage.getItem('household-group') || 'store';
 
 const $ = selector => document.querySelector(selector);
@@ -278,7 +279,7 @@ function render() {
   else renderManage(arr);
 }
 
-window.setHuizeChaosPage = nextPage => { page = nextPage; localStorage.setItem('household-page', page); render(); };
+window.setHuizeChaosPage = nextPage => { page = nextPage; localStorage.setItem('household-page', page); sessionStorage.setItem('hc-household-page-session', page); render(); };
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
@@ -291,7 +292,7 @@ window.applyHuizeChaosRole = role => {
   document.body.dataset.role = role || '';
   if (role === 'member') {
     page = 'list';
-    localStorage.setItem('household-page', page);
+    localStorage.setItem('household-page', page); sessionStorage.setItem('hc-household-page-session', page);
   }
   render();
 };
@@ -419,7 +420,7 @@ function initApp() {
         search.value = '';
         updateSearchClear();
       }
-      localStorage.setItem('household-page', page);
+      localStorage.setItem('household-page', page); sessionStorage.setItem('hc-household-page-session', page);
       render();
     };
   });

@@ -389,3 +389,18 @@ body:has(#receiptModal.open){overflow:hidden}
 #receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(260px,2.1fr) minmax(82px,.55fr) minmax(150px,1fr) 44px}
 #receiptModal .receipt-desktop-summary{top:8px}
 @media(max-width:850px){#receiptModal .receipt-card{width:100%;max-width:720px}#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 88px 40px}}
+
+
+/* V1.3.67 - AH-parser, niet-boodschappen en veilig bonvoorbeeld op desktop */
+#receiptModal .receipt-card{grid-template-columns:minmax(0,1fr) 300px}
+#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(320px,2.4fr) minmax(95px,.6fr) minmax(190px,1.05fr) 48px;align-items:end}
+.receipt-desktop-summary{position:sticky;top:8px;max-height:calc(100vh - 30px);overflow:hidden}
+#receiptDesktopSummaryInfo{display:grid;gap:10px}
+#receiptDesktopSummaryInfo>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid #eee9f0;font-size:13px}
+#receiptDesktopSummaryInfo>div:first-of-type{border-top:0}
+#receiptDesktopSummaryInfo span{color:#6f6874}#receiptDesktopSummaryInfo strong{text-align:right}
+.receipt-desktop-preview{margin-top:10px;border-top:1px solid #eee9f0;padding-top:10px;display:grid;place-items:center;max-height:430px;overflow:hidden;background:#faf9fb;border-radius:10px}
+.receipt-preview-image,.receipt-preview-canvas{display:block;max-width:100%;max-height:410px;width:auto;height:auto;object-fit:contain}
+@media(max-width:850px){#receiptModal .receipt-card{display:block}#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 88px 40px}.receipt-desktop-summary{display:none}}
+
+.insight-outside-help{margin:-4px 0 8px;color:#7b7280;font-size:12px}.insight-outside .insight-cat small{min-width:34px}
