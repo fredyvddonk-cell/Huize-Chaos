@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Boodschappen</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css?v=1.3.64">
+  <link rel="stylesheet" href="style.css?v=1.3.65">
 </head>
 <body>
   <main class="app">
@@ -16,7 +16,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.64</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus">Lokaal</span><span class="version">V1.3.65</span><button id="accountButton" class="icon" type="button" aria-label="Account en instellingen">⚙</button></div>
     </div>
 
     <nav class="tabs">
@@ -171,7 +171,7 @@
   </div>
 
   <div id="receiptModal" class="modal receipt-modal" aria-hidden="true">
-    <form id="receiptForm" class="card receipt-card">
+    <form id="receiptForm" class="card receipt-card"><div class="receipt-form-main">
       <button type="button" id="receiptBack" class="receipt-back">‹ Terug naar Inzicht</button>
       <h2 id="receiptTitle">Bon toevoegen</h2>
       <p class="receipt-intro">Registreer een boodschappenbon. De gegevens worden alleen gebruikt voor inzicht.</p>
@@ -207,7 +207,7 @@
       <section class="receipt-step">
         <h3>3. Controleer en pas aan</h3>
         <div class="receipt-panel receipt-review">
-          <div class="field"><label for="receiptTotal">Totaalbedrag *</label><div class="money-input"><span>€</span><input id="receiptTotal" inputmode="decimal" required placeholder="0,00"></div></div>
+          <div class="field"><label for="receiptTotal">Boodschappenbedrag * <small>(excl. koopzegels)</small></label><div class="money-input"><span>€</span><input id="receiptTotal" inputmode="decimal" required placeholder="0,00"></div><div id="receiptAmountMeta" class="receipt-amount-meta" hidden></div></div>
           <div class="field"><label for="receiptNote">Opmerking <small>(optioneel)</small></label><input id="receiptNote" placeholder="Bijv. actiebon, zelfscan, opmerking voor later..."><small class="field-help">Alleen voor jezelf, niet zichtbaar in het overzicht.</small></div>
         </div>
       </section>
@@ -223,6 +223,7 @@
       </section>
 
       <div class="modal-actions receipt-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button type="submit" class="btn primary">▣ Opslaan bon</button></div>
+      </div><aside id="receiptDesktopSummary" class="receipt-desktop-summary"><h3>Herkende bon</h3><p class="receipt-summary-empty">Kies een bon om de gegevens te controleren.</p></aside>
     </form>
   </div>
 
@@ -276,12 +277,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.3.64"></script>
-  <script src="js/shopping.js?v=1.3.64"></script>
-  <script src="js/stock.js?v=1.3.64"></script>
-  <script src="js/hutsel.js?v=1.3.64"></script>
-  <script src="js/insight.js?v=1.3.64"></script>
-  <script type="module" src="js/firebase.js?v=1.3.64"></script>
+  <script src="js/app.js?v=1.3.65"></script>
+  <script src="js/shopping.js?v=1.3.65"></script>
+  <script src="js/stock.js?v=1.3.65"></script>
+  <script src="js/hutsel.js?v=1.3.65"></script>
+  <script src="js/insight.js?v=1.3.65"></script>
+  <script type="module" src="js/firebase.js?v=1.3.65"></script>
 
 </body>
 </html>

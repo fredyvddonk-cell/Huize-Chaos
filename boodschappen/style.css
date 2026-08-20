@@ -367,4 +367,16 @@ body.insight-page #add::first-letter{font-size:0}
 
 /* V1.3.58 - Inzicht synchronisatie via Firebase; geen visuele wijzigingen */
 
-/* V1.3.64 - bonviewer verwijderd; Picnic PDF-parser behouden en hersteld */
+/* V1.3.65 - bonviewer verwijderd; Picnic PDF-parser behouden en hersteld */
+
+/* V1.3.65 - compactere desktop boncontrole en koopzegels buiten boodschappen */
+.receipt-card{max-width:1120px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.receipt-form-main{min-width:0}
+.receipt-desktop-summary{position:sticky;top:10px;border:1px solid #e6dfea;border-radius:16px;background:#fff;padding:16px;display:grid;gap:10px}
+.receipt-desktop-summary h3{margin:0 0 4px;color:#6737b4;font-size:17px}
+.receipt-desktop-summary>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid #eee9f0;font-size:13px}
+.receipt-desktop-summary>div:first-of-type{border-top:0}.receipt-desktop-summary span{color:#6f6874}.receipt-desktop-summary strong{text-align:right}
+.receipt-desktop-summary .receipt-summary-total{color:#6737b4}.receipt-desktop-summary .receipt-summary-total span{color:#6737b4}.receipt-desktop-summary small,.receipt-summary-empty{color:#7a727e;font-size:12px;margin:4px 0 0}
+.receipt-amount-meta{display:grid;gap:4px;margin-top:8px;padding:9px 10px;border-radius:9px;background:#f7f4fa;font-size:11px;color:#6d6472}
+.receipt-amount-meta span{display:flex;justify-content:space-between;gap:10px}.receipt-amount-meta strong{color:#3f3943}
+@media(max-width:850px){.receipt-card{display:block;max-width:720px}.receipt-desktop-summary{display:none}}

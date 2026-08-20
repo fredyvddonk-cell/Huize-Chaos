@@ -3,7 +3,7 @@ const CATS=['Vlees & vis','Maaltijden','Groente & fruit','Ontbijt & lunch','Dran
 const KEYWORDS={
 'Vlees & vis':['gehakt','gehaktbal','gehaktballet','kipfilet','kipdij','kipburger','kip ','kipshaslick','shaslick','dijlap','slavink','vlees','rund','vis','kabeljauw','koolvis','zalm','worst','braadworst','steak','schnitzel','hamburger','biefstuk','spek','shoarma'],
 'Groente & fruit':['snijboon','snijbonen','tomatenblok','peterselie','broccoli','ijsbergsla','paprika','tomaat','komkommer','sla','gele ui','uien','ui','knoflook','wortel','appelmoes','appel','banaan','druif','kiwi','fruit','groente','avocado','courgette','prei','champignon','aardbei'],
-'Ontbijt & lunch':['brood','kaas','beleg','yoghurt','kwark','cruesli','muesli','havermout','melk','jam','hagelslag','smeerkaas','vleeswaar','beschuit','cracker'],
+'Ontbijt & lunch':['suikerklont','suiker','zoetje','zoetjes','brood','kaas','beleg','yoghurt','kwark','cruesli','muesli','havermout','melk','jam','hagelslag','smeerkaas','vleeswaar','beschuit','cracker'],
 'Maaltijden':['gele rijst','rijst','aardappelschijf','bami & nasi','bami','nasi','eiermie','mie','boemboe','gebakken uitjes','spaghetti','pasta'],
 'Dranken':['cola','fanta','sinas','sap','koffie','thee','drank','water','limonade','sprite','pepsi','wijn'],
 'Snacks & lekkers':['chips','snoep','koek','chocolade','ijs','snack','toast','drop','winegum','borrel'],
@@ -139,7 +139,22 @@ function productLines(lines,total){
   }
   return out.slice(0,120)
 }
-function parseReceiptText(text){const cleaned=cleanText(text);const lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);const total=detectTotal(lines);return{store:detectStore(cleaned),date:detectDate(cleaned),total,lines:productLines(lines,total),raw:cleaned}}
+function detectKoopzegels(lines){
+  for(let i=0;i<lines.length;i++){
+    if(!/koopzegel/i.test(lines[i]))continue;
+    const same=lineMoney(lines[i]).filter(v=>v>=0);
+    if(same.length)return same[same.length-1];
+    for(let j=i+1;j<=Math.min(i+2,lines.length-1);j++){
+      const vals=lineMoney(lines[j]).filter(v=>v>=0);
+      if(vals.length)return vals[vals.length-1];
+      const q=String(lines[j]).match(/^\s*\d+\s*[xX]\s*(\d+[,.]\d{2})/);
+      if(q){const qty=Number(String(lines[j]).match(/^\s*(\d+)/)?.[1]||0),unit=parseMoney(q[1]);if(qty&&unit!==null)return +(qty*unit).toFixed(2)}
+    }
+  }
+  return 0
+}
+function groceryTotalFromReceipt(lines,total){const koopzegels=detectKoopzegels(lines);return{originalTotal:total,koopzegels,total:total!==null?+Math.max(0,total-koopzegels).toFixed(2):null}}
+function parseReceiptText(text){const cleaned=cleanText(text);const lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);const detected=detectTotal(lines);const amounts=groceryTotalFromReceipt(lines,detected);return{store:detectStore(cleaned),date:detectDate(cleaned),total:amounts.total,originalTotal:amounts.originalTotal,koopzegels:amounts.koopzegels,lines:productLines(lines,amounts.total),raw:cleaned}}
 async function ocrImage(input,onProgress){if(!window.Tesseract)throw new Error('OCR-module kon niet worden geladen. Controleer je internetverbinding.');const result=await window.Tesseract.recognize(input,'nld+eng',{logger:m=>{if(m.status==='recognizing text'&&onProgress)onProgress(Math.round((m.progress||0)*100))}});return result?.data?.text||''}
 async function enhanceReceiptImage(file){
   const bitmap=await createImageBitmap(file),max=2200,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
@@ -154,6 +169,18 @@ async function parseReceiptImage(file){
   const raw=await ocrImage(file,pc=>setReadStatus(`Bon wordt uitgelezen… ${pc}%`,'busy'));let best=parseReceiptText(raw);
   if((best.lines||[]).length<4||best.total===null){
     try{setReadStatus('Bon wordt extra gecontroleerd…','busy');const canvas=await enhanceReceiptImage(file);const raw2=await ocrImage(canvas,pc=>setReadStatus(`Bon wordt extra gecontroleerd… ${pc}%`,'busy'));const alt=parseReceiptText(raw2);if(receiptParseScore(alt)>receiptParseScore(best))best=alt}catch(err){console.warn('Extra fotoherkenning overgeslagen',err)}
+  }
+  // Jumbo zelfscanbonnen zijn vaak gekreukt of licht gefotografeerd. Als er nog
+  // weinig regels zijn gevonden, probeer een grotere zwart-wit versie.
+  if(detectStore(best.raw||'')==='Jumbo'&&((best.lines||[]).length<6||best.total===null)){
+    try{
+      setReadStatus('Jumbo-bon wordt extra gecontroleerd…','busy');
+      const bitmap=await createImageBitmap(file),scale=Math.min(2,3000/Math.max(bitmap.width,bitmap.height));
+      const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;for(let i=0;i<d.length;i+=4){const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];const v=g>178?255:g<105?0:Math.max(0,Math.min(255,(g-128)*2.2+128));d[i]=d[i+1]=d[i+2]=v}ctx.putImageData(img,0,0);if(bitmap.close)bitmap.close();
+      const raw3=await ocrImage(canvas,pc=>setReadStatus(`Jumbo-bon wordt extra gecontroleerd… ${pc}%`,'busy')),alt3=parseReceiptText(raw3);if(receiptParseScore(alt3)>receiptParseScore(best))best=alt3;
+    }catch(err){console.warn('Extra Jumbo-fotoherkenning overgeslagen',err)}
   }
   best.__parsedReceipt=true;return best;
 }
@@ -220,15 +247,16 @@ function parsePicnicPdfPages(pageItems,rawText){
   const delivery=oneLine.match(/bezorging\s+van\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
   let date='';
   if(delivery){const months={januari:1,februari:2,maart:3,april:4,mei:5,juni:6,juli:7,augustus:8,september:9,oktober:10,november:11,december:12},d=+delivery[1],mo=months[delivery[2].toLowerCase()],y=+delivery[3];date=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`}else date=detectDate(oneLine);
-  return{__parsedReceipt:true,store:'Picnic',date,total,lines:parsed,raw:rawText}
+  return{__parsedReceipt:true,store:'Picnic',date,total,originalTotal:total,koopzegels:0,lines:parsed,raw:rawText}
 }
 async function pdfText(file){if(!window.pdfjsLib)throw new Error('PDF-module kon niet worden geladen. Controleer je internetverbinding.');window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const data=await file.arrayBuffer();const pdf=await window.pdfjsLib.getDocument({data}).promise;let text='';const pageItems=[];const max=Math.min(pdf.numPages,5);for(let p=1;p<=max;p++){const page=await pdf.getPage(p);const content=await page.getTextContent();pageItems.push(content.items);text+=pdfItemsToLines(content.items)+'\n';}if(isPicnicPdfText(text)){const picnic=parsePicnicPdfPages(pageItems,text);if(picnic.lines.length||picnic.total!==null)return picnic}if(cleanText(text).length>=80)return text;let ocr='';for(let p=1;p<=Math.min(pdf.numPages,3);p++){setReadStatus(`PDF-pagina ${p} wordt uitgelezen…`,'busy');const page=await pdf.getPage(p),viewport=page.getViewport({scale:2});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;ocr+=await ocrImage(canvas,pc=>setReadStatus(`PDF-pagina ${p} wordt uitgelezen… ${pc}%`,'busy'))+'\n';}return ocr}
 async function extractReceipt(file){if(!file)throw new Error('Geen bestand gekozen.');if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))return pdfText(file);if(file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp)$/i.test(file.name))return parseReceiptImage(file);throw new Error('Dit bestandstype kan nog niet worden uitgelezen. Kies een PDF of afbeelding.')}
-function applyParsed(parsed){if(parsed.store)document.querySelector('#receiptStore').value=parsed.store;if(parsed.date)document.querySelector('#receiptDate').value=parsed.date;if(parsed.total!==null)document.querySelector('#receiptTotal').value=String(parsed.total.toFixed(2)).replace('.',',');if(parsed.lines.length){const rows=document.querySelector('#receiptProductRows');rows.innerHTML='';parsed.lines.forEach(addProductRow)}}
+function applyParsed(parsed){if(parsed.store)document.querySelector('#receiptStore').value=parsed.store;if(parsed.date)document.querySelector('#receiptDate').value=parsed.date;if(parsed.total!==null)document.querySelector('#receiptTotal').value=String(parsed.total.toFixed(2)).replace('.',',');const meta=document.querySelector('#receiptAmountMeta');if(meta){const kz=Number(parsed.koopzegels||0),orig=parsed.originalTotal;meta.hidden=!(kz>0&&orig!==null);meta.innerHTML=kz>0&&orig!==null?`<span>Origineel kassabedrag <strong>${money(orig)}</strong></span><span>Koopzegels niet meegenomen <strong>− ${money(kz)}</strong></span>`:''}if(parsed.lines.length){const rows=document.querySelector('#receiptProductRows');rows.innerHTML='';parsed.lines.forEach(addProductRow)}updateReceiptSummary(parsed)}
+function updateReceiptSummary(parsed={}){const box=document.querySelector('#receiptDesktopSummary');if(!box)return;const store=parsed.store||document.querySelector('#receiptStore')?.value||'—',date=parsed.date||document.querySelector('#receiptDate')?.value||'',total=parsed.total!==null&&parsed.total!==undefined?parsed.total:parseFloat((document.querySelector('#receiptTotal')?.value||'').replace(',','.'))||0,kz=Number(parsed.koopzegels||0),count=parsed.lines?.length||document.querySelectorAll('.receipt-product-row').length;box.innerHTML=`<h3>Herkende bon</h3><div><span>Winkel</span><strong>${esc(store)}</strong></div><div><span>Datum</span><strong>${date?new Date(date+'T12:00:00').toLocaleDateString('nl-NL'):'—'}</strong></div><div class="receipt-summary-total"><span>Boodschappenbedrag</span><strong>${money(total)}</strong></div>${kz?`<div><span>Koopzegels niet meegenomen</span><strong>${money(kz)}</strong></div>`:''}<small>${count} ${count===1?'productregel':'productregels'} gevonden</small>`}
 function resetReceiptRecognitionFields(){
   document.querySelector('#receiptStore').value='';
   document.querySelector('#receiptDate').value='';
-  document.querySelector('#receiptTotal').value='';
+  document.querySelector('#receiptTotal').value='';const meta=document.querySelector('#receiptAmountMeta');if(meta){meta.hidden=true;meta.innerHTML=''};const summary=document.querySelector('#receiptDesktopSummary');if(summary)summary.innerHTML='<h3>Herkende bon</h3><p class="receipt-summary-empty">Kies een bon om de gegevens te controleren.</p>';
   const rows=document.querySelector('#receiptProductRows');
   if(rows){rows.innerHTML='';addProductRow({})}
 }
