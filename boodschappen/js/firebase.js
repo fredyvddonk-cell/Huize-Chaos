@@ -242,7 +242,7 @@ function hasMeaningfulInsightData(data) {
 async function syncInsightNow() {
   if (!user || !role || !insightCloudReady || applyingInsightCloud || !window.getHuizeChaosInsightData) return;
   const data = window.getHuizeChaosInsightData();
-  await setDoc(insightRef, { ...data, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: false });
+  await setDoc(insightRef, { ...data, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: true });
 }
 
 function scheduleInsightSync() {

@@ -23,10 +23,13 @@
     }
   ],
   "share_target": {
-    "action": "./boodschappen/?share-target=1",
+    "action": "./?share-target=1",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
       "files": [
         {
           "name": "receipt",
