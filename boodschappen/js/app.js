@@ -63,7 +63,7 @@ function migrateProduct(x) {
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
 
-// V1.3.94: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
+// V1.3.95: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
 // Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
 (function migrateCompleteHerbDatabase() {
   const migrationKey = 'household-migration-complete-herbs-v1377';

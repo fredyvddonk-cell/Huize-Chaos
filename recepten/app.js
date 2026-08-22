@@ -63,14 +63,25 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.94 - voorraad koppelen aan recepten
+// V1.3.95 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
 function stockProducts(){try{return JSON.parse(localStorage.getItem(STOCK_KEY)||'[]')}catch(_){return[]}}
 function relevantStock(){return stockProducts().filter(x=>x.status==='In huis' && /^(Bewaarproducten \(voorraad\)|Groente|Diepvries|Vlees\s*\/?\s*vis|Vlees|Vis)$/i.test(String(x.category||'')))}
 function normFood(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(gv\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\b(blik|blikje|pot|zak|pak|stuks?|verse|vers|diepvries|gekookte|gesneden)\b/g,' ').replace(/\s+/g,' ').trim().replace(/en$/,'')}
-function ingredientMatchesProduct(ingredient,product){const a=normFood(ingredient),b=normFood(product.name);if(!a||!b)return false;return a.includes(b)||b.includes(a)||b.split(' ').filter(w=>w.length>3).every(w=>a.includes(w))}
+function ingredientMatchesProduct(ingredient,product){
+  const a=normFood(ingredient),b=normFood(product.name);
+  if(!a||!b)return false;
+  // Match op volledige woorden in plaats van substrings. Zo is paprika niet hetzelfde
+  // als paprikapoeder, ui niet hetzelfde als uienpoeder en tomaat niet als tomatenpuree.
+  const words=s=>s.split(/\s+/).filter(Boolean);
+  const aw=words(a),bw=words(b);
+  const meaningful=w=>w.length>1 && !/^(rood|rode|geel|gele|groen|groene|wit|witte|zwart|zwarte|klein|kleine|groot|grote|heel|halve|half)$/.test(w);
+  const aa=aw.filter(meaningful),bb=bw.filter(meaningful);
+  const subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));
+  return subset(bb,aw)||subset(aa,bw);
+}
 function recipeStockScore(r,selected){const ingredients=r.ingredients||[];const hits=selected.filter(p=>ingredients.some(i=>ingredientMatchesProduct(i.ingredient,p))).length;const all=stockProducts().filter(p=>p.status==='In huis');const missing=ingredients.filter(i=>!all.some(p=>ingredientMatchesProduct(i.ingredient,p))).length;return{hits,missing}}
 function renderStockPicker(){const a=relevantStock();stockPicker.innerHTML=`<div class="stock-picker"><h2>Kies uit je voorraad</h2><p>Bewaarproducten, groente, diepvries en vlees/vis. Kies één of meer producten.</p>${a.length?`<div class="actions stock-picker-actions"><button class="btn" id="clearStockSelection">Alles deselecteren</button></div><div class="stock-options">${a.map(x=>`<label class="stock-option"><input type="checkbox" data-stock-id="${esc(x.id)}" ${stockFilterIds.includes(String(x.id))?'checked':''}><span>${esc(x.name)} <small>${esc([x.quantity,x.unit].filter(Boolean).join(' '))}</small></span></label>`).join('')}</div><div class="actions"><button class="btn primary" id="findStockRecipes">Passende recepten zoeken</button><button class="btn" id="closeStockPicker">Sluiten</button></div>`:'<div class="empty">Geen producten uit deze groepen staan op In huis.</div>'}</div>`;stockPicker.querySelector('#closeStockPicker')?.addEventListener('click',()=>stockPicker.innerHTML='');stockPicker.querySelector('#clearStockSelection')?.addEventListener('click',()=>{stockFilterIds=[];stockPicker.querySelectorAll('[data-stock-id]').forEach(x=>x.checked=false);renderList()});stockPicker.querySelector('#findStockRecipes')?.addEventListener('click',()=>{stockFilterIds=[...stockPicker.querySelectorAll('[data-stock-id]:checked')].map(x=>x.dataset.stockId);renderList()})}
 stockRecipeButton?.addEventListener('click',renderStockPicker);
@@ -87,7 +98,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.94 - recepten per week plannen (zonder dagen)
+// V1.3.95 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -95,7 +106,7 @@ function weekOptions(count=16){let d=new Date(),out=[];for(let i=0;i<count;i++){
 function showWeekPlanner(r){detail.querySelector('.recipe-week-picker')?.remove();const box=document.createElement('div');box.className='panel recipe-week-picker';box.innerHTML=`<h3>Plan voor week</h3><p>Geen dag nodig. De ingrediënten voor ${esc(displayServings||r.servings||'?')} personen verschijnen alleen op de boodschappenlijst van deze week.</p><select id="recipePlanWeek">${weekOptions()}</select><div class="actions"><button class="btn primary" id="saveRecipeWeek">Inplannen</button></div>`;detail.appendChild(box);box.querySelector('#saveRecipeWeek').onclick=()=>{const week=box.querySelector('#recipePlanWeek').value,plans=recipeWeekPlans(),shown=scaledRecipe(r);const existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:shown.servings||r.servings||'',ingredients:(shown.ingredients||[]).map((i,n)=>({id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:false}))};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}}
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.94 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.95 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -148,10 +159,10 @@ showRecipeModule('weekmenu');
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}
 
-// V1.3.94 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.95 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.94 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.95 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
