@@ -63,7 +63,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.98 - voorraad koppelen aan recepten
+// V1.3.99 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -98,7 +98,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.98 - recepten per week plannen (zonder dagen)
+// V1.3.99 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -146,7 +146,7 @@ function showWeekPlanner(r){
 }
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.98 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.99 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -200,10 +200,10 @@ showRecipeModule('weekmenu');
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}
 
-// V1.3.98 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.99 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.98 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.99 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
