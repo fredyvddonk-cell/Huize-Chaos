@@ -12,7 +12,32 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const nlDate=s=>{if(!s)return 'Geen datum';const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'short',year:'numeric'}).format(d)};
-function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>({...m,ingredients:(m.ingredients||[]).map(i=>({...i,enabled:i.enabled!==false}))}));e.shopping=e.shopping||[];if(typeof e.shoppingCreated!=='boolean')e.shoppingCreated=e.shopping.length>0;e.evaluation=e.evaluation||'';return e}
+function parseQtyNumber(value){
+  let s=String(value??'').trim().replace(',','.');if(!s)return null;
+  const unicode={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875};
+  if(unicode[s]!=null)return unicode[s];
+  const mixed=s.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(mixed)return Number(mixed[1])+Number(mixed[2])/Number(mixed[3]);
+  const frac=s.match(/^(\d+)\/(\d+)$/);if(frac)return Number(frac[1])/Number(frac[2]);
+  const n=Number(s);return Number.isFinite(n)?n:null;
+}
+function formatScaledNumber(n,unit='',ingredient=''){
+  if(!Number.isFinite(n))return '';const u=String(unit||'').toLowerCase(),food=String(ingredient||'').toLowerCase();
+  let v=n;if(['el','tl'].includes(u))v=Math.round(v*16)/16;
+  else if(['g','gr','gram','ml'].includes(u))v=Math.round(v);
+  else if(/^(stuks?|stuk|blik(?:je)?|zak(?:je)?|teen|tenen)$/.test(u))v=Math.round(v);
+  else if(!u&&/(limoen|citroen)/.test(food))v=Math.round(v*2)/2;
+  else v=Math.round(v*100)/100;
+  const whole=Math.floor(v),f=Math.round((v-whole)*16)/16;
+  const fm={0.25:'¼',0.5:'½',0.75:'¾'};
+  if(fm[f]&&Math.abs(v-(whole+f))<1e-8)return whole?`${whole} ${fm[f]}`:fm[f];
+  return String(Number(v.toFixed(4))).replace('.',',');
+}
+function scaledQty(qty,factor,unit,ingredient){const n=parseQtyNumber(qty);return n==null?String(qty||''):formatScaledNumber(n*factor,unit,ingredient)}
+function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>{
+  const base=String(m.recipeBaseServings||m.recipeServings||'');
+  const selected=String(m.servings||m.recipeServings||'');
+  return {...m,recipeBaseServings:base,servings:selected,ingredients:(m.ingredients||[]).map(i=>({...i,baseQty:i.baseQty??i.qty??'',enabled:i.enabled!==false}))};
+});e.shopping=e.shopping||[];if(typeof e.shoppingCreated!=='boolean')e.shoppingCreated=e.shopping.length>0;e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
 function save(){localStorage.setItem(KEY,JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
 function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncCloud,250)}
@@ -114,11 +139,13 @@ window.openDetail=id=>{
   if(result)result.onchange=()=>{const excess=$('#newExcessQty');excess.hidden=result.value!=='Te veel';if(excess.hidden)excess.value=''};
   $('#detailDialog').showModal()
 };
-function menuHtml(x,i){const linked=x.recipeId&&x.ingredients?.length;return `<div class="menu-card"><div class="menu-card-head"><div><span class="menu-type">${esc(x.type||'Overig')}</span><strong>${esc(x.dish||'')}</strong>${x.recipeId?'<small>Gekoppeld recept</small>':''}</div><button class="del danger" onclick="deleteMenu(${i})">×</button></div>${linked?`<div class="menu-ingredients"><div class="meta">Kies wat je voor deze gelegenheid wilt gebruiken:</div>${x.ingredients.map((ing,j)=>`<label class="menu-ingredient"><input type="checkbox" ${ing.enabled!==false?'checked':''} onchange="toggleMenuIngredient(${i},${j},this.checked)"><span>${esc([ing.qty,ing.unit,ing.ingredient].filter(Boolean).join(' '))}</span></label>`).join('')}</div>`:x.needed?`<div class="menu-needed">${esc(x.needed)}</div>`:''}</div>`}
+function menuHtml(x,i){const linked=x.recipeId&&x.ingredients?.length;return `<div class="menu-card"><div class="menu-card-head"><div><span class="menu-type">${esc(x.type||'Overig')}</span>${x.recipeId?`<button class="menu-recipe-open" type="button" onclick="openMenuRecipe(${i})"><strong>${esc(x.dish||'')}</strong><small>Gekoppeld recept · tik voor bereiding ›</small></button>`:`<strong>${esc(x.dish||'')}</strong>`}</div><button class="del danger" onclick="deleteMenu(${i})">×</button></div>${linked?`<div class="menu-servings"><label>Aantal personen<input type="number" min="1" inputmode="numeric" value="${esc(x.servings||x.recipeServings||'')}" onchange="setMenuServings(${i},this.value)"></label><small>Ingrediënten en boodschappen passen automatisch mee aan.</small></div><div class="menu-ingredients"><div class="meta">Kies wat je voor deze gelegenheid wilt gebruiken:</div>${x.ingredients.map((ing,j)=>`<label class="menu-ingredient"><input type="checkbox" ${ing.enabled!==false?'checked':''} onchange="toggleMenuIngredient(${i},${j},this.checked)"><span>${esc([ing.qty,ing.unit,ing.ingredient].filter(Boolean).join(' '))}</span></label>`).join('')}</div>`:x.needed?`<div class="menu-needed">${esc(x.needed)}</div>`:''}</div>`}
 function recipeLibrary(){const base=window.HUIZE_CHAOS_RECIPES||[];let custom=[];try{custom=JSON.parse(localStorage.getItem('hc-recipe-custom-v1')||'[]')}catch(_){}const edits=new Map();base.forEach(r=>{try{const e=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(e)edits.set(String(r.id),e)}catch(_){}});return [...base.map(r=>edits.get(String(r.id))||r),...custom]}
 window.toggleLooseMenu=()=>{const box=$('#looseMenuBox');box.hidden=!box.hidden};
 window.showRecipeSearch=id=>{const box=$('#recipeSearchBox');box.innerHTML=`<div class="recipe-search"><input id="occasionRecipeQuery" placeholder="Zoek recept…" autocomplete="off"><div id="occasionRecipeResults" class="recipe-results"></div></div>`;const input=$('#occasionRecipeQuery');const draw=()=>{const q=input.value.trim().toLowerCase();const a=recipeLibrary().filter(r=>!q||(r.title||'').toLowerCase().includes(q)).slice(0,30);$('#occasionRecipeResults').innerHTML=a.map(r=>`<button onclick="addRecipeToOccasion('${id}','${esc(String(r.id))}')"><span><strong>${esc(r.title)}</strong><small>${esc(r.servings||'')} ${r.servings?'personen':''}</small></span><span>Toevoegen</span></button>`).join('')||'<p class="meta">Geen recepten gevonden.</p>'};input.oninput=draw;draw();input.focus()};
-window.addRecipeToOccasion=(id,recipeId)=>{const e=events.find(x=>x.id===id),r=recipeLibrary().find(x=>String(x.id)===String(recipeId));if(!e||!r)return;normalizeEvent(e);e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});refreshEventShoppingIfCreated(e);save();openDetail(id)};
+window.addRecipeToOccasion=(id,recipeId)=>{const e=events.find(x=>x.id===id),r=recipeLibrary().find(x=>String(x.id)===String(recipeId));if(!e||!r)return;normalizeEvent(e);const base=Number(r.servings)||Number(e.people)||1,target=Number(e.people)||base,factor=target/base;e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:String(r.servings||''),recipeBaseServings:String(base),servings:String(target),ingredients:(r.ingredients||[]).map(x=>({baseQty:x.qty||'',qty:scaledQty(x.qty||'',factor,x.unit,x.ingredient),unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});refreshEventShoppingIfCreated(e);save();openDetail(id)};
+window.openMenuRecipe=i=>{const e=current(),m=e?.menu?.[i];if(!m?.recipeId)return;window.location.href=`../recepten/?recipe=${encodeURIComponent(m.recipeId)}&view=directions&event=${encodeURIComponent(e.id)}&servings=${encodeURIComponent(m.servings||m.recipeServings||'')}`};
+window.setMenuServings=(i,value)=>{const e=current(),m=e?.menu?.[i];if(!m?.recipeId)return;const target=Math.max(1,Number(value)||1),base=Math.max(1,Number(m.recipeBaseServings||m.recipeServings)||target),factor=target/base;m.servings=String(target);m.ingredients=(m.ingredients||[]).map(ing=>({...ing,baseQty:ing.baseQty??ing.qty??'',qty:scaledQty(ing.baseQty??ing.qty??'',factor,ing.unit,ing.ingredient)}));refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 window.toggleMenuIngredient=(i,j,v)=>{const e=current();if(!e?.menu?.[i]?.ingredients?.[j])return;e.menu[i].ingredients[j].enabled=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 function shoppingHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateShopping(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" onchange="updateShopping(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" onchange="updateShopping(${i},'qty',this.value)"><button class="del danger" onclick="deleteShopping(${i})">×</button></div>`}
 function needHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateNeed(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Benodigd" onchange="updateNeed(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" aria-label="Aantal" onchange="updateNeed(${i},'qty',this.value)"><button class="del danger" onclick="deleteNeed(${i})" aria-label="Verwijderen">×</button></div>`}
@@ -132,7 +159,7 @@ function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});refreshEventShoppingIfCreated(e);save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
-// V1.3.91 - datum van een gelegenheid zonder lokale tijdzone naar ISO-week omzetten.
+// V1.3.92 - datum van een gelegenheid zonder lokale tijdzone naar ISO-week omzetten.
 function eventWeekKey(date){let d;if(date){const m=String(date).match(/^(\d{4})-(\d{2})-(\d{2})$/);d=m?new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3]))):new Date(date)}else{const n=new Date();d=new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))}if(Number.isNaN(d.getTime()))return '';const x=new Date(d);x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
 function currentWeekKey(){return eventWeekKey('')}
 function buildEventShopping(e){
@@ -174,3 +201,4 @@ window.saveEvaluation=id=>{const e=events.find(x=>x.id===id);e.evaluation=$('#ev
 window.editEvent=id=>{const e=events.find(x=>x.id===id);$('#detailDialog').close();openForm(e)};
 window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>x.id!==id);if(occasionUser)deleteDoc(plannerItemRef(id)).catch(()=>{});save();$('#detailDialog').close()};
 render();initCloud();
+const requestedEvent=new URLSearchParams(location.search).get('event');if(requestedEvent&&events.some(e=>String(e.id)===String(requestedEvent)))setTimeout(()=>openDetail(requestedEvent),0);
