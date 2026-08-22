@@ -62,6 +62,33 @@ function migrateProduct(x) {
 }
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
+
+// V1.3.77: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
+// Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
+(function migrateCompleteHerbDatabase() {
+  const migrationKey = 'household-migration-complete-herbs-v1377';
+  if (localStorage.getItem(migrationKey) === 'done') return;
+
+  const herbSeed = seed.filter(product => product.category === 'Kruiden');
+  const existingNames = new Set(products.map(product => String(product.name || '').trim().toLocaleLowerCase('nl-NL')));
+  let nextId = Math.max(0, ...products.map(product => Number(product.id) || 0)) + 1;
+
+  herbSeed.forEach(herb => {
+    const key = String(herb.name || '').trim().toLocaleLowerCase('nl-NL');
+    if (!key || existingNames.has(key)) return;
+    products.push({
+      ...herb,
+      id: nextId++,
+      status: 'In huis',
+      shopping: false,
+      done: false
+    });
+    existingNames.add(key);
+  });
+
+  localStorage.setItem('household-products-v2', JSON.stringify(products));
+  localStorage.setItem(migrationKey, 'done');
+})();
 const wideDesktop=window.matchMedia('(min-width:851px)').matches;
 let page = wideDesktop ? (sessionStorage.getItem('hc-household-page-session') || 'list') : (localStorage.getItem('household-page') || 'list');
 let group = localStorage.getItem('household-group') || 'store';

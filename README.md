@@ -1,8 +1,11 @@
-## V1.3.76
+## V1.3.77
+- De volledige kruiden-, specerijen- en kruidenmixdatabase wordt nu **éénmalig toegevoegd aan bestaande voorraad**.
+- Bestaande kruiden blijven volledig behouden; status, memo, hoeveelheid en winkel worden niet overschreven.
+- Alleen ontbrekende kruidennamen worden toegevoegd, zonder dubbelen.
 - Volledige uitgebreide kruiden-, specerijen- en kruidenmixdatabase toegevoegd aan categorie Kruiden.
 - Bij **Kies uit je voorraad** is de knop **Alles deselecteren** toegevoegd; hiermee wordt de volledige voorraadselectie gewist.
 - **Diepvries** is toegevoegd aan de voorraadgroepen waarmee passende recepten gezocht kunnen worden.
-- Versie- en cacheverwijzingen bijgewerkt naar V1.3.76.
+- Versie- en cacheverwijzingen bijgewerkt naar V1.3.77.
 
 
 ## V1.3.74
