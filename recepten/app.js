@@ -63,7 +63,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.100 - voorraad koppelen aan recepten
+// V1.3.101 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -105,7 +105,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.100 - recepten per week plannen (zonder dagen)
+// V1.3.101 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -119,7 +119,8 @@ function qtyNumber(v){const n=parseFloat(String(v??'').replace(',','.'));return 
 function toBaseAmount(qty,unit){const n=qtyNumber(qty),u=normalizedUnit(unit);if(n==null)return null;if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
 function stockCoverage(ingredient,preferredProductId=''){
   const matches=stockProducts().filter(p=>p.status==='In huis'&&ingredientMatchesProduct(ingredient.ingredient,p));
-  const product=matches.find(p=>String(p.id)===String(preferredProductId))||matches[0];
+  const genericPasta=isGenericPasta(ingredient.ingredient);
+  const product=matches.find(p=>String(p.id)===String(preferredProductId))||(genericPasta?matches.find(p=>pastaType(p.name)):null)||matches[0];
   if(!product)return {matched:false,enough:false,label:'Niet in huis',product:null,shortage:null,matches:[]};
   const have=toBaseAmount(product.quantity,product.unit),need=toBaseAmount(ingredient.qty,ingredient.unit);
   let enough=true,shortage=null;
@@ -134,12 +135,15 @@ function stockCoverage(ingredient,preferredProductId=''){
     }
   }
   const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';
-  return {matched:true,enough,label:`In huis: ${available}`,product,shortage,matches};
+  const productName=String(product.name||'').trim();
+  const pastaChoiceName=genericPasta && pastaType(productName) ? productName : '';
+  const label=pastaChoiceName?`In huis: ${pastaChoiceName} · ${available}`:`In huis: ${available}`;
+  return {matched:true,enough,label,product,shortage,matches};
 }
 function plannerOrderRows(shown,existing,week){
   if(week!==upcomingWeekKey())return '';
   const old=existing?.ingredients||[];
-  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert eerst wat al in huis is. Alleen wat nog nodig is kan op de boodschappenlijst komen. Vink aan wat je al elders hebt besteld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'';const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${coverage.matches?.length>1&&isGenericPasta(i.ingredient)?`<select class="stock-alternative-select" data-stock-choice="${n}" aria-label="Kies pastasoort uit voorraad">${coverage.matches.map(p=>`<option value="${esc(p.id)}" ${String(prev?.stockProductId||coverage.product?.id)===String(p.id)?'selected':''}>${esc(p.name)} · ${esc([p.quantity,p.unit].filter(Boolean).join(' '))}</option>`).join('')}</select>`:''}</span></label>`}).join('')}</div></div>`
+  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert eerst wat al in huis is. Alleen wat nog nodig is kan op de boodschappenlijst komen. Vink aan wat je al elders hebt besteld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'';const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${isGenericPasta(i.ingredient)&&coverage.matches?.some(p=>pastaType(p.name))?`<select class="stock-alternative-select" data-stock-choice="${n}" aria-label="Kies pastasoort uit voorraad">${coverage.matches.filter(p=>pastaType(p.name)).map(p=>`<option value="${esc(p.id)}" ${String(prev?.stockProductId||coverage.product?.id)===String(p.id)?'selected':''}>${esc(p.name)} · ${esc([p.quantity,p.unit].filter(Boolean).join(' '))}</option>`).join('')}</select>`:''}</span></label>`}).join('')}</div></div>`
 }
 function showWeekPlanner(r){
   detail.querySelector('.recipe-week-picker')?.remove();
@@ -148,13 +152,22 @@ function showWeekPlanner(r){
   box.innerHTML=`<h3>Plan voor week</h3><p>Geen dag nodig. De ingrediënten voor ${esc(displayServings||r.servings||'?')} personen verschijnen alleen op de boodschappenlijst van deze week.</p><select id="recipePlanWeek">${weekOptions()}</select><div id="recipePlanOrdered"></div><div class="actions"><button class="btn primary" id="saveRecipeWeek">Inplannen</button></div>`;
   detail.appendChild(box);
   const select=box.querySelector('#recipePlanWeek'),orderedBox=box.querySelector('#recipePlanOrdered');
-  const refreshOrdered=()=>{const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);orderedBox.innerHTML=plannerOrderRows(shown,existing,week)};
+  const refreshOrdered=()=>{
+    const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);
+    orderedBox.innerHTML=plannerOrderRows(shown,existing,week);
+    orderedBox.querySelectorAll('[data-stock-choice]').forEach(choice=>choice.addEventListener('change',()=>{
+      const n=Number(choice.dataset.stockChoice),ingredient=shown.ingredients?.[n];if(!ingredient)return;
+      const coverage=stockCoverage(ingredient,choice.value),row=choice.closest('.recipe-order-row'),info=row?.querySelector('.stock-coverage'),cb=row?.querySelector('[data-plan-ordered]');
+      if(info){info.textContent=coverage.matched?(coverage.enough?coverage.label:`${coverage.label}${coverage.shortage?` · tekort ${[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' ')}`:''}`):'Niet in huis';info.className=`stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}`}
+      row?.classList.toggle('in-stock',Boolean(coverage.enough));if(cb){cb.disabled=Boolean(coverage.enough);if(coverage.enough)cb.checked=false}
+    }));
+  };
   select.addEventListener('change',refreshOrdered);refreshOrdered();
   box.querySelector('#saveRecipeWeek').onclick=()=>{const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const old=existing?.ingredients||[];const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:shown.servings||r.servings||'',ingredients:(shown.ingredients||[]).map((i,n)=>{const preferred=box.querySelector(`[data-stock-choice=\"${n}\"]`)?.value||old[n]?.stockProductId||'',coverage=stockCoverage(i,preferred),ordered=week===upcomingWeekKey()?Boolean(box.querySelector(`[data-plan-ordered="${n}"]`)?.checked):Boolean(old[n]?.ordered&&week===upcomingWeekKey());return {id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:old[n]?.done||false,ordered,stockEnough:Boolean(coverage.enough),stockProductId:coverage.product?.id??'',stockLabel:coverage.matched?coverage.label:'',shoppingQty:coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):(old[n]?.shoppingQty||''),store:old[n]?.store||coverage.product?.store||'',category:old[n]?.category||coverage.product?.category||''}})};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}
 }
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.100 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.101 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -181,8 +194,9 @@ function renderWeekMenu(){
   weekMenuTitle.textContent=weekNumberLabel(selectedMenuWeek);
   const plans=recipeWeekPlans().filter(p=>p.week===selectedMenuWeek);
   if(!plans.length){weekMenuList.innerHTML=`<div class="week-menu-empty">Voor deze week zijn nog geen recepten geselecteerd.<br><button class="btn primary" id="weekMenuFindRecipes" type="button">Recept kiezen</button></div>`;weekMenuList.querySelector('#weekMenuFindRecipes')?.addEventListener('click',()=>showRecipeModule('recipes'));return}
-  weekMenuList.innerHTML=plans.map(p=>`<article class="week-menu-card" data-plan-card="${esc(p.id)}"><button class="week-menu-recipe-link" data-open-week-recipe="${esc(p.recipeId)}" type="button"><span><strong>${esc(p.title||'Recept')}</strong><small>${p.servings?esc(p.servings)+' personen · ':''}${(p.ingredients||[]).length} ingrediënten</small></span><span class="go">›</span></button><div class="week-menu-actions"><select data-move-week="${esc(p.id)}" aria-label="Andere week">${menuWeekOptions(p.week)}</select><button class="btn" data-move-plan="${esc(p.id)}" type="button">Verplaatsen</button><button class="btn danger remove-week-plan" data-remove-plan="${esc(p.id)}" type="button">Uit deze week verwijderen</button></div>${selectedMenuWeek===upcomingWeekKey()?`<div class="week-menu-ordered"><strong>Voorraad & besteld</strong>${(p.ingredients||[]).map((i,n)=>{const coverage=stockCoverage(i);const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label}${coverage.shortage?` · tekort ${[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' ')}`:''}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-week-ordered="${esc(p.id)}:${n}" ${i.ordered?'checked':''} ${coverage.enough?'disabled':''}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small></span></label>`}).join('')}</div>`:''}</article>`).join('');
+  weekMenuList.innerHTML=plans.map(p=>`<article class="week-menu-card" data-plan-card="${esc(p.id)}"><button class="week-menu-recipe-link" data-open-week-recipe="${esc(p.recipeId)}" type="button"><span><strong>${esc(p.title||'Recept')}</strong><small>${p.servings?esc(p.servings)+' personen · ':''}${(p.ingredients||[]).length} ingrediënten</small></span><span class="go">›</span></button><div class="week-menu-actions"><select data-move-week="${esc(p.id)}" aria-label="Andere week">${menuWeekOptions(p.week)}</select><button class="btn" data-move-plan="${esc(p.id)}" type="button">Verplaatsen</button><button class="btn danger remove-week-plan" data-remove-plan="${esc(p.id)}" type="button">Uit deze week verwijderen</button></div>${selectedMenuWeek===upcomingWeekKey()?`<div class="week-menu-ordered"><strong>Voorraad & besteld</strong>${(p.ingredients||[]).map((i,n)=>{const coverage=stockCoverage(i);const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label}${coverage.shortage?` · tekort ${[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' ')}`:''}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-week-ordered="${esc(p.id)}:${n}" ${i.ordered?'checked':''} ${coverage.enough?'disabled':''}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${isGenericPasta(i.ingredient)&&coverage.matches?.some(x=>pastaType(x.name))?`<select class="stock-alternative-select" data-week-stock-choice="${esc(p.id)}:${n}" aria-label="Kies pastasoort uit voorraad">${coverage.matches.filter(x=>pastaType(x.name)).map(x=>`<option value="${esc(x.id)}" ${String(i.stockProductId||coverage.product?.id)===String(x.id)?'selected':''}>${esc(x.name)} · ${esc([x.quantity,x.unit].filter(Boolean).join(' '))}</option>`).join('')}</select>`:''}</span></label>`}).join('')}</div>`:''}</article>`).join('');
   weekMenuList.querySelectorAll('[data-week-ordered]').forEach(cb=>cb.addEventListener('change',()=>{const [id,idx]=String(cb.dataset.weekOrdered).split(':');const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===id);if(!plan?.ingredients?.[Number(idx)])return;plan.ingredients[Number(idx)].ordered=cb.checked;saveRecipeWeekPlans(plans)}));
+  weekMenuList.querySelectorAll('[data-week-stock-choice]').forEach(choice=>choice.addEventListener('change',()=>{const [id,idx]=String(choice.dataset.weekStockChoice).split(':');const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===id),ingredient=plan?.ingredients?.[Number(idx)];if(!ingredient)return;const coverage=stockCoverage(ingredient,choice.value);ingredient.stockProductId=coverage.product?.id??'';ingredient.stockEnough=Boolean(coverage.enough);ingredient.stockLabel=coverage.matched?coverage.label:'';ingredient.shoppingQty=coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):'';ingredient.store=coverage.product?.store||ingredient.store||'';ingredient.category=coverage.product?.category||ingredient.category||'';if(coverage.enough)ingredient.ordered=false;saveRecipeWeekPlans(plans);renderWeekMenu()}));
   weekMenuList.querySelectorAll('[data-open-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const r=getRecipe(btn.dataset.openWeekRecipe);if(!r){alert('Dit recept is niet meer beschikbaar in Recepten.');return}const plan=recipeWeekPlans().find(x=>String(x.recipeId)===String(r.id)&&x.week===selectedMenuWeek);openedFromWeekMenu=true;current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=String(plan?.servings||r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView('directions')}));
   weekMenuList.querySelectorAll('[data-move-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.movePlan));const select=weekMenuList.querySelector(`[data-move-week="${CSS.escape(String(btn.dataset.movePlan))}"]`);if(!plan||!select)return;const oldWeek=plan.week,newWeek=select.value;if(newWeek===oldWeek)return;plan.week=newWeek;saveRecipeWeekPlans(plans);renderWeekMenu()}));
   weekMenuList.querySelectorAll('[data-remove-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.removePlan));if(!plan)return;if(!confirm(`${plan.title||'Dit recept'} uit ${weekNumberLabel(selectedMenuWeek)} verwijderen?`))return;saveRecipeWeekPlans(plans.filter(x=>String(x.id)!==String(btn.dataset.removePlan)));renderWeekMenu()}));
@@ -208,10 +222,10 @@ showRecipeModule('weekmenu');
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}
 
-// V1.3.100 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.101 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.100 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.101 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
