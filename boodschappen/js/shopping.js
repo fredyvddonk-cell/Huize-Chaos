@@ -66,7 +66,7 @@ function shoppingGroupKey(level, parent, name) {
 
 
 function shoppingPrioritySort(a, b) {
-  const priority = status => status === 'Kopen' ? 0 : status === 'Niet in huis' ? 1 : 2;
+  const priority = status => status === 'Niet in huis' ? 0 : 1;
   return priority(a.status) - priority(b.status) || sortProducts(a, b);
 }
 
@@ -107,7 +107,7 @@ window.toggleAllShopping = () => {
   if (expandedShoppingGroups.size) {
     expandedShoppingGroups.clear();
   } else {
-    let arr = products.filter(x => x.shopping && !(x.status === 'Kopen' && x.buyDirectWhenOut));
+    let arr = products.filter(x => x.shopping);
     if (group === 'store' && shoppingStoreFilter !== 'all') {
       arr = arr.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
     }
@@ -146,7 +146,7 @@ function renderShopping(allProducts) {
   }
 
   const row = (x, showLocation = false) => {
-    const isUrgent = x.status === 'Kopen' && x.buyDirectWhenOut;
+    const isUrgent = x.status === 'Niet in huis' && x.buyDirectWhenOut;
     return `
     <div class="item shopping-item ${x.done ? 'done' : ''} ${isUrgent ? 'urgent-item' : ''}">
       <input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done ? 'checked' : ''} onchange="markBought(${x.id}, this.checked)">
@@ -179,7 +179,7 @@ function renderShopping(allProducts) {
   const printCategories = groups(printable, 'category').map(([categoryName, items]) => {
     let weight = 2;
     const rows = [...items].sort(shoppingPrioritySort).map(x => {
-        const isUrgent = x.status === 'Kopen' && x.buyDirectWhenOut;
+        const isUrgent = x.status === 'Niet in huis' && x.buyDirectWhenOut;
         const details = [quantityText(x), x.memo].filter(Boolean).map(esc).join(' · ');
         weight += 1 + (details ? .55 : 0) + (String(x.name).length > 28 ? .4 : 0) + (details.length > 36 ? .35 : 0);
         return `<div class="print-item ${isUrgent ? 'urgent-item' : ''}">

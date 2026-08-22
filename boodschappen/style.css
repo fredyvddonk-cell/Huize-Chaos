@@ -411,16 +411,19 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-purchase-count{display:block;text-align:center;margin:4px 0 14px;color:#777}
 @media(max-width:700px){.insight-budget-grid{grid-template-columns:1fr}}
 
-/* V1.3.77 - diagnostiek Jumbo scanbon */
+/* V1.3.78 - diagnostiek Jumbo scanbon */
 .receipt-debug{margin-top:12px;border:1px dashed #9b83bd;border-radius:12px;padding:10px 12px;background:#faf8fd}
 .receipt-debug summary{cursor:pointer;color:#6737b4;font-weight:850}
 .receipt-debug h4{margin:12px 0 5px;font-size:12px}
 .receipt-debug-stats{font-size:12px;line-height:1.5;margin-top:8px}
 .receipt-debug-pre{max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #e7e0eb;border-radius:9px;padding:9px;font:11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
 
-/* V1.3.77 - gedeelde bonnen eerst controleren */
+/* V1.3.78 - gedeelde bonnen eerst controleren */
 .receipt-pending-section{border:1px solid #dacdea;background:#fbf9fd}
 .receipt-pending-section h2{display:flex;align-items:center;gap:8px}
 .pending-count{min-width:25px;height:25px;padding:0 7px;border-radius:999px;background:#957ac1;color:#fff;display:inline-grid;place-items:center;font-size:12px}
 .receipt-pending-card{width:100%;border:1px solid #e5deeb;background:#fff;border-radius:13px;padding:12px 13px;margin-top:8px;display:flex;justify-content:space-between;gap:12px;text-align:left;color:inherit}
 .receipt-pending-card span:last-child{text-align:right}.receipt-pending-card small{display:block;color:#7b7280;margin-top:3px;font-size:11px}
+
+/* V1.3.78 - voorraadstatus los van boodschappenkeuze */
+.stock-buy-check{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #d8d0e6;border-radius:10px;background:#fff;font-weight:700;color:#4f465d;cursor:pointer}.stock-buy-check input{width:18px;height:18px;accent-color:#3FA7A3}.stock-actions{flex-wrap:wrap}

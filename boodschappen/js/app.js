@@ -48,10 +48,10 @@ function migrateProduct(x) {
   product.memo = String(product.memo || '');
   product.store = String(product.store || '');
   product.category = String(product.category || '');
-  product.status = ({'Voldoende':'In huis','Aanvullen':'Niet in huis','Op':'Kopen'}[product.status] || product.status || 'In huis');
-  if (product.status === 'Niet in huis') product.shopping = false;
-  if (product.status === 'Kopen') product.shopping = true;
-  product.shopping = Boolean(product.shopping);
+  const oldStatus = product.status;
+  product.status = ({'Voldoende':'In huis','Aanvullen':'Niet in huis','Op':'Niet in huis','Kopen':'Niet in huis'}[oldStatus] || oldStatus || 'In huis');
+  if (!['In huis','Niet in huis'].includes(product.status)) product.status = 'In huis';
+  product.shopping = Boolean(product.shopping || oldStatus === 'Op' || oldStatus === 'Kopen');
   product.done = Boolean(product.done);
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
   product.temporary = Boolean(product.temporary);
@@ -63,7 +63,7 @@ function migrateProduct(x) {
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
 
-// V1.3.77: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
+// V1.3.78: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
 // Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
 (function migrateCompleteHerbDatabase() {
   const migrationKey = 'household-migration-complete-herbs-v1377';
