@@ -120,22 +120,31 @@ window.toggleAllShopping = () => {
 };
 
 
+let shoppingWeekOffset=Number(localStorage.getItem('hc-shopping-week-offset')||0);
+function shoppingWeekKey(offset=shoppingWeekOffset){const d=new Date();d.setDate(d.getDate()+offset*7);const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
+function eventWeekKey(date){if(!date)return shoppingWeekKey();const d=new Date(date+'T12:00:00');const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
+function weekLabel(){return `Week ${Number(shoppingWeekKey().slice(-2))}`}
+function inferShoppingMeta(name){const n=String(name||'').toLowerCase();const p=products.find(x=>String(x.name||'').toLowerCase()===n)||products.find(x=>n.includes(String(x.name||'').toLowerCase())||String(x.name||'').toLowerCase().includes(n));return {category:p?.category||'Overig',store:p?.store||'Overig',status:p?.status||'Niet in huis'} }
+function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem('huize-chaos-recipe-weeks-v1')||'[]')}catch(_){return[]}}
+function recipeShoppingRows(){const week=shoppingWeekKey();const stock=products||[];return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).filter(i=>!i.done).map((i,index)=>{const m=inferShoppingMeta(i.ingredient);const inHouse=stock.some(x=>x.status==='In huis'&&String(x.name||'').toLowerCase()===String(i.ingredient||'').toLowerCase());return inHouse?null:{...m,name:i.ingredient,qty:[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,index}}).filter(Boolean))}
+function plannedRecipeTitles(){return [...new Set(recipeWeekPlans().filter(p=>p.week===shoppingWeekKey()).map(p=>p.title).filter(Boolean))]}
 function occasionShoppingData(){
-  try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).filter(e=>(e.shopping||[]).some(x=>!x.done))}catch(_){return []}
+  const week=shoppingWeekKey();try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).map(e=>({...e,shopping:(e.shopping||[]).filter(x=>!x.done && ((x.buyWeek||eventWeekKey(e.date))===week))})).filter(e=>e.shopping.length)}catch(_){return []}
 }
-function occasionShoppingHtml(){
-  return occasionShoppingData().map(e=>`<section class="shopping-group occasion-shopping-wrap"><div class="shopping-group-head"><span>${esc(e.name||'Gelegenheid')}</span><span>${(e.shopping||[]).filter(x=>!x.done).length}</span></div><div class="shopping-group-body">${(e.shopping||[]).filter(x=>!x.done).map((x,i)=>`<div class="item shopping-item occasion-shopping-item"><input class="check" type="checkbox" aria-label="${esc(x.text)} gekocht" onchange="markOccasionBought('${String(e.id).replace(/'/g,"\'")}',${i},this.checked)"><div class="main"><div class="name">${esc(x.text)}</div>${x.qty?`<div class="meta">${esc(x.qty)} · ${esc(e.name||'Gelegenheid')}</div>`:`<div class="meta">${esc(e.name||'Gelegenheid')}</div>`}</div></div>`).join('')}</div></section>`).join('')
-}
+function occasionShoppingRows(){return occasionShoppingData().flatMap(e=>(e.shopping||[]).map((x,i)=>{const m=inferShoppingMeta(x.text);return {...m,name:x.text,qty:x.qty||'',sourceName:e.name||'Gelegenheid',sourceType:'occasion',eventId:e.id,index:i}}))}
+function sourceShoppingHtml(){const rows=[...occasionShoppingRows(),...recipeShoppingRows()];if(!rows.length)return '';const key=group==='store'?'store':'category';const grouped={};rows.forEach(x=>(grouped[x[key]||'Overig']??=[]).push(x));return Object.entries(grouped).map(([title,items])=>`<section class="shopping-group"><div class="shopping-group-head"><span>${esc(title)}</span><span>${items.length}</span></div><div class="shopping-group-body">${items.map(x=>`<div class="item shopping-item"><input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" onchange="${x.sourceType==='occasion'?`markOccasionBought('${String(x.eventId).replace(/'/g,"\\'")}',${x.index},this.checked)`:`markRecipeIngredientBought('${x.planId}',${x.index},this.checked)`}"><div class="main"><div class="name">${esc(x.name)}</div><div class="meta">${[x.qty,x.sourceName].filter(Boolean).map(esc).join(' · ')}</div></div></div>`).join('')}</div></section>`).join('')}
 window.markOccasionBought=(eventId,visibleIndex,checked)=>{
   let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}
-  const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const open=(e.shopping||[]).filter(x=>!x.done);const target=open[visibleIndex];if(!target)return;target.done=Boolean(checked);localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render();
+  const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const open=(e.shopping||[]).filter(x=>!x.done && ((x.buyWeek||eventWeekKey(e.date))===shoppingWeekKey()));const target=open[visibleIndex];if(!target)return;target.done=Boolean(checked);localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render();
 };
+window.markRecipeIngredientBought=(planId,index,checked)=>{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(planId));if(!p||!p.ingredients?.[index])return;p.ingredients[index].done=Boolean(checked);localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));render()};
+window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 
 function renderShopping(allProducts) {
   const arr = allProducts.filter(x => x.shopping);
   const done = arr.filter(x => x.done).length;
-  const occasionCount=occasionShoppingData().reduce((n,e)=>n+(e.shopping||[]).filter(x=>!x.done).length,0);
+  const occasionCount=occasionShoppingRows().length + recipeShoppingRows().length;
 
   $('#count').textContent = `${arr.length + occasionCount} boodschappen · ${done} afgevinkt`;
   const collapseBtn = $('#collapseShoppingBtn');
@@ -189,7 +198,7 @@ function renderShopping(allProducts) {
     html = groups(visibleItems, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
   }
 
-  const printable = arr.filter(x => !x.done);
+  const sourcePrintable=[...occasionShoppingRows(),...recipeShoppingRows()].map(x=>({name:x.name,category:x.category||'Overig',quantity:x.qty||'',unit:'',memo:x.sourceName||'',status:x.status||'Niet in huis'})); const printable = [...arr.filter(x => !x.done),...sourcePrintable];
   const printCategories = groups(printable, 'category').map(([categoryName, items]) => {
     let weight = 2;
     const rows = [...items].sort(shoppingPrioritySort).map(x => {
@@ -223,7 +232,7 @@ function renderShopping(allProducts) {
   const rightPrintColumn = printCategories.slice(splitAt).map(category => category.html).join('');
   const printHtml = `<div class="print-column">${leftPrintColumn}</div><div class="print-column">${rightPrintColumn}</div>`;
 
-  content.innerHTML = `<div class="screen-shopping">${occasionShoppingHtml()}${html}</div><div class="print-shopping">${printHtml}</div>`;
+  const recipeHeads=plannedRecipeTitles(); const headsHtml=recipeHeads.length?`<div class="print-week-recipes"><h1>Week ${Number(shoppingWeekKey().slice(-2))}</h1><ul>${recipeHeads.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''; content.innerHTML = `<div class="screen-shopping">${sourceShoppingHtml()}${html}</div>${headsHtml}<div class="print-shopping">${printHtml}</div>`;
 }
 
 
@@ -255,7 +264,7 @@ function bindShoppingEvents() {
     };
   });
 
-  $('#collapseShoppingBtn').onclick = toggleAllShopping;
+  $('#collapseShoppingBtn').onclick = toggleAllShopping; const wl=$('#shoppingWeekLabel');if(wl)wl.textContent=weekLabel();$('#prevShoppingWeek').onclick=()=>{shoppingWeekOffset--;localStorage.setItem('hc-shopping-week-offset',shoppingWeekOffset);render()};$('#nextShoppingWeek').onclick=()=>{shoppingWeekOffset++;localStorage.setItem('hc-shopping-week-offset',shoppingWeekOffset);render()};
   $('#printList').onclick = () => window.print();
   document.addEventListener('click', event => {
     document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => {

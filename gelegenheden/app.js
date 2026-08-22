@@ -81,7 +81,7 @@ window.openDetail=id=>{
 
     <section class="occasion-section shopping-section">
       <div class="section-title"><div><h3>Boodschappen</h3><p>Maak de lijst vanuit je benodigdheden en menu. De boodschappen verschijnen daarna bij Menu → Boodschappen.</p></div><button class="primary" onclick="createShopping('${id}')">Naar Boodschappen</button></div>
-      ${(e.shopping||[]).length?`<p class="meta">${e.shopping.filter(x=>!x.done).length} boodschappen voor ${esc(e.name)} staan in Boodschappen.</p>`:'<p class="meta empty-line">Nog geen boodschappen doorgestuurd.</p>'}
+      ${(e.shopping||[]).length?`<p class="meta">${e.shopping.filter(x=>!x.done).length} boodschappen gepland. Wil je iets vanwege een aanbieding eerder kopen, zet het dan op deze week.</p><div class="early-buy-list">${e.shopping.filter(x=>!x.done).map((x,i)=>`<div class="early-buy-row"><span>${esc(x.text)} ${x.qty?`<small>${esc(x.qty)}</small>`:''}</span><button onclick="buyNow(${i})">Nu kopen</button></div>`).join('')}</div>`:'<p class="meta empty-line">Nog geen boodschappen doorgestuurd.</p>'}
     </section>
 
     <section class="occasion-section">
@@ -114,7 +114,10 @@ function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;save();openDetail(e.id)};
 window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);save();openDetail(e.id)};
-window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();window.location.href='../boodschappen/?page=list'};
+function eventWeekKey(date){const d=date?new Date(date+'T12:00:00'):new Date();const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
+function currentWeekKey(){return eventWeekKey('')}
+window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false,buyWeek:eventWeekKey(e.date)})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();window.location.href='../boodschappen/?page=list'};
+window.buyNow=i=>{const e=current();if(!e||!e.shopping[i])return;e.shopping[i].buyWeek=currentWeekKey();save();openDetail(e.id)};
 window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
 window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
 window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];save();openDetail(id)};
