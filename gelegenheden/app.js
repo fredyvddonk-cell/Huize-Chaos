@@ -5,7 +5,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const nlDate=s=>{if(!s)return 'Geen datum';const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'short',year:'numeric'}).format(d)};
-function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.evaluation=e.evaluation||'';return e}
+function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=e.menu||[];e.shopping=e.shopping||[];e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
 function save(){localStorage.setItem(KEY,JSON.stringify(events));render()}
 function catTotals(e){return ['Eten','Hapjes','Dranken','Overig'].map(c=>[c,(e.items||[]).filter(x=>x.category===c).reduce((a,x)=>a+(+x.cost||0),0)])}
@@ -34,7 +34,7 @@ $('#eventForm').onsubmit=ev=>{
   ev.preventDefault();
   const id=$('#eventId').value||String(Date.now());
   let e=events.find(x=>x.id===id);
-  if(!e){e={id,items:[],needs:[],prep:[],evaluation:''};events.push(e)}
+  if(!e){e={id,items:[],needs:[],prep:[],menu:[],shopping:[],evaluation:''};events.push(e)}
   normalizeEvent(e);
   e.name=$('#eventName').value.trim();
   e.date=$('#eventDate').value;
@@ -51,15 +51,27 @@ window.openDetail=id=>{
     <div class="summary">${sums.map(([c,n])=>`<div class="sum"><small>${c}</small><strong>${money(n)}</strong></div>`).join('')}</div>
 
     <section class="occasion-section">
+      <div class="section-title"><div><h3>Menu</h3><p>Maak voor iedere gelegenheid een menu. Een gerecht hoeft geen bestaand recept te zijn.</p></div></div>
+      <div class="menu-list">${(e.menu||[]).map((x,i)=>menuHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen gerechten toegevoegd.</p>'}</div>
+      <div class="quick-add menu-add"><select id="newMenuType"><option>Hapje</option><option>Voorgerecht</option><option>Hoofdgerecht</option><option>Bijgerecht</option><option>Dessert</option><option>Drank</option><option>Overig</option></select><input id="newMenuDish" placeholder="Gerecht of onderdeel"><input id="newMenuNeeded" placeholder="Benodigdheden (optioneel)"><button class="primary" onclick="addMenu('${id}')">+ Toevoegen</button></div>
+    </section>
+
+    <section class="occasion-section">
       <div class="section-title"><div><h3>Wat heb ik nodig?</h3><p>Maak vooraf een lijst met wat je voor deze gelegenheid nodig hebt.</p></div></div>
       <div id="needsList" class="check-list">${(e.needs||[]).map((x,i)=>needHtml(x,i)).join('')||'<p class="meta empty-line">Nog niets op de lijst.</p>'}</div>
       <div class="quick-add needs-add"><input id="newNeed" placeholder="Bijv. chips, servetten of kaarsjes"><input id="newNeedQty" placeholder="Aantal / hoeveelheid"><button class="primary" onclick="addNeed('${id}')">+ Toevoegen</button></div>
     </section>
 
     <section class="occasion-section">
-      <div class="section-title"><div><h3>Voorbereiden</h3><p>Zet klaar wat er gedaan moet worden. Een datum is optioneel.</p></div></div>
+      <div class="section-title"><div><h3>Voorbereiden</h3><p>Zet klaar wat er gedaan moet worden. Datum en tijd zijn optioneel.</p></div></div>
       <div id="prepList" class="check-list">${prepSorted(e).map(({x,i})=>prepHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen voorbereidingen toegevoegd.</p>'}</div>
-      <div class="quick-add prep-add"><input id="newPrep" placeholder="Bijv. soep maken of tafel dekken"><label class="compact-date"><span>Datum (optioneel)</span><input id="newPrepDate" type="date"></label><button class="primary" onclick="addPrep('${id}')">+ Toevoegen</button></div>
+      <div class="quick-add prep-add"><input id="newPrep" placeholder="Bijv. soep maken of tafel dekken"><label class="compact-date"><span>Datum (optioneel)</span><input id="newPrepDate" type="date"></label><label class="compact-date"><span>Tijd (optioneel)</span><input id="newPrepTime" type="time"></label><button class="primary" onclick="addPrep('${id}')">+ Toevoegen</button></div>
+    </section>
+
+    <section class="occasion-section shopping-section">
+      <div class="section-title"><div><h3>Boodschappenlijst</h3><p>Maak een boodschappenlijst vanuit je benodigdheden en het menu. Controleer de lijst voordat je gaat winkelen.</p></div><button onclick="createShopping('${id}')">Boodschappenlijst maken</button></div>
+      <div class="check-list">${(e.shopping||[]).map((x,i)=>shoppingHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen boodschappenlijst gemaakt.</p>'}</div>
+      ${(e.shopping||[]).length?`<div class="shopping-actions"><button onclick="clearShopping('${id}')">Lijst leegmaken</button></div>`:''}
     </section>
 
     <section class="occasion-section">
@@ -74,18 +86,27 @@ window.openDetail=id=>{
   if(result)result.onchange=()=>{const excess=$('#newExcessQty');excess.hidden=result.value!=='Te veel';if(excess.hidden)excess.value=''};
   $('#detailDialog').showModal()
 };
+function menuHtml(x,i){return `<div class="menu-row"><select onchange="updateMenu(${i},'type',this.value)">${['Hapje','Voorgerecht','Hoofdgerecht','Bijgerecht','Dessert','Drank','Overig'].map(c=>`<option ${x.type===c?'selected':''}>${c}</option>`).join('')}</select><input class="grow" value="${esc(x.dish||'')}" placeholder="Gerecht" onchange="updateMenu(${i},'dish',this.value)"><input value="${esc(x.needed||'')}" placeholder="Benodigdheden" onchange="updateMenu(${i},'needed',this.value)"><button class="del danger" onclick="deleteMenu(${i})">×</button></div>`}
+function shoppingHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateShopping(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" onchange="updateShopping(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" onchange="updateShopping(${i},'qty',this.value)"><button class="del danger" onclick="deleteShopping(${i})">×</button></div>`}
 function needHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateNeed(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Benodigd" onchange="updateNeed(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" aria-label="Aantal" onchange="updateNeed(${i},'qty',this.value)"><button class="del danger" onclick="deleteNeed(${i})" aria-label="Verwijderen">×</button></div>`}
 function prepSorted(e){return (e.prep||[]).map((x,i)=>({x,i})).sort((a,b)=>{if(a.x.done!==b.x.done)return a.x.done?1:-1;if(!a.x.date&&!b.x.date)return 0;if(!a.x.date)return 1;if(!b.x.date)return -1;return a.x.date.localeCompare(b.x.date)})}
-function prepHtml(x,i){return `<div class="check-row prep-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updatePrep(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Voorbereiding" onchange="updatePrep(${i},'text',this.value)"><input class="date" type="date" value="${esc(x.date||'')}" aria-label="Datum" onchange="updatePrep(${i},'date',this.value)"><button class="del danger" onclick="deletePrep(${i})" aria-label="Verwijderen">×</button></div>`}
+function prepHtml(x,i){return `<div class="check-row prep-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updatePrep(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Voorbereiding" onchange="updatePrep(${i},'text',this.value)"><input class="date" type="date" value="${esc(x.date||'')}" aria-label="Datum" onchange="updatePrep(${i},'date',this.value)"><input class="time" type="time" value="${esc(x.time||'')}" aria-label="Tijd" onchange="updatePrep(${i},'time',this.value)"><button class="del danger" onclick="deletePrep(${i})" aria-label="Verwijderen">×</button></div>`}
 function itemHtml(x,i){
   const excess=x.result==='Te veel'?`<input class="excess" value="${esc(x.excessQty||'')}" placeholder="Aantal over" aria-label="Aantal over" onchange="updateItem(${i},'excessQty',this.value)">`:'';
   return `<div class="item-wrap"><div class="item"><input class="product" value="${esc(x.product)}" onchange="updateItem(${i},'product',this.value)"><select onchange="updateItem(${i},'category',this.value)">${['Eten','Hapjes','Dranken','Overig'].map(c=>`<option ${x.category===c?'selected':''}>${c}</option>`).join('')}</select><input value="${esc(x.qty||'')}" placeholder="Aantal" onchange="updateItem(${i},'qty',this.value)"><input value="${esc(x.cost||'')}" inputmode="decimal" placeholder="Kosten" onchange="updateItem(${i},'cost',this.value)"><select onchange="updateItemResult(${i},this.value)"><option value="">—</option>${['Te veel','Precies goed','Te weinig'].map(c=>`<option ${x.result===c?'selected':''}>${c}</option>`).join('')}</select><button class="del danger" onclick="deleteItem(${i})">×</button></div>${excess?`<div class="excess-row"><label>Aantal over${excess}</label></div>`:''}</div>`
 }
 function current(){return events.find(x=>x.id===activeEventId)}
+window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});save();openDetail(id)};
+window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;save();openDetail(e.id)};
+window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);save();openDetail(e.id)};
+window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();openDetail(id)};
+window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
+window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
+window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];save();openDetail(id)};
 window.addNeed=id=>{const e=events.find(x=>x.id===id);const text=$('#newNeed').value.trim();if(!e||!text)return;normalizeEvent(e);e.needs.push({text,qty:$('#newNeedQty').value.trim(),done:false});save();openDetail(id)};
 window.updateNeed=(i,k,v)=>{const e=current();if(!e)return;e.needs[i][k]=v;save();openDetail(e.id)};
 window.deleteNeed=i=>{const e=current();if(!e)return;e.needs.splice(i,1);save();openDetail(e.id)};
-window.addPrep=id=>{const e=events.find(x=>x.id===id);const text=$('#newPrep').value.trim();if(!e||!text)return;normalizeEvent(e);e.prep.push({text,date:$('#newPrepDate').value,done:false});save();openDetail(id)};
+window.addPrep=id=>{const e=events.find(x=>x.id===id);const text=$('#newPrep').value.trim();if(!e||!text)return;normalizeEvent(e);e.prep.push({text,date:$('#newPrepDate').value,time:$('#newPrepTime').value,done:false});save();openDetail(id)};
 window.updatePrep=(i,k,v)=>{const e=current();if(!e)return;e.prep[i][k]=v;save();openDetail(e.id)};
 window.deletePrep=i=>{const e=current();if(!e)return;e.prep.splice(i,1);save();openDetail(e.id)};
 window.addItem=id=>{const e=events.find(x=>x.id===id);const product=$('#newProduct').value.trim();if(!product)return;const result=$('#newResult').value;e.items.push({product,category:$('#newCategory').value,qty:$('#newQty').value,cost:$('#newCost').value.replace(',','.'),result,excessQty:result==='Te veel'?$('#newExcessQty').value:''});save();openDetail(id)};

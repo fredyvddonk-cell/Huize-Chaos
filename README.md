@@ -1,4 +1,15 @@
-## V1.3.79
+## V1.3.80
+
+- Iedere gelegenheid heeft nu een eigen Menu.
+- Gerechten kunnen los worden ingevoerd; een bestaand recept is niet verplicht.
+- Per menuonderdeel kunnen benodigdheden worden vastgelegd.
+- Voorbereidingen ondersteunen nu zowel een optionele datum als tijd.
+- Per gelegenheid kan een boodschappenlijst worden gemaakt uit openstaande benodigdheden en menu-benodigdheden.
+- De boodschappenlijst kan worden afgevinkt en aangepast.
+- Evaluatie met Te veel + Aantal over uit V1.3.79 blijft behouden.
+- Geen productafbeeldingen en geen Git-bestanden in de distributie.
+
+## V1.3.80
 - Feestdagen & gelegenheden: bij **Te veel** kan nu **Aantal over** worden ingevuld.
 - Per gelegenheid is een vooraf-lijst **Wat heb ik nodig?** toegevoegd, met hoeveelheid en afvinken.
 - Per gelegenheid is een lijst **Voorbereiden** toegevoegd, met optionele datum en afvinken.
@@ -19,7 +30,7 @@
 - Volledige uitgebreide kruiden-, specerijen- en kruidenmixdatabase toegevoegd aan categorie Kruiden.
 - Bij **Kies uit je voorraad** is de knop **Alles deselecteren** toegevoegd; hiermee wordt de volledige voorraadselectie gewist.
 - **Diepvries** is toegevoegd aan de voorraadgroepen waarmee passende recepten gezocht kunnen worden.
-- Versie- en cacheverwijzingen bijgewerkt naar V1.3.79.
+- Versie- en cacheverwijzingen bijgewerkt naar V1.3.80.
 
 
 ## V1.3.74
