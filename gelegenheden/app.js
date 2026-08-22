@@ -1,8 +1,9 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import { getFirestore, doc, getDoc, onSnapshot, serverTimestamp, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
 const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const occasionRef=doc(db,'households','huize-chaos','insight','occasions');
+const plannerItemRef=id=>doc(db,'households','huize-chaos','plannerItems',`occasion-${String(id).replace(/[^a-zA-Z0-9_-]/g,'_')}`);
 let occasionUser=null,cloudReady=false,applyingCloud=false,syncTimer=0,stopCloud=null;
 const KEY='huize-chaos-occasions-v1';
 let activeEventId='';
@@ -15,7 +16,23 @@ function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep
 events=events.map(normalizeEvent);
 function save(){localStorage.setItem(KEY,JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
 function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncCloud,250)}
-async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false})}
+async function syncOccasionToPlanner(e){
+  if(!occasionUser||!e?.id)return;
+  const ref=plannerItemRef(e.id);
+  if(!e.date){await deleteDoc(ref).catch(()=>{});return}
+  const people=e.people?`${e.people} personen`:'';
+  const note=[people,e.note,'Beheer via Feestdagen & gelegenheden'].filter(Boolean).join(' · ');
+  await setDoc(ref,{
+    localId:`occasion-${e.id}`,
+    type:'appointment',date:String(e.date||''),deadline:'',urgent:false,category:'',
+    title:String(e.name||'Gelegenheid'),time:'',endTime:'',personUid:'',personName:'',participants:[],
+    linkedAppointmentId:'',note,done:false,repeat:'none',completedPeriods:[],createdAt:Number(e.createdAt||Date.now()),
+    visibility:'shared',addedBy:occasionUser.uid,addedByName:(occasionUser.displayName||occasionUser.email||'Huize Chaos').split(/\s+/)[0],
+    occasionId:String(e.id),source:'occasion',updatedAt:serverTimestamp()
+  },{merge:true});
+}
+async function syncAllOccasionsToPlanner(){if(!occasionUser)return;await Promise.all(events.map(syncOccasionToPlanner))}
+async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false});await syncAllOccasionsToPlanner()}
 function initCloud(){onAuthStateChanged(auth,async u=>{occasionUser=u;if(!u)return;try{const snap=await getDoc(occasionRef);if(snap.exists()&&Array.isArray(snap.data().events)){applyingCloud=true;events=snap.data().events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render()}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(occasionRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data();if(!Array.isArray(d.events))return;applyingCloud=true;events=d.events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render();if(activeEventId&&events.some(e=>e.id===activeEventId))openDetail(activeEventId)},()=>{})}catch(err){console.warn('Synchronisatie gelegenheden niet beschikbaar',err)}})}
 function catTotals(e){return ['Eten','Hapjes','Dranken','Overig'].map(c=>[c,(e.items||[]).filter(x=>x.category===c).reduce((a,x)=>a+(+x.cost||0),0)])}
 function render(){
@@ -43,7 +60,7 @@ $('#eventForm').onsubmit=ev=>{
   ev.preventDefault();
   const id=$('#eventId').value||String(Date.now());
   let e=events.find(x=>x.id===id);
-  if(!e){e={id,items:[],needs:[],prep:[],menu:[],shopping:[],evaluation:''};events.push(e)}
+  if(!e){e={id,items:[],needs:[],prep:[],menu:[],shopping:[],evaluation:'',createdAt:Date.now()};events.push(e)}
   normalizeEvent(e);
   e.name=$('#eventName').value.trim();
   e.date=$('#eventDate').value;
@@ -154,5 +171,5 @@ window.updateItemResult=(i,v)=>{const e=current();if(!e)return;e.items[i].result
 window.deleteItem=i=>{const e=current();if(!e)return;e.items.splice(i,1);save();openDetail(e.id)};
 window.saveEvaluation=id=>{const e=events.find(x=>x.id===id);e.evaluation=$('#evaluation').value;save();openDetail(id)};
 window.editEvent=id=>{const e=events.find(x=>x.id===id);$('#detailDialog').close();openForm(e)};
-window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>x.id!==id);save();$('#detailDialog').close()};
+window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>x.id!==id);if(occasionUser)deleteDoc(plannerItemRef(id)).catch(()=>{});save();$('#detailDialog').close()};
 render();initCloud();
