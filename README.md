@@ -1,3 +1,13 @@
+
+## V1.3.74
+- Voorraadstatussen hernoemd naar **In huis**, **Niet in huis** en **Kopen**.
+- **Niet in huis** zet een product niet op de boodschappenlijst; **Kopen** wel.
+- Vanuit Recepten kunnen passende recepten worden gezocht op geselecteerde voorraad uit Bewaarproducten, Groente en Vlees/vis.
+- Receptresultaten worden gerangschikt als Alles in huis, Bijna compleet of Past bij voorraad.
+- Na **Recept gemaakt** toont Huize Chaos eerst een controleerbaar afboekoverzicht.
+- Voorraad wordt pas na bevestiging afgeboekt; hoeveelheden kunnen vóór bevestiging worden aangepast.
+- Producten die door afboeken op 0 komen, krijgen status **Niet in huis** en gaan niet automatisch naar de boodschappenlijst.
+
 Versie 1.3.64 voegt gerichte ondersteuning toe voor papieren kassabonnen als foto, met de Jumbo-zelfscanbon als eerste test. De werkende PDF-parsers uit V1.3.63 blijven ongewijzigd.
 
 Nieuw:

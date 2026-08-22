@@ -81,7 +81,7 @@ function cloudData(product) {
     memo: String(product.memo || ''),
     done: Boolean(product.done),
     temporary: Boolean(product.temporary),
-    source: product.cloudSource || (product.status === 'Voldoende' ? 'family' : 'stock'),
+    source: product.cloudSource || (product.status === 'In huis' ? 'family' : 'stock'),
     addedBy: product.cloudAddedBy || user.uid,
     addedByName: product.cloudAddedByName || user.displayName || 'Gezinslid'
   };
@@ -131,7 +131,7 @@ function applySnapshot(snapshot) {
       product = products.find(x => String(x.id) === String(data.localId) && x.shopping);
     }
     if (!product) {
-      product = { id: Date.now() + counter++, status: 'Voldoende', shopping: true, buyDirectWhenOut: false };
+      product = { id: Date.now() + counter++, status: 'In huis', shopping: true, buyDirectWhenOut: false };
       products.push(product);
     }
     Object.assign(product, {
@@ -158,7 +158,7 @@ function applySnapshot(snapshot) {
     if (product.cloudSource === 'stock') {
       product.shopping = false;
       product.done = false;
-      product.status = 'Voldoende';
+      product.status = 'In huis';
       delete product.cloudId;
       return true;
     }
@@ -194,7 +194,7 @@ async function syncNow() {
   for (const product of products.filter(x => x.shopping)) {
     if (!product.cloudId) {
       product.cloudId = crypto.randomUUID();
-      product.cloudSource = role === 'owner' && product.status !== 'Voldoende' ? 'stock' : 'family';
+      product.cloudSource = role === 'owner' && product.status !== 'In huis' ? 'stock' : 'family';
       product.cloudAddedBy = user.uid;
       product.cloudAddedByName = user.displayName || 'Gezinslid';
       product.cloudPending = true;

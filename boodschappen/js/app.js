@@ -22,7 +22,7 @@ const rawSeed = [
 ['Aluminiumfolie','Keukenbenodigdheden'],['Bakpapier','Keukenbenodigdheden'],['Boterhamzakjes','Keukenbenodigdheden'],['Diepvrieszakjes','Keukenbenodigdheden'],['Extra plastic bakjes','Keukenbenodigdheden'],['Vershoudfolie','Keukenbenodigdheden'],
 ['Bitterballen','Diepvries'],['Friet','Diepvries'],['Frikandellen','Diepvries'],['Kroketten','Diepvries'],['(GV) Snacks','Diepvries']
 ];
-const seed = rawSeed.map((r,i)=>({id:i+1,name:r[0],category:r[1],quantity:r[2]||'',unit:r[3]||'',store:r[4]||'',memo:r[5]||'',status:'Voldoende',shopping:false,done:false}));
+const seed = rawSeed.map((r,i)=>({id:i+1,name:r[0],category:r[1],quantity:r[2]||'',unit:r[3]||'',store:r[4]||'',memo:r[5]||'',status:'In huis',shopping:false,done:false}));
 let stores = JSON.parse(localStorage.getItem('household-stores') || 'null') || [...DEFAULT_STORES];
 let categories = JSON.parse(localStorage.getItem('household-categories') || 'null') || [...DEFAULT_CATEGORIES];
 if (!categories.includes('Overig')) categories.push('Overig');
@@ -48,7 +48,9 @@ function migrateProduct(x) {
   product.memo = String(product.memo || '');
   product.store = String(product.store || '');
   product.category = String(product.category || '');
-  product.status = product.status || 'Voldoende';
+  product.status = ({'Voldoende':'In huis','Aanvullen':'Niet in huis','Op':'Kopen'}[product.status] || product.status || 'In huis');
+  if (product.status === 'Niet in huis') product.shopping = false;
+  if (product.status === 'Kopen') product.shopping = true;
   product.shopping = Boolean(product.shopping);
   product.done = Boolean(product.done);
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
@@ -355,7 +357,7 @@ function initApp() {
       products.push({
         id: Date.now(),
         ...data,
-        status: 'Voldoende',
+        status: 'In huis',
         shopping: page === 'list',
         done: false,
         buyDirectWhenOut: data.buyDirectWhenOut

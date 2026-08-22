@@ -45,7 +45,7 @@ function renderStock(arr) {
             </div>
             <div class="stock-actions">
               <button class="small to-hutsel" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
-              <button class="status ${x.status === 'Voldoende' ? 'good' : x.status === 'Aanvullen' ? 'low' : 'out'}" onclick="cycleStatus(${x.id})">${x.status}</button>
+              <button class="status ${x.status === 'In huis' ? 'good' : x.status === 'Niet in huis' ? 'low' : 'out'}" onclick="cycleStatus(${x.id})">${x.status}</button>
             </div>
           </div>`).join('')}</div>
       </section>`;
@@ -56,16 +56,11 @@ window.cycleStatus = id => {
   const x = products.find(x => x.id === id);
   if (!x) return;
 
-  const statuses = ['Voldoende', 'Aanvullen', 'Op'];
+  const statuses = ['In huis', 'Niet in huis', 'Kopen'];
   x.status = statuses[(statuses.indexOf(x.status) + 1) % statuses.length];
 
-  if (x.status === 'Voldoende') {
-    x.shopping = false;
-    x.done = false;
-  } else {
-    x.shopping = true;
-    x.done = false;
-  }
+  x.shopping = x.status === 'Kopen';
+  x.done = false;
 
   save();
   render();
