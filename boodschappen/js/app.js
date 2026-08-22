@@ -63,7 +63,7 @@ function migrateProduct(x) {
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
 
-// V1.3.85: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
+// V1.3.86: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
 // Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
 (function migrateCompleteHerbDatabase() {
   const migrationKey = 'household-migration-complete-herbs-v1377';
@@ -127,7 +127,7 @@ function quantityText(x) {
 }
 
 function meta(x) {
-  return [quantityText(x), x.store, x.category]
+  return [quantityText(x), x.store]
     .filter(Boolean)
     .map(esc)
     .join(' · ');
