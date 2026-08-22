@@ -63,18 +63,25 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.99 - voorraad koppelen aan recepten
+// V1.3.100 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
 function stockProducts(){try{return JSON.parse(localStorage.getItem(STOCK_KEY)||'[]')}catch(_){return[]}}
 function relevantStock(){return stockProducts().filter(x=>x.status==='In huis' && /^(Bewaarproducten \(voorraad\)|Groente|Diepvries|Vlees\s*\/?\s*vis|Vlees|Vis)$/i.test(String(x.category||'')))}
 function normFood(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(gv\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\b(blik|blikje|pot|zak|pak|stuks?|verse|vers|diepvries|gekookte|gesneden)\b/g,' ').replace(/\s+/g,' ').trim().replace(/en$/,'')}
+const PASTA_TYPES=['spaghetti','macaroni','fusilli','penne','farfalle','rigatoni','tagliatelle','linguine','vermicelli','orzo'];
+function isGenericPasta(s){return normFood(s).split(/\s+/).includes('pasta')}
+function pastaType(s){const words=normFood(s).split(/\s+/);return PASTA_TYPES.find(x=>words.includes(x))||''}
 function ingredientMatchesProduct(ingredient,product){
   const a=normFood(ingredient),b=normFood(product.name);
   if(!a||!b)return false;
-  // Match op volledige woorden in plaats van substrings. Zo is paprika niet hetzelfde
-  // als paprikapoeder, ui niet hetzelfde als uienpoeder en tomaat niet als tomatenpuree.
+  // Pasta is een bewuste productgroep: een recept met 'pasta' mag worden gedekt
+  // door een concrete pastasoort. Een concrete soort wordt niet zomaar een andere soort.
+  const ai=isGenericPasta(a),bi=isGenericPasta(b),at=pastaType(a),bt=pastaType(b);
+  if((ai&&!at&&bt)||(bi&&!bt&&at))return true;
+  if(at&&bt&&at!==bt)return false;
+  // Match verder op volledige woorden. Zo blijft paprika != paprikapoeder enzovoort.
   const words=s=>s.split(/\s+/).filter(Boolean);
   const aw=words(a),bw=words(b);
   const meaningful=w=>w.length>1 && !/^(rood|rode|geel|gele|groen|groene|wit|witte|zwart|zwarte|klein|kleine|groot|grote|heel|halve|half)$/.test(w);
@@ -98,7 +105,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.99 - recepten per week plannen (zonder dagen)
+// V1.3.100 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -110,9 +117,10 @@ function normalizedUnit(u){
 }
 function qtyNumber(v){const n=parseFloat(String(v??'').replace(',','.'));return Number.isFinite(n)?n:null}
 function toBaseAmount(qty,unit){const n=qtyNumber(qty),u=normalizedUnit(unit);if(n==null)return null;if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
-function stockCoverage(ingredient){
-  const product=stockProducts().find(p=>p.status==='In huis'&&ingredientMatchesProduct(ingredient.ingredient,p));
-  if(!product)return {matched:false,enough:false,label:'Niet in huis',product:null,shortage:null};
+function stockCoverage(ingredient,preferredProductId=''){
+  const matches=stockProducts().filter(p=>p.status==='In huis'&&ingredientMatchesProduct(ingredient.ingredient,p));
+  const product=matches.find(p=>String(p.id)===String(preferredProductId))||matches[0];
+  if(!product)return {matched:false,enough:false,label:'Niet in huis',product:null,shortage:null,matches:[]};
   const have=toBaseAmount(product.quantity,product.unit),need=toBaseAmount(ingredient.qty,ingredient.unit);
   let enough=true,shortage=null;
   if(have&&need&&have.u&&need.u&&have.u===need.u){
@@ -126,12 +134,12 @@ function stockCoverage(ingredient){
     }
   }
   const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';
-  return {matched:true,enough,label:`In huis: ${available}`,product,shortage};
+  return {matched:true,enough,label:`In huis: ${available}`,product,shortage,matches};
 }
 function plannerOrderRows(shown,existing,week){
   if(week!==upcomingWeekKey())return '';
   const old=existing?.ingredients||[];
-  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert eerst wat al in huis is. Alleen wat nog nodig is kan op de boodschappenlijst komen. Vink aan wat je al elders hebt besteld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'';const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small></span></label>`}).join('')}</div></div>`
+  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert eerst wat al in huis is. Alleen wat nog nodig is kan op de boodschappenlijst komen. Vink aan wat je al elders hebt besteld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'';const info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${coverage.matches?.length>1&&isGenericPasta(i.ingredient)?`<select class="stock-alternative-select" data-stock-choice="${n}" aria-label="Kies pastasoort uit voorraad">${coverage.matches.map(p=>`<option value="${esc(p.id)}" ${String(prev?.stockProductId||coverage.product?.id)===String(p.id)?'selected':''}>${esc(p.name)} · ${esc([p.quantity,p.unit].filter(Boolean).join(' '))}</option>`).join('')}</select>`:''}</span></label>`}).join('')}</div></div>`
 }
 function showWeekPlanner(r){
   detail.querySelector('.recipe-week-picker')?.remove();
@@ -142,11 +150,11 @@ function showWeekPlanner(r){
   const select=box.querySelector('#recipePlanWeek'),orderedBox=box.querySelector('#recipePlanOrdered');
   const refreshOrdered=()=>{const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);orderedBox.innerHTML=plannerOrderRows(shown,existing,week)};
   select.addEventListener('change',refreshOrdered);refreshOrdered();
-  box.querySelector('#saveRecipeWeek').onclick=()=>{const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const old=existing?.ingredients||[];const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:shown.servings||r.servings||'',ingredients:(shown.ingredients||[]).map((i,n)=>{const coverage=stockCoverage(i),ordered=week===upcomingWeekKey()?Boolean(box.querySelector(`[data-plan-ordered="${n}"]`)?.checked):Boolean(old[n]?.ordered&&week===upcomingWeekKey());return {id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:old[n]?.done||false,ordered,stockEnough:Boolean(coverage.enough),stockProductId:coverage.product?.id??'',stockLabel:coverage.matched?coverage.label:'',shoppingQty:coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):(old[n]?.shoppingQty||''),store:old[n]?.store||coverage.product?.store||'',category:old[n]?.category||coverage.product?.category||''}})};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}
+  box.querySelector('#saveRecipeWeek').onclick=()=>{const week=select.value,existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const old=existing?.ingredients||[];const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:shown.servings||r.servings||'',ingredients:(shown.ingredients||[]).map((i,n)=>{const preferred=box.querySelector(`[data-stock-choice=\"${n}\"]`)?.value||old[n]?.stockProductId||'',coverage=stockCoverage(i,preferred),ordered=week===upcomingWeekKey()?Boolean(box.querySelector(`[data-plan-ordered="${n}"]`)?.checked):Boolean(old[n]?.ordered&&week===upcomingWeekKey());return {id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:old[n]?.done||false,ordered,stockEnough:Boolean(coverage.enough),stockProductId:coverage.product?.id??'',stockLabel:coverage.matched?coverage.label:'',shoppingQty:coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):(old[n]?.shoppingQty||''),store:old[n]?.store||coverage.product?.store||'',category:old[n]?.category||coverage.product?.category||''}})};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}
 }
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.99 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.100 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -200,10 +208,10 @@ showRecipeModule('weekmenu');
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}
 
-// V1.3.99 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.100 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.99 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.100 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
