@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.93 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.94 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
