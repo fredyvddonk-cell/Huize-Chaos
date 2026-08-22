@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/
 import { getFirestore, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
-const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const recipeRef=doc(db,'households','huize-chaos','insight','recipes');
+const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const recipeRef=doc(db,'households','huize-chaos','insight','recipes');const occasionRef=doc(db,'households','huize-chaos','insight','occasions');
 const BASE=window.HUIZE_CHAOS_RECIPES||[];const PENDING_KEY='hc-recipe-pending-v1',CUSTOM_KEY='hc-recipe-custom-v1';
 const list=document.querySelector('#list'),pendingBox=document.querySelector('#pending'),detail=document.querySelector('#detail'),search=document.querySelector('#search'),syncStatus=document.querySelector('#recipeSyncStatus');
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null;
@@ -43,7 +43,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.81 - voorraad koppelen aan recepten
+// V1.3.82 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -63,5 +63,5 @@ showView=function(view){originalShowView(view);if(view==='ingredients'&&edited){
 const OCCASION_KEY='huize-chaos-occasions-v1';
 function localOccasions(){try{return JSON.parse(localStorage.getItem(OCCASION_KEY)||'[]')}catch(_){return[]}}
 function showOccasionPicker(r){const a=localOccasions();detail.insertAdjacentHTML('beforeend',`<div class="panel occasion-picker"><h3>Toevoegen aan gelegenheid</h3>${a.length?a.map(e=>`<button class="btn occasion-choice" data-occ="${esc(e.id)}">${esc(e.name)} <small>${esc(e.date||'')}</small></button>`).join(''):'<p>Nog geen gelegenheden gevonden. Maak eerst een gelegenheid aan.</p>'}</div>`);detail.querySelectorAll('[data-occ]').forEach(b=>b.onclick=()=>addCurrentRecipeToOccasion(r,b.dataset.occ))}
-function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.find(x=>String(x.id)===String(id));if(!e)return;e.menu=e.menu||[];e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});localStorage.setItem(OCCASION_KEY,JSON.stringify(a));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));alert('Recept toegevoegd aan '+e.name+'. Je kunt daar kiezen welke ingrediënten je wilt gebruiken.');showView('ingredients')}
+async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.find(x=>String(x.id)===String(id));if(!e)return;e.menu=e.menu||[];e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});localStorage.setItem(OCCASION_KEY,JSON.stringify(a));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));try{if(user)await setDoc(occasionRef,{events:a,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false})}catch(err){console.warn('Gelegenheid is lokaal bijgewerkt; cloudsynchronisatie volgt via Gelegenheden.',err)}alert('Recept toegevoegd aan '+e.name+'. Je kunt daar kiezen welke ingrediënten je wilt gebruiken.');showView('ingredients')}
 
