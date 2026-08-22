@@ -13,7 +13,7 @@ const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).
 const nlDate=s=>{if(!s)return 'Geen datum';const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'short',year:'numeric'}).format(d)};
 function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>({...m,ingredients:(m.ingredients||[]).map(i=>({...i,enabled:i.enabled!==false}))}));e.shopping=e.shopping||[];e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
-function save(){localStorage.setItem(KEY,JSON.stringify(events));render();scheduleCloudSync()}
+function save(){localStorage.setItem(KEY,JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
 function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncCloud,250)}
 async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false})}
 function initCloud(){onAuthStateChanged(auth,async u=>{occasionUser=u;if(!u)return;try{const snap=await getDoc(occasionRef);if(snap.exists()&&Array.isArray(snap.data().events)){applyingCloud=true;events=snap.data().events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render()}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(occasionRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data();if(!Array.isArray(d.events))return;applyingCloud=true;events=d.events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render();if(activeEventId&&events.some(e=>e.id===activeEventId))openDetail(activeEventId)},()=>{})}catch(err){console.warn('Synchronisatie gelegenheden niet beschikbaar',err)}})}
@@ -80,9 +80,8 @@ window.openDetail=id=>{
     </section>
 
     <section class="occasion-section shopping-section">
-      <div class="section-title"><div><h3>Boodschappenlijst</h3><p>Maak een boodschappenlijst vanuit je benodigdheden en het menu. Controleer de lijst voordat je gaat winkelen.</p></div><button onclick="createShopping('${id}')">Boodschappenlijst maken</button></div>
-      <div class="check-list">${(e.shopping||[]).map((x,i)=>shoppingHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen boodschappenlijst gemaakt.</p>'}</div>
-      ${(e.shopping||[]).length?`<div class="shopping-actions"><button onclick="clearShopping('${id}')">Lijst leegmaken</button></div>`:''}
+      <div class="section-title"><div><h3>Boodschappen</h3><p>Maak de lijst vanuit je benodigdheden en menu. De boodschappen verschijnen daarna bij Menu → Boodschappen.</p></div><button class="primary" onclick="createShopping('${id}')">Naar Boodschappen</button></div>
+      ${(e.shopping||[]).length?`<p class="meta">${e.shopping.filter(x=>!x.done).length} boodschappen voor ${esc(e.name)} staan in Boodschappen.</p>`:'<p class="meta empty-line">Nog geen boodschappen doorgestuurd.</p>'}
     </section>
 
     <section class="occasion-section">
@@ -115,7 +114,7 @@ function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;save();openDetail(e.id)};
 window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);save();openDetail(e.id)};
-window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();openDetail(id)};
+window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();window.location.href='../boodschappen/?page=list'};
 window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
 window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
 window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];save();openDetail(id)};

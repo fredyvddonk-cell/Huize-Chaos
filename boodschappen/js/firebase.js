@@ -18,6 +18,7 @@ const provider = new GoogleAuthProvider();
 const HOUSEHOLD_ID = 'huize-chaos';
 const itemsRef = collection(db, 'households', HOUSEHOLD_ID, 'shoppingItems');
 const insightRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'shared');
+const occasionsRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'occasions');
 
 let role = '';
 let user = null;

@@ -119,11 +119,25 @@ window.toggleAllShopping = () => {
   render();
 };
 
+
+function occasionShoppingData(){
+  try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).filter(e=>(e.shopping||[]).some(x=>!x.done))}catch(_){return []}
+}
+function occasionShoppingHtml(){
+  return occasionShoppingData().map(e=>`<section class="shopping-group occasion-shopping-wrap"><div class="shopping-group-head"><span>${esc(e.name||'Gelegenheid')}</span><span>${(e.shopping||[]).filter(x=>!x.done).length}</span></div><div class="shopping-group-body">${(e.shopping||[]).filter(x=>!x.done).map((x,i)=>`<div class="item shopping-item occasion-shopping-item"><input class="check" type="checkbox" aria-label="${esc(x.text)} gekocht" onchange="markOccasionBought('${String(e.id).replace(/'/g,"\'")}',${i},this.checked)"><div class="main"><div class="name">${esc(x.text)}</div>${x.qty?`<div class="meta">${esc(x.qty)} · ${esc(e.name||'Gelegenheid')}</div>`:`<div class="meta">${esc(e.name||'Gelegenheid')}</div>`}</div></div>`).join('')}</div></section>`).join('')
+}
+window.markOccasionBought=(eventId,visibleIndex,checked)=>{
+  let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}
+  const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const open=(e.shopping||[]).filter(x=>!x.done);const target=open[visibleIndex];if(!target)return;target.done=Boolean(checked);localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render();
+};
+window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
+
 function renderShopping(allProducts) {
   const arr = allProducts.filter(x => x.shopping);
   const done = arr.filter(x => x.done).length;
+  const occasionCount=occasionShoppingData().reduce((n,e)=>n+(e.shopping||[]).filter(x=>!x.done).length,0);
 
-  $('#count').textContent = `${arr.length} boodschappen · ${done} afgevinkt`;
+  $('#count').textContent = `${arr.length + occasionCount} boodschappen · ${done} afgevinkt`;
   const collapseBtn = $('#collapseShoppingBtn');
   if (collapseBtn) collapseBtn.textContent = expandedShoppingGroups.size ? 'Alles inklappen' : 'Alles uitklappen';
   $('#processDoneBar').classList.toggle('visible', done > 0);
@@ -133,7 +147,7 @@ function renderShopping(allProducts) {
     button.classList.toggle('active', button.dataset.group === group);
   });
 
-  if (!arr.length) {
+  if (!arr.length && !occasionCount) {
     content.innerHTML = '<div class="empty">Geen producten gevonden.</div>';
     return;
   }
@@ -209,7 +223,7 @@ function renderShopping(allProducts) {
   const rightPrintColumn = printCategories.slice(splitAt).map(category => category.html).join('');
   const printHtml = `<div class="print-column">${leftPrintColumn}</div><div class="print-column">${rightPrintColumn}</div>`;
 
-  content.innerHTML = `<div class="screen-shopping">${html}</div><div class="print-shopping">${printHtml}</div>`;
+  content.innerHTML = `<div class="screen-shopping">${occasionShoppingHtml()}${html}</div><div class="print-shopping">${printHtml}</div>`;
 }
 
 

@@ -41,12 +41,11 @@ function renderStock(arr) {
               <div class="name">${esc(x.name)}</div>
               ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
               ${memoHtml(x)}
-              <div class="stock-edit-hint">Tik op product om te wijzigen</div>
             </div>
-            <div class="stock-actions">
-              <button class="small to-hutsel" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
-              <button class="status ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${x.id})">${x.status}</button>
-              <label class="stock-buy-check"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${x.id}, this.checked)"><span>Kopen</span></label>
+            <div class="stock-actions stock-actions-compact">
+              <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${x.id})">${x.status}</button>
+              <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${x.id}, this.checked)"><span>Kopen</span></label>
+              <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
             </div>
           </div>`).join('')}</div>
       </section>`;

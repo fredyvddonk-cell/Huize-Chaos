@@ -63,7 +63,7 @@ function migrateProduct(x) {
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
 
-// V1.3.82: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
+// V1.3.83: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
 // Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
 (function migrateCompleteHerbDatabase() {
   const migrationKey = 'household-migration-complete-herbs-v1377';
@@ -90,7 +90,8 @@ let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'nul
   localStorage.setItem(migrationKey, 'done');
 })();
 const wideDesktop=window.matchMedia('(min-width:851px)').matches;
-let page = wideDesktop ? (sessionStorage.getItem('hc-household-page-session') || 'list') : (localStorage.getItem('household-page') || 'list');
+const requestedPage = new URLSearchParams(location.search).get('page');
+let page = ['list','stock','hutsel','insight','manage'].includes(requestedPage) ? requestedPage : (wideDesktop ? (sessionStorage.getItem('hc-household-page-session') || 'list') : (localStorage.getItem('household-page') || 'list'));
 let group = localStorage.getItem('household-group') || 'store';
 
 const $ = selector => document.querySelector(selector);
