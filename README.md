@@ -1,17 +1,25 @@
+## V1.3.79
+- Feestdagen & gelegenheden: bij **Te veel** kan nu **Aantal over** worden ingevuld.
+- Per gelegenheid is een vooraf-lijst **Wat heb ik nodig?** toegevoegd, met hoeveelheid en afvinken.
+- Per gelegenheid is een lijst **Voorbereiden** toegevoegd, met optionele datum en afvinken.
+- Openstaande benodigdheden en voorbereidingen zijn zichtbaar op de kaart van de gelegenheid.
+- Geen productafbeeldingen toegevoegd.
+- Git-bestanden worden niet meer meegeleverd in de distributie-zip.
+
 ## V1.3.78
 - Voorraadstatus is alleen In huis / Niet in huis; Kopen is een apart vinkje.
 - Feestdagen & gelegenheden toegevoegd met aantal personen, productcategorieën Eten/Hapjes/Dranken/Overig, kosten per categorie, gekochte aantallen en Te veel/Precies goed/Te weinig.
 - Algemene evaluatie per gelegenheid.
 - Geen productafbeeldingen toegevoegd.
 
-## V1.3.78
+## V1.3.77
 - De volledige kruiden-, specerijen- en kruidenmixdatabase wordt nu **éénmalig toegevoegd aan bestaande voorraad**.
 - Bestaande kruiden blijven volledig behouden; status, memo, hoeveelheid en winkel worden niet overschreven.
 - Alleen ontbrekende kruidennamen worden toegevoegd, zonder dubbelen.
 - Volledige uitgebreide kruiden-, specerijen- en kruidenmixdatabase toegevoegd aan categorie Kruiden.
 - Bij **Kies uit je voorraad** is de knop **Alles deselecteren** toegevoegd; hiermee wordt de volledige voorraadselectie gewist.
 - **Diepvries** is toegevoegd aan de voorraadgroepen waarmee passende recepten gezocht kunnen worden.
-- Versie- en cacheverwijzingen bijgewerkt naar V1.3.78.
+- Versie- en cacheverwijzingen bijgewerkt naar V1.3.79.
 
 
 ## V1.3.74
