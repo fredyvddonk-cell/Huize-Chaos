@@ -43,7 +43,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.87 - voorraad koppelen aan recepten
+// V1.3.88 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -67,7 +67,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.87 - recepten per week plannen (zonder dagen)
+// V1.3.88 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -75,7 +75,7 @@ function weekOptions(count=16){let d=new Date(),out=[];for(let i=0;i<count;i++){
 function showWeekPlanner(r){detail.querySelector('.recipe-week-picker')?.remove();const box=document.createElement('div');box.className='panel recipe-week-picker';box.innerHTML=`<h3>Plan voor week</h3><p>Geen dag nodig. De ingrediënten verschijnen alleen op de boodschappenlijst van deze week.</p><select id="recipePlanWeek">${weekOptions()}</select><div class="actions"><button class="btn primary" id="saveRecipeWeek">Inplannen</button></div>`;detail.appendChild(box);box.querySelector('#saveRecipeWeek').onclick=()=>{const week=box.querySelector('#recipePlanWeek').value,plans=recipeWeekPlans();const existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:r.servings||'',ingredients:(r.ingredients||[]).map((i,n)=>({id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:false}))};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}}
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.87 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.88 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');

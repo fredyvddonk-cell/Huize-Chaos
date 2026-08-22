@@ -281,6 +281,11 @@ async function startInsightSync() {
 
 window.addEventListener('huize-chaos-insight-changed', scheduleInsightSync);
 
+window.syncHuizeChaosOccasions=async events=>{
+  if(!user||!Array.isArray(events))return;
+  try{await setDoc(occasionsRef,{events,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false})}catch(error){console.error('Gelegenheden synchroniseren mislukt',error)}
+};
+
 async function startOccasionsSync(){
   stopOccasions?.();
   const first=await getDoc(occasionsRef);

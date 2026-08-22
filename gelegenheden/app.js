@@ -47,6 +47,7 @@ $('#eventForm').onsubmit=ev=>{
   normalizeEvent(e);
   e.name=$('#eventName').value.trim();
   e.date=$('#eventDate').value;
+  refreshEventShoppingIfCreated(e);
   e.people=$('#eventPeople').value;
   e.note=$('#eventNote').value.trim();
   save();$('#eventDialog').close();openDetail(id)
@@ -125,7 +126,7 @@ function buildEventShopping(e){
     const found=rows.find(r=>r.text.toLowerCase()===key);
     if(found){if(qty&&!found.qty)found.qty=qty;return}
     const previous=old.find(r=>String(r.text||'').trim().toLowerCase()===key);
-    rows.push({text,qty:qty||previous?.qty||'',done:Boolean(previous?.done),buyWeek:previous?.buyWeek||eventWeekKey(e.date)});
+    rows.push({text,qty:qty||previous?.qty||'',done:Boolean(previous?.done),buyWeek:previous?.buyWeekOverride?previous.buyWeek:eventWeekKey(e.date),buyWeekOverride:Boolean(previous?.buyWeekOverride),store:previous?.store||'',category:previous?.category||'',unit:previous?.unit||''});
   };
   (e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));
   (e.menu||[]).forEach(x=>{
@@ -137,7 +138,7 @@ function buildEventShopping(e){
 }
 function refreshEventShoppingIfCreated(e){if(e?.shoppingCreated)buildEventShopping(e)}
 window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);e.shoppingCreated=true;buildEventShopping(e);save();window.location.href='../boodschappen/?page=list'};
-window.buyNow=i=>{const e=current();if(!e||!e.shopping[i])return;e.shopping[i].buyWeek=currentWeekKey();save();openDetail(e.id)};
+window.buyNow=i=>{const e=current();if(!e||!e.shopping[i])return;e.shopping[i].buyWeek=currentWeekKey();e.shopping[i].buyWeekOverride=true;save();openDetail(e.id)};
 window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
 window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
 window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];e.shoppingCreated=false;save();openDetail(id)};
