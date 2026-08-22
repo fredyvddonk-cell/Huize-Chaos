@@ -6,7 +6,7 @@ const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomai
 const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const recipeRef=doc(db,'households','huize-chaos','insight','recipes');const occasionRef=doc(db,'households','huize-chaos','insight','occasions');
 const BASE=window.HUIZE_CHAOS_RECIPES||[];const PENDING_KEY='hc-recipe-pending-v1',CUSTOM_KEY='hc-recipe-custom-v1';
 const list=document.querySelector('#list'),pendingBox=document.querySelector('#pending'),detail=document.querySelector('#detail'),search=document.querySelector('#search'),syncStatus=document.querySelector('#recipeSyncStatus');
-let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null;
+let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const read=(k,f=[])=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:f}catch(_){return f}};const pending=()=>read(PENDING_KEY),custom=()=>read(CUSTOM_KEY);
 const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));const mergeById=(a,b)=>{const m=new Map();[...a,...b].forEach(x=>m.set(String(x.id),x));return [...m.values()]};
@@ -18,7 +18,7 @@ async function initCloud(){onAuthStateChanged(auth,async u=>{user=u;if(!u){setSt
 function savePending(a){write(PENDING_KEY,a);renderList();scheduleSync()}function saveCustom(a){write(CUSTOM_KEY,a);renderList();scheduleSync()}
 function sourceLabel(r){try{return r.sourceUrl?new URL(r.sourceUrl).hostname.replace(/^www\./,''):r.source||'Gedeeld'}catch(_){return r.source||'Gedeeld'}}
 function renderList(){const q=search.value.trim().toLowerCase(),drafts=pending();pendingBox.innerHTML=drafts.length?`<section class="pending-recipes"><div class="pending-head"><h2>Te controleren</h2><span>${drafts.length}</span></div><p>Gedeelde recepten staan hier tot je ze hebt nagekeken.</p>${drafts.map(r=>`<button class="pending-recipe-card" data-pending="${esc(r.id)}"><span><strong>${esc(r.title||'Gedeeld recept')}</strong><small>${esc(sourceLabel(r))}</small></span><span>Controleren ›</span></button>`).join('')}</section>`:'';pendingBox.querySelectorAll('[data-pending]').forEach(b=>b.onclick=()=>openPending(b.dataset.pending));const a=allRecipes().filter(r=>(r.title||'').toLowerCase().includes(q)).slice(0,150);list.innerHTML=a.length?a.map(r=>`<button class="recipe-card" data-id="${esc(r.id)}"><span><strong>${esc(r.title)}</strong><small>${r.servings?esc(r.servings)+' personen':''}${r.imported?' · geïmporteerd':''}</small></span><span class="go">›</span></button>`).join(''):`<div class="empty">Geen recepten gevonden.</div>`;list.querySelectorAll('.recipe-card').forEach(b=>b.onclick=()=>openRecipe(b.dataset.id))}
-function hideList(){list.classList.add('hidden');pendingBox.classList.add('hidden');search.classList.add('hidden');detail.classList.remove('hidden');document.querySelector('.recipes')?.classList.add('recipe-detail-open')}function backList(){detail.classList.add('hidden');list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');document.querySelector('.recipes')?.classList.remove('recipe-detail-open');current=null;edited=null;window.hcShowRecipeModule?.('recipes');renderList()}
+function hideList(){list.classList.add('hidden');pendingBox.classList.add('hidden');search.classList.add('hidden');detail.classList.remove('hidden');document.querySelector('.recipes')?.classList.add('recipe-detail-open')}function backList(){detail.classList.add('hidden');list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');document.querySelector('.recipes')?.classList.remove('recipe-detail-open');current=null;edited=null;const backToWeekMenu=openedFromWeekMenu;openedFromWeekMenu=false;window.hcShowRecipeModule?.(backToWeekMenu?'weekmenu':'recipes');renderList()}
 function getRecipe(id){return allRecipes().find(r=>String(r.id)===String(id))}function isCustom(id){return custom().some(r=>String(r.id)===String(id))}
 function openRecipe(id){current=String(id);edited=JSON.parse(JSON.stringify(getRecipe(id)));hideList();showView('ingredients')}
 function openPending(id){const r=pending().find(x=>String(x.id)===String(id));if(!r)return;current='pending:'+id;edited=JSON.parse(JSON.stringify(r));hideList();showReview()}
@@ -43,7 +43,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();initCloud();receiveSharedRecipe();
 
-// V1.3.88 - voorraad koppelen aan recepten
+// V1.3.89 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -67,7 +67,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.88 - recepten per week plannen (zonder dagen)
+// V1.3.89 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -75,7 +75,7 @@ function weekOptions(count=16){let d=new Date(),out=[];for(let i=0;i<count;i++){
 function showWeekPlanner(r){detail.querySelector('.recipe-week-picker')?.remove();const box=document.createElement('div');box.className='panel recipe-week-picker';box.innerHTML=`<h3>Plan voor week</h3><p>Geen dag nodig. De ingrediënten verschijnen alleen op de boodschappenlijst van deze week.</p><select id="recipePlanWeek">${weekOptions()}</select><div class="actions"><button class="btn primary" id="saveRecipeWeek">Inplannen</button></div>`;detail.appendChild(box);box.querySelector('#saveRecipeWeek').onclick=()=>{const week=box.querySelector('#recipePlanWeek').value,plans=recipeWeekPlans();const existing=plans.find(x=>String(x.recipeId)===String(r.id)&&x.week===week);const plan={id:existing?.id||String(Date.now()),recipeId:String(r.id),title:r.title,week,servings:r.servings||'',ingredients:(r.ingredients||[]).map((i,n)=>({id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:false}))};if(existing)Object.assign(existing,plan);else plans.push(plan);localStorage.setItem(RECIPE_WEEK_KEY,JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));alert(`${r.title} staat gepland voor week ${Number(week.slice(-2))}.`);box.remove()}}
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited){const actions=detail.querySelector('.recipe-occasion-actions');if(actions&&!actions.querySelector('#planRecipeWeek')){const b=document.createElement('button');b.className='btn';b.id='planRecipeWeek';b.textContent='Plan voor week';b.onclick=()=>showWeekPlanner(edited);actions.appendChild(b)}}};
 
-// V1.3.88 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.89 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -102,7 +102,8 @@ function renderWeekMenu(){
   weekMenuTitle.textContent=weekNumberLabel(selectedMenuWeek);
   const plans=recipeWeekPlans().filter(p=>p.week===selectedMenuWeek);
   if(!plans.length){weekMenuList.innerHTML=`<div class="week-menu-empty">Voor deze week zijn nog geen recepten geselecteerd.<br><button class="btn primary" id="weekMenuFindRecipes" type="button">Recept kiezen</button></div>`;weekMenuList.querySelector('#weekMenuFindRecipes')?.addEventListener('click',()=>showRecipeModule('recipes'));return}
-  weekMenuList.innerHTML=plans.map(p=>`<article class="week-menu-card" data-plan-card="${esc(p.id)}"><strong>${esc(p.title||'Recept')}</strong><small>${p.servings?esc(p.servings)+' personen · ':''}${(p.ingredients||[]).length} ingrediënten</small><div class="week-menu-actions"><select data-move-week="${esc(p.id)}" aria-label="Andere week">${menuWeekOptions(p.week)}</select><button class="btn" data-move-plan="${esc(p.id)}" type="button">Verplaatsen</button><button class="btn danger remove-week-plan" data-remove-plan="${esc(p.id)}" type="button">Uit deze week verwijderen</button></div></article>`).join('');
+  weekMenuList.innerHTML=plans.map(p=>`<article class="week-menu-card" data-plan-card="${esc(p.id)}"><button class="week-menu-recipe-link" data-open-week-recipe="${esc(p.recipeId)}" type="button"><span><strong>${esc(p.title||'Recept')}</strong><small>${p.servings?esc(p.servings)+' personen · ':''}${(p.ingredients||[]).length} ingrediënten</small></span><span class="go">›</span></button><div class="week-menu-actions"><select data-move-week="${esc(p.id)}" aria-label="Andere week">${menuWeekOptions(p.week)}</select><button class="btn" data-move-plan="${esc(p.id)}" type="button">Verplaatsen</button><button class="btn danger remove-week-plan" data-remove-plan="${esc(p.id)}" type="button">Uit deze week verwijderen</button></div></article>`).join('');
+  weekMenuList.querySelectorAll('[data-open-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const r=getRecipe(btn.dataset.openWeekRecipe);if(!r){alert('Dit recept is niet meer beschikbaar in Recepten.');return}openedFromWeekMenu=true;current=String(r.id);edited=JSON.parse(JSON.stringify(r));weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView('directions')}));
   weekMenuList.querySelectorAll('[data-move-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.movePlan));const select=weekMenuList.querySelector(`[data-move-week="${CSS.escape(String(btn.dataset.movePlan))}"]`);if(!plan||!select)return;const oldWeek=plan.week,newWeek=select.value;if(newWeek===oldWeek)return;plan.week=newWeek;saveRecipeWeekPlans(plans);renderWeekMenu()}));
   weekMenuList.querySelectorAll('[data-remove-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.removePlan));if(!plan)return;if(!confirm(`${plan.title||'Dit recept'} uit ${weekNumberLabel(selectedMenuWeek)} verwijderen?`))return;saveRecipeWeekPlans(plans.filter(x=>String(x.id)!==String(btn.dataset.removePlan)));renderWeekMenu()}));
 }
@@ -124,3 +125,5 @@ document.querySelector('#weekMenuNext')?.addEventListener('click',()=>{selectedM
 window.addEventListener('huize-chaos-recipe-weeks-changed',renderWeekMenu);
 window.addEventListener('storage',e=>{if(e.key===RECIPE_WEEK_KEY)renderWeekMenu()});
 showRecipeModule('weekmenu');
+
+// V1.3.89 - recepten in het Weekmenu zijn aanklikbaar en openen direct de bereiding.
