@@ -1,7 +1,8 @@
-## V1.3.75
+## V1.3.76
+- Volledige uitgebreide kruiden-, specerijen- en kruidenmixdatabase toegevoegd aan categorie Kruiden.
 - Bij **Kies uit je voorraad** is de knop **Alles deselecteren** toegevoegd; hiermee wordt de volledige voorraadselectie gewist.
 - **Diepvries** is toegevoegd aan de voorraadgroepen waarmee passende recepten gezocht kunnen worden.
-- Versie- en cacheverwijzingen bijgewerkt naar V1.3.75.
+- Versie- en cacheverwijzingen bijgewerkt naar V1.3.76.
 
 
 ## V1.3.74
