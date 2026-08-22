@@ -1,1 +1,49 @@
-<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Recepten · Huize Chaos</title><link rel="stylesheet" href="style.css?v=1.3.86"></head><body><main class="recipes"><header class="top"><a href="../" class="back">‹</a><div class="top-title"><div class="eyebrow">Huize Chaos</div><h1>Recepten</h1><small id="recipeSyncStatus">Recepten laden…</small></div></header><div class="search"><input id="search" placeholder="Zoek recept…" autocomplete="off"></div><div class="stock-recipe-tools"><button class="btn" id="stockRecipeButton" type="button">Uit voorraad recepten zoeken</button><div id="stockPicker"></div></div><div id="pending"></div><div id="list" class="list"></div><section id="detail" class="detail hidden"></section></main><script src="recipes-data.js"></script><script type="module" src="app.js?v=1.3.86"></script></body></html>
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Weekmenu & Recepten · Huize Chaos</title>
+  <link rel="stylesheet" href="style.css?v=1.3.87">
+</head>
+<body>
+<main class="recipes">
+  <header class="top">
+    <a href="../" class="back">‹</a>
+    <div class="top-title">
+      <div class="eyebrow">Huize Chaos</div>
+      <h1>Weekmenu & Recepten</h1>
+      <small id="recipeSyncStatus">Recepten laden…</small>
+    </div>
+  </header>
+
+  <nav class="module-tabs" aria-label="Weekmenu en recepten">
+    <button class="module-tab active" id="showWeekMenu" type="button">Weekmenu</button>
+    <button class="module-tab" id="showRecipes" type="button">Recepten</button>
+  </nav>
+
+  <section id="weekMenuPanel" class="week-menu-panel">
+    <div class="week-menu-head">
+      <button class="week-nav" id="weekMenuPrev" type="button" aria-label="Vorige week">‹</button>
+      <div>
+        <strong id="weekMenuTitle">Week</strong>
+        <small>Geen dagen, alleen je gekozen recepten</small>
+      </div>
+      <button class="week-nav" id="weekMenuNext" type="button" aria-label="Volgende week">›</button>
+    </div>
+    <div id="weekMenuList" class="week-menu-list"></div>
+  </section>
+
+  <section id="recipeLibraryPanel" class="hidden">
+    <div class="search"><input id="search" placeholder="Zoek recept…" autocomplete="off"></div>
+    <div class="stock-recipe-tools"><button class="btn" id="stockRecipeButton" type="button">Uit voorraad recepten zoeken</button><div id="stockPicker"></div></div>
+    <div id="pending"></div>
+    <div id="list" class="list"></div>
+  </section>
+
+  <section id="detail" class="detail hidden"></section>
+</main>
+<script src="recipes-data.js"></script>
+<script type="module" src="app.js?v=1.3.87"></script>
+</body>
+</html>
