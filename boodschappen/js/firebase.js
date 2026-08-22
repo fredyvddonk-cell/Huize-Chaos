@@ -30,6 +30,7 @@ let remoteItems = new Map();
 let stopItems = null;
 let serverRefreshTimer = 0;
 let stopInsight = null;
+let stopOccasions = null;
 let insightCloudReady = false;
 let applyingInsightCloud = false;
 let insightSyncTimer = 0;
@@ -280,6 +281,20 @@ async function startInsightSync() {
 
 window.addEventListener('huize-chaos-insight-changed', scheduleInsightSync);
 
+async function startOccasionsSync(){
+  stopOccasions?.();
+  const first=await getDoc(occasionsRef);
+  if(first.exists()&&Array.isArray(first.data()?.events)){
+    localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(first.data().events));
+    window.dispatchEvent(new Event('huize-chaos-occasions-changed'));
+  }
+  stopOccasions=onSnapshot(occasionsRef,snapshot=>{
+    if(!snapshot.exists()||!Array.isArray(snapshot.data()?.events))return;
+    localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(snapshot.data().events));
+    window.dispatchEvent(new Event('huize-chaos-occasions-changed'));
+  },error=>console.error('Gelegenheden live synchronisatie mislukt',error));
+}
+
 window.scheduleCloudSync = scheduleSync;
 window.addEventListener('huize-chaos-products-changed', scheduleSync);
 
@@ -302,6 +317,7 @@ async function openFor(currentUser) {
   });
   startServerRefresh();
   await startInsightSync();
+  await startOccasionsSync();
   refreshItemsFromServer().catch(error => {
     console.error(error);
     setSyncStatus('Geen verbinding', 'error');
@@ -370,6 +386,8 @@ onAuthStateChanged(auth, currentUser => {
   stopItems = null;
   stopInsight?.();
   stopInsight = null;
+  stopOccasions?.();
+  stopOccasions = null;
   insightCloudReady = false;
   clearInterval(serverRefreshTimer);
   if (!currentUser) {

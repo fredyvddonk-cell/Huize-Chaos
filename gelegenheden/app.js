@@ -11,7 +11,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const nlDate=s=>{if(!s)return 'Geen datum';const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'short',year:'numeric'}).format(d)};
-function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>({...m,ingredients:(m.ingredients||[]).map(i=>({...i,enabled:i.enabled!==false}))}));e.shopping=e.shopping||[];e.evaluation=e.evaluation||'';return e}
+function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>({...m,ingredients:(m.ingredients||[]).map(i=>({...i,enabled:i.enabled!==false}))}));e.shopping=e.shopping||[];if(typeof e.shoppingCreated!=='boolean')e.shoppingCreated=e.shopping.length>0;e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
 function save(){localStorage.setItem(KEY,JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
 function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncCloud,250)}
@@ -100,8 +100,8 @@ function menuHtml(x,i){const linked=x.recipeId&&x.ingredients?.length;return `<d
 function recipeLibrary(){const base=window.HUIZE_CHAOS_RECIPES||[];let custom=[];try{custom=JSON.parse(localStorage.getItem('hc-recipe-custom-v1')||'[]')}catch(_){}const edits=new Map();base.forEach(r=>{try{const e=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(e)edits.set(String(r.id),e)}catch(_){}});return [...base.map(r=>edits.get(String(r.id))||r),...custom]}
 window.toggleLooseMenu=()=>{const box=$('#looseMenuBox');box.hidden=!box.hidden};
 window.showRecipeSearch=id=>{const box=$('#recipeSearchBox');box.innerHTML=`<div class="recipe-search"><input id="occasionRecipeQuery" placeholder="Zoek recept…" autocomplete="off"><div id="occasionRecipeResults" class="recipe-results"></div></div>`;const input=$('#occasionRecipeQuery');const draw=()=>{const q=input.value.trim().toLowerCase();const a=recipeLibrary().filter(r=>!q||(r.title||'').toLowerCase().includes(q)).slice(0,30);$('#occasionRecipeResults').innerHTML=a.map(r=>`<button onclick="addRecipeToOccasion('${id}','${esc(String(r.id))}')"><span><strong>${esc(r.title)}</strong><small>${esc(r.servings||'')} ${r.servings?'personen':''}</small></span><span>Toevoegen</span></button>`).join('')||'<p class="meta">Geen recepten gevonden.</p>'};input.oninput=draw;draw();input.focus()};
-window.addRecipeToOccasion=(id,recipeId)=>{const e=events.find(x=>x.id===id),r=recipeLibrary().find(x=>String(x.id)===String(recipeId));if(!e||!r)return;normalizeEvent(e);e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});save();openDetail(id)};
-window.toggleMenuIngredient=(i,j,v)=>{const e=current();if(!e?.menu?.[i]?.ingredients?.[j])return;e.menu[i].ingredients[j].enabled=v;save();openDetail(e.id)};
+window.addRecipeToOccasion=(id,recipeId)=>{const e=events.find(x=>x.id===id),r=recipeLibrary().find(x=>String(x.id)===String(recipeId));if(!e||!r)return;normalizeEvent(e);e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});refreshEventShoppingIfCreated(e);save();openDetail(id)};
+window.toggleMenuIngredient=(i,j,v)=>{const e=current();if(!e?.menu?.[i]?.ingredients?.[j])return;e.menu[i].ingredients[j].enabled=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 function shoppingHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateShopping(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" onchange="updateShopping(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" onchange="updateShopping(${i},'qty',this.value)"><button class="del danger" onclick="deleteShopping(${i})">×</button></div>`}
 function needHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateNeed(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Benodigd" onchange="updateNeed(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" aria-label="Aantal" onchange="updateNeed(${i},'qty',this.value)"><button class="del danger" onclick="deleteNeed(${i})" aria-label="Verwijderen">×</button></div>`}
 function prepSorted(e){return (e.prep||[]).map((x,i)=>({x,i})).sort((a,b)=>{if(a.x.done!==b.x.done)return a.x.done?1:-1;if(!a.x.date&&!b.x.date)return 0;if(!a.x.date)return 1;if(!b.x.date)return -1;return a.x.date.localeCompare(b.x.date)})}
@@ -111,19 +111,39 @@ function itemHtml(x,i){
   return `<div class="item-wrap"><div class="item"><input class="product" value="${esc(x.product)}" onchange="updateItem(${i},'product',this.value)"><select onchange="updateItem(${i},'category',this.value)">${['Eten','Hapjes','Dranken','Overig'].map(c=>`<option ${x.category===c?'selected':''}>${c}</option>`).join('')}</select><input value="${esc(x.qty||'')}" placeholder="Aantal" onchange="updateItem(${i},'qty',this.value)"><input value="${esc(x.cost||'')}" inputmode="decimal" placeholder="Kosten" onchange="updateItem(${i},'cost',this.value)"><select onchange="updateItemResult(${i},this.value)"><option value="">—</option>${['Te veel','Precies goed','Te weinig'].map(c=>`<option ${x.result===c?'selected':''}>${c}</option>`).join('')}</select><button class="del danger" onclick="deleteItem(${i})">×</button></div>${excess?`<div class="excess-row"><label>Aantal over${excess}</label></div>`:''}</div>`
 }
 function current(){return events.find(x=>x.id===activeEventId)}
-window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});save();openDetail(id)};
-window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;save();openDetail(e.id)};
-window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);save();openDetail(e.id)};
+window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});refreshEventShoppingIfCreated(e);save();openDetail(id)};
+window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
+window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 function eventWeekKey(date){const d=date?new Date(date+'T12:00:00'):new Date();const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
 function currentWeekKey(){return eventWeekKey('')}
-window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false,buyWeek:eventWeekKey(e.date)})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();window.location.href='../boodschappen/?page=list'};
+function buildEventShopping(e){
+  normalizeEvent(e);
+  const old=e.shopping||[],rows=[];
+  const add=(text,qty='')=>{
+    text=String(text||'').trim();if(!text)return;
+    const key=text.toLowerCase();
+    const found=rows.find(r=>r.text.toLowerCase()===key);
+    if(found){if(qty&&!found.qty)found.qty=qty;return}
+    const previous=old.find(r=>String(r.text||'').trim().toLowerCase()===key);
+    rows.push({text,qty:qty||previous?.qty||'',done:Boolean(previous?.done),buyWeek:previous?.buyWeek||eventWeekKey(e.date)});
+  };
+  (e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));
+  (e.menu||[]).forEach(x=>{
+    if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));
+    else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''));
+  });
+  e.shopping=rows;
+  return rows;
+}
+function refreshEventShoppingIfCreated(e){if(e?.shoppingCreated)buildEventShopping(e)}
+window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);e.shoppingCreated=true;buildEventShopping(e);save();window.location.href='../boodschappen/?page=list'};
 window.buyNow=i=>{const e=current();if(!e||!e.shopping[i])return;e.shopping[i].buyWeek=currentWeekKey();save();openDetail(e.id)};
 window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
 window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
-window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];save();openDetail(id)};
-window.addNeed=id=>{const e=events.find(x=>x.id===id);const text=$('#newNeed').value.trim();if(!e||!text)return;normalizeEvent(e);e.needs.push({text,qty:$('#newNeedQty').value.trim(),done:false});save();openDetail(id)};
-window.updateNeed=(i,k,v)=>{const e=current();if(!e)return;e.needs[i][k]=v;save();openDetail(e.id)};
-window.deleteNeed=i=>{const e=current();if(!e)return;e.needs.splice(i,1);save();openDetail(e.id)};
+window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];e.shoppingCreated=false;save();openDetail(id)};
+window.addNeed=id=>{const e=events.find(x=>x.id===id);const text=$('#newNeed').value.trim();if(!e||!text)return;normalizeEvent(e);e.needs.push({text,qty:$('#newNeedQty').value.trim(),done:false});refreshEventShoppingIfCreated(e);save();openDetail(id)};
+window.updateNeed=(i,k,v)=>{const e=current();if(!e)return;e.needs[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
+window.deleteNeed=i=>{const e=current();if(!e)return;e.needs.splice(i,1);refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 window.addPrep=id=>{const e=events.find(x=>x.id===id);const text=$('#newPrep').value.trim();if(!e||!text)return;normalizeEvent(e);e.prep.push({text,date:$('#newPrepDate').value,time:$('#newPrepTime').value,done:false});save();openDetail(id)};
 window.updatePrep=(i,k,v)=>{const e=current();if(!e)return;e.prep[i][k]=v;save();openDetail(e.id)};
 window.deletePrep=i=>{const e=current();if(!e)return;e.prep.splice(i,1);save();openDetail(e.id)};

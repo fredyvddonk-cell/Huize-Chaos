@@ -120,10 +120,15 @@ window.toggleAllShopping = () => {
 };
 
 
-let shoppingWeekOffset=Number(localStorage.getItem('hc-shopping-week-offset')||0);
-function shoppingWeekKey(offset=shoppingWeekOffset){const d=new Date();d.setDate(d.getDate()+offset*7);const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
-function eventWeekKey(date){if(!date)return shoppingWeekKey();const d=new Date(date+'T12:00:00');const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
-function weekLabel(){return `Week ${Number(shoppingWeekKey().slice(-2))}`}
+function isoWeekKeyFromDate(date){const d=new Date(date);const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
+function isoWeekMonday(key){const m=String(key||'').match(/^(\d{4})-W(\d{2})$/);if(!m)return null;const year=Number(m[1]),week=Number(m[2]);const jan4=new Date(Date.UTC(year,0,4));const jan4Day=jan4.getUTCDay()||7;const monday=new Date(jan4);monday.setUTCDate(jan4.getUTCDate()-(jan4Day-1)+(week-1)*7);return monday}
+const currentShoppingWeekKey=()=>isoWeekKeyFromDate(new Date());
+let selectedShoppingWeek=localStorage.getItem('hc-shopping-selected-week')||currentShoppingWeekKey();
+if(!isoWeekMonday(selectedShoppingWeek))selectedShoppingWeek=currentShoppingWeekKey();
+function shoppingWeekKey(){return selectedShoppingWeek}
+function eventWeekKey(date){return date?isoWeekKeyFromDate(new Date(date+'T12:00:00')):currentShoppingWeekKey()}
+function weekLabel(){const [year,week]=shoppingWeekKey().split('-W');return `Week ${Number(week)}${year!==String(new Date().getFullYear())?` · ${year}`:''}`}
+function shiftShoppingWeek(delta){const monday=isoWeekMonday(selectedShoppingWeek)||isoWeekMonday(currentShoppingWeekKey());monday.setUTCDate(monday.getUTCDate()+Number(delta||0)*7);selectedShoppingWeek=isoWeekKeyFromDate(monday);localStorage.setItem('hc-shopping-selected-week',selectedShoppingWeek);localStorage.removeItem('hc-shopping-week-offset');render()}
 function inferShoppingMeta(name){const n=String(name||'').toLowerCase();const p=products.find(x=>String(x.name||'').toLowerCase()===n)||products.find(x=>n.includes(String(x.name||'').toLowerCase())||String(x.name||'').toLowerCase().includes(n));return {category:p?.category||'Overig',store:p?.store||'Overig',status:p?.status||'Niet in huis'} }
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem('huize-chaos-recipe-weeks-v1')||'[]')}catch(_){return[]}}
 function recipeShoppingRows(){const week=shoppingWeekKey();const stock=products||[];return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).filter(i=>!i.done).map((i,index)=>{const m=inferShoppingMeta(i.ingredient);const inHouse=stock.some(x=>x.status==='In huis'&&String(x.name||'').toLowerCase()===String(i.ingredient||'').toLowerCase());return inHouse?null:{...m,name:i.ingredient,qty:[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,index}}).filter(Boolean))}
@@ -142,6 +147,7 @@ window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=
 window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 
 function renderShopping(allProducts) {
+  const wl=document.getElementById('shoppingWeekLabel');if(wl)wl.textContent=weekLabel();
   const arr = allProducts.filter(x => x.shopping);
   const done = arr.filter(x => x.done).length;
   const occasionCount=occasionShoppingRows().length + recipeShoppingRows().length;
@@ -264,7 +270,7 @@ function bindShoppingEvents() {
     };
   });
 
-  $('#collapseShoppingBtn').onclick = toggleAllShopping; const wl=$('#shoppingWeekLabel');if(wl)wl.textContent=weekLabel();$('#prevShoppingWeek').onclick=()=>{shoppingWeekOffset--;localStorage.setItem('hc-shopping-week-offset',shoppingWeekOffset);render()};$('#nextShoppingWeek').onclick=()=>{shoppingWeekOffset++;localStorage.setItem('hc-shopping-week-offset',shoppingWeekOffset);render()};
+  $('#collapseShoppingBtn').onclick = toggleAllShopping; const wl=$('#shoppingWeekLabel');if(wl)wl.textContent=weekLabel();$('#prevShoppingWeek').onclick=()=>shiftShoppingWeek(-1);$('#nextShoppingWeek').onclick=()=>shiftShoppingWeek(1);
   $('#printList').onclick = () => window.print();
   document.addEventListener('click', event => {
     document.querySelectorAll('.shopping-item-menu[open]').forEach(menu => {

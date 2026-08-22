@@ -411,25 +411,25 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-purchase-count{display:block;text-align:center;margin:4px 0 14px;color:#777}
 @media(max-width:700px){.insight-budget-grid{grid-template-columns:1fr}}
 
-/* V1.3.84 - diagnostiek Jumbo scanbon */
+/* V1.3.85 - diagnostiek Jumbo scanbon */
 .receipt-debug{margin-top:12px;border:1px dashed #9b83bd;border-radius:12px;padding:10px 12px;background:#faf8fd}
 .receipt-debug summary{cursor:pointer;color:#6737b4;font-weight:850}
 .receipt-debug h4{margin:12px 0 5px;font-size:12px}
 .receipt-debug-stats{font-size:12px;line-height:1.5;margin-top:8px}
 .receipt-debug-pre{max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #e7e0eb;border-radius:9px;padding:9px;font:11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
 
-/* V1.3.84 - gedeelde bonnen eerst controleren */
+/* V1.3.85 - gedeelde bonnen eerst controleren */
 .receipt-pending-section{border:1px solid #dacdea;background:#fbf9fd}
 .receipt-pending-section h2{display:flex;align-items:center;gap:8px}
 .pending-count{min-width:25px;height:25px;padding:0 7px;border-radius:999px;background:#957ac1;color:#fff;display:inline-grid;place-items:center;font-size:12px}
 .receipt-pending-card{width:100%;border:1px solid #e5deeb;background:#fff;border-radius:13px;padding:12px 13px;margin-top:8px;display:flex;justify-content:space-between;gap:12px;text-align:left;color:inherit}
 .receipt-pending-card span:last-child{text-align:right}.receipt-pending-card small{display:block;color:#7b7280;margin-top:3px;font-size:11px}
 
-/* V1.3.84 - voorraadstatus los van boodschappenkeuze */
+/* V1.3.85 - voorraadstatus los van boodschappenkeuze */
 .stock-buy-check{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #d8d0e6;border-radius:10px;background:#fff;font-weight:700;color:#4f465d;cursor:pointer}.stock-buy-check input{width:18px;height:18px;accent-color:#3FA7A3}.stock-actions{flex-wrap:wrap}
 
 
-/* V1.3.84 - compacte voorraadacties */
+/* V1.3.85 - compacte voorraadacties */
 .stock-actions-compact{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;flex:0 0 auto}
 .stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px;line-height:1.2;font-weight:800}
 .stock-actions-compact .stock-status-toggle{padding:3px 7px;border-radius:7px}
@@ -438,10 +438,10 @@ body:has(#receiptModal.open){overflow:hidden}
 .stock-actions-compact .stock-hutsel-link{border:0;background:transparent;padding:3px 7px;color:#6f3fba}
 @media(max-width:520px){.stock-actions-compact{min-width:88px}.stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px}}
 
-/* V1.3.84 - gelegenhedenboodschappen in gewone boodschappenweergave */
+/* V1.3.85 - gelegenhedenboodschappen in gewone boodschappenweergave */
 .occasion-shopping-wrap{margin-bottom:14px}.occasion-shopping-title{margin:0 0 7px;color:#6737b4;font-size:14px}.occasion-shopping-item .main{min-width:0}.occasion-shopping-item .meta{color:#786f7d}
 
-/* V1.3.84 - extra compacte voorraadbediening */
+/* V1.3.85 - extra compacte voorraadbediening */
 .stock-actions-compact{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end;gap:8px;min-width:0!important;flex-wrap:nowrap}
 .stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px!important;line-height:1.15!important;white-space:nowrap}
 .stock-actions-compact .stock-buy-red{display:inline-flex;align-items:center;gap:4px;color:#c83232;font-weight:800}
