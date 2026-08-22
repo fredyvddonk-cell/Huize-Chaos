@@ -1,3 +1,9 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
+const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const occasionRef=doc(db,'households','huize-chaos','insight','occasions');
+let occasionUser=null,cloudReady=false,applyingCloud=false,syncTimer=0,stopCloud=null;
 const KEY='huize-chaos-occasions-v1';
 let activeEventId='';
 let events=JSON.parse(localStorage.getItem(KEY)||'[]');
@@ -5,9 +11,12 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const nlDate=s=>{if(!s)return 'Geen datum';const d=new Date(`${s}T12:00:00`);return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'short',year:'numeric'}).format(d)};
-function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=e.menu||[];e.shopping=e.shopping||[];e.evaluation=e.evaluation||'';return e}
+function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>({...m,ingredients:(m.ingredients||[]).map(i=>({...i,enabled:i.enabled!==false}))}));e.shopping=e.shopping||[];e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
-function save(){localStorage.setItem(KEY,JSON.stringify(events));render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(events));render();scheduleCloudSync()}
+function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncCloud,250)}
+async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false})}
+function initCloud(){onAuthStateChanged(auth,async u=>{occasionUser=u;if(!u)return;try{const snap=await getDoc(occasionRef);if(snap.exists()&&Array.isArray(snap.data().events)){applyingCloud=true;events=snap.data().events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render()}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(occasionRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data();if(!Array.isArray(d.events))return;applyingCloud=true;events=d.events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render();if(activeEventId&&events.some(e=>e.id===activeEventId))openDetail(activeEventId)},()=>{})}catch(err){console.warn('Synchronisatie gelegenheden niet beschikbaar',err)}})}
 function catTotals(e){return ['Eten','Hapjes','Dranken','Overig'].map(c=>[c,(e.items||[]).filter(x=>x.category===c).reduce((a,x)=>a+(+x.cost||0),0)])}
 function render(){
   const list=$('#list');
@@ -51,9 +60,11 @@ window.openDetail=id=>{
     <div class="summary">${sums.map(([c,n])=>`<div class="sum"><small>${c}</small><strong>${money(n)}</strong></div>`).join('')}</div>
 
     <section class="occasion-section">
-      <div class="section-title"><div><h3>Menu</h3><p>Maak voor iedere gelegenheid een menu. Een gerecht hoeft geen bestaand recept te zijn.</p></div></div>
+      <div class="section-title"><div><h3>Menu</h3><p>Voeg een recept toe of maak een los menuonderdeel.</p></div></div>
       <div class="menu-list">${(e.menu||[]).map((x,i)=>menuHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen gerechten toegevoegd.</p>'}</div>
-      <div class="quick-add menu-add"><select id="newMenuType"><option>Hapje</option><option>Voorgerecht</option><option>Hoofdgerecht</option><option>Bijgerecht</option><option>Dessert</option><option>Drank</option><option>Overig</option></select><input id="newMenuDish" placeholder="Gerecht of onderdeel"><input id="newMenuNeeded" placeholder="Benodigdheden (optioneel)"><button class="primary" onclick="addMenu('${id}')">+ Toevoegen</button></div>
+      <div class="menu-actions"><button class="primary" onclick="showRecipeSearch('${id}')">Zoeken in recepten</button><button onclick="toggleLooseMenu()">+ Los gerecht</button></div>
+      <div id="recipeSearchBox"></div>
+      <div id="looseMenuBox" class="quick-add menu-add" hidden><select id="newMenuType"><option>Hapje</option><option>Voorgerecht</option><option>Hoofdgerecht</option><option>Bijgerecht</option><option>Dessert</option><option>Drank</option><option>Overig</option></select><input id="newMenuDish" placeholder="Gerecht of onderdeel"><input id="newMenuNeeded" placeholder="Benodigdheden (optioneel)"><button class="primary" onclick="addMenu('${id}')">+ Toevoegen</button></div>
     </section>
 
     <section class="occasion-section">
@@ -86,7 +97,12 @@ window.openDetail=id=>{
   if(result)result.onchange=()=>{const excess=$('#newExcessQty');excess.hidden=result.value!=='Te veel';if(excess.hidden)excess.value=''};
   $('#detailDialog').showModal()
 };
-function menuHtml(x,i){return `<div class="menu-row"><select onchange="updateMenu(${i},'type',this.value)">${['Hapje','Voorgerecht','Hoofdgerecht','Bijgerecht','Dessert','Drank','Overig'].map(c=>`<option ${x.type===c?'selected':''}>${c}</option>`).join('')}</select><input class="grow" value="${esc(x.dish||'')}" placeholder="Gerecht" onchange="updateMenu(${i},'dish',this.value)"><input value="${esc(x.needed||'')}" placeholder="Benodigdheden" onchange="updateMenu(${i},'needed',this.value)"><button class="del danger" onclick="deleteMenu(${i})">×</button></div>`}
+function menuHtml(x,i){const linked=x.recipeId&&x.ingredients?.length;return `<div class="menu-card"><div class="menu-card-head"><div><span class="menu-type">${esc(x.type||'Overig')}</span><strong>${esc(x.dish||'')}</strong>${x.recipeId?'<small>Gekoppeld recept</small>':''}</div><button class="del danger" onclick="deleteMenu(${i})">×</button></div>${linked?`<div class="menu-ingredients"><div class="meta">Kies wat je voor deze gelegenheid wilt gebruiken:</div>${x.ingredients.map((ing,j)=>`<label class="menu-ingredient"><input type="checkbox" ${ing.enabled!==false?'checked':''} onchange="toggleMenuIngredient(${i},${j},this.checked)"><span>${esc([ing.qty,ing.unit,ing.ingredient].filter(Boolean).join(' '))}</span></label>`).join('')}</div>`:x.needed?`<div class="menu-needed">${esc(x.needed)}</div>`:''}</div>`}
+function recipeLibrary(){const base=window.HUIZE_CHAOS_RECIPES||[];let custom=[];try{custom=JSON.parse(localStorage.getItem('hc-recipe-custom-v1')||'[]')}catch(_){}const edits=new Map();base.forEach(r=>{try{const e=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(e)edits.set(String(r.id),e)}catch(_){}});return [...base.map(r=>edits.get(String(r.id))||r),...custom]}
+window.toggleLooseMenu=()=>{const box=$('#looseMenuBox');box.hidden=!box.hidden};
+window.showRecipeSearch=id=>{const box=$('#recipeSearchBox');box.innerHTML=`<div class="recipe-search"><input id="occasionRecipeQuery" placeholder="Zoek recept…" autocomplete="off"><div id="occasionRecipeResults" class="recipe-results"></div></div>`;const input=$('#occasionRecipeQuery');const draw=()=>{const q=input.value.trim().toLowerCase();const a=recipeLibrary().filter(r=>!q||(r.title||'').toLowerCase().includes(q)).slice(0,30);$('#occasionRecipeResults').innerHTML=a.map(r=>`<button onclick="addRecipeToOccasion('${id}','${esc(String(r.id))}')"><span><strong>${esc(r.title)}</strong><small>${esc(r.servings||'')} ${r.servings?'personen':''}</small></span><span>Toevoegen</span></button>`).join('')||'<p class="meta">Geen recepten gevonden.</p>'};input.oninput=draw;draw();input.focus()};
+window.addRecipeToOccasion=(id,recipeId)=>{const e=events.find(x=>x.id===id),r=recipeLibrary().find(x=>String(x.id)===String(recipeId));if(!e||!r)return;normalizeEvent(e);e.menu.push({type:'Hapje',dish:r.title,recipeId:String(r.id),recipeServings:r.servings||'',ingredients:(r.ingredients||[]).map(x=>({qty:x.qty||'',unit:x.unit||'',ingredient:x.ingredient||'',memo:x.memo||'',enabled:true}))});save();openDetail(id)};
+window.toggleMenuIngredient=(i,j,v)=>{const e=current();if(!e?.menu?.[i]?.ingredients?.[j])return;e.menu[i].ingredients[j].enabled=v;save();openDetail(e.id)};
 function shoppingHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateShopping(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" onchange="updateShopping(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" onchange="updateShopping(${i},'qty',this.value)"><button class="del danger" onclick="deleteShopping(${i})">×</button></div>`}
 function needHtml(x,i){return `<div class="check-row ${x.done?'done':''}"><input class="row-check" type="checkbox" ${x.done?'checked':''} onchange="updateNeed(${i},'done',this.checked)"><input class="grow" value="${esc(x.text||'')}" aria-label="Benodigd" onchange="updateNeed(${i},'text',this.value)"><input class="qty" value="${esc(x.qty||'')}" placeholder="Aantal / hoeveelheid" aria-label="Aantal" onchange="updateNeed(${i},'qty',this.value)"><button class="del danger" onclick="deleteNeed(${i})" aria-label="Verwijderen">×</button></div>`}
 function prepSorted(e){return (e.prep||[]).map((x,i)=>({x,i})).sort((a,b)=>{if(a.x.done!==b.x.done)return a.x.done?1:-1;if(!a.x.date&&!b.x.date)return 0;if(!a.x.date)return 1;if(!b.x.date)return -1;return a.x.date.localeCompare(b.x.date)})}
@@ -99,7 +115,7 @@ function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;save();openDetail(e.id)};
 window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);save();openDetail(e.id)};
-window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();openDetail(id)};
+window.createShopping=id=>{const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);const rows=[];const add=(text,qty='')=>{text=String(text||'').trim();if(!text)return;const found=rows.find(r=>r.text.toLowerCase()===text.toLowerCase());if(found){if(qty&&!found.qty)found.qty=qty;return}rows.push({text,qty,done:false})};(e.needs||[]).filter(x=>!x.done).forEach(x=>add(x.text,x.qty));(e.menu||[]).forEach(x=>{if(x.ingredients?.length)x.ingredients.filter(i=>i.enabled!==false).forEach(i=>add(i.ingredient,[i.qty,i.unit].filter(Boolean).join(' ')));else String(x.needed||'').split(/[,;\n]+/).map(v=>v.trim()).filter(Boolean).forEach(v=>add(v,''))});e.shopping=rows;save();openDetail(id)};
 window.updateShopping=(i,k,v)=>{const e=current();if(!e)return;e.shopping[i][k]=v;save();openDetail(e.id)};
 window.deleteShopping=i=>{const e=current();if(!e)return;e.shopping.splice(i,1);save();openDetail(e.id)};
 window.clearShopping=id=>{const e=events.find(x=>x.id===id);if(!e||!confirm('Boodschappenlijst leegmaken?'))return;e.shopping=[];save();openDetail(id)};
@@ -116,4 +132,4 @@ window.deleteItem=i=>{const e=current();if(!e)return;e.items.splice(i,1);save();
 window.saveEvaluation=id=>{const e=events.find(x=>x.id===id);e.evaluation=$('#evaluation').value;save();openDetail(id)};
 window.editEvent=id=>{const e=events.find(x=>x.id===id);$('#detailDialog').close();openForm(e)};
 window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>x.id!==id);save();$('#detailDialog').close()};
-render();
+render();initCloud();
