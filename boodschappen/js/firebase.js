@@ -19,6 +19,7 @@ const HOUSEHOLD_ID = 'huize-chaos';
 const itemsRef = collection(db, 'households', HOUSEHOLD_ID, 'shoppingItems');
 const insightRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'shared');
 const occasionsRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'occasions');
+const inventoryRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'products');
 
 let role = '';
 let user = null;
@@ -34,6 +35,10 @@ let stopOccasions = null;
 let insightCloudReady = false;
 let applyingInsightCloud = false;
 let insightSyncTimer = 0;
+let inventoryCloudReady = false;
+let applyingInventoryCloud = false;
+let inventorySyncTimer = 0;
+let stopInventory = null;
 
 const gate = document.getElementById('authGate');
 const message = document.getElementById('authMessage');
@@ -70,6 +75,69 @@ function showWaiting(currentUser) {
   accessBox.hidden = false;
   accessUid.textContent = currentUser.uid;
   setSyncStatus('Wacht op toegang');
+}
+
+function inventoryProductData(product){
+  const copy = { ...product };
+  delete copy.cloudPending;
+  return copy;
+}
+
+function inventoryProducts(){
+  return window.getHuizeChaosProducts().filter(product => !product.temporary).map(inventoryProductData);
+}
+
+async function syncInventoryNow(){
+  if(!inventoryCloudReady || !user || applyingInventoryCloud) return;
+  const products = inventoryProducts();
+  await setDoc(inventoryRef, {
+    products,
+    updatedAt: serverTimestamp(),
+    updatedBy: user.uid
+  }, { merge: false });
+}
+
+function scheduleInventorySync(){
+  if(applyingInventoryCloud) return;
+  clearTimeout(inventorySyncTimer);
+  inventorySyncTimer=setTimeout(()=>syncInventoryNow().catch(error=>{
+    console.error('Voorraadsynchronisatie mislukt',error);
+    setSyncStatus('Syncfout','error');
+  }),300);
+}
+
+function mergeInventoryFromCloud(remoteProducts){
+  const local=window.getHuizeChaosProducts();
+  // Eenmalige/gezinsboodschappen blijven lokaal via shoppingItems bestaan.
+  const extras=local.filter(product => product.temporary || (product.cloudSource==='family' && !remoteProducts.some(r=>String(r.id)===String(product.id))));
+  const merged=[...remoteProducts.map(product=>({ ...product })), ...extras];
+  applyingInventoryCloud=true;
+  window.replaceHuizeChaosProducts(merged);
+  applyingInventoryCloud=false;
+}
+
+async function startInventorySync(){
+  if(!user) return;
+  try{
+    const snap=await getDoc(inventoryRef);
+    if(snap.exists() && Array.isArray(snap.data()?.products)){
+      mergeInventoryFromCloud(snap.data().products);
+    }else{
+      inventoryCloudReady=true;
+      await syncInventoryNow();
+    }
+    inventoryCloudReady=true;
+    stopInventory?.();
+    stopInventory=onSnapshot(inventoryRef,snapshot=>{
+      if(!snapshot.exists() || applyingInventoryCloud) return;
+      const data=snapshot.data()||{};
+      if(!Array.isArray(data.products)) return;
+      mergeInventoryFromCloud(data.products);
+      setSyncStatus('Gesynchroniseerd','online');
+    },error=>console.error('Voorraad live synchronisatie mislukt',error));
+  }catch(error){
+    console.error('Voorraadsynchronisatie starten mislukt',error);
+  }
 }
 
 function cloudData(product) {
@@ -302,6 +370,7 @@ async function startOccasionsSync(){
 
 window.scheduleCloudSync = scheduleSync;
 window.addEventListener('huize-chaos-products-changed', scheduleSync);
+window.addEventListener('huize-chaos-products-changed', scheduleInventorySync);
 
 async function openFor(currentUser) {
   const memberRef = doc(db, 'households', HOUSEHOLD_ID, 'members', currentUser.uid);
@@ -323,6 +392,7 @@ async function openFor(currentUser) {
   startServerRefresh();
   await startInsightSync();
   await startOccasionsSync();
+  await startInventorySync();
   refreshItemsFromServer().catch(error => {
     console.error(error);
     setSyncStatus('Geen verbinding', 'error');
@@ -393,6 +463,9 @@ onAuthStateChanged(auth, currentUser => {
   stopInsight = null;
   stopOccasions?.();
   stopOccasions = null;
+  stopInventory?.();
+  stopInventory = null;
+  inventoryCloudReady = false;
   insightCloudReady = false;
   clearInterval(serverRefreshTimer);
   if (!currentUser) {
