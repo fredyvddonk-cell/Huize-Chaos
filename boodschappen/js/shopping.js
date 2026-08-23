@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.114 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.115 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -164,7 +164,7 @@ function materializeOccasionShopping(e){
 }
 function occasionShoppingData(){const week=shoppingWeekKey();try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).map(e=>({...e,shopping:materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===week:weekContainsDate(week,e.date)))})).filter(e=>e.shopping.length)}catch(_){return []}}
 function occasionShoppingRows(){return occasionShoppingData().flatMap(e=>(e.shopping||[]).map((x,i)=>{const m=inferShoppingMeta(x.text);return {...m,category:x.category||m.category,store:x.store||m.store,name:x.text,qty:x.qty||'',sourceName:e.name||'Gelegenheid',sourceType:'occasion',eventId:e.id,index:i,done:Boolean(x.done)}}))}
-function recipeShoppingRows(){const week=shoppingWeekKey();return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).map((i,index)=>({i,index})).filter(x=>!x.i.ordered&&x.i.shoppingSelected!==false).map(({i,index})=>{const m=inferShoppingMeta(i.ingredient),coverage=recipeStockCoverage(i);if(coverage.enough)return null;return {...m,category:i.category||m.category,store:i.store||m.store,name:i.ingredient,qty:i.shoppingQty||coverage.shortage||[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,recipeId:plan.recipeId,servings:plan.servings,index,done:Boolean(i.done)}}).filter(Boolean))}
+function recipeShoppingRows(){const week=shoppingWeekKey();return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).map((i,index)=>({i,index})).filter(x=>!x.i.ordered&&x.i.shoppingSelected!==false).map(({i,index})=>{const m=inferShoppingMeta(i.ingredient),coverage=recipeStockCoverage(i);/* V1.3.115: een net afgevinkt receptingrediënt blijft zichtbaar als doorgestreepte boodschap, ook nadat Voorraad op In huis is gezet. */if(coverage.enough&&!i.done)return null;return {...m,category:i.category||m.category,store:i.store||m.store,name:i.ingredient,qty:i.shoppingQty||coverage.shortage||[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,recipeId:plan.recipeId,servings:plan.servings,index,done:Boolean(i.done)}}).filter(Boolean))}
 function sourceShoppingHtml(){const rows=[...occasionShoppingRows(),...recipeShoppingRows()];if(!rows.length)return '';const key=group==='store'?'store':'category',grouped={};rows.forEach(x=>(grouped[x[key]||'Overig']??=[]).push(x));return Object.entries(grouped).map(([title,items])=>`<section class="shopping-group"><div class="shopping-group-head"><span>${esc(title)}</span><span>${items.length}</span></div><div class="shopping-group-body">${items.map(x=>`<div class="item shopping-item source-shopping-item ${x.done?'done':''}" role="button" tabindex="0" onclick="openSourceShoppingEdit('${x.sourceType}','${x.sourceType==='occasion'?String(x.eventId).replace(/'/g,"\\'"):String(x.planId).replace(/'/g,"\\'")}',${x.index})"><input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done?'checked':''} onclick="event.stopPropagation()" onchange="${x.sourceType==='occasion'?`markOccasionBought('${String(x.eventId).replace(/'/g,"\\'")}',${x.index},this.checked)`:`markRecipeIngredientBought('${x.planId}',${x.index},this.checked)`}"><div class="main"><div class="name source-shopping-name">${esc([x.qty,x.name].filter(Boolean).join(' '))}</div><div class="meta source-shopping-meta">${[x.store,x.sourceName].filter(Boolean).map(esc).join(' · ')}</div></div>${x.sourceType==='recipe'&&x.recipeId?`<button class="mini-recipe-button" type="button" title="Recept bekijken" aria-label="Recept bekijken" onclick="event.stopPropagation();openShoppingRecipe('${String(x.recipeId).replace(/'/g,"\\'")}', '${esc(x.servings||'')}')">R</button>`:''}</div>`).join('')}</div></section>`).join('')}
 function ensureSourceEditDialog(){let d=document.getElementById('sourceShoppingEditDialog');if(d)return d;d=document.createElement('dialog');d.id='sourceShoppingEditDialog';d.innerHTML=`<form method="dialog" class="source-shopping-edit"><h2>Boodschap wijzigen</h2><p id="sourceEditName" class="source-edit-name"></p><label>Hoeveelheid<input id="sourceEditQty" autocomplete="off"></label><label>Winkel<input id="sourceEditStore" list="sourceStoreOptions" autocomplete="off"><datalist id="sourceStoreOptions"></datalist></label><label>Categorie<input id="sourceEditCategory" autocomplete="off"></label><p id="sourceEditOrigin" class="meta"></p><div class="actions"><button value="cancel">Annuleren</button><button id="sourceEditSave" value="default" class="primary">Opslaan</button></div></form>`;document.body.appendChild(d);return d}
 window.openShoppingRecipe=(recipeId,servings='')=>{sessionStorage.setItem('hc-shopping-return-scroll',String(window.scrollY||0));sessionStorage.setItem('hc-shopping-return-week',shoppingWeekKey());localStorage.setItem('household-page','list');sessionStorage.setItem('hc-household-page-session','list');window.location.href=`../recepten/?recipe=${encodeURIComponent(recipeId)}&readonly=shopping&view=ingredients${servings?`&servings=${encodeURIComponent(servings)}`:''}`};
@@ -178,7 +178,7 @@ window.markRecipeIngredientBought=(planId,index,checked)=>{
   ingredient.done=Boolean(checked);
   localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));
 
-  // V1.3.114 - gekocht receptingrediënt wordt één keer als 'In huis' in Voorraad gezet.
+  // V1.3.115 - gekocht receptingrediënt wordt één keer als 'In huis' in Voorraad gezet.
   // Exacte hoeveelheden worden bewust niet overgenomen.
   if(checked){
     const name=String(ingredient.ingredient||'').trim();
@@ -285,7 +285,7 @@ function renderShopping(allProducts) {
     }
   });
 
-  // V1.3.114 - natuurlijke printvolgorde: eerst de huidige kolom vullen,
+  // V1.3.115 - natuurlijke printvolgorde: eerst de huidige kolom vullen,
   // daarna pas doorstromen naar de volgende kolom.
   const printHtml=printCategories.map(category=>category.html).join('');
 
@@ -350,12 +350,12 @@ function bindShoppingEvents() {
     let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}
     events.forEach(e=>{if(Array.isArray(e.shopping))e.shopping=e.shopping.filter(x=>!x.done)});
     localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.syncHuizeChaosOccasions?.(events);
-    const plans=recipeWeekPlans();plans.forEach(p=>{if(Array.isArray(p.ingredients))p.ingredients=p.ingredients.filter(x=>!x.done)});
+    const plans=recipeWeekPlans();plans.forEach(p=>{if(Array.isArray(p.ingredients))p.ingredients.forEach(x=>{if(x.done)x.done=false})});
     localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
     save();
     render();
   };
 }
 
-// V1.3.114 - terug uit recept naar dezelfde plek in boodschappenlijst
+// V1.3.115 - terug uit recept naar dezelfde plek in boodschappenlijst
 window.addEventListener('load',()=>{const wk=sessionStorage.getItem('hc-shopping-return-week');if(wk){selectedShoppingWeek=wk;localStorage.setItem('hc-shopping-selected-week',wk);sessionStorage.removeItem('hc-shopping-return-week');setTimeout(()=>{render();const y=Number(sessionStorage.getItem('hc-shopping-return-scroll')||0);sessionStorage.removeItem('hc-shopping-return-scroll');window.scrollTo(0,y)},80)}});
