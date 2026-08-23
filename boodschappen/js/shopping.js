@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.111 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.112 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -324,5 +324,5 @@ function bindShoppingEvents() {
   };
 }
 
-// V1.3.111 - terug uit recept naar dezelfde plek in boodschappenlijst
+// V1.3.112 - terug uit recept naar dezelfde plek in boodschappenlijst
 window.addEventListener('load',()=>{const wk=sessionStorage.getItem('hc-shopping-return-week');if(wk){selectedShoppingWeek=wk;localStorage.setItem('hc-shopping-selected-week',wk);sessionStorage.removeItem('hc-shopping-return-week');setTimeout(()=>{render();const y=Number(sessionStorage.getItem('hc-shopping-return-scroll')||0);sessionStorage.removeItem('hc-shopping-return-scroll');window.scrollTo(0,y)},80)}});

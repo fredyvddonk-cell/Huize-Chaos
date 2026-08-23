@@ -78,8 +78,17 @@ function showWaiting(currentUser) {
 }
 
 function inventoryProductData(product){
+  // Voorraad synchroniseert de productgegevens, maar NIET de boodschappenstatus.
+  // `shoppingItems` is de enige bron voor Kopen aan/uit. Zo kunnen de twee
+  // synchronisatieroutes elkaar niet meer terugtriggeren.
   const copy = { ...product };
   delete copy.cloudPending;
+  delete copy.cloudId;
+  delete copy.cloudSource;
+  delete copy.cloudAddedBy;
+  delete copy.cloudAddedByName;
+  delete copy.shopping;
+  delete copy.done;
   return copy;
 }
 
@@ -108,9 +117,28 @@ function scheduleInventorySync(){
 
 function mergeInventoryFromCloud(remoteProducts){
   const local=window.getHuizeChaosProducts();
-  // Eenmalige/gezinsboodschappen blijven lokaal via shoppingItems bestaan.
-  const extras=local.filter(product => product.temporary || (product.cloudSource==='family' && !remoteProducts.some(r=>String(r.id)===String(product.id))));
-  const merged=[...remoteProducts.map(product=>({ ...product })), ...extras];
+  const localById=new Map(local.map(product=>[String(product.id),product]));
+  // Voorraadvelden komen uit inventory. Boodschappenstatus + cloud-identiteit
+  // blijven lokaal en worden uitsluitend door shoppingItems beheerd.
+  const merged=remoteProducts.map(remote=>{
+    const current=localById.get(String(remote.id));
+    if(!current) return { ...remote, shopping:false, done:false };
+    return {
+      ...current,
+      ...remote,
+      shopping:Boolean(current.shopping),
+      done:Boolean(current.done),
+      cloudId:current.cloudId,
+      cloudSource:current.cloudSource,
+      cloudAddedBy:current.cloudAddedBy,
+      cloudAddedByName:current.cloudAddedByName,
+      cloudPending:current.cloudPending
+    };
+  });
+  // Eenmalige/gezinsboodschappen bestaan alleen via shoppingItems.
+  local.filter(product=>product.temporary || product.cloudSource==='family').forEach(product=>{
+    if(!merged.some(x=>String(x.id)===String(product.id))) merged.push(product);
+  });
   applyingInventoryCloud=true;
   window.replaceHuizeChaosProducts(merged);
   applyingInventoryCloud=false;
@@ -264,7 +292,7 @@ async function syncNow() {
   for (const product of products.filter(x => x.shopping)) {
     if (!product.cloudId) {
       product.cloudId = crypto.randomUUID();
-      product.cloudSource = role === 'owner' && product.status !== 'In huis' ? 'stock' : 'family';
+      product.cloudSource = product.temporary ? 'family' : 'stock';
       product.cloudAddedBy = user.uid;
       product.cloudAddedByName = user.displayName || 'Gezinslid';
       product.cloudPending = true;

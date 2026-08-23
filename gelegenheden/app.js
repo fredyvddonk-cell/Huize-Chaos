@@ -162,7 +162,7 @@ function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});refreshEventShoppingIfCreated(e);save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
 window.deleteMenu=i=>{const e=current();if(!e)return;e.menu.splice(i,1);refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
-// V1.3.111 - datum van een gelegenheid zonder lokale tijdzone naar ISO-week omzetten.
+// V1.3.112 - datum van een gelegenheid zonder lokale tijdzone naar ISO-week omzetten.
 function eventWeekKey(date){let d;if(date){const m=String(date).match(/^(\d{4})-(\d{2})-(\d{2})$/);d=m?new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3]))):new Date(date)}else{const n=new Date();d=new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))}if(Number.isNaN(d.getTime()))return '';const x=new Date(d);x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
 function currentWeekKey(){return eventWeekKey('')}
 function buildEventShopping(e){
@@ -206,5 +206,5 @@ window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;even
 render();initCloud();
 const requestedEvent=new URLSearchParams(location.search).get('event');if(requestedEvent&&events.some(e=>String(e.id)===String(requestedEvent)))setTimeout(()=>openDetail(requestedEvent),0);
 
-// V1.3.111 - Ga/Enter voert de veldactie uit en sluit het mobiele toetsenbord.
+// V1.3.112 - Ga/Enter voert de veldactie uit en sluit het mobiele toetsenbord.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.id?.startsWith('menuServings')){e.preventDefault();const i=Number(input.id.replace('menuServings',''));window.setMenuServings(i,input.value);input.blur();return}if(input.type!=='search'){input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();}});
