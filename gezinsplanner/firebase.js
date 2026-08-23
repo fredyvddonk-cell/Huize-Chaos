@@ -87,17 +87,33 @@ window.schedulePlannerCloudSync=scheduleSync;
 window.schedulePlannerBigStateSync=state=>{if(!cloudReady||!user)return;setDoc(bigStateRef,{...state,updatedAt:serverTimestamp()},{merge:true}).catch(error=>{console.error(error);setStatus('Syncfout','error')})};
 
 async function openFor(currentUser){
-  const member=await getDoc(doc(db,'households',HOUSEHOLD_ID,'members',currentUser.uid));
-  if(!member.exists()){showWaiting(currentUser);return}
-  role=member.data().role==='owner'?'owner':'member';
-  window.huizeChaosPlannerUserUid=currentUser.uid;window.huizeChaosPlannerUserName=currentUser.displayName||currentUser.email||'Gezinslid';
-  window.applyHuizeChaosPlannerRole(role);
-  privateRef=collection(db,'households',HOUSEHOLD_ID,'members',currentUser.uid,'privatePlannerItems');
-  gate.classList.add('ready');signOutButton.hidden=false;setStatus('Verbinden…');
-  stopAll();sharedReady=false;privateReady=role!=='owner';
-  stopListeners.push(onSnapshot(sharedRef,snapshot=>{sharedItems=new Map();snapshot.forEach(item=>sharedItems.set(item.id,item.data()));sharedReady=true;applyCombined()},syncError));
-  if(role==='owner')stopListeners.push(onSnapshot(privateRef,snapshot=>{privateItems=new Map();snapshot.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;applyCombined()},syncError));
-  stopListeners.push(onSnapshot(bigStateRef,snapshot=>{if(snapshot.exists())window.applyHuizeChaosBigState(snapshot.data())},syncError));
+  let stage='ledencontrole';
+  try{
+    const member=await getDoc(doc(db,'households',HOUSEHOLD_ID,'members',currentUser.uid));
+    if(!member.exists()){showWaiting(currentUser);return}
+    stage='rol bepalen';
+    role=member.data().role==='owner'?'owner':'member';
+    window.huizeChaosPlannerUserUid=currentUser.uid;window.huizeChaosPlannerUserName=currentUser.displayName||currentUser.email||'Gezinslid';
+    stage='planner initialiseren';
+    if(typeof window.applyHuizeChaosPlannerRole!=='function')throw new Error('applyHuizeChaosPlannerRole ontbreekt');
+    window.applyHuizeChaosPlannerRole(role);
+    privateRef=collection(db,'households',HOUSEHOLD_ID,'members',currentUser.uid,'privatePlannerItems');
+    gate.classList.add('ready');signOutButton.hidden=false;setStatus('Verbinden…');
+    stage='luisteraars starten';
+    stopAll();sharedReady=false;privateReady=role!=='owner';
+    stopListeners.push(onSnapshot(sharedRef,snapshot=>{sharedItems=new Map();snapshot.forEach(item=>sharedItems.set(item.id,item.data()));sharedReady=true;applyCombined()},syncError));
+    if(role==='owner')stopListeners.push(onSnapshot(privateRef,snapshot=>{privateItems=new Map();snapshot.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;applyCombined()},syncError));
+    stopListeners.push(onSnapshot(bigStateRef,snapshot=>{if(snapshot.exists())window.applyHuizeChaosBigState(snapshot.data())},syncError));
+  }catch(error){
+    error.huizeChaosStage=stage;
+    throw error;
+  }
+}
+function diagnosticText(error){
+  const stage=error?.huizeChaosStage||'onbekende stap';
+  const code=String(error?.code||'geen foutcode');
+  const detail=String(error?.message||error||'onbekende fout').replace(/^FirebaseError:\s*/,'');
+  return `Toegangsfout bij ${stage}. Foutcode: ${code}. ${detail}`;
 }
 function syncError(error){console.error(error);setStatus('Geen verbinding','error')}
 
@@ -105,4 +121,4 @@ signInButton.addEventListener('click',async()=>{try{await signInWithPopup(auth,p
 signOutButton.addEventListener('click',()=>signOut(auth));
 document.getElementById('copyAccessUid').addEventListener('click',async()=>{await navigator.clipboard.writeText(accessUid.textContent);document.getElementById('copyAccessUid').textContent='Gekopieerd'});
 getRedirectResult(auth).catch(console.error);
-onAuthStateChanged(auth,currentUser=>{user=currentUser;cloudReady=false;stopAll();if(!currentUser){role='';showSignedOut();return}openFor(currentUser).catch(error=>{console.error(error);message.textContent='Toegang controleren is niet gelukt. Controleer de Firebase-instellingen.';setStatus('Toegangsfout','error')})});
+onAuthStateChanged(auth,currentUser=>{user=currentUser;cloudReady=false;stopAll();if(!currentUser){role='';showSignedOut();return}openFor(currentUser).catch(error=>{console.error('Gezinsplanner diagnose',error);message.textContent=diagnosticText(error);setStatus('Toegangsfout','error')})});

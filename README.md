@@ -52,6 +52,12 @@ Nieuw:
 - Koopzegels, privacytekst, aantallen, medewerker- en winkelregels worden niet als producten opgenomen.
 - Bestaande Jumbo-, AH- en Picnic-PDF-inlezing blijft behouden.
 
+## V1.3.122
+- Gezinsplanner: gerichte diagnose toegevoegd voor de toegangsfout.
+- De algemene Firebase-melding toont nu de exacte stap, foutcode en fouttekst.
+- Geen beveiligingsregels versoepeld; deze versie is bedoeld om de werkelijke oorzaak veilig vast te stellen.
+
+
 ## V1.3.73
 - AH-koopzegels worden niet meer als productregel herkend.
 - Een detailregel zoals `39 X 0,10` wordt na `KOOPZEGELS PREMIUM` overgeslagen.
