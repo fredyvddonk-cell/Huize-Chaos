@@ -1,3 +1,10 @@
+
+## V1.3.123
+- Gezinsplanner: opstartfout opgelost waardoor `applyHuizeChaosPlannerRole` niet beschikbaar kwam.
+- Oorzaak: `renderStudy()` werd tijdens het opstarten uitgevoerd voordat `studyTimerInterval` was geïnitialiseerd.
+- De studietimer wordt nu vóór de eerste render geïnitialiseerd, zodat `app.js` volledig kan laden en de Firebase-plannerkoppeling kan starten.
+- Diagnosemelding uit V1.3.122 blijft beschikbaar voor eventuele vervolgproblemen.
+
 ## V1.3.80
 
 - Iedere gelegenheid heeft nu een eigen Menu.
@@ -52,7 +59,7 @@ Nieuw:
 - Koopzegels, privacytekst, aantallen, medewerker- en winkelregels worden niet als producten opgenomen.
 - Bestaande Jumbo-, AH- en Picnic-PDF-inlezing blijft behouden.
 
-## V1.3.122
+## V1.3.123
 - Gezinsplanner: gerichte diagnose toegevoegd voor de toegangsfout.
 - De algemene Firebase-melding toont nu de exacte stap, foutcode en fouttekst.
 - Geen beveiligingsregels versoepeld; deze versie is bedoeld om de werkelijke oorzaak veilig vast te stellen.
