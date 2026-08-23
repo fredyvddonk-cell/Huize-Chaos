@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.109 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.110 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -162,15 +162,15 @@ function materializeOccasionShopping(e){
   saved.forEach(old=>{if(old.manual&&!rows.some(r=>r.text.toLowerCase()===String(old.text||'').trim().toLowerCase()))rows.push({...old})});
   return rows;
 }
-function occasionShoppingData(){const week=shoppingWeekKey();try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).map(e=>({...e,shopping:materializeOccasionShopping(e).filter(x=>!x.done&&(x.buyWeekOverride?x.buyWeek===week:weekContainsDate(week,e.date)))})).filter(e=>e.shopping.length)}catch(_){return []}}
-function occasionShoppingRows(){return occasionShoppingData().flatMap(e=>(e.shopping||[]).map((x,i)=>{const m=inferShoppingMeta(x.text);return {...m,category:x.category||m.category,store:x.store||m.store,name:x.text,qty:x.qty||'',sourceName:e.name||'Gelegenheid',sourceType:'occasion',eventId:e.id,index:i}}))}
-function recipeShoppingRows(){const week=shoppingWeekKey();return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).map((i,index)=>({i,index})).filter(x=>!x.i.done&&!x.i.ordered&&x.i.shoppingSelected!==false).map(({i,index})=>{const m=inferShoppingMeta(i.ingredient),coverage=recipeStockCoverage(i);if(coverage.enough)return null;return {...m,category:i.category||m.category,store:i.store||m.store,name:i.ingredient,qty:i.shoppingQty||coverage.shortage||[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,recipeId:plan.recipeId,servings:plan.servings,index}}).filter(Boolean))}
-function sourceShoppingHtml(){const rows=[...occasionShoppingRows(),...recipeShoppingRows()];if(!rows.length)return '';const key=group==='store'?'store':'category',grouped={};rows.forEach(x=>(grouped[x[key]||'Overig']??=[]).push(x));return Object.entries(grouped).map(([title,items])=>`<section class="shopping-group"><div class="shopping-group-head"><span>${esc(title)}</span><span>${items.length}</span></div><div class="shopping-group-body">${items.map(x=>`<div class="item shopping-item source-shopping-item" role="button" tabindex="0" onclick="openSourceShoppingEdit('${x.sourceType}','${x.sourceType==='occasion'?String(x.eventId).replace(/'/g,"\\'"):String(x.planId).replace(/'/g,"\\'")}',${x.index})"><input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" onclick="event.stopPropagation()" onchange="${x.sourceType==='occasion'?`markOccasionBought('${String(x.eventId).replace(/'/g,"\\'")}',${x.index},this.checked)`:`markRecipeIngredientBought('${x.planId}',${x.index},this.checked)`}"><div class="main"><div class="name source-shopping-name">${esc([x.qty,x.name].filter(Boolean).join(' '))}</div><div class="meta source-shopping-meta">${[x.store,x.sourceName].filter(Boolean).map(esc).join(' · ')}${x.sourceType==='recipe'&&x.recipeId?` <button class="mini-recipe-button" type="button" onclick="event.stopPropagation();openShoppingRecipe('${String(x.recipeId).replace(/'/g,"\\'")}', '${esc(x.servings||'')}')">Recept</button>`:''}</div></div></div>`).join('')}</div></section>`).join('')}
+function occasionShoppingData(){const week=shoppingWeekKey();try{return (JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]).map(e=>({...e,shopping:materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===week:weekContainsDate(week,e.date)))})).filter(e=>e.shopping.length)}catch(_){return []}}
+function occasionShoppingRows(){return occasionShoppingData().flatMap(e=>(e.shopping||[]).map((x,i)=>{const m=inferShoppingMeta(x.text);return {...m,category:x.category||m.category,store:x.store||m.store,name:x.text,qty:x.qty||'',sourceName:e.name||'Gelegenheid',sourceType:'occasion',eventId:e.id,index:i,done:Boolean(x.done)}}))}
+function recipeShoppingRows(){const week=shoppingWeekKey();return recipeWeekPlans().filter(p=>p.week===week).flatMap(plan=>(plan.ingredients||[]).map((i,index)=>({i,index})).filter(x=>!x.i.ordered&&x.i.shoppingSelected!==false).map(({i,index})=>{const m=inferShoppingMeta(i.ingredient),coverage=recipeStockCoverage(i);if(coverage.enough)return null;return {...m,category:i.category||m.category,store:i.store||m.store,name:i.ingredient,qty:i.shoppingQty||coverage.shortage||[i.qty,i.unit].filter(Boolean).join(' '),sourceName:plan.title,sourceType:'recipe',planId:plan.id,recipeId:plan.recipeId,servings:plan.servings,index,done:Boolean(i.done)}}).filter(Boolean))}
+function sourceShoppingHtml(){const rows=[...occasionShoppingRows(),...recipeShoppingRows()];if(!rows.length)return '';const key=group==='store'?'store':'category',grouped={};rows.forEach(x=>(grouped[x[key]||'Overig']??=[]).push(x));return Object.entries(grouped).map(([title,items])=>`<section class="shopping-group"><div class="shopping-group-head"><span>${esc(title)}</span><span>${items.length}</span></div><div class="shopping-group-body">${items.map(x=>`<div class="item shopping-item source-shopping-item ${x.done?'done':''}" role="button" tabindex="0" onclick="openSourceShoppingEdit('${x.sourceType}','${x.sourceType==='occasion'?String(x.eventId).replace(/'/g,"\\'"):String(x.planId).replace(/'/g,"\\'")}',${x.index})"><input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done?'checked':''} onclick="event.stopPropagation()" onchange="${x.sourceType==='occasion'?`markOccasionBought('${String(x.eventId).replace(/'/g,"\\'")}',${x.index},this.checked)`:`markRecipeIngredientBought('${x.planId}',${x.index},this.checked)`}"><div class="main"><div class="name source-shopping-name">${esc([x.qty,x.name].filter(Boolean).join(' '))}</div><div class="meta source-shopping-meta">${[x.store,x.sourceName].filter(Boolean).map(esc).join(' · ')}</div></div>${x.sourceType==='recipe'&&x.recipeId?`<button class="mini-recipe-button" type="button" title="Recept bekijken" aria-label="Recept bekijken" onclick="event.stopPropagation();openShoppingRecipe('${String(x.recipeId).replace(/'/g,"\\'")}', '${esc(x.servings||'')}')">R</button>`:''}</div>`).join('')}</div></section>`).join('')}
 function ensureSourceEditDialog(){let d=document.getElementById('sourceShoppingEditDialog');if(d)return d;d=document.createElement('dialog');d.id='sourceShoppingEditDialog';d.innerHTML=`<form method="dialog" class="source-shopping-edit"><h2>Boodschap wijzigen</h2><p id="sourceEditName" class="source-edit-name"></p><label>Hoeveelheid<input id="sourceEditQty" autocomplete="off"></label><label>Winkel<input id="sourceEditStore" list="sourceStoreOptions" autocomplete="off"><datalist id="sourceStoreOptions"></datalist></label><label>Categorie<input id="sourceEditCategory" autocomplete="off"></label><p id="sourceEditOrigin" class="meta"></p><div class="actions"><button value="cancel">Annuleren</button><button id="sourceEditSave" value="default" class="primary">Opslaan</button></div></form>`;document.body.appendChild(d);return d}
 window.openShoppingRecipe=(recipeId,servings='')=>{sessionStorage.setItem('hc-shopping-return-scroll',String(window.scrollY||0));sessionStorage.setItem('hc-shopping-return-week',shoppingWeekKey());localStorage.setItem('household-page','list');sessionStorage.setItem('hc-household-page-session','list');window.location.href=`../recepten/?recipe=${encodeURIComponent(recipeId)}&readonly=shopping&view=ingredients${servings?`&servings=${encodeURIComponent(servings)}`:''}`};
 window.openSourceShoppingEdit=(type,id,index)=>{const d=ensureSourceEditDialog();let row=type==='occasion'?occasionShoppingRows().find(x=>String(x.eventId)===String(id)&&x.index===Number(index)):recipeShoppingRows().find(x=>String(x.planId)===String(id)&&x.index===Number(index));if(!row)return;sourceEditName.textContent=row.name;sourceEditQty.value=row.qty||'';sourceEditStore.value=row.store==='Overig'?'':row.store||'';sourceEditCategory.value=row.category==='Overig'?'':row.category||'';sourceEditOrigin.textContent=`Herkomst: ${row.sourceName}`;sourceStoreOptions.innerHTML=[...new Set((products||[]).map(x=>x.store).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}"></option>`).join('');sourceEditSave.onclick=()=>saveSourceShoppingEdit(type,id,Number(index));d.showModal()}
-window.saveSourceShoppingEdit=(type,id,index)=>{const qty=sourceEditQty.value.trim(),store=sourceEditStore.value.trim(),category=sourceEditCategory.value.trim();if(type==='occasion'){let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(id));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>!x.done&&(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[index];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.qty=qty;actual.store=store;actual.category=category;e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events)}else{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(id));if(!p||!p.ingredients?.[index])return;p.ingredients[index].shoppingQty=qty;p.ingredients[index].store=store;p.ingredients[index].category=category;localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'))}render()}
-window.markOccasionBought=(eventId,visibleIndex,checked)=>{let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>!x.done&&(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[visibleIndex];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.done=Boolean(checked);e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render()}
+window.saveSourceShoppingEdit=(type,id,index)=>{const qty=sourceEditQty.value.trim(),store=sourceEditStore.value.trim(),category=sourceEditCategory.value.trim();if(type==='occasion'){let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(id));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[index];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.qty=qty;actual.store=store;actual.category=category;e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events)}else{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(id));if(!p||!p.ingredients?.[index])return;p.ingredients[index].shoppingQty=qty;p.ingredients[index].store=store;p.ingredients[index].category=category;localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'))}render()}
+window.markOccasionBought=(eventId,visibleIndex,checked)=>{let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[visibleIndex];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.done=Boolean(checked);e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render()}
 window.markRecipeIngredientBought=(planId,index,checked)=>{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(planId));if(!p||!p.ingredients?.[index])return;p.ingredients[index].done=Boolean(checked);localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));render()};
 window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
@@ -178,14 +178,15 @@ window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='u
 function renderShopping(allProducts) {
   const wl=document.getElementById('shoppingWeekLabel');if(wl)wl.textContent=weekLabel();
   const arr = allProducts.filter(x => x.shopping);
-  const done = arr.filter(x => x.done).length;
-  const occasionCount=occasionShoppingRows().length + recipeShoppingRows().length;
+  const sourceRows=[...occasionShoppingRows(),...recipeShoppingRows()];
+  const done = arr.filter(x => x.done).length + sourceRows.filter(x=>x.done).length;
+  const occasionCount=sourceRows.length;
 
   $('#count').textContent = `${arr.length + occasionCount} boodschappen · ${done} afgevinkt`;
   const collapseBtn = $('#collapseShoppingBtn');
   if (collapseBtn) collapseBtn.textContent = expandedShoppingGroups.size ? 'Alles inklappen' : 'Alles uitklappen';
   $('#processDoneBar').classList.toggle('visible', done > 0);
-  $('#clearDone').textContent = done ? `✓ Boodschappen verwerken (${done})` : '✓ Boodschappen verwerken';
+  $('#clearDone').textContent = done ? `Gekochte producten verwijderen (${done})` : 'Gekochte producten verwijderen';
 
   document.querySelectorAll('[data-group]').forEach(button => {
     button.classList.toggle('active', button.dataset.group === group);
@@ -233,16 +234,16 @@ function renderShopping(allProducts) {
     html = groups(visibleItems, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
   }
 
-  const sourcePrintable=[...occasionShoppingRows(),...recipeShoppingRows()].map(x=>({name:x.name,category:x.category||'Overig',quantity:x.qty||'',unit:'',memo:x.sourceName||'',status:x.status||'Niet in huis'})); const printable = [...arr.filter(x => !x.done),...sourcePrintable];
+  const sourcePrintable=[...occasionShoppingRows(),...recipeShoppingRows()].filter(x=>!x.done).map(x=>({name:x.name,category:x.category||'Overig',quantity:x.qty||'',unit:'',memo:x.sourceName||'',status:x.status||'Niet in huis'})); const printable = [...arr.filter(x => !x.done),...sourcePrintable];
   const printCategories = groups(printable, 'category').map(([categoryName, items]) => {
     let weight = 2;
     const rows = [...items].sort(shoppingPrioritySort).map(x => {
         const isUrgent = x.status === 'Niet in huis' && x.buyDirectWhenOut;
-        const details = [quantityText(x), x.memo].filter(Boolean).map(esc).join(' · ');
+        const qtxt=quantityText(x); const details = [x.memo].filter(Boolean).map(esc).join(' · ');
         weight += 1 + (details ? .55 : 0) + (String(x.name).length > 28 ? .4 : 0) + (details.length > 36 ? .35 : 0);
         return `<div class="print-item ${isUrgent ? 'urgent-item' : ''}">
           <span class="print-check" aria-hidden="true"></span>
-          <div><div class="print-name">${esc(x.name)}</div>${details ? `<div class="print-meta">${details}</div>` : ''}</div>
+          <div><div class="print-name">${esc([qtxt,x.name].filter(Boolean).join(' '))}</div>${details ? `<div class="print-meta">${details}</div>` : ''}</div>
         </div>`;
       }).join('');
     return {
@@ -251,21 +252,9 @@ function renderShopping(allProducts) {
     };
   });
 
-  const totalWeight = printCategories.reduce((sum, category) => sum + category.weight, 0);
-  let splitAt = printCategories.length;
-  let runningWeight = 0;
-  let smallestDifference = Infinity;
-  for (let index = 1; index < printCategories.length; index += 1) {
-    runningWeight += printCategories[index - 1].weight;
-    const difference = Math.abs(totalWeight / 2 - runningWeight);
-    if (difference < smallestDifference) {
-      smallestDifference = difference;
-      splitAt = index;
-    }
-  }
-  const leftPrintColumn = printCategories.slice(0, splitAt).map(category => category.html).join('');
-  const rightPrintColumn = printCategories.slice(splitAt).map(category => category.html).join('');
-  const printHtml = `<div class="print-column">${leftPrintColumn}</div><div class="print-column">${rightPrintColumn}</div>`;
+  const printCols=[[],[],[],[]],weights=[0,0,0,0];
+  printCategories.forEach(category=>{const idx=weights.indexOf(Math.min(...weights));printCols[idx].push(category.html);weights[idx]+=category.weight});
+  const printHtml=printCols.map(col=>`<div class="print-column">${col.join('')}</div>`).join('');
 
   const recipeHeads=plannedRecipeTitles(); const headsHtml=recipeHeads.length?`<div class="print-week-recipes"><h1>Week ${Number(shoppingWeekKey().slice(-2))}</h1><ul>${recipeHeads.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''; content.innerHTML = `<div class="screen-shopping">${sourceShoppingHtml()}${html}</div>${headsHtml}<div class="print-shopping">${printHtml}</div>`;
 }
@@ -324,10 +313,16 @@ function bindShoppingEvents() {
       }
       return true;
     });
+    // Verwijder ook afgevinkte recept- en gelegenheidsboodschappen pas na deze knop.
+    let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}
+    events.forEach(e=>{if(Array.isArray(e.shopping))e.shopping=e.shopping.filter(x=>!x.done)});
+    localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.syncHuizeChaosOccasions?.(events);
+    const plans=recipeWeekPlans();plans.forEach(p=>{if(Array.isArray(p.ingredients))p.ingredients=p.ingredients.filter(x=>!x.done)});
+    localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
     save();
     render();
   };
 }
 
-// V1.3.109 - terug uit recept naar dezelfde plek in boodschappenlijst
+// V1.3.110 - terug uit recept naar dezelfde plek in boodschappenlijst
 window.addEventListener('load',()=>{const wk=sessionStorage.getItem('hc-shopping-return-week');if(wk){selectedShoppingWeek=wk;localStorage.setItem('hc-shopping-selected-week',wk);sessionStorage.removeItem('hc-shopping-return-week');setTimeout(()=>{render();const y=Number(sessionStorage.getItem('hc-shopping-return-scroll')||0);sessionStorage.removeItem('hc-shopping-return-scroll');window.scrollTo(0,y)},80)}});
