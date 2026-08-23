@@ -411,14 +411,14 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-purchase-count{display:block;text-align:center;margin:4px 0 14px;color:#777}
 @media(max-width:700px){.insight-budget-grid{grid-template-columns:1fr}}
 
-/* V1.3.110 - diagnostiek Jumbo scanbon */
+/* V1.3.111 - diagnostiek Jumbo scanbon */
 .receipt-debug{margin-top:12px;border:1px dashed #9b83bd;border-radius:12px;padding:10px 12px;background:#faf8fd}
 .receipt-debug summary{cursor:pointer;color:#6737b4;font-weight:850}
 .receipt-debug h4{margin:12px 0 5px;font-size:12px}
 .receipt-debug-stats{font-size:12px;line-height:1.5;margin-top:8px}
 .receipt-debug-pre{max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #e7e0eb;border-radius:9px;padding:9px;font:11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
 
-/* V1.3.110 - gedeelde bonnen eerst controleren */
+/* V1.3.111 - gedeelde bonnen eerst controleren */
 .receipt-pending-section{border:1px solid #dacdea;background:#fbf9fd}
 .receipt-pending-section h2{display:flex;align-items:center;gap:8px}
 .pending-count{min-width:25px;height:25px;padding:0 7px;border-radius:999px;background:#957ac1;color:#fff;display:inline-grid;place-items:center;font-size:12px}
@@ -427,11 +427,11 @@ body:has(#receiptModal.open){overflow:hidden}
 .receipt-pending-main span:last-child{text-align:right}.receipt-pending-card small{display:block;color:#7b7280;margin-top:3px;font-size:11px}
 .receipt-pending-delete{flex:0 0 auto;border:0;background:transparent;color:#a33b4b;font:inherit;font-size:12px;font-weight:800;padding:8px 5px;cursor:pointer}
 
-/* V1.3.110 - voorraadstatus los van boodschappenkeuze */
+/* V1.3.111 - voorraadstatus los van boodschappenkeuze */
 .stock-buy-check{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #d8d0e6;border-radius:10px;background:#fff;font-weight:700;color:#4f465d;cursor:pointer}.stock-buy-check input{width:18px;height:18px;accent-color:#3FA7A3}.stock-actions{flex-wrap:wrap}
 
 
-/* V1.3.110 - compacte voorraadacties */
+/* V1.3.111 - compacte voorraadacties */
 .stock-actions-compact{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;flex:0 0 auto}
 .stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px;line-height:1.2;font-weight:800}
 .stock-actions-compact .stock-status-toggle{padding:3px 7px;border-radius:7px}
@@ -440,10 +440,10 @@ body:has(#receiptModal.open){overflow:hidden}
 .stock-actions-compact .stock-hutsel-link{border:0;background:transparent;padding:3px 7px;color:#6f3fba}
 @media(max-width:520px){.stock-actions-compact{min-width:88px}.stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px}}
 
-/* V1.3.110 - gelegenhedenboodschappen in gewone boodschappenweergave */
+/* V1.3.111 - gelegenhedenboodschappen in gewone boodschappenweergave */
 .occasion-shopping-wrap{margin-bottom:14px}.occasion-shopping-title{margin:0 0 7px;color:#6737b4;font-size:14px}.occasion-shopping-item .main{min-width:0}.occasion-shopping-item .meta{color:#786f7d}
 
-/* V1.3.110 - extra compacte voorraadbediening */
+/* V1.3.111 - extra compacte voorraadbediening */
 .stock-actions-compact{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end;gap:8px;min-width:0!important;flex-wrap:nowrap}
 .stock-actions-compact .stock-status-toggle,.stock-actions-compact .stock-buy-red,.stock-actions-compact .stock-hutsel-link{font-size:12px!important;line-height:1.15!important;white-space:nowrap}
 .stock-actions-compact .stock-buy-red{display:inline-flex;align-items:center;gap:4px;color:#c83232;font-weight:800}
@@ -455,7 +455,7 @@ body:has(#receiptModal.open){overflow:hidden}
 .shopping-weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 12px}.shopping-weekbar button{border:1px solid #ddd3e7;background:#fff;border-radius:10px;padding:7px 11px;font-weight:800;color:#60417d}.shopping-weekbar strong{min-width:92px;text-align:center}.print-week-recipes{display:none}
 @media print{.shopping-weekbar{display:none!important}.print-week-recipes{display:block!important;margin:0 0 10pt;break-after:avoid}.print-week-recipes h1{font-size:16pt;margin:0 0 5pt}.print-week-recipes ul{margin:0 0 9pt;padding-left:18pt;font-size:9.5pt}.print-shopping{padding-top:4pt}.print-category{break-inside:auto!important}.print-category h2{padding-top:2pt}.print-item{break-inside:avoid}}
 
-/* V1.3.110 - boodschappen uit recepten/gelegenheden aanklikbaar wijzigen */
+/* V1.3.111 - boodschappen uit recepten/gelegenheden aanklikbaar wijzigen */
 .source-shopping-item{cursor:pointer}
 .source-shopping-item:active{background:rgba(149,122,193,.08)}
 #sourceShoppingEditDialog{border:0;border-radius:18px;max-width:min(92vw,430px);width:100%;padding:0;box-shadow:0 18px 60px rgba(50,35,80,.24)}
@@ -464,12 +464,22 @@ body:has(#receiptModal.open){overflow:hidden}
 .source-shopping-edit h2{margin:0}.source-shopping-edit label{display:grid;gap:5px;font-weight:700}.source-shopping-edit input{font:inherit;padding:11px 12px;border:1px solid #d8d0e4;border-radius:10px}.source-shopping-edit .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.source-edit-name{font-weight:800;margin:0}
 
 
-/* V1.3.110 - compacte receptboodschap */
+/* V1.3.111 - compacte receptboodschap */
 .source-shopping-name{font-size:inherit;font-weight:800}.source-shopping-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.mini-recipe-button{border:1px solid #d9cbea;background:#f7f2fb;color:#6737b4;border-radius:8px;padding:3px 7px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
 
-/* V1.3.110 - weektitel terug naar huidige week */
+/* V1.3.111 - weektitel terug naar huidige week */
 #shoppingWeekLabel{cursor:pointer;user-select:none}
 #shoppingWeekLabel:active{opacity:.72}
 
-/* V1.3.110 - rustige receptknop en gekochte bronproducten */
+/* V1.3.111 - rustige receptknop en gekochte bronproducten */
 .source-shopping-item{position:relative;align-items:center}.source-shopping-item.done .source-shopping-name,.source-shopping-item.done .source-shopping-meta{text-decoration:line-through;opacity:.55}.mini-recipe-button{margin-left:auto;flex:0 0 28px;width:28px;height:28px;padding:0;border-radius:50%;font-size:11px;background:#faf8fc;border-color:#e6deed;color:#8a72a2;align-self:center}.print-shopping{grid-template-columns:repeat(4,minmax(0,1fr))!important}.print-name{font-weight:600}
+
+/* V1.3.111 - print gebruikt A4 landscape beter */
+@media print{
+  @page{size:A4 landscape;margin:7mm}
+  .print-shopping{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5mm!important;width:100%!important}
+  .print-name{font-size:10.5pt!important;line-height:1.18!important;font-weight:600!important}
+  .print-meta{font-size:8.5pt!important;line-height:1.15!important}
+  .print-category h2{font-size:10pt!important;margin:0 0 3pt!important}
+  .print-week-recipes{margin-bottom:6pt!important}.print-week-recipes h1{font-size:14pt!important}.print-week-recipes ul{font-size:9pt!important;margin-bottom:5pt!important}
+}
