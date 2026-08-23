@@ -3,6 +3,7 @@ const SEED_KEY='huizeChaosCarTasksV131';
 const HOUSE_SEED_KEY='huizeChaosHouseTasksV138';
 const ROUTINE_KEY='huizeChaosDailyRoutinesV132';
 const BIG_STATE_KEY='huizeChaosBigChoreV132';
+const HOUSEHOLD_TIME_KEY='huizeChaosHouseholdTimeV120';
 const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
 const ROUTINES=['Keuken opruimen en aanrecht afnemen','Vaatwasser in- of uitruimen','Woonkamer opruimen','Was bijwerken','Kattenbak controleren en zo nodig verschonen','Toilet kort reinigen: doekje en borstel'];
 const BIG_CHORES=[];
@@ -291,7 +292,35 @@ function periodKey(repeat,date=new Date()){
 function isTaskDone(item){return item.repeat&&item.repeat!=='none'?(item.completedPeriods||[]).includes(periodKey(item.repeat)):Boolean(item.done)}
 function todayEntries(type){return entries.filter(item=>{if(item.type!==type||item.category==='household')return false;if(type==='appointment')return item.date===todayKey();if(item.date>todayKey())return false;if(item.repeat&&item.repeat!=='none')return true;return item.date===todayKey()||!isTaskDone(item)})}
 function householdItems(){return entries.filter(item=>item.type==='task'&&item.category==='household')}
+let householdTimerInterval=null;
+function householdTimeState(){
+  let state={date:todayKey(),seconds:1800,running:false,finished:false};
+  try{const saved=JSON.parse(localStorage.getItem(HOUSEHOLD_TIME_KEY)||'null');if(saved&&saved.date===todayKey())state={...state,...saved}}catch{}
+  if(state.running&&state.startedAt){state.seconds=Math.max(0,state.seconds-Math.floor((Date.now()-state.startedAt)/1000));state.startedAt=Date.now();if(state.seconds===0){state.running=false;state.finished=true}}
+  return state;
+}
+function saveHouseholdTime(state){localStorage.setItem(HOUSEHOLD_TIME_KEY,JSON.stringify(state))}
+function householdTimeElements(){return {timer:document.getElementById('householdTimer'),text:document.getElementById('householdTimeText'),start:document.getElementById('startHouseholdTimer'),pause:document.getElementById('pauseHouseholdTimer'),reset:document.getElementById('resetHouseholdTimer'),extra:document.getElementById('householdExtraActions')}}
+function renderHouseholdTime(){
+  const el=householdTimeElements();if(!el.timer)return;const state=householdTimeState();saveHouseholdTime(state);
+  const m=Math.floor(state.seconds/60),sec=state.seconds%60;el.timer.textContent=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  const due=householdItems().filter(item=>!isTaskDone(item)).length;
+  el.text.textContent=state.finished?'30 minuten gedaan. Voor vandaag is dit voldoende. Meer mag, maar hoeft niet.':`Iedere dag 30 minuten. ${due?`${due} huishoudtaken staan nog open in je bestaande planner.`:'Alle geplande huishoudtaken zijn afgerond.'}`;
+  el.start.hidden=state.running||state.finished;el.start.textContent=state.seconds<1800?'Verder':'Start 30 minuten';el.pause.hidden=!state.running;el.reset.hidden=!(state.running||state.seconds<1800)&&!state.finished;el.extra.hidden=!state.finished;
+  clearInterval(householdTimerInterval);if(state.running)householdTimerInterval=setInterval(tickHouseholdTime,1000);
+}
+function tickHouseholdTime(){const state=householdTimeState();saveHouseholdTime(state);const el=householdTimeElements();const m=Math.floor(state.seconds/60),sec=state.seconds%60;el.timer.textContent=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;if(!state.running)renderHouseholdTime()}
+function startHouseholdTime(){const state=householdTimeState();state.running=true;state.finished=false;state.startedAt=Date.now();saveHouseholdTime(state);renderHouseholdTime()}
+function pauseHouseholdTime(){const state=householdTimeState();state.running=false;delete state.startedAt;saveHouseholdTime(state);renderHouseholdTime()}
+function finishHouseholdTime(){const state=householdTimeState();state.running=false;state.finished=true;state.seconds=0;delete state.startedAt;saveHouseholdTime(state);renderHouseholdTime()}
+function addHouseholdTime(minutes){const state=householdTimeState();state.seconds=minutes*60;state.running=true;state.finished=false;state.startedAt=Date.now();saveHouseholdTime(state);renderHouseholdTime()}
+document.getElementById('startHouseholdTimer')?.addEventListener('click',startHouseholdTime);
+document.getElementById('pauseHouseholdTimer')?.addEventListener('click',pauseHouseholdTime);
+document.getElementById('resetHouseholdTimer')?.addEventListener('click',finishHouseholdTime);
+document.querySelectorAll('[data-household-extra]').forEach(button=>button.addEventListener('click',()=>addHouseholdTime(Number(button.dataset.householdExtra))));
+
 function renderHousehold(){
+  renderHouseholdTime();
   const items=householdItems();const byId=new Map(items.map(item=>[item.id,item]));const blockIds=new Set(HOUSEHOLD_BLOCKS.flatMap(block=>block.taskIds));
   const floor=byId.get('house-floor-downstairs');const weekly=[];const biweekly=[];
   if(floor)weekly.push(renderHouseholdTask(floor,true));

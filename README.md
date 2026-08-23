@@ -63,3 +63,11 @@ Nieuw:
 - Gedeelde recepten komen onder **Te controleren** en synchroniseren via Firebase zodat controle op telefoon of laptop kan.
 - Receptlinks worden waar mogelijk via Recipe/JSON-LD uitgelezen; als een website dat blokkeert blijft de bronlink bij het concept staan.
 - Gedeelde bonnen worden als **Te controleren** opgeslagen en tellen pas na goedkeuren mee in Inzicht/budget.
+
+
+## V1.3.120
+- Gezinsplanner: vast dagelijks huishoudblok van 30 minuten toegevoegd.
+- Het blok gebruikt de huishoudtaken die al in de bestaande planner staan; er worden geen dubbele poetstaken aangemaakt.
+- Timer kan worden gepauzeerd of na 30 minuten worden afgerond.
+- Na afronden kan optioneel 15 of 30 minuten extra worden toegevoegd.
+- De timer start iedere kalenderdag opnieuw op 30 minuten; gemiste tijd wordt niet opgeteld bij de volgende dag.
