@@ -1,4 +1,4 @@
-// V1.3.112 - de receptenmodule start altijd lokaal. Firebase wordt pas daarna dynamisch geladen,
+// V1.3.113 - de receptenmodule start altijd lokaal. Firebase wordt pas daarna dynamisch geladen,
 // zodat een netwerk/CDN-probleem het Weekmenu niet meer kan blokkeren.
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
 let auth=null,db=null,recipeRef=null,occasionRef=null;
@@ -85,7 +85,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();
 
-// V1.3.112 - voorraad koppelen aan recepten
+// V1.3.113 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -155,7 +155,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.112 - recepten per week plannen (zonder dagen)
+// V1.3.113 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -226,7 +226,7 @@ function showWeekPlanner(r,preferredWeek='',preferredGf=null){
 }
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited)ensureRecipeActions()};
 
-// V1.3.112 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.113 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -291,10 +291,10 @@ function showReadonlyRecipe(r,view='ingredients'){
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');if(directParams.get('readonly')==='shopping')showReadonlyRecipe(r,directParams.get('view')||'ingredients');else{returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}}
 
-// V1.3.112 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.113 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.112 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.113 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
@@ -358,5 +358,5 @@ function showManualRecipeForm(){
 }
 document.querySelector('#addRecipeManual')?.addEventListener('click',showManualRecipeForm);
 
-// V1.3.112 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
+// V1.3.113 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.type==='search')return;e.preventDefault();input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();});

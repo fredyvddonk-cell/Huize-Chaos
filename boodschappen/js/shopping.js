@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.112 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.113 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -235,9 +235,17 @@ function renderShopping(allProducts) {
   }
 
   const sourcePrintable=[...occasionShoppingRows(),...recipeShoppingRows()].filter(x=>!x.done).map(x=>({name:x.name,category:x.category||'Overig',quantity:x.qty||'',unit:'',memo:x.sourceName||'',status:x.status||'Niet in huis'})); const printable = [...arr.filter(x => !x.done),...sourcePrintable];
-  const printCategories = groups(printable, 'category').map(([categoryName, items]) => {
-    let weight = 2;
-    const rows = [...items].sort(shoppingPrioritySort).map(x => {
+  // Printblokken worden bewust kleiner gemaakt dan een hele categorie.
+  // Zo kan een grote categorie over meerdere kolommen lopen en blijven de 4 kolommen
+  // veel gelijkmatiger gevuld. Kleine categorieën blijven als één blok bij elkaar.
+  const printCategories = [];
+  groups(printable, 'category').forEach(([categoryName, items]) => {
+    const sorted=[...items].sort(shoppingPrioritySort);
+    const chunkSize = sorted.length <= 7 ? sorted.length : 6;
+    for(let start=0; start<sorted.length; start+=chunkSize){
+      const chunk=sorted.slice(start,start+chunkSize);
+      let weight = 1.35;
+      const rows = chunk.map(x => {
         const isUrgent = x.status === 'Niet in huis' && x.buyDirectWhenOut;
         const qtxt=quantityText(x); const details = [x.memo].filter(Boolean).map(esc).join(' · ');
         weight += 1 + (details ? .55 : 0) + (String(x.name).length > 28 ? .4 : 0) + (details.length > 36 ? .35 : 0);
@@ -246,10 +254,9 @@ function renderShopping(allProducts) {
           <div><div class="print-name">${esc([qtxt,x.name].filter(Boolean).join(' '))}</div>${details ? `<div class="print-meta">${details}</div>` : ''}</div>
         </div>`;
       }).join('');
-    return {
-      weight,
-      html: `<section class="print-category"><h2>${esc(categoryName)}</h2>${rows}</section>`
-    };
+      const heading = start===0 ? categoryName : `${categoryName} · vervolg`;
+      printCategories.push({weight,html:`<section class="print-category"><h2>${esc(heading)}</h2>${rows}</section>`});
+    }
   });
 
   const printCols=[[],[],[],[]],weights=[0,0,0,0];
@@ -324,5 +331,5 @@ function bindShoppingEvents() {
   };
 }
 
-// V1.3.112 - terug uit recept naar dezelfde plek in boodschappenlijst
+// V1.3.113 - terug uit recept naar dezelfde plek in boodschappenlijst
 window.addEventListener('load',()=>{const wk=sessionStorage.getItem('hc-shopping-return-week');if(wk){selectedShoppingWeek=wk;localStorage.setItem('hc-shopping-selected-week',wk);sessionStorage.removeItem('hc-shopping-return-week');setTimeout(()=>{render();const y=Number(sessionStorage.getItem('hc-shopping-return-scroll')||0);sessionStorage.removeItem('hc-shopping-return-scroll');window.scrollTo(0,y)},80)}});
