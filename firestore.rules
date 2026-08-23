@@ -48,9 +48,6 @@ service cloud.firestore {
       allow read, write: if isMember() && request.auth.uid == uid && isOwner();
     }
 
-    match /households/huize-chaos/auto/{documentId} {
-      allow read, write: if isMember();
-    }
 
     match /{document=**} {
       allow read, write: if false;
