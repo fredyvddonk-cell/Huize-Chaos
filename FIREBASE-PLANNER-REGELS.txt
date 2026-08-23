@@ -22,3 +22,8 @@ match /members/{memberUid}/privatePlannerItems/{itemId} {
 
 Belangrijk: vervang de bestaande regels niet blind. Voeg deze drie match-blokken toe
 aan de bestaande household-regels, zodat de boodschappenlijst toegang blijft houden.
+
+// V1.3.121 - privénotities (plaats binnen match /households/huize-chaos)
+match /members/{memberUid}/privateNotes/{noteId} {
+  allow read, write: if isMember() && request.auth.uid == memberUid && isOwner();
+}

@@ -68,3 +68,10 @@
 .household-extra-actions{margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
 .household-extra-actions span{width:100%;font-size:12px;font-weight:800;color:var(--muted)}
 .household-extra-actions button{border:1px solid #d9cde8;border-radius:10px;padding:8px 12px;background:#fff;color:var(--purple-dark);font-weight:800}
+
+/* V1.3.121 - dagelijkse blokken op Vandaag */
+.study-time-panel{background:linear-gradient(180deg,#f1fbfa,#fff)}
+.compact-household-link{margin:0 0 12px}
+.study-period-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.study-period-actions small{width:100%;color:var(--muted)}
+.text-button{border:0;background:transparent;padding:3px 0;margin-right:12px;color:var(--purple-dark);font-weight:750;text-decoration:underline;cursor:pointer}

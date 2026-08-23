@@ -48,6 +48,10 @@ service cloud.firestore {
       allow read, write: if isMember() && request.auth.uid == uid && isOwner();
     }
 
+    match /households/huize-chaos/members/{uid}/privateNotes/{noteId} {
+      allow read, write: if isMember() && request.auth.uid == uid && isOwner();
+    }
+
 
     match /{document=**} {
       allow read, write: if false;

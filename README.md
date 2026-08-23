@@ -65,9 +65,15 @@ Nieuw:
 - Gedeelde bonnen worden als **Te controleren** opgeslagen en tellen pas na goedkeuren mee in Inzicht/budget.
 
 
-## V1.3.120
+## V1.3.121
 - Gezinsplanner: vast dagelijks huishoudblok van 30 minuten toegevoegd.
 - Het blok gebruikt de huishoudtaken die al in de bestaande planner staan; er worden geen dubbele poetstaken aangemaakt.
 - Timer kan worden gepauzeerd of na 30 minuten worden afgerond.
 - Na afronden kan optioneel 15 of 30 minuten extra worden toegevoegd.
 - De timer start iedere kalenderdag opnieuw op 30 minuten; gemiste tijd wordt niet opgeteld bij de volgende dag.
+
+## V1.3.121
+- Huishoudtijd verplaatst naar de pagina Vandaag, met directe koppeling naar Huishouden.
+- Dagelijks studieblok toegevoegd: minimum 60 minuten, streefdoel 90 minuten en daarna vrij doorlopen.
+- Studieperiode staat standaard t/m 15 november 2026 en kan eerder worden beëindigd of worden verlengd met een nieuwe einddatum.
+- Nieuw onderdeel Mijn notities toegevoegd. Notities worden per eigenaar opgeslagen in privateNotes en zijn niet zichtbaar voor gezinsleden.

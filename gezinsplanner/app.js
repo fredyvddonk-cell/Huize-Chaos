@@ -4,6 +4,8 @@ const HOUSE_SEED_KEY='huizeChaosHouseTasksV138';
 const ROUTINE_KEY='huizeChaosDailyRoutinesV132';
 const BIG_STATE_KEY='huizeChaosBigChoreV132';
 const HOUSEHOLD_TIME_KEY='huizeChaosHouseholdTimeV120';
+const STUDY_TIME_KEY='huizeChaosStudyTimeV121';
+const STUDY_PERIOD_KEY='huizeChaosStudyPeriodV121';
 const DEADLINE_SEED_KEY='huizeChaosOldCarDeadlineV133';
 const ROUTINES=['Keuken opruimen en aanrecht afnemen','Vaatwasser in- of uitruimen','Woonkamer opruimen','Was bijwerken','Kattenbak controleren en zo nodig verschonen','Toilet kort reinigen: doekje en borstel'];
 const BIG_CHORES=[];
@@ -149,6 +151,7 @@ document.querySelectorAll('[data-shift]').forEach(button=>button.addEventListene
 document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>showPlannerPage(button.dataset.plannerPage)));
 document.addEventListener('click',event=>{const activeMenu=event.target.closest('.item-menu');document.querySelectorAll('.item-menu[open]').forEach(menu=>{if(menu!==activeMenu||event.target.closest('.item-menu-popover button'))menu.removeAttribute('open')})});
 document.getElementById('openHouseholdFromTasks').addEventListener('click',()=>showPlannerPage('household'));
+document.getElementById('openHouseholdFromTime')?.addEventListener('click',()=>showPlannerPage('household'));
 els.wastePanel.addEventListener('click',shareWasteReminder);
 els.wastePanel.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();shareWasteReminder()}});
 document.getElementById('openRoster').addEventListener('click',openRosterModal);
@@ -319,6 +322,22 @@ document.getElementById('pauseHouseholdTimer')?.addEventListener('click',pauseHo
 document.getElementById('resetHouseholdTimer')?.addEventListener('click',finishHouseholdTime);
 document.querySelectorAll('[data-household-extra]').forEach(button=>button.addEventListener('click',()=>addHouseholdTime(Number(button.dataset.householdExtra))));
 
+let studyTimerInterval=null;
+function studyPeriod(){let state={endDate:'2026-11-15',ended:false};try{state={...state,...JSON.parse(localStorage.getItem(STUDY_PERIOD_KEY)||'{}')}}catch{}return state}
+function saveStudyPeriod(state){localStorage.setItem(STUDY_PERIOD_KEY,JSON.stringify(state))}
+function studyState(){let state={date:todayKey(),elapsed:0,running:false,phase:'minimum'};try{const x=JSON.parse(localStorage.getItem(STUDY_TIME_KEY)||'null');if(x&&x.date===todayKey())state={...state,...x}}catch{}if(state.running&&state.startedAt){state.elapsed+=Math.floor((Date.now()-state.startedAt)/1000);state.startedAt=Date.now()}return state}
+function saveStudyState(state){localStorage.setItem(STUDY_TIME_KEY,JSON.stringify(state))}
+function studyEls(){return {timer:document.getElementById('studyTimer'),text:document.getElementById('studyTimeText'),start:document.getElementById('startStudyTimer'),pause:document.getElementById('pauseStudyTimer'),finish:document.getElementById('finishStudyTimer'),extra:document.getElementById('studyExtraActions'),period:document.getElementById('studyPeriodText')}}
+function renderStudy(){const e=studyEls();if(!e.timer)return;const p=studyPeriod(),st=studyState();saveStudyState(st);const min=Math.floor(st.elapsed/60),sec=st.elapsed%60;e.timer.textContent=st.elapsed<3600?`${String(Math.floor((3600-st.elapsed)/60)).padStart(2,'0')}:${String((3600-st.elapsed)%60).padStart(2,'0')}`:`${Math.floor(st.elapsed/3600)}u ${String(Math.floor((st.elapsed%3600)/60)).padStart(2,'0')}m`;e.text.textContent=p.ended?'Studieperiode afgerond.':st.elapsed>=5400?'Streefdoel gehaald. Je kunt stoppen of lekker doorgaan zolang het goed gaat.':st.elapsed>=3600?'Minimum gehaald. Nog 30 minuten tot je streefdoel.':`Iedere dag minimaal 60 minuten. Streefdoel: 90 minuten.`;e.start.hidden=st.running||p.ended;e.start.textContent=st.elapsed?'Verder studeren':'Start 60 minuten';e.pause.hidden=!st.running;e.finish.hidden=p.ended||(!st.running&&!st.elapsed);e.extra.hidden=p.ended||st.elapsed<3600||st.elapsed>=5400;e.period.textContent=p.ended?'Studieperiode beëindigd.':`Studieperiode t/m ${new Intl.DateTimeFormat('nl-NL',{day:'numeric',month:'long',year:'numeric'}).format(new Date(p.endDate+'T12:00:00'))}.`;clearInterval(studyTimerInterval);if(st.running)studyTimerInterval=setInterval(tickStudy,1000)}
+function tickStudy(){const st=studyState();saveStudyState(st);renderStudy()}
+function startStudy(){const st=studyState();st.running=true;st.startedAt=Date.now();saveStudyState(st);renderStudy()}
+function pauseStudy(){const st=studyState();st.running=false;delete st.startedAt;saveStudyState(st);renderStudy()}
+function finishStudy(){pauseStudy()}
+function continueStudy(){startStudy()}
+document.getElementById('startStudyTimer')?.addEventListener('click',startStudy);document.getElementById('pauseStudyTimer')?.addEventListener('click',pauseStudy);document.getElementById('finishStudyTimer')?.addEventListener('click',finishStudy);document.getElementById('continueStudy30')?.addEventListener('click',continueStudy);
+document.getElementById('finishStudyPeriod')?.addEventListener('click',()=>{if(confirm('Zijn alle examens, T-opdrachten en IOP’s klaar? Dan wordt het dagelijkse studieblok beëindigd.')){const p=studyPeriod();p.ended=true;saveStudyPeriod(p);renderStudy()}});
+document.getElementById('extendStudyPeriod')?.addEventListener('click',()=>{const p=studyPeriod(),v=prompt('Nieuwe einddatum (JJJJ-MM-DD):',p.endDate);if(v&&/^\d{4}-\d{2}-\d{2}$/.test(v)){p.endDate=v;p.ended=false;saveStudyPeriod(p);renderStudy()}});
+
 function renderHousehold(){
   renderHouseholdTime();
   const items=householdItems();const byId=new Map(items.map(item=>[item.id,item]));const blockIds=new Set(HOUSEHOLD_BLOCKS.flatMap(block=>block.taskIds));
@@ -350,7 +369,7 @@ function deadlineInfo(item){
   return `<span class="deadline-badge">Nog ${days} dagen</span>`;
 }
 
-function render(){
+function render(){renderStudy();
   const appointments=todayEntries('appointment').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   const tasks=todayEntries('task').sort((a,b)=>Number(isTaskDone(a))-Number(isTaskDone(b))||Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||a.createdAt-b.createdAt);const big=currentBigChore();if(big)tasks.push(big);
   const futureEntries=entries.filter(item=>item.date>todayKey()).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));
