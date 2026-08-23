@@ -120,7 +120,7 @@ window.toggleAllShopping = () => {
 };
 
 
-// V1.3.113 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
+// V1.3.114 - weekberekening volledig in UTC, zodat gelegenheden in een ander jaar correct aan de boodschappenweek gekoppeld blijven.
 function dateOnlyUtc(value){
   if(value instanceof Date)return new Date(Date.UTC(value.getFullYear(),value.getMonth(),value.getDate()));
   const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -171,7 +171,33 @@ window.openShoppingRecipe=(recipeId,servings='')=>{sessionStorage.setItem('hc-sh
 window.openSourceShoppingEdit=(type,id,index)=>{const d=ensureSourceEditDialog();let row=type==='occasion'?occasionShoppingRows().find(x=>String(x.eventId)===String(id)&&x.index===Number(index)):recipeShoppingRows().find(x=>String(x.planId)===String(id)&&x.index===Number(index));if(!row)return;sourceEditName.textContent=row.name;sourceEditQty.value=row.qty||'';sourceEditStore.value=row.store==='Overig'?'':row.store||'';sourceEditCategory.value=row.category==='Overig'?'':row.category||'';sourceEditOrigin.textContent=`Herkomst: ${row.sourceName}`;sourceStoreOptions.innerHTML=[...new Set((products||[]).map(x=>x.store).filter(Boolean))].sort().map(x=>`<option value="${esc(x)}"></option>`).join('');sourceEditSave.onclick=()=>saveSourceShoppingEdit(type,id,Number(index));d.showModal()}
 window.saveSourceShoppingEdit=(type,id,index)=>{const qty=sourceEditQty.value.trim(),store=sourceEditStore.value.trim(),category=sourceEditCategory.value.trim();if(type==='occasion'){let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(id));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[index];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.qty=qty;actual.store=store;actual.category=category;e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events)}else{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(id));if(!p||!p.ingredients?.[index])return;p.ingredients[index].shoppingQty=qty;p.ingredients[index].store=store;p.ingredients[index].category=category;localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'))}render()}
 window.markOccasionBought=(eventId,visibleIndex,checked)=>{let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}const e=events.find(x=>String(x.id)===String(eventId));if(!e)return;const visible=materializeOccasionShopping(e).filter(x=>(x.buyWeekOverride?x.buyWeek===shoppingWeekKey():weekContainsDate(shoppingWeekKey(),e.date))),target=visible[visibleIndex];if(!target)return;const key=String(target.text||'').toLowerCase();let actual=(e.shopping||[]).find(x=>String(x.text||'').toLowerCase()===key);if(!actual){actual={...target};(e.shopping??=[]).push(actual)}actual.done=Boolean(checked);e.shoppingCreated=true;localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));window.syncHuizeChaosOccasions?.(events);render()}
-window.markRecipeIngredientBought=(planId,index,checked)=>{const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(planId));if(!p||!p.ingredients?.[index])return;p.ingredients[index].done=Boolean(checked);localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));render()};
+window.markRecipeIngredientBought=(planId,index,checked)=>{
+  const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(planId));
+  if(!p||!p.ingredients?.[index])return;
+  const ingredient=p.ingredients[index];
+  ingredient.done=Boolean(checked);
+  localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));
+
+  // V1.3.114 - gekocht receptingrediënt wordt één keer als 'In huis' in Voorraad gezet.
+  // Exacte hoeveelheden worden bewust niet overgenomen.
+  if(checked){
+    const name=String(ingredient.ingredient||'').trim();
+    if(name){
+      let stock=(products||[]).find(x=>recipeIngredientMatchesProduct(name,x));
+      if(stock){
+        stock.status='In huis';
+        stock.shopping=false;
+        stock.done=false;
+      }else{
+        const meta=inferShoppingMeta(name);
+        const nextId=Math.max(0,...(products||[]).map(x=>Number(x.id)||0))+1;
+        products.push(migrateProduct({id:nextId,name,category:ingredient.category||meta.category||'Overig',quantity:'',unit:'',store:ingredient.store||meta.store||'',memo:'',status:'In huis',shopping:false,done:false}));
+      }
+      save();
+    }
+  }
+  render();
+};
 window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 
@@ -259,9 +285,9 @@ function renderShopping(allProducts) {
     }
   });
 
-  const printCols=[[],[],[],[]],weights=[0,0,0,0];
-  printCategories.forEach(category=>{const idx=weights.indexOf(Math.min(...weights));printCols[idx].push(category.html);weights[idx]+=category.weight});
-  const printHtml=printCols.map(col=>`<div class="print-column">${col.join('')}</div>`).join('');
+  // V1.3.114 - natuurlijke printvolgorde: eerst de huidige kolom vullen,
+  // daarna pas doorstromen naar de volgende kolom.
+  const printHtml=printCategories.map(category=>category.html).join('');
 
   const recipeHeads=plannedRecipeTitles(); const headsHtml=recipeHeads.length?`<div class="print-week-recipes"><h1>Week ${Number(shoppingWeekKey().slice(-2))}</h1><ul>${recipeHeads.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''; content.innerHTML = `<div class="screen-shopping">${sourceShoppingHtml()}${html}</div>${headsHtml}<div class="print-shopping">${printHtml}</div>`;
 }
@@ -331,5 +357,5 @@ function bindShoppingEvents() {
   };
 }
 
-// V1.3.113 - terug uit recept naar dezelfde plek in boodschappenlijst
+// V1.3.114 - terug uit recept naar dezelfde plek in boodschappenlijst
 window.addEventListener('load',()=>{const wk=sessionStorage.getItem('hc-shopping-return-week');if(wk){selectedShoppingWeek=wk;localStorage.setItem('hc-shopping-selected-week',wk);sessionStorage.removeItem('hc-shopping-return-week');setTimeout(()=>{render();const y=Number(sessionStorage.getItem('hc-shopping-return-scroll')||0);sessionStorage.removeItem('hc-shopping-return-scroll');window.scrollTo(0,y)},80)}});
