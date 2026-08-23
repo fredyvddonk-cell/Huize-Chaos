@@ -1,9 +1,8 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-
+// V1.3.109 - de receptenmodule start altijd lokaal. Firebase wordt pas daarna dynamisch geladen,
+// zodat een netwerk/CDN-probleem het Weekmenu niet meer kan blokkeren.
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
-const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);const recipeRef=doc(db,'households','huize-chaos','insight','recipes');const occasionRef=doc(db,'households','huize-chaos','insight','occasions');
+let auth=null,db=null,recipeRef=null,occasionRef=null;
+let fbOnAuthStateChanged=null,fbGetDoc=null,fbOnSnapshot=null,fbServerTimestamp=null,fbSetDoc=null;
 const BASE=window.HUIZE_CHAOS_RECIPES||[];const PENDING_KEY='hc-recipe-pending-v1',CUSTOM_KEY='hc-recipe-custom-v1',META_KEY='hc-recipe-meta-v1';
 const list=document.querySelector('#list'),pendingBox=document.querySelector('#pending'),detail=document.querySelector('#detail'),search=document.querySelector('#search'),syncStatus=document.querySelector('#recipeSyncStatus');
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false,returnEventId='',displayServings='';
@@ -15,8 +14,21 @@ const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));const mergeById=(a,
 function allRecipes(){const edits=new Map();BASE.forEach(r=>{try{const x=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(x)edits.set(String(r.id),x)}catch(_){}});return [...BASE.map(r=>edits.get(String(r.id))||r),...custom()]}
 function setStatus(t){if(syncStatus)syncStatus.textContent=t}
 function scheduleSync(){if(!cloudReady||applyingCloud||!user)return;clearTimeout(syncTimer);setStatus('Synchroniseren…');syncTimer=setTimeout(syncCloud,250)}
-async function syncCloud(){if(!user)return;await setDoc(recipeRef,{pending:pending(),custom:custom(),meta:recipeMeta(),updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false});setStatus('Gesynchroniseerd')}
-async function initCloud(){onAuthStateChanged(auth,async u=>{user=u;if(!u){setStatus('Alleen op dit apparaat');return}setStatus('Synchroniseren…');try{const snap=await getDoc(recipeRef);if(snap.exists()){applyingCloud=true;const d=snap.data()||{};write(PENDING_KEY,mergeById(d.pending||[],pending()));write(CUSTOM_KEY,mergeById(d.custom||[],custom()));write(META_KEY,mergeById(d.meta||[],recipeMeta()));applyingCloud=false;renderList();}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(recipeRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data()||{};applyingCloud=true;write(PENDING_KEY,d.pending||[]);write(CUSTOM_KEY,d.custom||[]);write(META_KEY,d.meta||[]);applyingCloud=false;renderList();setStatus('Gesynchroniseerd')},()=>setStatus('Synchronisatie niet beschikbaar'));}catch(err){console.warn(err);setStatus('Alleen op dit apparaat')}})}
+async function syncCloud(){if(!user||!recipeRef||!fbSetDoc||!fbServerTimestamp)return;await fbSetDoc(recipeRef,{pending:pending(),custom:custom(),meta:recipeMeta(),updatedAt:fbServerTimestamp(),updatedBy:user.uid},{merge:false});setStatus('Gesynchroniseerd')}
+async function initCloud(){
+  try{
+    const [appMod,authMod,fireMod]=await Promise.all([
+      import('https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js')
+    ]);
+    const firebaseApp=appMod.initializeApp(firebaseConfig);
+    auth=authMod.getAuth(firebaseApp);db=fireMod.getFirestore(firebaseApp);
+    recipeRef=fireMod.doc(db,'households','huize-chaos','insight','recipes');occasionRef=fireMod.doc(db,'households','huize-chaos','insight','occasions');
+    fbOnAuthStateChanged=authMod.onAuthStateChanged;fbGetDoc=fireMod.getDoc;fbOnSnapshot=fireMod.onSnapshot;fbServerTimestamp=fireMod.serverTimestamp;fbSetDoc=fireMod.setDoc;
+    fbOnAuthStateChanged(auth,async u=>{user=u;if(!u){setStatus('Alleen op dit apparaat');return}setStatus('Synchroniseren…');try{const snap=await fbGetDoc(recipeRef);if(snap.exists()){applyingCloud=true;const d=snap.data()||{};write(PENDING_KEY,mergeById(d.pending||[],pending()));write(CUSTOM_KEY,mergeById(d.custom||[],custom()));write(META_KEY,mergeById(d.meta||[],recipeMeta()));applyingCloud=false;renderList();renderWeekMenu?.();}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=fbOnSnapshot(recipeRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data()||{};applyingCloud=true;write(PENDING_KEY,d.pending||[]);write(CUSTOM_KEY,d.custom||[]);write(META_KEY,d.meta||[]);applyingCloud=false;renderList();renderWeekMenu?.();setStatus('Gesynchroniseerd')},()=>setStatus('Synchronisatie niet beschikbaar'));}catch(err){console.warn(err);setStatus('Alleen op dit apparaat')}});
+  }catch(err){console.warn('Firebase kon niet worden geladen; lokaal gebruik blijft beschikbaar.',err);setStatus('Alleen op dit apparaat')}
+}
 function savePending(a){write(PENDING_KEY,a);renderList();scheduleSync()}function saveCustom(a){write(CUSTOM_KEY,a);renderList();scheduleSync()}
 function sourceLabel(r){try{return r.sourceUrl?new URL(r.sourceUrl).hostname.replace(/^www\./,''):r.source||'Gedeeld'}catch(_){return r.source||'Gedeeld'}}
 function renderList(){const q=search.value.trim().toLowerCase(),drafts=pending();pendingBox.innerHTML=drafts.length?`<section class="pending-recipes"><div class="pending-head"><h2>Te controleren</h2><span>${drafts.length}</span></div><p>Gedeelde recepten staan hier tot je ze hebt nagekeken.</p>${drafts.map(r=>`<button class="pending-recipe-card" data-pending="${esc(r.id)}"><span><strong>${esc(r.title||'Gedeeld recept')}</strong><small>${esc(sourceLabel(r))}</small></span><span>Controleren ›</span></button>`).join('')}</section>`:'';pendingBox.querySelectorAll('[data-pending]').forEach(b=>b.onclick=()=>openPending(b.dataset.pending));const a=allRecipes().filter(r=>(r.title||'').toLowerCase().includes(q)).sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)).slice(0,150);list.innerHTML=a.length?a.map(r=>`<button class="recipe-card" data-id="${esc(r.id)}"><span><strong>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</strong><small>${[r.servings?esc(r.servings)+' personen':'',r.source?esc(r.source):'',r.imported?'geïmporteerd':''].filter(Boolean).join(' · ')}</small></span><span class="go">›</span></button>`).join(''):`<div class="empty">Geen recepten gevonden.</div>`;list.querySelectorAll('.recipe-card').forEach(b=>b.onclick=()=>openRecipe(b.dataset.id))}
@@ -53,8 +65,7 @@ function showView(view){
   if(view==='edit')bindEdit(false)
 }
 function ingredientRows(r){return (r.ingredients||[]).map((x,i)=>{const linked=linkedRecipeForIngredient(x);return `<div class="edit-row ingredient-edit-row" data-row="${i}"><input data-f="qty" data-i="${i}" value="${esc(x.qty)}" placeholder="Aantal"><input data-f="unit" data-i="${i}" value="${esc(x.unit)}" placeholder="Eenheid"><input data-f="ingredient" data-i="${i}" value="${esc(x.ingredient)}" placeholder="Ingrediënt"><button type="button" class="remove-ing" data-remove="${i}" aria-label="Ingrediënt verwijderen">×</button><div class="subrecipe-editor"><button type="button" class="btn link-subrecipe" data-link-subrecipe="${i}">${linked?'Gekoppeld: '+esc(linked.title):'Koppel recept'}</button>${linked?`<button type="button" class="btn unlink-subrecipe" data-unlink-subrecipe="${i}">Ontkoppelen</button>`:''}</div></div>`}).join('')}
-function chooseSubrecipe(index){const q=prompt('Zoek een recept om aan dit ingrediënt te koppelen:');if(!q)return;const matches=allRecipes().filter(r=>String(r.id)!==String(edited.id)&&(r.title||'').toLowerCase().includes(q.trim().toLowerCase())).slice(0,12);if(!matches.length){alert('Geen passend recept gevonden.');return}let chosen=matches[0];if(matches.length>1){const answer=prompt('Kies een nummer:
-'+matches.map((r,i)=>`${i+1}. ${r.title}`).join('\n'),'1');const n=Number(answer);if(!Number.isInteger(n)||n<1||n>matches.length)return;chosen=matches[n-1]}edited.ingredients[index].linkedRecipeId=String(chosen.id);showReviewOrEdit()}
+function chooseSubrecipe(index){const q=prompt('Zoek een recept om aan dit ingrediënt te koppelen:');if(!q)return;const matches=allRecipes().filter(r=>String(r.id)!==String(edited.id)&&(r.title||'').toLowerCase().includes(q.trim().toLowerCase())).slice(0,12);if(!matches.length){alert('Geen passend recept gevonden.');return}let chosen=matches[0];if(matches.length>1){const answer=prompt('Kies een nummer:\n'+matches.map((r,i)=>`${i+1}. ${r.title}`).join('\n'),'1');const n=Number(answer);if(!Number.isInteger(n)||n<1||n>matches.length)return;chosen=matches[n-1]}edited.ingredients[index].linkedRecipeId=String(chosen.id);showReviewOrEdit()}
 
 function editForm(r,review){return `<div class="review-fields"><label>Titel<input id="titleEdit" value="${esc(r.title||'')}"></label><label>Personen<input id="servingsEdit" type="number" min="1" inputmode="numeric" value="${esc(r.servings||'')}"></label><label class="source-field">Bron<input id="sourceEdit" value="${esc(r.source||'')}" placeholder="Bijv. Picnic, Allerhande, eigen recept"></label><label class="source-field">Bron / URL<input id="sourceUrlEdit" type="url" value="${esc(r.sourceUrl||'')}" placeholder="https://…"></label></div><div class="edit-section open"><button type="button">Ingrediënten <span>▾</span></button><div class="edit-body"><div id="ingredientEditor">${ingredientRows(r)}</div><button type="button" class="btn add-ing" id="addIngredient">+ Ingrediënt</button></div></div><div class="edit-section open"><button type="button">Bereiding <span>▾</span></button><div class="edit-body"><textarea id="directionsEdit">${esc(r.directions||'')}</textarea></div></div><div class="actions review-actions">${review?'<button class="btn primary" id="approve">Goedkeuren</button><button class="btn" id="keepPending">Bewaren voor later</button><button class="btn danger" id="deletePending">Verwijderen</button>':'<button class="btn primary" id="save">Opslaan</button><button class="btn" id="cancel">Annuleren</button>'}</div>`}
 function bindCommonEdit(){detail.querySelector('#titleEdit').oninput=e=>edited.title=e.target.value;detail.querySelector('#servingsEdit').oninput=e=>edited.servings=e.target.value;detail.querySelector('#sourceEdit')?.addEventListener('input',e=>edited.source=e.target.value);detail.querySelector('#sourceUrlEdit')?.addEventListener('input',e=>edited.sourceUrl=e.target.value);detail.querySelector('#directionsEdit').oninput=e=>edited.directions=e.target.value;detail.querySelectorAll('.edit-section>button').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'));detail.querySelectorAll('input[data-f]').forEach(el=>el.oninput=()=>edited.ingredients[+el.dataset.i][el.dataset.f]=el.value);detail.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{edited.ingredients.splice(+b.dataset.remove,1);showReviewOrEdit()});detail.querySelectorAll('[data-link-subrecipe]').forEach(b=>b.onclick=()=>chooseSubrecipe(+b.dataset.linkSubrecipe));detail.querySelectorAll('[data-unlink-subrecipe]').forEach(b=>b.onclick=()=>{delete edited.ingredients[+b.dataset.unlinkSubrecipe].linkedRecipeId;showReviewOrEdit()});detail.querySelector('#addIngredient').onclick=()=>{edited.ingredients.push({qty:'',unit:'',ingredient:'',memo:'',linkedRecipeId:''});showReviewOrEdit()}}
@@ -74,7 +85,7 @@ async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searc
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();
 
-// V1.3.108 - voorraad koppelen aan recepten
+// V1.3.109 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
 const stockRecipeButton=document.querySelector('#stockRecipeButton'),stockPicker=document.querySelector('#stockPicker');
 let stockFilterIds=[];
@@ -144,7 +155,7 @@ async function addCurrentRecipeToOccasion(r,id){const a=localOccasions(),e=a.fin
 
 
 
-// V1.3.108 - recepten per week plannen (zonder dagen)
+// V1.3.109 - recepten per week plannen (zonder dagen)
 const RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1';
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')}catch(_){return[]}}
 function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -213,7 +224,7 @@ function showWeekPlanner(r,preferredWeek='',preferredGf=null){
 }
 const _showViewWeek=showView;showView=function(view){_showViewWeek(view);if(view==='ingredients'&&edited)ensureRecipeActions()};
 
-// V1.3.108 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
+// V1.3.109 - Weekmenu-overzicht: recepten per week bekijken, verplaatsen en verwijderen
 const weekMenuPanel=document.querySelector('#weekMenuPanel');
 const recipeLibraryPanel=document.querySelector('#recipeLibraryPanel');
 const showWeekMenuButton=document.querySelector('#showWeekMenu');
@@ -276,10 +287,10 @@ function showReadonlyRecipe(r,view='ingredients'){
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');
 if(directRecipe){const r=getRecipe(directRecipe);if(r){weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');if(directParams.get('readonly')==='shopping')showReadonlyRecipe(r,directParams.get('view')||'ingredients');else{returnEventId=directParams.get('event')||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=directParams.get('servings')||String(r.servings||'');hideList();showView(directParams.get('view')==='directions'?'directions':'ingredients')}}}
 
-// V1.3.108 - slimme bulkinvoer voor handmatige recepten toegevoegd.
+// V1.3.109 - slimme bulkinvoer voor handmatige recepten toegevoegd.
 
 
-// V1.3.108 - handmatig recept toevoegen met slimme algemene bulkinvoer
+// V1.3.109 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase();
   const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
