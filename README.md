@@ -1,4 +1,9 @@
-## V1.3.124
+## V1.3.125
+- Voorraadcontrole bij geplande recepten beschikbaar voor de huidige én volgende week.
+- Kruiden en Bewaarproducten hebben knoppen ‘Alles in huis’ en ‘Alles niet in huis’, met bevestiging.
+- De bulkknoppen wijzigen alleen de voorraadstatus; Kopen blijft ongemoeid.
+
+## V1.3.125
 - Receptdetail: **Terug** hergebruikt de bestaande receptenlijst en start niet opnieuw de zware voorraadmatch.
 - **Uit voorraad recepten zoeken**: voorraadproducten staan alfabetisch A-Z.
 - Voorraadkiezer heeft een **Zoek product…**-veld; zoeken gebeurt in de hele productnaam (bijv. `paprika` vindt ook `geroosterde paprika`).

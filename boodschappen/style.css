@@ -508,3 +508,7 @@ body:has(#receiptModal.open){overflow:hidden}
   .print-shopping{display:block!important;column-count:4!important;column-gap:4.5mm!important;column-fill:auto!important;height:185mm!important;width:100%!important}
   .print-category{display:inline-block!important;width:100%!important;break-inside:avoid!important;page-break-inside:avoid!important}
 }
+
+/* V1.3.125 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
+.stock-bulk-status{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#faf8fc;border-bottom:1px solid var(--line)}
+.stock-bulk-status .clear{margin:0}

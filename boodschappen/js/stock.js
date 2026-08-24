@@ -31,11 +31,12 @@ function renderStock(arr) {
   content.innerHTML = `<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size ? 'Alles inklappen' : 'Alles uitklappen'}</button></div>` +
     groups(arr, 'category').map(([categoryName, items]) => {
       const collapsed = !expandedStockCategories.has(categoryName);
+      const bulkStatus = ['Kruiden', 'Bewaarproducten (voorraad)'].includes(categoryName) ? `<div class="stock-bulk-status"><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','In huis')">Alles in huis</button><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','Niet in huis')">Alles niet in huis</button></div>` : '';
       return `<section class="stock-category ${collapsed ? 'collapsed' : ''}">
         <button class="shopping-group-head stock-category-head" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')">
           <span>${esc(categoryName)}</span><span class="chevron">⌄</span>
         </button>
-        <div class="shopping-group-body">${items.map(x => `
+        <div class="shopping-group-body">${bulkStatus}${items.map(x => `
           <div class="item stock-item">
             <div class="main" onclick="editProduct(${x.id})" role="button" tabindex="0">
               <div class="name">${esc(x.name)}</div>
@@ -51,6 +52,22 @@ function renderStock(arr) {
       </section>`;
     }).join('');
 }
+
+
+window.setCategoryStockStatus = (encodedCategory, status) => {
+  const category = decodeURIComponent(encodedCategory);
+  if (!['Kruiden', 'Bewaarproducten (voorraad)'].includes(category)) return;
+  if (!['In huis', 'Niet in huis'].includes(status)) return;
+  if (!confirm(`Alle producten in ${category} op “${status}” zetten?`)) return;
+  products.forEach(product => {
+    if (product.category === category) {
+      product.status = status;
+      product.done = false;
+    }
+  });
+  save();
+  render();
+};
 
 window.cycleStatus = id => {
   const x = products.find(x => x.id === id);
