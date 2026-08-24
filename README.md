@@ -1,3 +1,10 @@
+## V1.3.124
+- Receptdetail: **Terug** hergebruikt de bestaande receptenlijst en start niet opnieuw de zware voorraadmatch.
+- **Uit voorraad recepten zoeken**: voorraadproducten staan alfabetisch A-Z.
+- Voorraadkiezer heeft een **Zoek product…**-veld; zoeken gebeurt in de hele productnaam (bijv. `paprika` vindt ook `geroosterde paprika`).
+- Voorraad-receptmatch wordt pas berekend na **Passende recepten zoeken** en daarna tijdelijk hergebruikt.
+- Bij **Wijzigen** van een recept is **Verwijder recept** toegevoegd met bevestiging. Verwijderde basisrecepten blijven ook na herladen verborgen en synchroniseren mee.
+
 
 ## V1.3.123
 - Gezinsplanner: opstartfout opgelost waardoor `applyHuizeChaosPlannerRole` niet beschikbaar kwam.
