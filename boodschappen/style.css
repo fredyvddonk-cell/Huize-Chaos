@@ -406,7 +406,7 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-outside-help{margin:-4px 0 8px;color:#7b7280;font-size:12px}.insight-outside .insight-cat small{min-width:34px}
 
 /* V1.3.68 - aparte budgetten Boodschappen en Verzorging */
-.insight-budget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:8px}
+.insight-budget-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:8px}
 .insight-budget-grid .insight-total{margin:0}
 .insight-purchase-count{display:block;text-align:center;margin:4px 0 14px;color:#777}
 @media(max-width:700px){.insight-budget-grid{grid-template-columns:1fr}}
@@ -509,6 +509,6 @@ body:has(#receiptModal.open){overflow:hidden}
   .print-category{display:inline-block!important;width:100%!important;break-inside:avoid!important;page-break-inside:avoid!important}
 }
 
-/* V1.3.125 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
+/* V1.3.126 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
 .stock-bulk-status{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#faf8fc;border-bottom:1px solid var(--line)}
 .stock-bulk-status .clear{margin:0}
