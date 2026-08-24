@@ -509,6 +509,6 @@ body:has(#receiptModal.open){overflow:hidden}
   .print-category{display:inline-block!important;width:100%!important;break-inside:avoid!important;page-break-inside:avoid!important}
 }
 
-/* V1.3.126 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
+/* V1.3.127 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
 .stock-bulk-status{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#faf8fc;border-bottom:1px solid var(--line)}
 .stock-bulk-status .clear{margin:0}
