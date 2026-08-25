@@ -509,11 +509,11 @@ body:has(#receiptModal.open){overflow:hidden}
   .print-category{display:inline-block!important;width:100%!important;break-inside:avoid!important;page-break-inside:avoid!important}
 }
 
-/* V1.3.130 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
+/* V1.3.131 - snelle voorraadstatus voor Kruiden en Bewaarproducten */
 .stock-bulk-status{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px;background:#faf8fc;border-bottom:1px solid var(--line)}
 .stock-bulk-status .clear{margin:0}
 
-/* V1.3.130 - rekenhulp voor bedragen op bonregels */
+/* V1.3.131 - rekenhulp voor bedragen op bonregels */
 .receipt-calc-toggle{display:block;margin-top:4px;padding:0;border:0;background:transparent;color:#6737b4;font:inherit;font-size:10px;font-weight:800;text-align:left;cursor:pointer}
 .receipt-line-calculator{grid-column:1/-1;margin:4px 0 7px;padding:11px 12px;border:1px solid #ddd1eb;border-radius:11px;background:#fbf9fe}
 .receipt-line-calculator[hidden]{display:none!important}
