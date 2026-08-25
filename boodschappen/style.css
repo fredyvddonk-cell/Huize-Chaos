@@ -526,3 +526,12 @@ body:has(#receiptModal.open){overflow:hidden}
 .receipt-calc-result{color:#625a68;line-height:1.35}
 .receipt-calc-apply{border:1px solid #8f70c2;background:#fff;color:#6737b4;border-radius:8px;padding:7px 10px;font-weight:800;font-size:11px;white-space:nowrap}
 @media(max-width:850px){.receipt-line-calculator{grid-column:1/4;margin-top:2px}.receipt-calc-grid{grid-template-columns:1fr 1fr}.receipt-calc-grid>label:nth-child(3){grid-column:1/-1}.receipt-calc-bundle-wrap{grid-column:1/-1}.receipt-calc-bottom{align-items:flex-start;flex-direction:column}.receipt-calc-apply{width:100%}}
+
+/* V1.3.132 - specificatie Verzorging en Huishouden */
+.insight-total-detail{display:block;width:100%;border:0;background:transparent;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.insight-total-detail small,.insight-total-detail div,.insight-total-detail span{display:block}
+.insight-total-detail span{margin-top:4px;font-size:.78rem;font-weight:700;opacity:.72}
+.insight-year-spent{display:block;margin:6px 0 8px;opacity:.72}
+.insight-category-total{display:flex;justify-content:space-between;align-items:end;margin:10px 0 14px;padding:12px 14px;border-radius:14px;background:rgba(104,73,132,.08)}
+.insight-category-total small{font-weight:700}
+.insight-category-total strong{font-size:1.15rem}

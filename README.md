@@ -1,33 +1,33 @@
-## V1.3.131
+## V1.3.132
 - Bonrekenhulp gebruikt vaste kortingspercentages voor gratis-acties: 1+1 = 50%, 2+1 = 33,33%, 2+2 = 50%, 2+3 = 60%.
 - Verschillende prijzen binnen dezelfde actie worden eerst opgeteld; de korting wordt over het totale normale bedrag berekend.
 - Aantal en normale stukprijs worden automatisch uit de bonregel ingevuld; bij AH-regels met aantal + stukprijs + totaal wordt de stukprijs expliciet bewaard.
 - Knop “Gebruik betaald bedrag” verwijderd; zodra een actie is gekozen of aangepast wordt het betaalde bedrag direct verwerkt.
 - Normale stukprijs blijft de prijs vóór korting.
 
-## V1.3.131
+## V1.3.132
 - Bonrekenhulp ondersteunt acties met verschillende productprijzen.
 - Aantal en prijs worden vooraf ingevuld vanuit de bonregels.
 - Bij gratis-acties worden de goedkoopste producten correct als korting verwerkt.
 - Oorspronkelijke productprijzen blijven bewaard voor herberekenen.
 
-## V1.3.131
+## V1.3.132
 - Budget Verzorging wordt alleen in de maandweergave getoond.
 - Jaarbudget Huishouden wordt alleen in de maandweergave getoond.
 - De weekweergave blijft gericht op het weekbudget Boodschappen.
 
-## V1.3.131
+## V1.3.132
 - In Inzicht is **Huishouden** toegevoegd als derde budgetblok naast Boodschappen en Verzorging.
 - Huishouden telt niet meer mee in het boodschappenbudget.
 - Huishouden gebruikt een **jaarbudget** en toont **besteed dit jaar** en **nog beschikbaar**.
 - Het jaarbudget Huishouden wordt meegenomen in de bestaande synchronisatie.
 
-## V1.3.131
+## V1.3.132
 - Voorraadcontrole bij geplande recepten beschikbaar voor de huidige én volgende week.
 - Kruiden en Bewaarproducten hebben knoppen ‘Alles in huis’ en ‘Alles niet in huis’, met bevestiging.
 - De bulkknoppen wijzigen alleen de voorraadstatus; Kopen blijft ongemoeid.
 
-## V1.3.131
+## V1.3.132
 - Receptdetail: **Terug** hergebruikt de bestaande receptenlijst en start niet opnieuw de zware voorraadmatch.
 - **Uit voorraad recepten zoeken**: voorraadproducten staan alfabetisch A-Z.
 - Voorraadkiezer heeft een **Zoek product…**-veld; zoeken gebeurt in de hele productnaam (bijv. `paprika` vindt ook `geroosterde paprika`).
