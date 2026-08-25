@@ -1,3 +1,9 @@
+# Huize Chaos V1.3.133
+
+- In **Inzicht** worden productspecificaties nu standaard op **datum aflopend** getoond: de nieuwste aankoop staat bovenaan.
+- Aankopen worden **niet samengevoegd**; iedere aankoop blijft een aparte regel met eigen datum, winkel en bedrag.
+- Bij aankopen op dezelfde datum staat het hoogste bedrag eerst.
+
 ## V1.3.132
 - Bonrekenhulp gebruikt vaste kortingspercentages voor gratis-acties: 1+1 = 50%, 2+1 = 33,33%, 2+2 = 50%, 2+3 = 60%.
 - Verschillende prijzen binnen dezelfde actie worden eerst opgeteld; de korting wordt over het totale normale bedrag berekend.
