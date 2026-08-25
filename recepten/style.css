@@ -61,5 +61,5 @@
 /* V1.3.116 - aantal personen direct aanpassen bij gepland recept */
 .week-menu-servings{display:flex;align-items:center;gap:9px;margin-top:10px;font-weight:750;color:#5b347c}.week-menu-servings input{width:78px;padding:7px 9px;border:1px solid #d8d3dc;border-radius:10px;font:inherit;font-weight:800;background:#fff}
 
-/* V1.3.127 - voorraadzoeker en recept verwijderen */
+/* V1.3.128 - voorraadzoeker en recept verwijderen */
 .stock-product-search{margin:8px 0 10px}.stock-product-search input{width:100%;border:1px solid #d8d3dc;border-radius:10px;padding:10px 11px;background:#fff;font:inherit}.stock-option[hidden]{display:none}.review-actions .btn.danger{margin-left:auto}@media(max-width:500px){.review-actions .btn.danger{margin-left:0}}
