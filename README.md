@@ -1,3 +1,11 @@
+# Huize Chaos V1.3.153
+
+- Opslaan van **Aankopen** gerepareerd: gebruikt nu de bestaande toegestane synchronisatie-opslag en blijft via `kind: largePurchase` gescheiden van boodschappen.
+- Boodschappen-categorieën worden niet meer gebruikt bij grotere aankopen.
+- Eigen vaste categorieën voor grotere aankopen.
+- Nieuwe categorie kan direct vanuit het aankoopformulier worden toegevoegd en wordt gesynchroniseerd.
+- Foutmeldingen bij opslaan geven nu beter aan of het om rechten of bestandsgrootte gaat.
+
 ## V1.3.152
 
 - Nieuw onderdeel **Aankopen** voor grotere of duurzame aankopen, los van de gewone boodschappenbonnen.
