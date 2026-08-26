@@ -537,3 +537,20 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-category-total strong{font-size:1.15rem}
 /* V1.3.137 - bonverdeling, koopzegels en aanklikbare bron */
 .receipt-koopzegels-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.receipt-source-open{width:100%;border:0;background:transparent;text-align:left;padding:0;display:flex;flex-direction:column;gap:4px;cursor:pointer;color:inherit}.receipt-source-open span{text-decoration:underline;text-underline-offset:3px}.receipt-control.ok strong{color:#287a45}.receipt-control.warning strong{color:#a13b2d}@media(max-width:650px){.receipt-koopzegels-fields{grid-template-columns:1fr}}
+/* V1.3.138 - compact bonregels + aparte Huize Chaos/YNAB indeling */
+#receiptModal .receipt-koopzegels-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1.55fr) 92px minmax(125px,.8fr) minmax(125px,.8fr) 42px;gap:7px;padding:7px 8px;align-items:end}
+#receiptModal .receipt-products-head{display:none}
+#receiptModal .receipt-cell label{display:block;font-size:10px;font-weight:800;margin:0 0 3px;color:#615b65}
+#receiptModal .receipt-cell input,#receiptModal .receipt-cell select{padding:7px 8px;font-size:12px}
+#receiptModal .receipt-cell-action label{visibility:hidden}
+@media(max-width:850px){
+ #receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 88px 38px;gap:6px;padding:8px 0}
+ #receiptModal .receipt-cell-product{grid-column:1/2;grid-row:1}
+ #receiptModal .receipt-cell-price{grid-column:2/3;grid-row:1}
+ #receiptModal .receipt-cell-action{grid-column:3/4;grid-row:1}
+ #receiptModal .receipt-cell-cat{grid-column:1/2;grid-row:2}
+ #receiptModal .receipt-cell-ynab{grid-column:2/4;grid-row:2}
+ #receiptModal .receipt-cell-cat label::after{content:' categorie'}
+ #receiptModal .receipt-cell-ynab label::after{content:' categorie'}
+}
