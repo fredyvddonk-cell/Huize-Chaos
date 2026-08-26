@@ -6,6 +6,7 @@ let fbOnAuthStateChanged=null,fbGetDoc=null,fbOnSnapshot=null,fbServerTimestamp=
 const BASE=window.HUIZE_CHAOS_RECIPES||[];const PENDING_KEY='hc-recipe-pending-v1',CUSTOM_KEY='hc-recipe-custom-v1',META_KEY='hc-recipe-meta-v1',DELETED_KEY='hc-recipe-deleted-v1';
 const list=document.querySelector('#list'),pendingBox=document.querySelector('#pending'),detail=document.querySelector('#detail'),search=document.querySelector('#search'),syncStatus=document.querySelector('#recipeSyncStatus');
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false,returnEventId='',displayServings='';
+let recipeModuleView='weekmenu',recipeHistoryReady=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const read=(k,f=[])=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:f}catch(_){return f}};const pending=()=>read(PENDING_KEY),custom=()=>read(CUSTOM_KEY),recipeMeta=()=>read(META_KEY),deletedRecipes=()=>read(DELETED_KEY);
 function saveDeletedRecipes(ids){write(DELETED_KEY,[...new Set((ids||[]).map(String))]);scheduleSync()}
@@ -33,10 +34,13 @@ async function initCloud(){
 function savePending(a){write(PENDING_KEY,a);renderList();scheduleSync()}function saveCustom(a){write(CUSTOM_KEY,a);renderList();scheduleSync()}
 function sourceLabel(r){try{return r.sourceUrl?new URL(r.sourceUrl).hostname.replace(/^www\./,''):r.source||'Gedeeld'}catch(_){return r.source||'Gedeeld'}}
 function renderList(){const q=search.value.trim().toLowerCase(),drafts=pending();pendingBox.innerHTML=drafts.length?`<section class="pending-recipes"><div class="pending-head"><h2>Te controleren</h2><span>${drafts.length}</span></div><p>Gedeelde recepten staan hier tot je ze hebt nagekeken.</p>${drafts.map(r=>`<button class="pending-recipe-card" data-pending="${esc(r.id)}"><span><strong>${esc(r.title||'Gedeeld recept')}</strong><small>${esc(sourceLabel(r))}</small></span><span>Controleren ›</span></button>`).join('')}</section>`:'';pendingBox.querySelectorAll('[data-pending]').forEach(b=>b.onclick=()=>openPending(b.dataset.pending));const a=allRecipes().filter(r=>(r.title||'').toLowerCase().includes(q)).sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)).slice(0,150);list.innerHTML=a.length?a.map(r=>`<button class="recipe-card" data-id="${esc(r.id)}"><span><strong>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</strong><small>${[r.servings?esc(r.servings)+' personen':'',r.source?esc(r.source):'',r.imported?'geïmporteerd':''].filter(Boolean).join(' · ')}</small></span><span class="go">›</span></button>`).join(''):`<div class="empty">Geen recepten gevonden.</div>`;list.querySelectorAll('.recipe-card').forEach(b=>b.onclick=()=>openRecipe(b.dataset.id))}
-function hideList(){list.classList.add('hidden');pendingBox.classList.add('hidden');search.classList.add('hidden');detail.classList.remove('hidden');document.querySelector('.recipes')?.classList.add('recipe-detail-open')}function backList(refresh=false){if(returnEventId){const id=returnEventId;returnEventId='';window.location.href=`../gelegenheden/?event=${encodeURIComponent(id)}`;return}detail.classList.add('hidden');list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');document.querySelector('.recipes')?.classList.remove('recipe-detail-open');current=null;edited=null;displayServings='';const backToWeekMenu=openedFromWeekMenu;openedFromWeekMenu=false;if(backToWeekMenu){window.hcShowRecipeModule?.('weekmenu');return}if(refresh)renderList()}
+function hideList(){list.classList.add('hidden');pendingBox.classList.add('hidden');search.classList.add('hidden');detail.classList.remove('hidden');document.querySelector('.recipes')?.classList.add('recipe-detail-open')}
+function pushRecipeHistory(state){if(!recipeHistoryReady)return;history.pushState({...history.state,hcRecipeScreen:'detail',hcRecipeModule:recipeModuleView,...state},'',location.href)}
+function backListDirect(refresh=false){detail.classList.add('hidden');list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');document.querySelector('.recipes')?.classList.remove('recipe-detail-open');current=null;edited=null;displayServings='';const backToWeekMenu=openedFromWeekMenu;openedFromWeekMenu=false;if(backToWeekMenu){showRecipeModule('weekmenu',true);return}if(refresh)renderList()}
+function backList(refresh=false){if(returnEventId){const id=returnEventId;returnEventId='';window.location.href=`../gelegenheden/?event=${encodeURIComponent(id)}`;return}if(history.state?.hcRecipeScreen==='detail'){history.back();return}backListDirect(refresh)}
 function getRecipe(id){return allRecipes().find(r=>String(r.id)===String(id))}function isCustom(id){return custom().some(r=>String(r.id)===String(id))}
-function openRecipe(id){current=String(id);edited=JSON.parse(JSON.stringify(getRecipe(id)));displayServings=String(edited?.servings||'');hideList();showView('ingredients')}
-function openPending(id){const r=pending().find(x=>String(x.id)===String(id));if(!r)return;current='pending:'+id;edited=JSON.parse(JSON.stringify(r));hideList();showReview()}
+function openRecipe(id,{fromHistory=false}={}){const recipe=getRecipe(id);if(!recipe)return;if(!fromHistory)pushRecipeHistory({hcRecipeKind:'recipe',hcRecipeId:String(id),hcRecipeReturn:recipeModuleView});current=String(id);edited=JSON.parse(JSON.stringify(recipe));displayServings=String(edited?.servings||'');hideList();showView('ingredients')}
+function openPending(id,{fromHistory=false}={}){const r=pending().find(x=>String(x.id)===String(id));if(!r)return;if(!fromHistory)pushRecipeHistory({hcRecipeKind:'pending',hcRecipeId:String(id),hcRecipeReturn:recipeModuleView});current='pending:'+id;edited=JSON.parse(JSON.stringify(r));hideList();showReview()}
 function parseQtyNumber(value){let s=String(value??'').trim().replace(',','.');if(!s)return null;const u={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875};if(u[s]!=null)return u[s];const m=s.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(m)return Number(m[1])+Number(m[2])/Number(m[3]);const f=s.match(/^(\d+)\/(\d+)$/);if(f)return Number(f[1])/Number(f[2]);const n=Number(s);return Number.isFinite(n)?n:null}
 function formatScaledNumber(n,unit='',ingredient=''){if(!Number.isFinite(n))return '';const u=String(unit||'').toLowerCase(),food=String(ingredient||'').toLowerCase();let v=n;if(['el','tl'].includes(u))v=Math.round(v*16)/16;else if(['g','gr','gram','ml'].includes(u))v=Math.round(v);else if(/^(stuks?|stuk|blik(?:je)?|zak(?:je)?|teen|tenen)$/.test(u))v=Math.round(v);else if(!u&&/(limoen|citroen)/.test(food))v=Math.round(v*2)/2;else v=Math.round(v*100)/100;const whole=Math.floor(v),fr=Math.round((v-whole)*16)/16,fm={0.25:'¼',0.5:'½',0.75:'¾'};if(fm[fr]&&Math.abs(v-(whole+fr))<1e-8)return whole?`${whole} ${fm[fr]}`:fm[fr];return String(Number(v.toFixed(4))).replace('.',',')}
 function scaledQty(qty,factor,unit,ingredient){const n=parseQtyNumber(qty);return n==null?String(qty||''):formatScaledNumber(n*factor,unit,ingredient)}
@@ -84,7 +88,7 @@ function instructionText(v){if(Array.isArray(v))return v.map(x=>typeof x==='stri
 function parseYield(y){const s=Array.isArray(y)?y[0]:y;return String(s||'').match(/\d+/)?.[0]||''}
 async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{const res=await fetch(draft.sourceUrl,{credentials:'omit'});if(!res.ok)throw new Error('HTTP '+res.status);const html=await res.text(),docu=new DOMParser().parseFromString(html,'text/html');for(const el of docu.querySelectorAll('script[type="application/ld+json"]')){try{const recipe=findRecipeJson(JSON.parse(el.textContent));if(!recipe)continue;return{...draft,title:recipe.name||draft.title,servings:parseYield(recipe.recipeYield)||draft.servings,ingredients:(recipe.recipeIngredient||[]).map(parseIngredient),directions:instructionText(recipe.recipeInstructions)||draft.directions,source:sourceFromUrl(draft.sourceUrl)}}catch(_){}}}catch(err){console.info('Receptlink kon niet rechtstreeks worden uitgelezen; bron blijft bij concept.',err)}return draft}
 async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searchParams.has('share-target')||!('caches'in window))return null;try{const cache=await caches.open('huize-chaos-shared-content-v1'),key=new URL('__shared-recipe__',url).href,res=await cache.match(key);if(!res)return null;await cache.delete(key);return await res.json()}catch(err){console.warn(err);return null}}
-async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({},'',location.pathname+location.hash);openPending(draft.id)}
+async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({...history.state,hcRecipeScreen:'module',hcRecipeModule:recipeModuleView},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=renderList;renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();
 
 // V1.3.116 - voorraad koppelen aan recepten
@@ -261,12 +265,13 @@ function renderWeekMenu(){
   weekMenuList.querySelectorAll('[data-plan-servings]').forEach(input=>{input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyPlannedServings(input)}});input.addEventListener('change',()=>applyPlannedServings(input))});
   weekMenuList.querySelectorAll('[data-week-ordered]').forEach(cb=>cb.addEventListener('change',()=>{const [id,idx]=String(cb.dataset.weekOrdered).split(':');const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===id);if(!plan?.ingredients?.[Number(idx)])return;plan.ingredients[Number(idx)].ordered=cb.checked;saveRecipeWeekPlans(plans)}));
   weekMenuList.querySelectorAll('[data-week-stock-choice]').forEach(choice=>choice.addEventListener('change',()=>{const [id,idx]=String(choice.dataset.weekStockChoice).split(':');const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===id),ingredient=plan?.ingredients?.[Number(idx)];if(!ingredient)return;const coverage=stockCoverage(ingredient,choice.value);ingredient.stockProductId=coverage.product?.id??'';ingredient.stockEnough=Boolean(coverage.enough);ingredient.stockLabel=coverage.matched?coverage.label:'';ingredient.shoppingQty=coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):'';ingredient.store=coverage.product?.store||ingredient.store||'';ingredient.category=coverage.product?.category||ingredient.category||'';if(coverage.enough)ingredient.ordered=false;saveRecipeWeekPlans(plans);renderWeekMenu()}));
-  weekMenuList.querySelectorAll('[data-open-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const r=getRecipe(btn.dataset.openWeekRecipe);if(!r){alert('Dit recept is niet meer beschikbaar in Recepten.');return}const plan=recipeWeekPlans().find(x=>String(x.recipeId)===String(r.id)&&x.week===selectedMenuWeek);openedFromWeekMenu=true;current=String(r.id);edited=JSON.parse(JSON.stringify(r));if(plan?.ingredients?.length)edited.ingredients=JSON.parse(JSON.stringify(plan.ingredients));displayServings=String(plan?.servings||r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView('directions')}));
+  weekMenuList.querySelectorAll('[data-open-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const r=getRecipe(btn.dataset.openWeekRecipe);if(!r){alert('Dit recept is niet meer beschikbaar in Recepten.');return}const plan=recipeWeekPlans().find(x=>String(x.recipeId)===String(r.id)&&x.week===selectedMenuWeek);pushRecipeHistory({hcRecipeKind:'recipe',hcRecipeId:String(r.id),hcRecipeReturn:'weekmenu'});openedFromWeekMenu=true;current=String(r.id);edited=JSON.parse(JSON.stringify(r));if(plan?.ingredients?.length)edited.ingredients=JSON.parse(JSON.stringify(plan.ingredients));displayServings=String(plan?.servings||r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView('directions')}));
   weekMenuList.querySelectorAll('[data-move-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.movePlan));const select=weekMenuList.querySelector(`[data-move-week="${CSS.escape(String(btn.dataset.movePlan))}"]`);if(!plan||!select)return;const oldWeek=plan.week,newWeek=select.value;if(newWeek===oldWeek)return;plan.week=newWeek;saveRecipeWeekPlans(plans);renderWeekMenu()}));
   weekMenuList.querySelectorAll('[data-remove-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.removePlan));if(!plan)return;if(!confirm(`${plan.title||'Dit recept'} uit ${weekNumberLabel(selectedMenuWeek)} verwijderen?`))return;saveRecipeWeekPlans(plans.filter(x=>String(x.id)!==String(btn.dataset.removePlan)));renderWeekMenu()}));
 }
-function showRecipeModule(view){
-  const recipes=view==='recipes';
+function showRecipeModule(view,fromHistory=false){
+  const safe=view==='recipes'?'recipes':'weekmenu',recipes=safe==='recipes',changed=recipeModuleView!==safe;
+  recipeModuleView=safe;
   document.querySelector('.recipes')?.classList.remove('recipe-detail-open');
   detail?.classList.add('hidden');
   weekMenuPanel?.classList.toggle('hidden',recipes);
@@ -274,6 +279,7 @@ function showRecipeModule(view){
   showWeekMenuButton?.classList.toggle('active',!recipes);
   showRecipesButton?.classList.toggle('active',recipes);
   if(recipes){list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');renderList()}else renderWeekMenu();
+  if(recipeHistoryReady&&!fromHistory&&changed)history.pushState({...history.state,hcRecipeScreen:'module',hcRecipeModule:safe,hcRecipeKind:'',hcRecipeId:''},'',location.href);
 }
 window.hcShowRecipeModule=showRecipeModule;
 showWeekMenuButton?.addEventListener('click',()=>showRecipeModule('weekmenu'));
@@ -283,7 +289,17 @@ document.querySelector('#weekMenuNext')?.addEventListener('click',()=>{selectedM
 document.querySelector('#weekMenuTitle')?.addEventListener('click',()=>{selectedMenuWeek=isoWeekKey(new Date());localStorage.setItem(WEEK_MENU_SELECTED_KEY,selectedMenuWeek);renderWeekMenu()});
 window.addEventListener('huize-chaos-recipe-weeks-changed',renderWeekMenu);
 window.addEventListener('storage',e=>{if(e.key===RECIPE_WEEK_KEY)renderWeekMenu()});
-showRecipeModule('weekmenu');
+showRecipeModule('weekmenu',true);
+history.replaceState({...history.state,hcRecipeScreen:'module',hcRecipeModule:'weekmenu',hcRecipeKind:'',hcRecipeId:''},'',location.href);
+recipeHistoryReady=true;
+window.addEventListener('popstate',event=>{
+  const state=event.state||{};
+  if(state.hcRecipeScreen==='module'){openedFromWeekMenu=false;returnEventId='';backListDirect();showRecipeModule(state.hcRecipeModule||'weekmenu',true);return}
+  if(state.hcRecipeScreen==='detail'&&state.hcRecipeId){
+    recipeModuleView=state.hcRecipeReturn||state.hcRecipeModule||'recipes';
+    if(state.hcRecipeKind==='pending')openPending(state.hcRecipeId,{fromHistory:true});else openRecipe(state.hcRecipeId,{fromHistory:true});
+  }
+});
 function showReadonlyRecipe(r,view='ingredients'){
   const m=metaFor(r.id),memo=m.memo||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=String(new URLSearchParams(location.search).get('servings')||r.servings||'');hideList();
   const sourceBits=[];if(r.source)sourceBits.push(`Bron: ${esc(r.source)}`);if(r.sourceUrl)sourceBits.push(`<a href="${esc(r.sourceUrl)}" target="_blank" rel="noopener">Bron openen</a>`);
@@ -347,6 +363,7 @@ function parseBulkDirections(text){
   return steps.map((x,i)=>`${i+1}. ${x}`).join('\n\n');
 }
 function showManualRecipeForm(){
+  pushRecipeHistory({hcRecipeKind:'new',hcRecipeId:'new',hcRecipeReturn:recipeModuleView});
   current='new:'+Date.now();edited={id:'custom-'+Date.now(),title:'',servings:'',ingredients:[],directions:'',source:'Handmatig',imported:true};displayServings='';hideList();
   detail.innerHTML=`<div class="detail-head"><div><h2>Recept toevoegen</h2><small>Handmatig of door tekst te plakken</small></div><div class="actions"><button class="btn" id="cancelNewRecipe">Terug</button></div></div>
   <div class="panel bulk-recipe-panel"><label>Titel<input id="newRecipeTitle" placeholder="Naam van het recept"></label><label>Aantal personen<input id="newRecipeServings" type="number" min="1" inputmode="numeric" placeholder="4"></label><label>Bron<input id="newRecipeSource" placeholder="Bijv. Picnic, Allerhande, eigen recept"></label><label>Bron / URL (optioneel)<input id="newRecipeSourceUrl" type="url" placeholder="https://…"></label>

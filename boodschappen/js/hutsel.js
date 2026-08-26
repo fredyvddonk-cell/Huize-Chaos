@@ -27,10 +27,10 @@ function openHutselModal(item=null) {
   $('#hutselNote').value = item?.note || '';
   const day = item?.useDate === tomorrowKey() ? 'tomorrow' : 'today';
   document.querySelector(`input[name="hutselDay"][value="${day}"]`).checked = true;
-  $('#hutselModal').classList.add('open');
+  window.openHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal'));
   setTimeout(()=>$('#hutselName').focus(),50);
 }
-function closeHutselModal(){ $('#hutselModal').classList.remove('open'); }
+function closeHutselModal(){ window.closeHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal')); }
 
 window.sendStockToHutsel = id => {
   const product = products.find(x => x.id === id);
@@ -41,7 +41,7 @@ window.sendStockToHutsel = id => {
   $('#hutselName').value = product.name || '';
   $('#hutselNote').value = quantity || product.memo || '';
   document.querySelector('input[name="hutselDay"][value="today"]').checked = true;
-  $('#hutselModal').classList.add('open');
+  window.openHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal'));
   setTimeout(() => {
     const tomorrow = document.querySelector('input[name="hutselDay"][value="tomorrow"]');
     if (tomorrow) tomorrow.focus();
@@ -104,10 +104,10 @@ function openFreezerModal(item=null){
   $('#freezerPortions').value=item?.portions||1;
   $('#freezerDate').value=item?.frozenDate||localDateKey();
   $('#freezerNote').value=item?.note||'';
-  $('#freezerModal').classList.add('open');
+  window.openHuizeChaosOverlay?.('freezer-edit', $('#freezerModal'));
   setTimeout(()=>$('#freezerName').focus(),50);
 }
-function closeFreezerModal(){$('#freezerModal').classList.remove('open');}
+function closeFreezerModal(){window.closeHuizeChaosOverlay?.('freezer-edit', $('#freezerModal'));}
 function freezerHtml(q=''){
   const arr=freezerMeals.filter(x=>x.name.toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q));
   return `<section class="hutsel-section freezer-section">

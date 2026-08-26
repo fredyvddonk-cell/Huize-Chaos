@@ -10,6 +10,7 @@ function setOccasionSyncStatus(t){if(occasionSyncStatus)occasionSyncStatus.textC
 
 const KEY='huize-chaos-occasions-v1';
 let activeEventId='';
+let occasionHistoryReady=false,occasionDirectEvent=false;
 let events=JSON.parse(localStorage.getItem(KEY)||'[]');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -73,17 +74,22 @@ function render(){
     return `<article class="event"><div class="event-head"><div><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':'Aantal personen niet ingevuld'}</div></div><button onclick="openDetail('${e.id}')">Bekijken</button></div><div class="totals">${catTotals(e).filter(x=>x[1]).map(([c,n])=>`<span class="chip">${c}: <strong>${money(n)}</strong></span>`).join('')}<span class="chip">Totaal: <strong>${money(total)}</strong></span>${openNeeds?`<span class="chip accent">${openNeeds} nog nodig</span>`:''}${openPrep?`<span class="chip accent">${openPrep} voor te bereiden</span>`:''}</div></article>`
   }).join('')
 }
-function openForm(e={}){
+function openForm(e={},fromHistory=false){
   $('#formTitle').textContent=e.id?'Gelegenheid wijzigen':'Nieuwe gelegenheid';
   $('#eventId').value=e.id||'';
   $('#eventName').value=e.name||'';
   $('#eventDate').value=e.date||'';
   $('#eventPeople').value=e.people||'';
   $('#eventNote').value=e.note||'';
-  $('#eventDialog').showModal()
+  if(occasionHistoryReady&&!fromHistory){const returnScreen=history.state?.hcOccasionScreen==='detail'?'detail':'list';history.pushState({...history.state,hcOccasionScreen:'form',hcOccasionId:String(e.id||''),hcOccasionReturn:returnScreen},'',location.href);}
+  if(!$('#eventDialog').open)$('#eventDialog').showModal()
 }
+function closeEventForm(){if(history.state?.hcOccasionScreen==='form'){history.back();return}if($('#eventDialog').open)$('#eventDialog').close()}
+function closeOccasionDetail(){if(occasionDirectEvent&&history.state?.hcOccasionScreen==='detail'){occasionDirectEvent=false;history.replaceState({...history.state,hcOccasionScreen:'list',hcOccasionId:''},'',location.href);if($('#detailDialog').open)$('#detailDialog').close();activeEventId='';return}if(history.state?.hcOccasionScreen==='detail'){history.back();return}if($('#detailDialog').open)$('#detailDialog').close();activeEventId=''}
+window.closeOccasionDetail=closeOccasionDetail;
 $('#addEvent').onclick=()=>openForm();
-$('#cancelEvent').onclick=()=>$('#eventDialog').close();
+$('#cancelEvent').onclick=closeEventForm;
+$('#eventDialog').addEventListener('cancel',ev=>{ev.preventDefault();closeEventForm()});
 $('#eventForm').onsubmit=ev=>{
   ev.preventDefault();
   const id=$('#eventId').value||String(Date.now());
@@ -95,14 +101,16 @@ $('#eventForm').onsubmit=ev=>{
   refreshEventShoppingIfCreated(e);
   e.people=$('#eventPeople').value;
   e.note=$('#eventNote').value.trim();
-  save();$('#eventDialog').close();openDetail(id)
+  save();if($('#eventDialog').open)$('#eventDialog').close();if(history.state?.hcOccasionReturn==='detail'){history.back();return}history.replaceState({...history.state,hcOccasionScreen:'detail',hcOccasionId:String(id),hcOccasionReturn:''},'',location.href);openDetail(id,true)
 };
-window.openDetail=id=>{
+window.openDetail=(id,fromHistory=false)=>{
   activeEventId=id;
-  const e=events.find(x=>x.id===id);if(!e)return;normalizeEvent(e);
+  const e=events.find(x=>String(x.id)===String(id));if(!e)return;normalizeEvent(e);
+  const detailDialog=$('#detailDialog');
+  if(occasionHistoryReady&&!fromHistory&&!detailDialog.open)history.pushState({...history.state,hcOccasionScreen:'detail',hcOccasionId:String(id)},'',location.href);
   const sums=catTotals(e);
   $('#detail').innerHTML=`
-    <div class="detail-top"><div><small>Feestdagen & gelegenheden</small><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':''}</div>${e.note?`<p>${esc(e.note)}</p>`:''}</div><button class="close" onclick="detailDialog.close()">×</button></div>
+    <div class="detail-top"><div><small>Feestdagen & gelegenheden</small><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':''}</div>${e.note?`<p>${esc(e.note)}</p>`:''}</div><button class="close" onclick="closeOccasionDetail()">×</button></div>
     <div class="summary">${sums.map(([c,n])=>`<div class="sum"><small>${c}</small><strong>${money(n)}</strong></div>`).join('')}</div>
 
     <section class="occasion-section">
@@ -137,10 +145,10 @@ window.openDetail=id=>{
     </section>
 
     <div class="evaluation"><label>Algemene evaluatie<textarea id="evaluation" rows="3" placeholder="Wat wil je de volgende keer anders doen?">${esc(e.evaluation||'')}</textarea></label><button onclick="saveEvaluation('${id}')">Evaluatie opslaan</button></div>
-    <div class="actions"><button onclick="editEvent('${id}')">Gelegenheid wijzigen</button><button class="danger" onclick="deleteEvent('${id}')">Verwijderen</button><button class="primary" onclick="detailDialog.close()">Klaar</button></div>`;
+    <div class="actions"><button onclick="editEvent('${id}')">Gelegenheid wijzigen</button><button class="danger" onclick="deleteEvent('${id}')">Verwijderen</button><button class="primary" onclick="closeOccasionDetail()">Klaar</button></div>`;
   const result=$('#newResult');
   if(result)result.onchange=()=>{const excess=$('#newExcessQty');excess.hidden=result.value!=='Te veel';if(excess.hidden)excess.value=''};
-  $('#detailDialog').showModal()
+  if(!detailDialog.open)detailDialog.showModal()
 };
 function menuHtml(x,i){const linked=x.recipeId&&x.ingredients?.length;return `<div class="menu-card"><div class="menu-card-head"><div><span class="menu-type">${esc(x.type||'Overig')}</span>${x.recipeId?`<button class="menu-recipe-open" type="button" onclick="openMenuRecipe(${i})"><strong>${esc(x.dish||'')}</strong><small>Gekoppeld recept · tik voor bereiding ›</small></button>`:`<strong>${esc(x.dish||'')}</strong>`}</div><button class="del danger" onclick="deleteMenu(${i})">×</button></div>${linked?`<div class="menu-servings"><label>Aantal personen<input id="menuServings${i}" type="number" min="1" inputmode="numeric" value="${esc(x.servings||x.recipeServings||'')}"></label><button type="button" onclick="setMenuServings(${i},document.getElementById('menuServings${i}').value)">Toepassen</button><small>Ingrediënten en boodschappen passen meteen mee aan.</small></div><div class="menu-ingredients"><div class="meta">Kies wat je voor deze gelegenheid wilt gebruiken:</div>${x.ingredients.map((ing,j)=>`<label class="menu-ingredient"><input type="checkbox" ${ing.enabled!==false?'checked':''} onchange="toggleMenuIngredient(${i},${j},this.checked)"><span>${esc([ing.qty,ing.unit,ing.ingredient].filter(Boolean).join(' '))}</span></label>`).join('')}</div>`:x.needed?`<div class="menu-needed">${esc(x.needed)}</div>`:''}</div>`}
 function recipeLibrary(){const base=window.HUIZE_CHAOS_RECIPES||[];let custom=[];try{custom=JSON.parse(localStorage.getItem('hc-recipe-custom-v1')||'[]')}catch(_){}const edits=new Map();base.forEach(r=>{try{const e=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(e)edits.set(String(r.id),e)}catch(_){}});return [...base.map(r=>edits.get(String(r.id))||r),...custom]}
@@ -201,10 +209,12 @@ window.updateItem=(i,k,v)=>{const e=current();if(!e)return;e.items[i][k]=k==='co
 window.updateItemResult=(i,v)=>{const e=current();if(!e)return;e.items[i].result=v;if(v!=='Te veel')e.items[i].excessQty='';save();openDetail(e.id)};
 window.deleteItem=i=>{const e=current();if(!e)return;e.items.splice(i,1);save();openDetail(e.id)};
 window.saveEvaluation=id=>{const e=events.find(x=>x.id===id);e.evaluation=$('#evaluation').value;save();openDetail(id)};
-window.editEvent=id=>{const e=events.find(x=>x.id===id);$('#detailDialog').close();openForm(e)};
-window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>x.id!==id);if(occasionUser)deleteDoc(plannerItemRef(id)).catch(()=>{});save();$('#detailDialog').close()};
+window.editEvent=id=>{const e=events.find(x=>String(x.id)===String(id));if($('#detailDialog').open)$('#detailDialog').close();openForm(e)};
+window.deleteEvent=id=>{if(!confirm('Deze gelegenheid verwijderen?'))return;events=events.filter(x=>String(x.id)!==String(id));if(occasionUser)deleteDoc(plannerItemRef(id)).catch(()=>{});save();if($('#detailDialog').open)$('#detailDialog').close();activeEventId='';if(history.state?.hcOccasionScreen==='detail')history.back()};
 render();initCloud();
-const requestedEvent=new URLSearchParams(location.search).get('event');if(requestedEvent&&events.some(e=>String(e.id)===String(requestedEvent)))setTimeout(()=>openDetail(requestedEvent),0);
+history.replaceState({...history.state,hcOccasionScreen:'list',hcOccasionId:''},'',location.href);occasionHistoryReady=true;
+window.addEventListener('popstate',event=>{if($('#eventDialog').open)$('#eventDialog').close();if($('#detailDialog').open)$('#detailDialog').close();activeEventId='';const state=event.state||{};if(state.hcOccasionScreen==='detail'&&state.hcOccasionId){openDetail(state.hcOccasionId,true);return}if(state.hcOccasionScreen==='form'){const e=events.find(x=>String(x.id)===String(state.hcOccasionId));openForm(e||{},true)}});
+const requestedEvent=new URLSearchParams(location.search).get('event');if(requestedEvent&&events.some(e=>String(e.id)===String(requestedEvent))){occasionDirectEvent=true;history.replaceState({...history.state,hcOccasionScreen:'detail',hcOccasionId:String(requestedEvent)},'',location.href);setTimeout(()=>openDetail(requestedEvent,true),0)};
 
 // V1.3.116 - Ga/Enter voert de veldactie uit en sluit het mobiele toetsenbord.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.id?.startsWith('menuServings')){e.preventDefault();const i=Number(input.id.replace('menuServings',''));window.setMenuServings(i,input.value);input.blur();return}if(input.type!=='search'){input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();}});

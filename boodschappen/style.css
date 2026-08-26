@@ -582,7 +582,7 @@ body.receipt-reordering{user-select:none;-webkit-user-select:none}
 @media(max-width:850px){.receipt-calc-done{width:100%}}
 
 
-/* V1.3.148 - duidelijke boncontrole + koopzegelvelden exact uitgelijnd */
+/* V1.3.149 - duidelijke boncontrole + koopzegelvelden exact uitgelijnd */
 #receiptModal .receipt-amount-meta{margin-top:10px;padding:12px 14px;border-radius:12px;background:#f7f4fa;gap:5px;font-size:12px;color:#514a55}
 #receiptModal .receipt-control-title{font-weight:900;color:#6737b4;font-size:13px;margin-bottom:3px}
 #receiptModal .receipt-control-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
@@ -606,10 +606,15 @@ body.receipt-reordering{user-select:none;-webkit-user-select:none}
   #receiptModal .receipt-koopzegels-fields .money-input input{font-size:1rem;min-width:0}
 }
 
-/* V1.3.148 - YNAB blijft leidend voor Verzorging en Huishouden */
+/* V1.3.149 - YNAB blijft leidend voor Verzorging en Huishouden */
 .insight-other-expenses h2{font-size:16px;margin:0 0 8px}
 .insight-summary-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-top:1px solid #eee8f1;background:transparent;padding:12px 0;text-align:left;color:inherit;font:inherit;cursor:pointer}
 .insight-summary-row:first-of-type{border-top:0}
 .insight-summary-row>span:last-child{text-align:right}
 .insight-summary-row strong{display:block}
 .insight-summary-row small{display:block;color:#837b88;font-size:11px;margin-top:2px}
+
+/* V1.3.149 - slepen van bonproducten robuust op Android/telefoon */
+.receipt-drag-handle{-webkit-touch-callout:none;overscroll-behavior:contain}
+body.receipt-reordering #receiptModal{touch-action:none}
+@media(max-width:850px){.receipt-drag-handle{width:36px!important;height:38px!important;font-size:22px}}

@@ -182,6 +182,54 @@ function refreshCats() {
   $('#categories').innerHTML = categories.map(x => `<option value="${esc(x)}">`).join('');
 }
 
+// V1.3.151 - één geschiedenislaag voor alle schermen en modals in Boodschappen.
+// Hierdoor sluit de Android/browser-terugknop eerst het huidige venster en pas daarna de pagina.
+let huizeChaosHistoryState = history.state || {};
+function openHuizeChaosOverlay(name, element) {
+  if (!element) return;
+  element.dataset.hcOverlay = name;
+  if (history.state?.hcOverlay !== name) {
+    const nextState = {...history.state, hcPage: page, hcOverlay: name};
+    history.pushState(nextState, '', location.href);
+    huizeChaosHistoryState = nextState;
+  }
+  if (element.tagName === 'DIALOG') {
+    if (!element.open) element.showModal();
+  } else {
+    element.classList.add('open');
+    element.setAttribute('aria-hidden', 'false');
+  }
+}
+function closeHuizeChaosOverlayDirect(name, element = null) {
+  const targets = element ? [element] : [...document.querySelectorAll(`[data-hc-overlay="${CSS.escape(name)}"]`)];
+  targets.forEach(target => {
+    if (!target) return;
+    if (target.tagName === 'DIALOG') {
+      if (target.open) target.close();
+    } else {
+      target.classList.remove('open');
+      target.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+function closeHuizeChaosOverlay(name, element) {
+  if (!element) return;
+  if ((element.classList.contains('open') || element.open) && history.state?.hcOverlay === name) {
+    history.back();
+    return;
+  }
+  closeHuizeChaosOverlayDirect(name, element);
+}
+window.openHuizeChaosOverlay = openHuizeChaosOverlay;
+window.closeHuizeChaosOverlay = closeHuizeChaosOverlay;
+window.closeHuizeChaosOverlayDirect = closeHuizeChaosOverlayDirect;
+window.pushHuizeChaosState = patch => {
+  const nextState={...history.state,hcPage:page,hcOverlay:'',hcInsightCategory:'',...(patch||{})};
+  history.pushState(nextState,'',location.href);
+  huizeChaosHistoryState=nextState;
+  return nextState;
+};
+
 function openModal(x = null, prefillName = '') {
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('#modalTitle').textContent = x ? 'Product wijzigen' : 'Product toevoegen';
@@ -197,7 +245,7 @@ function openModal(x = null, prefillName = '') {
   const showFixedProductChoice = page === 'list';
   fixedProductOption.hidden = !showFixedProductChoice;
   $('#fixedProduct').checked = showFixedProductChoice ? Boolean(x && !x.temporary) : true;
-  $('#modal').classList.add('open');
+  openHuizeChaosOverlay('product-edit', $('#modal'));
   setTimeout(() => $('#productName').focus(), 50);
   const categoryInput = $('#category');
   categoryInput.onfocus = () => categoryInput.select();
@@ -209,7 +257,7 @@ function openModal(x = null, prefillName = '') {
 }
 
 function closeModal() {
-  $('#modal').classList.remove('open');
+  closeHuizeChaosOverlay('product-edit', $('#modal'));
 }
 
 function accordion(title, key, inner) {
@@ -318,16 +366,27 @@ function setPage(nextPage,{fromHistory=false}={}) {
   page=nextPage;
   localStorage.setItem('household-page',page);
   sessionStorage.setItem('hc-household-page-session',page);
-  if(changed&&!fromHistory) history.pushState({hcPage:page},'',location.href);
+  if(changed&&!fromHistory) {
+    const nextState={...history.state,hcPage:page,hcOverlay:'',hcInsightCategory:''};
+    history.pushState(nextState,'',location.href);
+    huizeChaosHistoryState=nextState;
+  }
   render();
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
-  const openModal=document.querySelector('.modal.open');
-  if(openModal){openModal.classList.remove('open');openModal.setAttribute('aria-hidden','true');return;}
-  if(e.state?.hcPage){setPage(e.state.hcPage,{fromHistory:true});return;}
+  const previousOverlay=huizeChaosHistoryState?.hcOverlay||'';
+  const targetOverlay=e.state?.hcOverlay||'';
+  huizeChaosHistoryState=e.state||{};
+  if(previousOverlay && previousOverlay!==targetOverlay) closeHuizeChaosOverlayDirect(previousOverlay);
+  if(e.state?.hcPage) {
+    setPage(e.state.hcPage,{fromHistory:true});
+    if(e.state.hcPage==='insight'&&e.state.hcInsightCategory) window.showHuizeChaosInsightCategory?.(e.state.hcInsightCategory,true);
+  }
 });
-if(!history.state?.hcPage) history.replaceState({...history.state,hcPage:page},'',location.href);
+const initialHistoryState={...history.state,hcPage:page,hcOverlay:'',hcInsightCategory:''};
+history.replaceState(initialHistoryState,'',location.href);
+huizeChaosHistoryState=initialHistoryState;
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
@@ -358,14 +417,12 @@ window.requestProductDelete = (id, mode = 'product') => {
       : 'Het product wordt alleen van de boodschappenlijst verwijderd. Het blijft bewaard in Voorraad en Beheer.'
     : 'Dit product wordt definitief verwijderd uit Voorraad en Beheer. Dit kan niet ongedaan worden gemaakt.';
   $('#confirmDelete').textContent = fromShopping && !product.temporary ? 'Van lijst verwijderen' : 'Verwijderen';
-  $('#deleteModal').classList.add('open');
-  $('#deleteModal').setAttribute('aria-hidden', 'false');
+  openHuizeChaosOverlay('product-delete', $('#deleteModal'));
 };
 
 function closeProductDelete() {
   pendingProductDelete = null;
-  $('#deleteModal').classList.remove('open');
-  $('#deleteModal').setAttribute('aria-hidden', 'true');
+  closeHuizeChaosOverlay('product-delete', $('#deleteModal'));
 }
 
 window.removeProduct = id => requestProductDelete(id, 'product');

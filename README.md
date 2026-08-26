@@ -1,4 +1,22 @@
-## V1.3.148
+## V1.3.151
+
+- Terugknop op Android/browser werkt nu consequent binnen Huize Chaos.
+- In Boodschappen sluit Terug eerst het actieve venster, zoals product wijzigen, verwijderen, Hutsel Frutsel, diepvries, account en bonvensters.
+- Vanuit Inzicht keert Terug vanuit een productspecificatie terug naar het overzicht.
+- In Recepten keert Terug vanuit een recept terug naar Recepten of Weekmenu zonder de module onnodig opnieuw te openen.
+- In Feestdagen & gelegenheden sluit Terug eerst details of wijzigen en keert daarna terug naar de lijst.
+- In Mijn notities sluit Terug eerst de geopende notitie.
+- In Auto navigeert Terug tussen de geopende tabbladen voordat Huize Chaos wordt verlaten.
+- Cache- en versieverwijzingen bijgewerkt naar V1.3.151.
+
+## V1.3.149
+
+- Bonproducten slepen opnieuw opgebouwd voor telefoon en Android.
+- Slepen gebruikt nu document-brede pointerbewegingen in plaats van pointer capture; hierdoor valt het slepen niet weg zodra een productregel in de lijst wordt verplaatst.
+- Tijdens slepen scrollt de bon automatisch mee wanneer je dicht bij de boven- of onderkant van het scherm komt.
+- Sleepgreep op mobiel iets groter gemaakt.
+
+## V1.3.149
 
 - In **Inzicht** blijven budgetteren en reserveren voor Verzorging en Huishouden voortaan bij YNAB.
 - De budgetvelden voor **Verzorging** en **Huishouden** zijn uit Huize Chaos verwijderd.

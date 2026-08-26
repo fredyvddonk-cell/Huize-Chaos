@@ -489,13 +489,11 @@ signOutButton.addEventListener('click', () => signOut(auth));
 accountButton.addEventListener('click', () => {
   if (!user) return;
   currentAccountName.textContent = user.displayName || user.email || 'Google-account';
-  accountModal.classList.add('open');
-  accountModal.setAttribute('aria-hidden', 'false');
+  window.openHuizeChaosOverlay?.('account', accountModal);
 });
 
 function closeAccountModal() {
-  accountModal.classList.remove('open');
-  accountModal.setAttribute('aria-hidden', 'true');
+  window.closeHuizeChaosOverlay?.('account', accountModal);
 }
 
 closeAccountButton.addEventListener('click', closeAccountModal);
