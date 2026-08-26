@@ -514,7 +514,6 @@ body:has(#receiptModal.open){overflow:hidden}
 .stock-bulk-status .clear{margin:0}
 
 /* V1.3.131 - rekenhulp voor bedragen op bonregels */
-.receipt-calc-toggle{display:block;margin-top:4px;padding:0;border:0;background:transparent;color:#6737b4;font:inherit;font-size:10px;font-weight:800;text-align:left;cursor:pointer}
 .receipt-line-calculator{grid-column:1/-1;margin:4px 0 7px;padding:11px 12px;border:1px solid #ddd1eb;border-radius:11px;background:#fbf9fe}
 .receipt-line-calculator[hidden]{display:none!important}
 .receipt-calc-grid{display:grid;grid-template-columns:90px 130px minmax(145px,1fr) minmax(130px,1fr);gap:8px;align-items:end}
@@ -536,7 +535,7 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-category-total small{font-weight:700}
 .insight-category-total strong{font-size:1.15rem}
 /* V1.3.137 - bonverdeling, koopzegels en aanklikbare bron */
-.receipt-koopzegels-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.receipt-source-open{width:100%;border:0;background:transparent;text-align:left;padding:0;display:flex;flex-direction:column;gap:4px;cursor:pointer;color:inherit}.receipt-source-open span{text-decoration:underline;text-underline-offset:3px}.receipt-control.ok strong{color:#287a45}.receipt-control.warning strong{color:#a13b2d}@media(max-width:650px){.receipt-koopzegels-fields{grid-template-columns:1fr}}
+.receipt-koopzegels-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.receipt-source-open{width:100%;border:0;background:transparent;text-align:left;padding:0;display:flex;flex-direction:column;gap:4px;cursor:pointer;color:inherit}.receipt-source-open span{text-decoration:underline;text-underline-offset:3px}.receipt-control.ok strong{color:#287a45}.receipt-control.warning strong{color:#a13b2d}@media(max-width:650px){.receipt-koopzegels-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.receipt-koopzegels-fields .field{min-width:0}.receipt-koopzegels-fields label{font-size:.9rem}.receipt-koopzegels-fields .money-input{min-width:0}}
 /* V1.3.138 - compact bonregels + aparte Huize Chaos/YNAB indeling */
 #receiptModal .receipt-koopzegels-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #receiptModal .receipt-product-row{grid-template-columns:minmax(0,1.55fr) 92px minmax(125px,.8fr) minmax(125px,.8fr) 42px;gap:7px;padding:7px 8px;align-items:end}
@@ -554,3 +553,13 @@ body:has(#receiptModal.open){overflow:hidden}
  #receiptModal .receipt-cell-cat label::after{content:' categorie'}
  #receiptModal .receipt-cell-ynab label::after{content:' categorie'}
 }
+
+/* V1.3.139 - testinformatie bonherkenning verwijderd + koopzegelvelden mobiel naast elkaar */
+/* V1.3.140 - bulk korting, tweede korting en volgorde bonregels */
+.receipt-bulk-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:#f7f2fb;border-bottom:1px solid #e9e0ef}.receipt-bulk-toolbar strong{margin-right:auto;font-size:12px}.receipt-bulk-toolbar button{border:1px solid #d8cae6;background:#fff;border-radius:8px;padding:6px 8px;font-weight:700;color:#6333ad}.receipt-row-tools{display:flex;gap:3px;align-items:center}.receipt-row-tools button{width:25px;height:25px;padding:0;border:1px solid #ddd4e3;background:#fff;border-radius:6px}.receipt-line-select{width:18px;height:18px}.receipt-calc-second{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed #ddd4e3}.receipt-calc-second label{font-size:10px;font-weight:800}.receipt-calc-second input,.receipt-calc-second select{width:100%;margin-top:3px}
+#receiptModal .receipt-product-row{grid-template-columns:76px minmax(0,1.55fr) 92px minmax(125px,.8fr) minmax(125px,.8fr) 42px}
+@media(max-width:850px){#receiptModal .receipt-product-row{grid-template-columns:70px minmax(0,1fr) 88px 38px}.receipt-row-tools{grid-column:1/2;grid-row:1}.receipt-cell-product{grid-column:2/3!important}.receipt-cell-price{grid-column:3/4!important}.receipt-cell-action{grid-column:4/5!important}.receipt-cell-cat{grid-column:2/3!important;grid-row:2}.receipt-cell-ynab{grid-column:3/5!important;grid-row:2}.receipt-line-calculator{grid-column:1/5}.receipt-bulk-toolbar{position:sticky;top:0;z-index:2}.receipt-calc-second{grid-template-columns:1fr 1fr}}
+
+/* V1.3.141 - bedrag opent rekenscherm + mobiel 0,00 direct vervangbaar */
+.receipt-line-price-calc{cursor:pointer;background:#fffdfd}
+.receipt-line-price-calc:focus{outline:2px solid rgba(103,55,180,.24);outline-offset:1px}
