@@ -1,3 +1,11 @@
+## V1.3.148
+
+- In **Inzicht** blijven budgetteren en reserveren voor Verzorging en Huishouden voortaan bij YNAB.
+- De budgetvelden voor **Verzorging** en **Huishouden** zijn uit Huize Chaos verwijderd.
+- Verzorging en Huishouden staan in de maandweergave compact samen onder **Overige uitgaven uit bonnen**.
+- Per onderdeel blijven het maandbedrag, het jaartotaal en **Bekijk specificatie** zichtbaar.
+- Het **Budget Boodschappen** blijft wel in Huize Chaos staan.
+
 ## V1.3.137
 
 - Bugfix: **Bon wijzigen** opent de geselecteerde bon weer in het bewerkscherm.

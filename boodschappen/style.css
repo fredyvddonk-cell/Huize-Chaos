@@ -406,7 +406,7 @@ body:has(#receiptModal.open){overflow:hidden}
 .insight-outside-help{margin:-4px 0 8px;color:#7b7280;font-size:12px}.insight-outside .insight-cat small{min-width:34px}
 
 /* V1.3.68 - aparte budgetten Boodschappen en Verzorging */
-.insight-budget-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:8px}
+.insight-budget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:8px}
 .insight-budget-grid .insight-total{margin:0}
 .insight-purchase-count{display:block;text-align:center;margin:4px 0 14px;color:#777}
 @media(max-width:700px){.insight-budget-grid{grid-template-columns:1fr}}
@@ -582,7 +582,7 @@ body.receipt-reordering{user-select:none;-webkit-user-select:none}
 @media(max-width:850px){.receipt-calc-done{width:100%}}
 
 
-/* V1.3.147 - duidelijke boncontrole + koopzegelvelden exact uitgelijnd */
+/* V1.3.148 - duidelijke boncontrole + koopzegelvelden exact uitgelijnd */
 #receiptModal .receipt-amount-meta{margin-top:10px;padding:12px 14px;border-radius:12px;background:#f7f4fa;gap:5px;font-size:12px;color:#514a55}
 #receiptModal .receipt-control-title{font-weight:900;color:#6737b4;font-size:13px;margin-bottom:3px}
 #receiptModal .receipt-control-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
@@ -605,3 +605,11 @@ body.receipt-reordering{user-select:none;-webkit-user-select:none}
   #receiptModal .receipt-koopzegels-fields .money-input span{font-size:1rem}
   #receiptModal .receipt-koopzegels-fields .money-input input{font-size:1rem;min-width:0}
 }
+
+/* V1.3.148 - YNAB blijft leidend voor Verzorging en Huishouden */
+.insight-other-expenses h2{font-size:16px;margin:0 0 8px}
+.insight-summary-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-top:1px solid #eee8f1;background:transparent;padding:12px 0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.insight-summary-row:first-of-type{border-top:0}
+.insight-summary-row>span:last-child{text-align:right}
+.insight-summary-row strong{display:block}
+.insight-summary-row small{display:block;color:#837b88;font-size:11px;margin-top:2px}
