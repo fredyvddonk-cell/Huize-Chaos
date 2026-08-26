@@ -557,8 +557,8 @@ body:has(#receiptModal.open){overflow:hidden}
 /* V1.3.139 - testinformatie bonherkenning verwijderd + koopzegelvelden mobiel naast elkaar */
 /* V1.3.140 - bulk korting, tweede korting en volgorde bonregels */
 .receipt-bulk-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:#f7f2fb;border-bottom:1px solid #e9e0ef}.receipt-bulk-toolbar strong{margin-right:auto;font-size:12px}.receipt-bulk-toolbar button{border:1px solid #d8cae6;background:#fff;border-radius:8px;padding:6px 8px;font-weight:700;color:#6333ad}.receipt-row-tools{display:flex;gap:3px;align-items:center}.receipt-row-tools button{width:25px;height:25px;padding:0;border:1px solid #ddd4e3;background:#fff;border-radius:6px}.receipt-line-select{width:18px;height:18px}.receipt-calc-second{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed #ddd4e3}.receipt-calc-second label{font-size:10px;font-weight:800}.receipt-calc-second input,.receipt-calc-second select{width:100%;margin-top:3px}
-#receiptModal .receipt-product-row{grid-template-columns:76px minmax(0,1.55fr) 92px minmax(125px,.8fr) minmax(125px,.8fr) 42px}
-@media(max-width:850px){#receiptModal .receipt-product-row{grid-template-columns:70px minmax(0,1fr) 88px 38px}.receipt-row-tools{grid-column:1/2;grid-row:1}.receipt-cell-product{grid-column:2/3!important}.receipt-cell-price{grid-column:3/4!important}.receipt-cell-action{grid-column:4/5!important}.receipt-cell-cat{grid-column:2/3!important;grid-row:2}.receipt-cell-ynab{grid-column:3/5!important;grid-row:2}.receipt-line-calculator{grid-column:1/5}.receipt-bulk-toolbar{position:sticky;top:0;z-index:2}.receipt-calc-second{grid-template-columns:1fr 1fr}}
+#receiptModal .receipt-product-row{grid-template-columns:58px minmax(0,1.55fr) 92px minmax(125px,.8fr) minmax(125px,.8fr) 42px}
+@media(max-width:850px){#receiptModal .receipt-product-row{grid-template-columns:54px minmax(0,1fr) 88px 38px}.receipt-row-tools{grid-column:1/2;grid-row:1}.receipt-cell-product{grid-column:2/3!important}.receipt-cell-price{grid-column:3/4!important}.receipt-cell-action{grid-column:4/5!important}.receipt-cell-cat{grid-column:2/3!important;grid-row:2}.receipt-cell-ynab{grid-column:3/5!important;grid-row:2}.receipt-line-calculator{grid-column:1/5}.receipt-bulk-toolbar{position:sticky;top:0;z-index:2}.receipt-calc-second{grid-template-columns:1fr 1fr}}
 
 /* V1.3.141 - bedrag opent rekenscherm + mobiel 0,00 direct vervangbaar */
 .receipt-line-price-calc{cursor:pointer;background:#fffdfd}
@@ -567,3 +567,41 @@ body:has(#receiptModal.open){overflow:hidden}
 /* V1.3.142 - cache-busting mobiel: actuele boncontrole-assets direct laden */
 
 /* V1.3.144 - boninvoer: expliciet opslaan, backdrop bewaart concept, geen-actie berekent normaalbedrag */
+
+
+/* V1.3.145 - productvolgorde met sleepveld in plaats van pijltjes */
+.receipt-row-tools{display:flex;gap:6px;align-items:center;justify-content:flex-start}
+.receipt-drag-handle{width:30px!important;height:30px!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d8d0df!important;border-radius:7px!important;background:#fff!important;color:#6e6675;font-size:21px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.receipt-drag-handle:active,.receipt-row-dragging .receipt-drag-handle{cursor:grabbing;background:#f4eef9!important;color:#6d35b5}
+.receipt-product-row.receipt-row-dragging{opacity:.72;box-shadow:0 4px 14px rgba(50,31,66,.14);background:#fbf8fd;position:relative;z-index:4}
+body.receipt-reordering{user-select:none;-webkit-user-select:none}
+@media(max-width:850px){.receipt-row-tools{gap:4px}.receipt-drag-handle{width:28px!important;height:32px!important;font-size:20px}.receipt-line-select{width:17px;height:17px}}
+
+/* V1.3.146 - rekenscherm kan na berekenen direct worden gesloten */
+.receipt-calc-done{border:1px solid #8f70c2;background:#fff;color:#6737b4;border-radius:8px;padding:7px 13px;font-weight:800;font-size:12px;white-space:nowrap;cursor:pointer}
+@media(max-width:850px){.receipt-calc-done{width:100%}}
+
+
+/* V1.3.147 - duidelijke boncontrole + koopzegelvelden exact uitgelijnd */
+#receiptModal .receipt-amount-meta{margin-top:10px;padding:12px 14px;border-radius:12px;background:#f7f4fa;gap:5px;font-size:12px;color:#514a55}
+#receiptModal .receipt-control-title{font-weight:900;color:#6737b4;font-size:13px;margin-bottom:3px}
+#receiptModal .receipt-control-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+#receiptModal .receipt-control-row span{min-width:0}
+#receiptModal .receipt-control-row strong{white-space:nowrap;color:#302a34}
+#receiptModal .receipt-control-total{margin-top:4px;padding-top:7px;border-top:1px solid #dfd7e5;font-weight:900}
+#receiptModal .receipt-control-status{margin-top:5px;padding:8px 10px;border-radius:9px;font-weight:900;text-align:center}
+#receiptModal .receipt-control-status.ok{background:#edf7f0;color:#287a45}
+#receiptModal .receipt-control-status.warning{background:#fff1ee;color:#a13b2d}
+#receiptModal .receipt-control-status.neutral{background:#f0ecf4;color:#6d6472}
+#receiptModal .receipt-koopzegels-fields{align-items:stretch}
+#receiptModal .receipt-koopzegels-fields .field{display:grid;grid-template-rows:22px auto;align-content:start;min-width:0;margin:0}
+#receiptModal .receipt-koopzegels-fields .field>label{display:flex;align-items:flex-end;min-width:0;line-height:1.05;white-space:nowrap;margin:0}
+#receiptModal .receipt-koopzegels-fields .money-input{width:100%;min-width:0;margin-top:4px}
+@media(max-width:650px){
+  #receiptModal .receipt-koopzegels-fields{gap:8px}
+  #receiptModal .receipt-koopzegels-fields .field{grid-template-rows:20px auto}
+  #receiptModal .receipt-koopzegels-fields .field>label{font-size:clamp(10px,3.2vw,13px);letter-spacing:-.15px}
+  #receiptModal .receipt-koopzegels-fields .money-input{padding-left:10px;padding-right:10px}
+  #receiptModal .receipt-koopzegels-fields .money-input span{font-size:1rem}
+  #receiptModal .receipt-koopzegels-fields .money-input input{font-size:1rem;min-width:0}
+}
