@@ -309,7 +309,22 @@ function render() {
   else renderManage(arr);
 }
 
-window.setHuizeChaosPage = nextPage => { page = nextPage; localStorage.setItem('household-page', page); sessionStorage.setItem('hc-household-page-session', page); render(); };
+function setPage(nextPage,{fromHistory=false}={}) {
+  if(!['list','stock','hutsel','insight','manage'].includes(nextPage)) return;
+  const changed=page!==nextPage;
+  page=nextPage;
+  localStorage.setItem('household-page',page);
+  sessionStorage.setItem('hc-household-page-session',page);
+  if(changed&&!fromHistory) history.pushState({hcPage:page},'',location.href);
+  render();
+}
+window.setHuizeChaosPage = nextPage => setPage(nextPage);
+window.addEventListener('popstate',e=>{
+  const openModal=document.querySelector('.modal.open');
+  if(openModal){openModal.classList.remove('open');openModal.setAttribute('aria-hidden','true');return;}
+  if(e.state?.hcPage){setPage(e.state.hcPage,{fromHistory:true});return;}
+});
+if(!history.state?.hcPage) history.replaceState({...history.state,hcPage:page},'',location.href);
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
@@ -445,13 +460,12 @@ function initApp() {
 
   document.querySelectorAll('.tab').forEach(button => {
     button.onclick = () => {
-      page = button.dataset.page;
-      if (page === 'hutsel') {
+      const nextPage=button.dataset.page;
+      if (nextPage === 'hutsel') {
         search.value = '';
         updateSearchClear();
       }
-      localStorage.setItem('household-page', page); sessionStorage.setItem('hc-household-page-session', page);
-      render();
+      setPage(nextPage);
     };
   });
 
