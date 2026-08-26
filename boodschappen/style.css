@@ -563,3 +563,7 @@ body:has(#receiptModal.open){overflow:hidden}
 /* V1.3.141 - bedrag opent rekenscherm + mobiel 0,00 direct vervangbaar */
 .receipt-line-price-calc{cursor:pointer;background:#fffdfd}
 .receipt-line-price-calc:focus{outline:2px solid rgba(103,55,180,.24);outline-offset:1px}
+
+/* V1.3.142 - cache-busting mobiel: actuele boncontrole-assets direct laden */
+
+/* V1.3.144 - boninvoer: expliciet opslaan, backdrop bewaart concept, geen-actie berekent normaalbedrag */

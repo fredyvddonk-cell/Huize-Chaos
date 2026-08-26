@@ -53,12 +53,16 @@ const currentAccountName = document.getElementById('currentAccountName');
 const closeAccountButton = document.getElementById('closeAccount');
 const accountSignOutButton = document.getElementById('accountSignOut');
 
+// Publieke, eenvoudige authstatus voor de niet-module scripts.
+window.huizeChaosAuthState = 'checking';
+
 function setSyncStatus(text, state = '') {
   syncStatus.textContent = text;
   syncStatus.className = `sync-status ${state}`.trim();
 }
 
 function showSignedOut() {
+  window.huizeChaosAuthState = 'signed-out';
   gate.classList.remove('ready');
   message.textContent = 'Meld je aan met Google om de gezamenlijke lijst te openen.';
   signInButton.hidden = false;
@@ -68,6 +72,7 @@ function showSignedOut() {
 }
 
 function showWaiting(currentUser) {
+  window.huizeChaosAuthState = 'waiting-access';
   gate.classList.remove('ready');
   message.textContent = `Je bent aangemeld als ${currentUser.displayName || currentUser.email || 'Google-gebruiker'}, maar hebt nog geen toegang.`;
   signInButton.hidden = true;
@@ -318,6 +323,11 @@ async function syncNow() {
 }
 
 function scheduleSync() {
+  // Lokale wijzigingen mogen de aanmeldstatus niet overschrijven.
+  if (!user) {
+    syncPending = false;
+    return;
+  }
   syncPending = true;
   if (!cloudReady || applyingCloud) {
     setSyncStatus('Wacht op synchronisatie…');
@@ -408,6 +418,7 @@ async function openFor(currentUser) {
     return;
   }
   role = member.data().role === 'owner' ? 'owner' : 'member';
+  window.huizeChaosAuthState = 'signed-in';
   gate.classList.add('ready');
   signOutButton.hidden = false;
   window.applyHuizeChaosRole(role);
@@ -437,14 +448,40 @@ window.addEventListener('focus', () => {
 });
 
 signInButton.addEventListener('click', async () => {
+  signInButton.disabled = true;
+  message.textContent = 'Aanmelden met Google…';
+  setSyncStatus('Aanmelden…');
+  window.huizeChaosAuthState = 'signing-in';
   try {
+    const mobileOrInstalled =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(pointer: coarse)').matches ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Redirect is op mobiele browsers/PWA's betrouwbaarder dan een popup.
+    if (mobileOrInstalled) {
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+
     await signInWithPopup(auth, provider);
   } catch (error) {
     if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-      await signInWithRedirect(auth, provider);
+      try {
+        await signInWithRedirect(auth, provider);
+        return;
+      } catch (redirectError) {
+        console.error(redirectError);
+        showSignedOut();
+        message.textContent = `Aanmelden is niet gelukt: ${redirectError.message}`;
+      }
     } else {
+      console.error(error);
+      showSignedOut();
       message.textContent = `Aanmelden is niet gelukt: ${error.message}`;
     }
+  } finally {
+    signInButton.disabled = false;
   }
 });
 
@@ -481,8 +518,13 @@ document.getElementById('copyAccessUid').addEventListener('click', async () => {
   document.getElementById('copyAccessUid').textContent = 'Gekopieerd';
 });
 
-getRedirectResult(auth).catch(console.error);
+getRedirectResult(auth).catch(error => {
+  console.error(error);
+  showSignedOut();
+  message.textContent = `Aanmelden is niet gelukt: ${error.message}`;
+});
 onAuthStateChanged(auth, currentUser => {
+  window.huizeChaosAuthState = 'checking';
   user = currentUser;
   cloudReady = false;
   stopItems?.();

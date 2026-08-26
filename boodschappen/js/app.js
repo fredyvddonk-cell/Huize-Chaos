@@ -104,7 +104,10 @@ function save() {
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));
   const status = document.getElementById('syncStatus');
-  if (status) {
+  // Toon alleen een synchronisatiewachtrij wanneer er echt een aangemelde
+  // cloudsessie is. Anders kon mobiel na lokaal opslaan ten onrechte
+  // 'Wacht op synchronisatie…' tonen terwijl de gebruiker nog moest inloggen.
+  if (status && window.huizeChaosAuthState === 'signed-in') {
     status.textContent = 'Wacht op synchronisatie…';
     status.className = 'sync-status';
   }
