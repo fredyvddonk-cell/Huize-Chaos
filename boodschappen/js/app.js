@@ -182,7 +182,7 @@ function refreshCats() {
   $('#categories').innerHTML = categories.map(x => `<option value="${esc(x)}">`).join('');
 }
 
-// V1.3.151 - één geschiedenislaag voor alle schermen en modals in Boodschappen.
+// V1.3.152 - één geschiedenislaag voor alle schermen en modals in Boodschappen.
 // Hierdoor sluit de Android/browser-terugknop eerst het huidige venster en pas daarna de pagina.
 let huizeChaosHistoryState = history.state || {};
 function openHuizeChaosOverlay(name, element) {

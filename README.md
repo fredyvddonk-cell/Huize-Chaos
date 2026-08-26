@@ -1,4 +1,15 @@
-## V1.3.151
+## V1.3.152
+
+- Nieuw onderdeel **Aankopen** voor grotere of duurzame aankopen, los van de gewone boodschappenbonnen.
+- Per aankoop: product, aankoopdatum, winkel/webshop, bedrag, categorie, garantie, merk/type, serienummer en notitie.
+- Aankoopbon of garantiebewijs als foto of PDF bewaren bij de aankoop. Foto's worden automatisch verkleind voor synchronisatie.
+- Aankopen zoeken op product, winkel, categorie, merk/type, serienummer en notitie.
+- Filteren op categorie en sorteren op datum, bedrag of productnaam.
+- Garantie-einddatum zichtbaar, met extra melding wanneer de garantie is verlopen of binnen 60 dagen afloopt.
+- Aankopen synchroniseren via Firebase voor leden van Huize Chaos.
+- Terugknop werkt binnen toevoegen, wijzigen en aankoopdetails.
+
+## V1.3.152
 
 - Terugknop op Android/browser werkt nu consequent binnen Huize Chaos.
 - In Boodschappen sluit Terug eerst het actieve venster, zoals product wijzigen, verwijderen, Hutsel Frutsel, diepvries, account en bonvensters.
@@ -7,7 +18,7 @@
 - In Feestdagen & gelegenheden sluit Terug eerst details of wijzigen en keert daarna terug naar de lijst.
 - In Mijn notities sluit Terug eerst de geopende notitie.
 - In Auto navigeert Terug tussen de geopende tabbladen voordat Huize Chaos wordt verlaten.
-- Cache- en versieverwijzingen bijgewerkt naar V1.3.151.
+- Cache- en versieverwijzingen bijgewerkt naar V1.3.152.
 
 ## V1.3.149
 
