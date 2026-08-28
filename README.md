@@ -1,4 +1,11 @@
-# Huize Chaos V1.3.158
+# Huize Chaos V1.3.159
+
+## V1.3.159
+- Alleen huishoudtaken met herhaling Twee keer per jaar of Ieder jaar hebben een paarse +.
+- Deze taken verschijnen zonder extra kop of aanduiding tussen de bestaande taken op Vandaag.
+- Ze tellen mee in de bestaande voortgang van het blok Taken.
+- Na afronden begint de nieuwe termijn vanaf die week en verschijnt de taak na zes maanden of één jaar automatisch opnieuw.
+- Korter terugkerende huishoudtaken blijven onder Huishouden.
 
 ## V1.3.158
 - Winkel en categorie bij Boodschap wijzigen zijn keuzemenu's met de bestaande waarden.
