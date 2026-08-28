@@ -1,4 +1,15 @@
-# Huize Chaos V1.3.153
+# Huize Chaos V1.3.154
+
+## V1.3.154
+- Terugkerende checklists toegevoegd aan de Gezinsplanner.
+- Instelbaar: startdatum, dagelijkse/wekelijkse/2-wekelijkse/4-wekelijkse/maandelijkse/kwartaal-/jaarherhaling en hoeveel dagen vooraf tonen.
+- Instelbaar toonmoment: ochtend, middag of avond.
+- Checklist verschijnt op Vandaag als Huize Chaos-kaart met paarse kop, witte inhoud en turquoise afsluiting.
+- Afvinken wordt per herhaling bewaard; na afronden begint de volgende herhaling leeg.
+- Beheer toegevoegd onder Routines, inclusief wijzigen, verwijderen en een herhaling overslaan.
+- Firebase-sync uitgebreid zodat checklists met het gezin synchroniseren.
+
+## V1.3.153
 
 - Opslaan van **Aankopen** gerepareerd: gebruikt nu de bestaande toegestane synchronisatie-opslag en blijft via `kind: largePurchase` gescheiden van boodschappen.
 - Boodschappen-categorieën worden niet meer gebruikt bij grotere aankopen.

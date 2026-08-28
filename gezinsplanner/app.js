@@ -134,6 +134,22 @@ let plannerHistoryReady=false;
 
 const els={date:document.getElementById('todayDate'),wastePanel:document.getElementById('wasteReminderPanel'),wasteTitle:document.getElementById('wasteReminderTitle'),wasteText:document.getElementById('wasteReminderText'),appointments:document.getElementById('appointmentList'),appointmentSearch:document.getElementById('appointmentSearch'),appointmentSearchStatus:document.getElementById('appointmentSearchStatus'),clearAppointmentSearch:document.getElementById('clearAppointmentSearch'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),participants:document.getElementById('entryParticipants'),schoolTask:document.getElementById('entrySchoolTask'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),participantsField:document.getElementById('participantsField'),schoolTaskField:document.getElementById('schoolTaskField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterYear:document.getElementById('rosterYear'),rosterPeriod:document.getElementById('rosterPeriod'),rosterPeriodRange:document.getElementById('rosterPeriodRange'),rosterWeekTabs:document.getElementById('rosterWeekTabs'),rosterDays:document.getElementById('rosterDays')};
 
+const checklistEls={
+  section:document.getElementById('recurringChecklistSection'),
+  today:document.getElementById('recurringChecklistToday'),
+  library:document.getElementById('recurringChecklistLibrary'),
+  modal:document.getElementById('checklistModal'),
+  form:document.getElementById('checklistForm'),
+  id:document.getElementById('checklistId'),
+  title:document.getElementById('checklistTitle'),
+  startDate:document.getElementById('checklistStartDate'),
+  repeat:document.getElementById('checklistRepeat'),
+  showBefore:document.getElementById('checklistShowBefore'),
+  showMoment:document.getElementById('checklistShowMoment'),
+  tasks:document.getElementById('checklistTasks'),
+  modalTitle:document.getElementById('checklistModalTitle')
+};
+
 seedCarPlanning();
 seedHouseholdPlanning();
 seedOldCarDeadline();
@@ -146,7 +162,7 @@ document.querySelectorAll('[data-add]').forEach(button=>button.addEventListener(
 document.querySelectorAll('[data-type]').forEach(button=>button.addEventListener('click',()=>setType(button.dataset.type)));
 document.getElementById('cancelEntry').addEventListener('click',closeModal);
 els.modal.addEventListener('click',event=>{if(event.target===els.modal)closeModal()});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeModal();closeDeleteModal()}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeModal();closeChecklistModal();closeDeleteModal()}});
 els.form.addEventListener('submit',saveEntry);
 els.hasDeadline.addEventListener('change',()=>{els.deadlineField.hidden=!els.hasDeadline.checked;if(!els.hasDeadline.checked)els.deadline.value='' });
 els.school.addEventListener('change',()=>{if(els.school.checked){els.private.checked=true;els.category.value='';document.querySelectorAll('[data-shift]').forEach(item=>item.classList.remove('active'))}els.private.disabled=els.school.checked});
@@ -157,6 +173,10 @@ document.getElementById('openHouseholdFromTasks').addEventListener('click',()=>s
 document.getElementById('openHouseholdFromTime')?.addEventListener('click',()=>showPlannerPage('household'));
 els.wastePanel.addEventListener('click',shareWasteReminder);
 els.wastePanel.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();shareWasteReminder()}});
+document.getElementById('openChecklistModal')?.addEventListener('click',()=>openChecklistModal());
+document.getElementById('cancelChecklist')?.addEventListener('click',()=>closeChecklistModal());
+checklistEls.modal?.addEventListener('click',event=>{if(event.target===checklistEls.modal)closeChecklistModal()});
+checklistEls.form?.addEventListener('submit',saveRecurringChecklist);
 document.getElementById('openRoster').addEventListener('click',openRosterModal);
 const fourWeekModal=document.getElementById('fourWeekModal');
 document.getElementById('openFourWeek').addEventListener('click',openFourWeekModal);
@@ -399,6 +419,57 @@ function bindHouseholdActions(){
   document.querySelectorAll('[data-house-subtask]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.houseSubtask);if(!item)return;setHouseholdCompletion(item,input.checked);persist();renderHousehold()}));
   document.querySelectorAll('[data-house-block]').forEach(input=>input.addEventListener('change',()=>{const block=HOUSEHOLD_BLOCKS.find(item=>item.id===input.dataset.houseBlock);if(!block)return;block.taskIds.map(id=>entries.find(entry=>entry.id===id)).filter(Boolean).forEach(item=>setHouseholdCompletion(item,input.checked));persist();renderHousehold()}));
 }
+function checklistItems(){return entries.filter(item=>item.type==='checklist')}
+function checklistRepeatLabel(value){return ({daily:'Iedere dag',weekly:'Iedere week',biweekly:'Iedere 2 weken',fourweekly:'Iedere 4 weken',monthly:'Iedere maand',quarterly:'Ieder kwartaal',yearly:'Ieder jaar'})[value]||value}
+function checklistMomentLabel(value){return ({morning:'ochtend',afternoon:'middag',evening:'avond'})[value]||'avond'}
+function checklistMomentHour(value){return ({morning:6,afternoon:12,evening:18})[value]??18}
+function checklistDate(value){return new Date(`${value}T12:00:00`)}
+function daysInMonth(year,month){return new Date(year,month+1,0).getDate()}
+function addChecklistMonths(date,months){const base=new Date(date);const day=base.getDate();const targetMonth=base.getMonth()+months;const year=base.getFullYear()+Math.floor(targetMonth/12);const month=((targetMonth%12)+12)%12;return new Date(year,month,Math.min(day,daysInMonth(year,month)),12)}
+function addChecklistOccurrence(date,repeat){const next=new Date(date);if(repeat==='daily')next.setDate(next.getDate()+1);else if(repeat==='weekly')next.setDate(next.getDate()+7);else if(repeat==='biweekly')next.setDate(next.getDate()+14);else if(repeat==='fourweekly')next.setDate(next.getDate()+28);else if(repeat==='monthly')return addChecklistMonths(next,1);else if(repeat==='quarterly')return addChecklistMonths(next,3);else if(repeat==='yearly')return addChecklistMonths(next,12);else next.setDate(next.getDate()+7);return next}
+function checklistOccurrencePair(item,targetKey=todayKey()){
+  const target=checklistDate(targetKey);let current=checklistDate(item.date);if(Number.isNaN(current.getTime()))return {previous:null,next:null};
+  if(current>target)return {previous:null,next:localDateKey(current)};
+  let previous=current;let guard=0;
+  while(guard++<5000){const upcoming=addChecklistOccurrence(previous,item.repeat);if(upcoming>target)return {previous:localDateKey(previous),next:localDateKey(upcoming)};previous=upcoming}
+  return {previous:localDateKey(previous),next:null};
+}
+function checklistState(item,occurrence){item.checklistStates=item.checklistStates&&typeof item.checklistStates==='object'?item.checklistStates:{};const raw=item.checklistStates[occurrence]||{};return {checked:Array.isArray(raw.checked)?raw.checked:[],completed:Boolean(raw.completed)}}
+function checklistSkipped(item,occurrence){return Array.isArray(item.skippedOccurrences)&&item.skippedOccurrences.includes(occurrence)}
+function checklistOccurrenceDone(item,occurrence){return !occurrence||checklistSkipped(item,occurrence)||checklistState(item,occurrence).completed}
+function daysBetween(a,b){return Math.round((checklistDate(b)-checklistDate(a))/86400000)}
+function visibleChecklistOccurrence(item){
+  const today=todayKey();const pair=checklistOccurrencePair(item,today);
+  if(pair.previous&&!checklistOccurrenceDone(item,pair.previous))return pair.previous;
+  const next=pair.next||(pair.previous&&item.repeat==='daily'?localDateKey(addChecklistOccurrence(checklistDate(pair.previous),item.repeat)):null);if(!next)return null;
+  const showBefore=Math.max(0,Number(item.showBeforeDays||0));const until=daysBetween(today,next);if(until<0||until>showBefore)return null;
+  if(until===showBefore&&showBefore>0&&new Date().getHours()<checklistMomentHour(item.showMoment))return null;
+  if(until===0&&showBefore===0&&new Date().getHours()<checklistMomentHour(item.showMoment))return null;
+  return checklistOccurrenceDone(item,next)?null:next;
+}
+function checklistDateLabel(value){const label=new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeric',month:'long'}).format(checklistDate(value));return label.charAt(0).toUpperCase()+label.slice(1)}
+function checklistIntro(occurrence){const difference=daysBetween(todayKey(),occurrence);if(difference<0)return `Nog niet afgerond · gepland voor ${checklistDateLabel(occurrence)}`;if(difference===0)return 'Vandaag is deze checklist aan de beurt.';if(difference===1)return 'Morgen is deze checklist aan de beurt.';return `Over ${difference} dagen is deze checklist aan de beurt.`}
+function renderRecurringChecklistCard(item,occurrence){const state=checklistState(item,occurrence);const tasks=Array.isArray(item.checklistTasks)?item.checklistTasks:[];const checked=new Set(state.checked.map(Number));return `<article class="hc-checklist-card" data-checklist-card="${escapeHtml(item.id)}"><header><span>HUIZE CHAOS</span><h3>${escapeHtml(item.title)}</h3></header><div class="hc-checklist-body"><strong class="hc-checklist-date">${escapeHtml(checklistDateLabel(occurrence))}</strong><p>${escapeHtml(checklistIntro(occurrence))}</p><div class="hc-checklist-tasks">${tasks.map((task,index)=>`<label class="hc-checklist-task${checked.has(index)?' done':''}"><input type="checkbox" data-checklist-check="${escapeHtml(item.id)}" data-occurrence="${occurrence}" data-task-index="${index}" ${checked.has(index)?'checked':''}><span>${escapeHtml(task)}</span></label>`).join('')}</div><div class="hc-checklist-actions"><button type="button" class="secondary" data-checklist-edit="${escapeHtml(item.id)}">Wijzigen</button><button type="button" class="secondary" data-checklist-skip="${escapeHtml(item.id)}" data-occurrence="${occurrence}">Deze keer overslaan</button></div></div><footer><i></i><span>Een beetje orde in de chaos.</span></footer></article>`}
+function renderRecurringChecklistLibrary(){
+  if(!checklistEls.library)return;const items=checklistItems().sort((a,b)=>a.title.localeCompare(b.title,'nl'));
+  checklistEls.library.innerHTML=items.length?items.map(item=>`<article class="checklist-library-item"><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(checklistRepeatLabel(item.repeat))} · vanaf ${escapeHtml(checklistDateLabel(item.date))} · ${Number(item.showBeforeDays||0)===0?'op de dag zelf':`${Number(item.showBeforeDays)} ${Number(item.showBeforeDays)===1?'dag':'dagen'} ervoor`} (${escapeHtml(checklistMomentLabel(item.showMoment))})</small><small>${Array.isArray(item.checklistTasks)?item.checklistTasks.length:0} taken</small></div><div class="item-actions"><button class="icon-button" type="button" data-checklist-edit="${escapeHtml(item.id)}" aria-label="Checklist wijzigen">✎</button><button class="icon-button delete" type="button" data-checklist-delete="${escapeHtml(item.id)}" aria-label="Checklist verwijderen">×</button></div></article>`).join(''):'<div class="empty">Nog geen terugkerende checklists</div>';
+}
+function renderRecurringChecklists(){
+  if(!checklistEls.today)return;const due=checklistItems().map(item=>({item,occurrence:visibleChecklistOccurrence(item)})).filter(row=>row.occurrence).sort((a,b)=>a.occurrence.localeCompare(b.occurrence));
+  checklistEls.section.hidden=!due.length;checklistEls.today.innerHTML=due.map(row=>renderRecurringChecklistCard(row.item,row.occurrence)).join('');renderRecurringChecklistLibrary();bindRecurringChecklistActions();
+}
+function bindRecurringChecklistActions(){
+  document.querySelectorAll('[data-checklist-check]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.checklistCheck&&entry.type==='checklist');if(!item)return;const occurrence=input.dataset.occurrence;const state=checklistState(item,occurrence);const index=Number(input.dataset.taskIndex);const checked=new Set(state.checked.map(Number));input.checked?checked.add(index):checked.delete(index);const total=Array.isArray(item.checklistTasks)?item.checklistTasks.length:0;item.checklistStates[occurrence]={checked:[...checked].sort((a,b)=>a-b),completed:total>0&&checked.size>=total};persist();renderRecurringChecklists()}));
+  document.querySelectorAll('[data-checklist-edit]').forEach(button=>button.addEventListener('click',()=>{const item=entries.find(entry=>entry.id===button.dataset.checklistEdit&&entry.type==='checklist');if(item)openChecklistModal(item)}));
+  document.querySelectorAll('[data-checklist-delete]').forEach(button=>button.addEventListener('click',()=>{const item=entries.find(entry=>entry.id===button.dataset.checklistDelete&&entry.type==='checklist');if(!item)return;if(confirm(`Checklist ‘${item.title}’ verwijderen?`)){entries=entries.filter(entry=>entry.id!==item.id);persist();render()}}));
+  document.querySelectorAll('[data-checklist-skip]').forEach(button=>button.addEventListener('click',()=>{const item=entries.find(entry=>entry.id===button.dataset.checklistSkip&&entry.type==='checklist');if(!item)return;const occurrence=button.dataset.occurrence;if(confirm(`‘${item.title}’ deze keer overslaan?`)){item.skippedOccurrences=[...new Set([...(item.skippedOccurrences||[]),occurrence])];persist();render()}}));
+}
+function openChecklistModal(item=null){
+  if(!checklistEls.modal)return;checklistEls.form.reset();checklistEls.id.value=item?.id||'';checklistEls.title.value=item?.title||'';checklistEls.startDate.value=item?.date||todayKey();checklistEls.repeat.value=item?.repeat||'fourweekly';checklistEls.showBefore.value=String(item?.showBeforeDays??1);checklistEls.showMoment.value=item?.showMoment||'evening';checklistEls.tasks.value=Array.isArray(item?.checklistTasks)?item.checklistTasks.join('\n'):'';checklistEls.modalTitle.textContent=item?'Terugkerende checklist wijzigen':'Terugkerende checklist toevoegen';openPlannerOverlay('checklist',checklistEls.modal);setTimeout(()=>checklistEls.title.focus(),0)
+}
+function closeChecklistModal(direct=false){if(checklistEls.modal)closePlannerOverlay('checklist',checklistEls.modal,direct)}
+function saveRecurringChecklist(event){event.preventDefault();const title=checklistEls.title.value.trim();const tasks=checklistEls.tasks.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);if(!title||!tasks.length)return;const existing=entries.find(entry=>entry.id===checklistEls.id.value&&entry.type==='checklist');const value={id:existing?.id||uid(),cloudId:existing?.cloudId||'',cloudScope:existing?.cloudScope||'',type:'checklist',date:checklistEls.startDate.value,deadline:'',urgent:false,category:'',visibility:'shared',title,time:'',endTime:'',personUid:'',personName:'',participants:[],note:'',done:false,repeat:checklistEls.repeat.value,completedPeriods:[],checklistTasks:tasks,showBeforeDays:Number(checklistEls.showBefore.value||0),showMoment:checklistEls.showMoment.value,checklistStates:existing?.checklistStates||{},skippedOccurrences:existing?.skippedOccurrences||[],createdAt:existing?.createdAt||Date.now()};if(existing)entries=entries.map(entry=>entry.id===existing.id?value:entry);else entries.push(value);persist();closeChecklistModal();render();showPlannerPage('routines')}
+
 function deadlineInfo(item){
   if(!item.deadline)return '';
   const today=new Date(`${todayKey()}T12:00:00`);const deadline=new Date(`${item.deadline}T12:00:00`);const days=Math.round((deadline-today)/86400000);
@@ -408,10 +479,10 @@ function deadlineInfo(item){
   return `<span class="deadline-badge">Nog ${days} dagen</span>`;
 }
 
-function render(){renderStudy();
+function render(){renderStudy();renderRecurringChecklists();
   const appointments=todayEntries('appointment').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   const tasks=todayEntries('task').sort((a,b)=>Number(isTaskDone(a))-Number(isTaskDone(b))||Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||a.createdAt-b.createdAt);const big=currentBigChore();if(big)tasks.push(big);
-  const futureEntries=entries.filter(item=>item.date>todayKey()).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const futureEntries=entries.filter(item=>(item.type==='appointment'||item.type==='task')&&item.date>todayKey()).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));
   const weekEndKey=currentWeekEndKey();
   const upcoming=futureEntries.filter(item=>item.category!=='work'||item.date<=weekEndKey);const bigUpcoming=upcomingBigChore();if(bigUpcoming)upcoming.push(bigUpcoming);upcoming.sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));upcoming.splice(8);
   const query=els.appointmentSearch.value.trim().toLocaleLowerCase('nl-NL');
