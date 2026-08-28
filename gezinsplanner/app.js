@@ -357,8 +357,10 @@ function periodKey(repeat,date=new Date()){
 function isTaskDone(item){return item.repeat&&item.repeat!=='none'?(item.completedPeriods||[]).includes(periodKey(item.repeat)):Boolean(item.done)}
 function currentWeekStartKey(){const date=new Date();const day=date.getDay()||7;date.setDate(date.getDate()-day+1);return localDateKey(date)}
 function nextHouseholdDueDate(repeat){const date=new Date(`${currentWeekStartKey()}T12:00:00`);if(repeat==='biweekly')date.setDate(date.getDate()+14);else if(repeat==='monthly')date.setMonth(date.getMonth()+1);else if(repeat==='bimonthly')date.setMonth(date.getMonth()+2);else if(repeat==='quarterly')date.setMonth(date.getMonth()+3);else if(repeat==='semiannual')date.setMonth(date.getMonth()+6);else if(repeat==='yearly')date.setFullYear(date.getFullYear()+1);return localDateKey(date)}
-function householdTaskAddedThisWeek(item){return item.manualWeekKey===periodKey('weekly')}
+function householdTaskAddedThisWeek(item){return Boolean(item.manualWeekKey)}
 function householdTaskDueFromCompletion(item){return Boolean(item.nextDueDate&&item.nextDueDate<=currentWeekEndKey())}
+function todayHouseholdItems(){return householdItems().filter(item=>LONG_HOUSEHOLD_REPEATS.has(item.repeat)&&!isTaskDone(item)&&(householdTaskAddedThisWeek(item)||householdTaskDueFromCompletion(item)))}
+function renderTodayHouseholdTasks(){const section=document.getElementById('weeklyHouseholdSection'),list=document.getElementById('weeklyHouseholdTasks');if(!section||!list)return;const items=todayHouseholdItems();section.hidden=!items.length;list.innerHTML=items.map(item=>renderHouseholdTask(item)).join('');list.querySelectorAll('[data-house-check]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.houseCheck);if(!item)return;setHouseholdCompletion(item,input.checked);persist();render();renderHousehold()}))}
 function todayEntries(type){return entries.filter(item=>{if(item.type!==type||item.category==='household')return false;if(type==='appointment')return item.date===todayKey();if(item.date>todayKey())return false;if(item.repeat&&item.repeat!=='none')return true;return item.date===todayKey()||!isTaskDone(item)})}
 function householdItems(){return entries.filter(item=>item.type==='task'&&item.category==='household')}
 function householdTimeState(){
@@ -428,7 +430,7 @@ function bindHouseholdActions(){
   document.querySelectorAll('[data-house-check]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.houseCheck);if(!item)return;if(input.checked&&item.id==='house-floor-whole-house'){completeHousehold(item);return}setHouseholdCompletion(item,input.checked);persist();renderHousehold()}));
   document.querySelectorAll('[data-house-subtask]').forEach(input=>input.addEventListener('change',()=>{const item=entries.find(entry=>entry.id===input.dataset.houseSubtask);if(!item)return;setHouseholdCompletion(item,input.checked);persist();renderHousehold()}));
   document.querySelectorAll('[data-house-block]').forEach(input=>input.addEventListener('change',()=>{const block=HOUSEHOLD_BLOCKS.find(item=>item.id===input.dataset.houseBlock);if(!block)return;block.taskIds.map(id=>entries.find(entry=>entry.id===id)).filter(Boolean).forEach(item=>setHouseholdCompletion(item,input.checked));persist();renderHousehold()}));
-  document.querySelectorAll('[data-house-add]').forEach(button=>button.addEventListener('click',()=>{const item=entries.find(entry=>entry.id===button.dataset.houseAdd);if(!item||!LONG_HOUSEHOLD_REPEATS.has(item.repeat))return;item.manualWeekKey=periodKey('weekly');persist();renderHousehold()}));
+  document.querySelectorAll('[data-house-add]').forEach(button=>button.addEventListener('click',()=>{const item=entries.find(entry=>entry.id===button.dataset.houseAdd);if(!item||!LONG_HOUSEHOLD_REPEATS.has(item.repeat))return;if(isTaskDone(item))setHouseholdCompletion(item,false);item.manualWeekKey=periodKey('weekly');persist();render();renderHousehold()}));
 }
 function checklistItems(){return entries.filter(item=>item.type==='checklist')}
 function checklistRepeatLabel(value){return ({daily:'Iedere dag',weekly:'Iedere week',biweekly:'Iedere 2 weken',fourweekly:'Iedere 4 weken',monthly:'Iedere maand',quarterly:'Ieder kwartaal',yearly:'Ieder jaar'})[value]||value}
@@ -491,7 +493,7 @@ function deadlineInfo(item){
   return `<span class="deadline-badge">Nog ${days} dagen</span>`;
 }
 
-function render(){renderHouseholdTime();renderStudy();renderRecurringChecklists();
+function render(){renderHouseholdTime();renderStudy();renderRecurringChecklists();renderTodayHouseholdTasks();
   const appointments=todayEntries('appointment').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   const tasks=todayEntries('task').sort((a,b)=>Number(isTaskDone(a))-Number(isTaskDone(b))||Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||a.createdAt-b.createdAt);const big=currentBigChore();if(big)tasks.push(big);
   const futureEntries=entries.filter(item=>(item.type==='appointment'||item.type==='task')&&item.date>todayKey()).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));

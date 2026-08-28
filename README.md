@@ -1,4 +1,10 @@
-# Huize Chaos V1.3.157
+# Huize Chaos V1.3.158
+
+## V1.3.158
+- Winkel en categorie bij Boodschap wijzigen zijn keuzemenu's met de bestaande waarden.
+- Huishoudtaken die via de paarse + worden gekozen, verschijnen op Vandaag onder Taken van deze week.
+- Een gekozen weektaak blijft daar staan tot deze is afgevinkt.
+- Na afvinken begint de volgende herhaaltermijn vanaf de week van afronding.
 
 ## V1.3.157
 - Initialisatiefout van de Gezinsplanner opgelost door de huishoudtimerstatus vóór de eerste weergave beschikbaar te maken.
