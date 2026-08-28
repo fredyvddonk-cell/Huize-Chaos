@@ -1,4 +1,11 @@
-# Huize Chaos V1.3.154
+# Huize Chaos V1.3.156
+
+## V1.3.156
+- Vandaag toont Huishoudtijd en Studietijd als compacte timers; tik op de tijd om te starten of pauzeren.
+- Uitleg en instellingen van beide timers staan onder Routines.
+- Taken bij een terugkerende checklist zijn optioneel; een herinnering zonder taken kan met Afronden worden gesloten.
+- Taken in de huishoudelijke Takenbibliotheek vanaf iedere twee weken hebben een paarse + om ze aan Deze week toe te voegen.
+- De volgende looptijd van zo'n taak begint in de week waarin de taak wordt afgevinkt.
 
 ## V1.3.154
 - Terugkerende checklists toegevoegd aan de Gezinsplanner.
