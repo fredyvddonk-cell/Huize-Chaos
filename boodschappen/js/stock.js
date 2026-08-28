@@ -33,9 +33,12 @@ function renderStock(arr) {
       const collapsed = !expandedStockCategories.has(categoryName);
       const bulkStatus = ['Kruiden', 'Bewaarproducten (voorraad)'].includes(categoryName) ? `<div class="stock-bulk-status"><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','In huis')">Alles in huis</button><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','Niet in huis')">Alles niet in huis</button></div>` : '';
       return `<section class="stock-category ${collapsed ? 'collapsed' : ''}">
-        <button class="shopping-group-head stock-category-head" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')">
-          <span>${esc(categoryName)}</span><span class="chevron">⌄</span>
-        </button>
+        <div class="shopping-group-head stock-category-head">
+          <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')" aria-label="${esc(categoryName)} ${collapsed ? 'uitklappen' : 'inklappen'}">
+            <span>${esc(categoryName)}</span><span class="chevron">⌄</span>
+          </button>
+          <button class="stock-category-add" type="button" onclick="openStockCategoryAdd('${encodeURIComponent(categoryName)}')" aria-label="Product toevoegen aan ${esc(categoryName)}" title="Product toevoegen">+</button>
+        </div>
         <div class="shopping-group-body">${bulkStatus}${items.map(x => `
           <div class="item stock-item">
             <div class="main" onclick="editProduct(${x.id})" role="button" tabindex="0">
@@ -52,6 +55,11 @@ function renderStock(arr) {
       </section>`;
     }).join('');
 }
+
+window.openStockCategoryAdd = encodedCategory => {
+  openModal(null);
+  $('#category').value = decodeURIComponent(encodedCategory);
+};
 
 
 window.setCategoryStockStatus = (encodedCategory, status) => {
