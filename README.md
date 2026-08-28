@@ -1,4 +1,8 @@
-# Huize Chaos V1.3.156
+# Huize Chaos V1.3.157
+
+## V1.3.157
+- Initialisatiefout van de Gezinsplanner opgelost door de huishoudtimerstatus vóór de eerste weergave beschikbaar te maken.
+- Aanmelden en synchroniseren werken hierdoor weer bij het openen van de Gezinsplanner.
 
 ## V1.3.156
 - Vandaag toont Huishoudtijd en Studietijd als compacte timers; tik op de tijd om te starten of pauzeren.
