@@ -1,4 +1,13 @@
-# Huize Chaos V1.3.159
+# Huize Chaos V1.3.160
+
+## V1.3.160
+- Maand-, tweemaandelijkse en kwartaaltaken eenmalig over weken verdeeld op basis van zwaarte.
+- Herhaling rekent voortaan met 4, 8, 13, 26 en 52 weken vanaf de week van afronding.
+- Maximaal 8 extra geplande huishoudtaken tegelijk; achterstallige taken hebben voorrang en overloop schuift een week door.
+- Alleen de taken voor deze week worden onder Huishouden getoond en openstaande taken blijven staan.
+- Een geplande taak kan met Volgende week handmatig worden doorgeschoven.
+- Vanuit de Takenbibliotheek kan een maand-, tweemaandelijkse of kwartaaltaak eenmalig naar deze week worden gehaald zolang er ruimte is.
+- De Takenbibliotheek toont bij deze taken in welke week ze gepland staan.
 
 ## V1.3.159
 - Alleen huishoudtaken met herhaling Twee keer per jaar of Ieder jaar hebben een paarse +.

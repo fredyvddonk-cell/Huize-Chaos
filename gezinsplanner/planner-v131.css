@@ -69,6 +69,7 @@
 .household-extra-actions{margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
 .household-extra-actions span{width:100%;font-size:12px;font-weight:800;color:var(--muted)}
 .household-extra-actions button{border:1px solid #d9cde8;border-radius:10px;padding:8px 12px;background:#fff;color:var(--purple-dark);font-weight:800}
+.house-postpone{align-self:center;border:0;background:transparent;color:var(--purple-dark);padding:5px 2px;font-size:11px;font-weight:750;text-decoration:underline;cursor:pointer}
 
 /* V1.3.131 - dagelijkse blokken op Vandaag */
 .study-time-panel{background:linear-gradient(180deg,#f1fbfa,#fff)}
