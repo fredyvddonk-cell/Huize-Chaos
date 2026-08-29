@@ -1,6 +1,6 @@
-# Huize Chaos V1.3.161
+# Huize Chaos V1.3.162
 
-## V1.3.161
+## V1.3.162
 
 - Het weekmenu synchroniseert nu via de gezamenlijke cloudopslag tussen telefoon en laptop.
 - Bij de eerste synchronisatie worden bestaande weekplannen op plan-ID samengevoegd, zodat unieke plannen van beide apparaten behouden blijven.
