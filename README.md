@@ -1,13 +1,27 @@
-# Huize Chaos V1.4.1
+# Huize Chaos V1.4.2
+
+## V1.4.2
+
+- Dubbele kassabonnen worden bij opslaan en bij gedeelde bonnen geblokkeerd.
+- Een dubbele klik op Opslaan kan niet meer twee bonnen aanmaken.
+- Bestaande identieke bonnen worden in het overzicht automatisch ontdubbeld.
+- Een net opgeslagen bon blijft lokaal staan totdat de Inzicht-gegevens naar Firebase zijn geschreven; een oudere cloudsnapshot kan hem niet meer direct overschrijven.
+- Bon-ID's gebruiken UUID's in plaats van alleen het tijdstip.
 
 ## V1.4.1
+
+- Synchronisatie tussen telefoon en laptop versterkt.
+- Actuele Firebase-gegevens worden opnieuw opgehaald wanneer Huize Chaos weer actief wordt.
+- Extra synchronisatiecontrole voor Voorraad, Boodschappen, Inzicht, Weekmenu en Gezinsplanner.
+- Cache vernieuwd zodat apparaten dezelfde programmaversie gebruiken.
+
+## V1.4.0
 
 - Nieuwe V1.4-reeks gestart; V1.3.164 blijft de laatste V1.3-versie.
 - Geopende invoer- en wijzigschermen krijgen niet meer automatisch focus op een tekstveld.
 - Het scherm kan daardoor eerst als overzicht worden bekeken zonder dat het toetsenbord verschijnt.
 - Het toetsenbord verschijnt pas wanneer de gebruiker zelf een invoerveld aantikt.
 - Expliciete zoek- en invoeracties blijven hun normale focusgedrag behouden.
-
 
 ## V1.3.164
 

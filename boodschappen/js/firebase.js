@@ -37,6 +37,7 @@ let stopOccasions = null;
 let insightCloudReady = false;
 let applyingInsightCloud = false;
 let insightSyncTimer = 0;
+let insightLocalDirty = false;
 let inventoryCloudReady = false;
 let applyingInventoryCloud = false;
 let inventorySyncTimer = 0;
@@ -428,10 +429,14 @@ async function syncInsightNow() {
   if (!user || !role || !insightCloudReady || applyingInsightCloud || !window.getHuizeChaosInsightData) return;
   const data = window.getHuizeChaosInsightData();
   await setDoc(insightRef, { ...data, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: true });
+  insightLocalDirty = false;
 }
 
+
 function scheduleInsightSync() {
-  if (!insightCloudReady || applyingInsightCloud) return;
+  if (applyingInsightCloud) return;
+  insightLocalDirty = true;
+  if (!insightCloudReady) return;
   clearTimeout(insightSyncTimer);
   insightSyncTimer = setTimeout(() => syncInsightNow().catch(error => {
     console.error('Synchronisatie Inzicht mislukt', error);
@@ -455,7 +460,7 @@ async function startInsightSync() {
   }
   insightCloudReady = true;
   stopInsight = onSnapshot(insightRef, snapshot => {
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists() || insightLocalDirty) return;
     applyingInsightCloud = true;
     window.applyHuizeChaosInsightData?.(snapshot.data());
     applyingInsightCloud = false;

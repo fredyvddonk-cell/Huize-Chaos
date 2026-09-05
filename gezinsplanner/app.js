@@ -284,7 +284,7 @@ function openPlannerOverlay(name,element){
   if(!element||element.classList.contains('open'))return;
   history.pushState({...history.state,hcPlannerPage:currentPlannerPage(),hcPlannerOverlay:name},'',location.href);
   element.classList.add('open');element.setAttribute('aria-hidden','false');
-  // V1.4.1 - laat een geopend formulier eerst als overzicht zien, zonder toetsenbord.
+  // V1.4.2 - laat een geopend formulier eerst als overzicht zien, zonder toetsenbord.
   element.setAttribute('tabindex','-1');try{element.focus({preventScroll:true})}catch(_){element.focus()}
 }
 function closePlannerOverlay(name,element,direct=false){

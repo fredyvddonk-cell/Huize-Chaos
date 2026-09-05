@@ -199,7 +199,7 @@ function openHuizeChaosOverlay(name, element) {
     element.classList.add('open');
     element.setAttribute('aria-hidden', 'false');
   }
-  // V1.4.1 - open schermen neutraal: geen invoerveld krijgt automatisch focus.
+  // V1.4.2 - open schermen neutraal: geen invoerveld krijgt automatisch focus.
   element.setAttribute('tabindex', '-1');
   try { element.focus({preventScroll:true}); } catch (_) { element.focus(); }
 }
