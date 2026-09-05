@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { collection, doc, getDoc, getFirestore, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import { collection, doc, getDoc, getDocsFromServer, getFirestore, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
 const app=initializeApp(firebaseConfig,'planner');
@@ -109,6 +109,20 @@ async function openFor(currentUser){
     throw error;
   }
 }
+
+async function refreshPlannerFromServer(){
+  if(!user || !role || document.visibilityState === 'hidden') return;
+  const sharedSnap=await getDocsFromServer(sharedRef);
+  sharedItems=new Map();sharedSnap.forEach(item=>sharedItems.set(item.id,item.data()));sharedReady=true;
+  if(role==='owner'){
+    const privateSnap=await getDocsFromServer(privateRef);
+    privateItems=new Map();privateSnap.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;
+  }
+  applyCombined();
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPlannerFromServer().catch(syncError)});
+window.addEventListener('focus',()=>refreshPlannerFromServer().catch(syncError));
+
 function diagnosticText(error){
   const stage=error?.huizeChaosStage||'onbekende stap';
   const code=String(error?.code||'geen foutcode');

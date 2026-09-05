@@ -340,6 +340,25 @@ async function refreshItemsFromServer() {
   applySnapshot(snapshot);
 }
 
+
+async function refreshSharedStateFromServer(){
+  if(!user || !role || document.visibilityState === 'hidden') return;
+  const [inventorySnap, insightSnap, recipesSnap] = await Promise.all([
+    getDoc(inventoryRef), getDoc(insightRef), getDoc(recipesRef)
+  ]);
+  if(inventorySnap.exists() && Array.isArray(inventorySnap.data()?.products)){
+    mergeInventoryFromCloud(inventorySnap.data().products);
+  }
+  if(insightSnap.exists()){
+    applyingInsightCloud=true;
+    window.applyHuizeChaosInsightData?.(insightSnap.data());
+    applyingInsightCloud=false;
+  }
+  if(recipesSnap.exists() && Array.isArray(recipesSnap.data()?.weekPlans)){
+    applyRecipeWeekPlans(recipesSnap.data().weekPlans);
+  }
+}
+
 function startServerRefresh() {
   clearInterval(serverRefreshTimer);
   serverRefreshTimer = setInterval(() => {
@@ -501,10 +520,12 @@ async function openFor(currentUser) {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     refreshItemsFromServer().catch(error => console.error('Servercontrole boodschappen mislukt', error));
+    refreshSharedStateFromServer().catch(error => console.error('Servercontrole gedeelde gegevens mislukt', error));
   }
 });
 window.addEventListener('focus', () => {
   refreshItemsFromServer().catch(error => console.error('Servercontrole boodschappen mislukt', error));
+  refreshSharedStateFromServer().catch(error => console.error('Servercontrole gedeelde gegevens mislukt', error));
 });
 
 signInButton.addEventListener('click', async () => {

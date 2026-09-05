@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.0
+# Huize Chaos V1.4.1
 
-## V1.4.0
+## V1.4.1
 
 - Nieuwe V1.4-reeks gestart; V1.3.164 blijft de laatste V1.3-versie.
 - Geopende invoer- en wijzigschermen krijgen niet meer automatisch focus op een tekstveld.
