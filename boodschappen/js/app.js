@@ -245,6 +245,9 @@ function openModal(x = null, prefillName = '') {
   const showFixedProductChoice = page === 'list';
   fixedProductOption.hidden = !showFixedProductChoice;
   $('#fixedProduct').checked = showFixedProductChoice ? Boolean(x && !x.temporary) : true;
+  const deleteFromProduct = $('#deleteFromProduct');
+  deleteFromProduct.hidden = !(x && page === 'stock');
+  deleteFromProduct.dataset.productId = x?.id || '';
   openHuizeChaosOverlay('product-edit', $('#modal'));
   setTimeout(() => $('#productName').focus(), 50);
   const categoryInput = $('#category');
@@ -480,6 +483,10 @@ function initApp() {
     openModal(null, prefillName);
   };
   $('#cancel').onclick = closeModal;
+  $('#deleteFromProduct').onclick = () => {
+    const id = Number($('#deleteFromProduct').dataset.productId);
+    if (id) requestProductDelete(id, 'product');
+  };
   $('#modal').onclick = event => {
     if (event.target.id === 'modal') closeModal();
   };
@@ -497,6 +504,9 @@ function initApp() {
       product.done = false;
     } else {
       products = products.filter(x => x.id !== id);
+      if (Number($('#editId').value) === id) {
+        closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
+      }
     }
     closeProductDelete();
     save();

@@ -622,3 +622,6 @@ body.receipt-reordering{user-select:none;-webkit-user-select:none}
 .receipt-drag-handle{-webkit-touch-callout:none;overscroll-behavior:contain}
 body.receipt-reordering #receiptModal{touch-action:none}
 @media(max-width:850px){.receipt-drag-handle{width:36px!important;height:38px!important;font-size:22px}}
+
+/* V1.3.164 - verwijderen vanuit geopend voorraadproduct */
+.product-delete-button{margin-right:auto}

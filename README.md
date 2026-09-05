@@ -1,4 +1,16 @@
-# Huize Chaos V1.3.162
+# Huize Chaos V1.3.164
+
+## V1.3.164
+
+- Bij het openen van een product in **Voorraad** staat nu een knop **Verwijderen**.
+- Verwijderen gebruikt de bestaande bevestiging, zodat een product niet per ongeluk wordt gewist.
+- Alleen het geselecteerde voorraadproduct wordt definitief verwijderd uit Voorraad en Beheer.
+
+## V1.3.163
+
+- Bij **Uit voorraad recepten zoeken** kun je nu kiezen uit alle voedingsmiddelen die op **In huis** staan.
+- Huishouden, verzorging, huisdieren en keukenbenodigdheden worden niet als voedingsmiddel getoond.
+- Zoeken kan op productnaam en categorie.
 
 ## V1.3.162
 
