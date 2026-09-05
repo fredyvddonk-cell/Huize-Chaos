@@ -1,4 +1,13 @@
-# Huize Chaos V1.3.164
+# Huize Chaos V1.4.0
+
+## V1.4.0
+
+- Nieuwe V1.4-reeks gestart; V1.3.164 blijft de laatste V1.3-versie.
+- Geopende invoer- en wijzigschermen krijgen niet meer automatisch focus op een tekstveld.
+- Het scherm kan daardoor eerst als overzicht worden bekeken zonder dat het toetsenbord verschijnt.
+- Het toetsenbord verschijnt pas wanneer de gebruiker zelf een invoerveld aantikt.
+- Expliciete zoek- en invoeracties blijven hun normale focusgedrag behouden.
+
 
 ## V1.3.164
 

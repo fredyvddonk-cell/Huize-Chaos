@@ -199,6 +199,9 @@ function openHuizeChaosOverlay(name, element) {
     element.classList.add('open');
     element.setAttribute('aria-hidden', 'false');
   }
+  // V1.4.0 - open schermen neutraal: geen invoerveld krijgt automatisch focus.
+  element.setAttribute('tabindex', '-1');
+  try { element.focus({preventScroll:true}); } catch (_) { element.focus(); }
 }
 function closeHuizeChaosOverlayDirect(name, element = null) {
   const targets = element ? [element] : [...document.querySelectorAll(`[data-hc-overlay="${CSS.escape(name)}"]`)];
@@ -249,7 +252,6 @@ function openModal(x = null, prefillName = '') {
   deleteFromProduct.hidden = !(x && page === 'stock');
   deleteFromProduct.dataset.productId = x?.id || '';
   openHuizeChaosOverlay('product-edit', $('#modal'));
-  setTimeout(() => $('#productName').focus(), 50);
   const categoryInput = $('#category');
   categoryInput.onfocus = () => categoryInput.select();
   categoryInput.onclick = () => categoryInput.select();

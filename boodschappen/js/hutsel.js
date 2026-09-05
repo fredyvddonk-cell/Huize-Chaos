@@ -28,7 +28,6 @@ function openHutselModal(item=null) {
   const day = item?.useDate === tomorrowKey() ? 'tomorrow' : 'today';
   document.querySelector(`input[name="hutselDay"][value="${day}"]`).checked = true;
   window.openHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal'));
-  setTimeout(()=>$('#hutselName').focus(),50);
 }
 function closeHutselModal(){ window.closeHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal')); }
 
@@ -105,7 +104,6 @@ function openFreezerModal(item=null){
   $('#freezerDate').value=item?.frozenDate||localDateKey();
   $('#freezerNote').value=item?.note||'';
   window.openHuizeChaosOverlay?.('freezer-edit', $('#freezerModal'));
-  setTimeout(()=>$('#freezerName').focus(),50);
 }
 function closeFreezerModal(){window.closeHuizeChaosOverlay?.('freezer-edit', $('#freezerModal'));}
 function freezerHtml(q=''){

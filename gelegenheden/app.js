@@ -82,7 +82,7 @@ function openForm(e={},fromHistory=false){
   $('#eventPeople').value=e.people||'';
   $('#eventNote').value=e.note||'';
   if(occasionHistoryReady&&!fromHistory){const returnScreen=history.state?.hcOccasionScreen==='detail'?'detail':'list';history.pushState({...history.state,hcOccasionScreen:'form',hcOccasionId:String(e.id||''),hcOccasionReturn:returnScreen},'',location.href);}
-  if(!$('#eventDialog').open)$('#eventDialog').showModal()
+  if(!$('#eventDialog').open)$('#eventDialog').showModal();$('#eventDialog').setAttribute('tabindex','-1');$('#eventDialog').focus({preventScroll:true})
 }
 function closeEventForm(){if(history.state?.hcOccasionScreen==='form'){history.back();return}if($('#eventDialog').open)$('#eventDialog').close()}
 function closeOccasionDetail(){if(occasionDirectEvent&&history.state?.hcOccasionScreen==='detail'){occasionDirectEvent=false;history.replaceState({...history.state,hcOccasionScreen:'list',hcOccasionId:''},'',location.href);if($('#detailDialog').open)$('#detailDialog').close();activeEventId='';return}if(history.state?.hcOccasionScreen==='detail'){history.back();return}if($('#detailDialog').open)$('#detailDialog').close();activeEventId=''}
