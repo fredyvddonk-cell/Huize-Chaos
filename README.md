@@ -1,6 +1,13 @@
-# Huize Chaos V1.4.5
+# Huize Chaos V1.4.6
 
-## V1.4.5
+## Wijzigingen V1.4.6
+
+- **2e halve prijs** rekent nu de halve prijs van het tweede artikel naar beneden af op hele centen.
+- Voorbeeld: 6 × €7,99 met 2e halve prijs = 3 × (€7,99 + €3,99) = **€35,94**.
+- Bij verschillende prijzen wordt per paar het goedkoopste artikel gehalveerd en de actieprijs van dat artikel naar beneden afgerond.
+- In **Inzicht → Verdeling boodschappen** staan bedragen en percentages nu in vaste, rechts uitgelijnde kolommen met tabular numbers.
+
+## V1.4.6
 
 - Nieuwe kortingssoort **2e halve prijs** toegevoegd aan het rekenscherm van bonproducten.
 - De korting wordt per paar berekend op het goedkoopste artikel.
