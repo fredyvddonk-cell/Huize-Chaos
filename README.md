@@ -1,4 +1,10 @@
-# Huize Chaos V1.4.16
+# Huize Chaos V1.4.17
+
+## Bonregels: actieproduct en reguliere boodschappen netjes uitgelijnd
+- **Actieproduct** en **Niet meenemen in reguliere weekboodschappen** overlappen niet meer.
+- Op brede schermen staan beide keuzes rustig naast elkaar.
+- Op smallere schermen staan ze onder elkaar voor betere leesbaarheid.
+- De werking van beide vinkjes is ongewijzigd.
 
 ## Actieproducten visueel herkenbaar
 - Bij een bonproduct kan handmatig **Actieproduct** aan of uit worden gezet.
