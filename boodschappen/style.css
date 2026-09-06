@@ -625,3 +625,12 @@ body.receipt-reordering #receiptModal{touch-action:none}
 
 /* V1.3.164 - verwijderen vanuit geopend voorraadproduct */
 .product-delete-button{margin-right:auto}
+
+/* V1.4.3 - grotere voorraad-aankopen apart zichtbaar in weekinzicht */
+#receiptModal .receipt-regular-toggle{grid-column:2/-1;display:flex;align-items:center;gap:8px;margin:1px 0 3px;font-size:11px;color:#615b65;cursor:pointer}
+#receiptModal .receipt-regular-toggle input{width:17px;height:17px;flex:0 0 auto;accent-color:#8768b1}
+.insight-regular-week{display:grid;gap:6px;margin:10px 0 2px;padding:9px 10px;border-radius:10px;background:#f6f1fa;text-align:left}
+.insight-regular-week span{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.insight-regular-week small{font-size:11px;color:#655d6a}
+.insight-regular-week strong{font-size:13px;color:#3f3447}
+@media(max-width:850px){#receiptModal .receipt-regular-toggle{grid-column:2/5;grid-row:3;margin-top:2px}}
