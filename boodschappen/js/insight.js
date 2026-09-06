@@ -123,7 +123,12 @@ row.querySelector('.receipt-line-cat').addEventListener('change',e=>{e.target.da
 const priceInput=row.querySelector('.receipt-line-price');
 const openCalc=()=>{document.querySelectorAll('.receipt-product-row').forEach(r=>{if(r!==row){const other=r.querySelector('.receipt-line-calculator');if(other)other.hidden=true;delete r.dataset.bulkCalc}});delete row.dataset.bulkCalc;const box=row.querySelector('.receipt-line-calculator');box.hidden=false;prefillReceiptCalc(row);updateReceiptCalcUi(row);box.scrollIntoView({behavior:'smooth',block:'nearest'})};
 priceInput.addEventListener('click',openCalc);priceInput.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCalc()}});
-row.querySelectorAll('.receipt-line-calculator input,.receipt-line-calculator select').forEach(el=>el.addEventListener('input',()=>{applyReceiptCalc(row)}));
+row.querySelectorAll('.receipt-line-calculator input').forEach(el=>{
+  el.addEventListener('focus',()=>setTimeout(()=>el.select(),0));
+  el.addEventListener('click',()=>el.select());
+  el.addEventListener('input',()=>{applyReceiptCalc(row)});
+});
+row.querySelectorAll('.receipt-line-calculator select').forEach(el=>el.addEventListener('input',()=>{applyReceiptCalc(row)}));
 row.querySelector('.receipt-calc-done')?.addEventListener('click',()=>{if(row.dataset.bulkCalc==='1'){applyReceiptCalc(row);delete row.dataset.bulkCalc}else applyReceiptCalc(row);const box=row.querySelector('.receipt-line-calculator');if(box)box.hidden=true;priceInput.focus()});
 const dragHandle=row.querySelector('.receipt-drag-handle');
 let receiptDragging=false,receiptDragPointerId=null;

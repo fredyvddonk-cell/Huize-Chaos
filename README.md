@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.3
+# Huize Chaos V1.4.4
 
-## V1.4.3
+## V1.4.4
 - In bonregels kan een boodschappenproduct worden gemarkeerd als **Niet meenemen in reguliere weekboodschappen**.
 - Het werkelijke boodschappenbedrag blijft volledig meetellen.
 - In weekweergave toont Inzicht daarnaast **Grotere voorraad-aankopen** en **Reguliere weekboodschappen**.
