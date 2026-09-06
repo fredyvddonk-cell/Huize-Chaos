@@ -9,9 +9,12 @@ const occasionSyncStatus=document.querySelector('#occasionSyncStatus');
 function setOccasionSyncStatus(t){if(occasionSyncStatus)occasionSyncStatus.textContent=t}
 
 const KEY='huize-chaos-occasions-v1';
+const WISH_KEY='huize-chaos-wishlists-v1';
 let activeEventId='';
+let mainScreen=localStorage.getItem('hc-occasions-screen')==='wishlists'?'wishlists':'events';
 let occasionHistoryReady=false,occasionDirectEvent=false;
 let events=JSON.parse(localStorage.getItem(KEY)||'[]');
+let wishlists=JSON.parse(localStorage.getItem(WISH_KEY)||'[]');
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
@@ -43,7 +46,12 @@ function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep
   return {...m,recipeBaseServings:base,servings:selected,ingredients:(m.ingredients||[]).map(i=>({...i,baseQty:i.baseQty??i.qty??'',enabled:i.enabled!==false}))};
 });e.shopping=e.shopping||[];if(typeof e.shoppingCreated!=='boolean')e.shoppingCreated=e.shopping.length>0;e.evaluation=e.evaluation||'';return e}
 events=events.map(normalizeEvent);
-function save(){localStorage.setItem(KEY,JSON.stringify(events));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
+function currentUserName(){return String(occasionUser?.displayName||occasionUser?.email||'').split(/[ @]/)[0].trim()}
+function personKey(v){return String(v||'').trim().toLowerCase().split(/[\s@._-]+/)[0]}
+function samePerson(a,b){const ka=personKey(a),kb=personKey(b);return Boolean(ka&&kb&&ka===kb)}
+function migrateEventWishlists(){let changed=false;for(const e of events){normalizeEvent(e);for(const x of (e.wishlist||[])){const w={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),owner:String(x.owner||'Onbekend').trim()||'Onbekend',text:String(x.text||'').trim(),price:x.price||'',link:x.shop||x.link||'',variant:x.variant||'',memo:x.memo||'',image:x.image||'',status:x.status||'free',createdAt:Date.now()};if(w.text&&!wishlists.some(y=>samePerson(y.owner,w.owner)&&String(y.text||'').trim().toLowerCase()===w.text.toLowerCase()&&String(y.link||'')===String(w.link||'')))wishlists.push(w)}if((e.wishlist||[]).length){e.wishlist=[];changed=true}}if(changed){localStorage.setItem(KEY,JSON.stringify(events));localStorage.setItem(WISH_KEY,JSON.stringify(wishlists))}return changed}
+migrateEventWishlists();
+function save(){localStorage.setItem(KEY,JSON.stringify(events));localStorage.setItem(WISH_KEY,JSON.stringify(wishlists));window.dispatchEvent(new Event('huize-chaos-occasions-changed'));render();scheduleCloudSync()}
 function scheduleCloudSync(){if(!cloudReady||applyingCloud||!occasionUser)return;clearTimeout(syncTimer);setOccasionSyncStatus('Synchroniseren…');syncTimer=setTimeout(syncCloud,250)}
 async function syncOccasionToPlanner(e){
   if(!occasionUser||!e?.id)return;
@@ -61,17 +69,19 @@ async function syncOccasionToPlanner(e){
   },{merge:true});
 }
 async function syncAllOccasionsToPlanner(){if(!occasionUser)return;await Promise.all(events.map(syncOccasionToPlanner))}
-async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false});await syncAllOccasionsToPlanner();setOccasionSyncStatus('Gesynchroniseerd')}
-function initCloud(){onAuthStateChanged(auth,async u=>{occasionUser=u;if(!u){setOccasionSyncStatus('Alleen op dit apparaat');return}try{const snap=await getDoc(occasionRef);if(snap.exists()&&Array.isArray(snap.data().events)){applyingCloud=true;events=snap.data().events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render()}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(occasionRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data();if(!Array.isArray(d.events))return;applyingCloud=true;events=d.events.map(normalizeEvent);localStorage.setItem(KEY,JSON.stringify(events));applyingCloud=false;render();if(activeEventId&&events.some(e=>e.id===activeEventId))openDetail(activeEventId)},()=>{})}catch(err){console.warn('Synchronisatie gelegenheden niet beschikbaar',err);setOccasionSyncStatus('Alleen op dit apparaat')}})}
+async function syncCloud(){if(!occasionUser)return;await setDoc(occasionRef,{events,wishlists,updatedAt:serverTimestamp(),updatedBy:occasionUser.uid},{merge:false});await syncAllOccasionsToPlanner();setOccasionSyncStatus('Gesynchroniseerd')}
+function initCloud(){onAuthStateChanged(auth,async u=>{occasionUser=u;if(!u){setOccasionSyncStatus('Alleen op dit apparaat');render();return}try{const snap=await getDoc(occasionRef);if(snap.exists()){const d=snap.data();applyingCloud=true;if(Array.isArray(d.events))events=d.events.map(normalizeEvent);if(Array.isArray(d.wishlists))wishlists=d.wishlists;localStorage.setItem(KEY,JSON.stringify(events));localStorage.setItem(WISH_KEY,JSON.stringify(wishlists));migrateEventWishlists();applyingCloud=false;render()}cloudReady=true;await syncCloud();stopCloud?.();stopCloud=onSnapshot(occasionRef,snap=>{if(!snap.exists()||applyingCloud)return;const d=snap.data();if(!Array.isArray(d.events))return;applyingCloud=true;events=d.events.map(normalizeEvent);if(Array.isArray(d.wishlists))wishlists=d.wishlists;localStorage.setItem(KEY,JSON.stringify(events));localStorage.setItem(WISH_KEY,JSON.stringify(wishlists));migrateEventWishlists();applyingCloud=false;render();if(activeEventId&&events.some(e=>e.id===activeEventId))openDetail(activeEventId)},()=>{})}catch(err){console.warn('Synchronisatie gelegenheden niet beschikbaar',err);setOccasionSyncStatus('Alleen op dit apparaat')}})}
 function catTotals(e){return ['Eten','Hapjes','Dranken','Overig'].map(c=>[c,(e.items||[]).filter(x=>x.category===c).reduce((a,x)=>a+(+x.cost||0),0)])}
-function render(){
-  const list=$('#list');
+function wishStatusLabel(v){return({free:'Vrij',reserved:'Gereserveerd',bought:'Gekocht',wrapped:'Ingepakt'}[v]||'Vrij')}
+function centralWishRow(w){const me=currentUserName(),own=me&&samePerson(me,w.owner),href=/^https?:\/\//i.test(String(w.link||'').trim())?String(w.link||'').trim():'';return `<article class="central-wish-row">${w.image?`<button class="wish-image-button" type="button" onclick="openWishImage('${esc(w.id)}')"><img src="${esc(w.image)}" alt="Afbeelding van ${esc(w.text)}"></button>`:'<div class="wish-image-placeholder">🎁</div>'}<div class="central-wish-main"><div><strong>${esc(w.text||'')}</strong>${w.price?`<span class="wish-price">${money(String(w.price).replace(',','.'))}</span>`:''}</div>${w.variant?`<small>${esc(w.variant)}</small>`:''}${w.link?`<small>${href?`<a href="${esc(href)}" target="_blank" rel="noopener">Productlink openen ↗</a>`:esc(w.link)}</small>`:''}${w.memo?`<small>Memo: ${esc(w.memo)}</small>`:''}${!own&&me?`<label class="wish-status-label">Status<select onchange="updateCentralWishStatus('${esc(w.id)}',this.value)">${[['free','Vrij'],['reserved','Gereserveerd'],['bought','Gekocht'],['wrapped','Ingepakt']].map(([v,l])=>`<option value="${v}" ${w.status===v?'selected':''}>${l}</option>`).join('')}</select></label>`:''}</div><div class="central-wish-actions"><button type="button" onclick="editCentralWish('${esc(w.id)}')">Wijzigen</button><button type="button" class="danger" onclick="deleteCentralWish('${esc(w.id)}')">×</button></div></article>`}
+function renderWishlists(){const list=$('#list'),groups=new Map();wishlists.forEach(w=>{const owner=String(w.owner||'Onbekend').trim()||'Onbekend';if(!groups.has(owner))groups.set(owner,[]);groups.get(owner).push(w)});list.innerHTML=`<section class="wishlist-page"><div class="wishlist-intro"><h2>Verlanglijstjes</h2><p>Eén vaste verlanglijst per persoon. Een wens kan later voor een verjaardag, Sinterklaas of Kerst worden gekocht.</p></div>${[...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0],'nl')).map(([owner,rows])=>`<section class="central-wish-person"><h3>${esc(owner)}</h3>${rows.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(centralWishRow).join('')}</section>`).join('')||'<div class="empty"><h2>Nog geen wensen</h2><p>Voeg hieronder de eerste wens toe.</p></div>'}<section class="central-wish-add"><h3>Wens toevoegen</h3><div class="central-wish-form"><input id="centralWishOwner" placeholder="Voor wie?" value="${esc(currentUserName())}"><input id="centralWishText" placeholder="Cadeauwens"><input id="centralWishPrice" inputmode="decimal" placeholder="Richtprijs €"><input id="centralWishLink" placeholder="Productlink (optioneel)"><input id="centralWishVariant" placeholder="Maat, kleur of uitvoering"><textarea id="centralWishMemo" rows="2" placeholder="Memo (optioneel)"></textarea><label class="wish-file-label">Afbeelding (optioneel)<input id="centralWishImage" type="file" accept="image/*"></label><button class="primary" type="button" onclick="addCentralWish()">+ Wens toevoegen</button></div></section></section>`}
+function render(){const list=$('#list'),add=$('#addEvent'),eventsTab=$('#showEvents'),wishTab=$('#showWishlists');eventsTab?.classList.toggle('active',mainScreen==='events');wishTab?.classList.toggle('active',mainScreen==='wishlists');if(add)add.hidden=mainScreen==='wishlists';if(mainScreen==='wishlists'){renderWishlists();return}
   if(!events.length){list.innerHTML='<div class="empty"><h2>Nog geen gelegenheden</h2><p>Voeg een feestdag, verjaardag of andere gelegenheid toe.</p></div>';return}
   list.innerHTML=[...events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>{
     const total=(e.items||[]).reduce((a,x)=>a+(+x.cost||0),0);
     const openNeeds=(e.needs||[]).filter(x=>!x.done).length;
     const openPrep=(e.prep||[]).filter(x=>!x.done).length;
-    return `<article class="event"><div class="event-head"><div><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':'Aantal personen niet ingevuld'}</div></div><button onclick="openDetail('${e.id}')">Bekijken</button></div><div class="totals">${catTotals(e).filter(x=>x[1]).map(([c,n])=>`<span class="chip">${c}: <strong>${money(n)}</strong></span>`).join('')}<span class="chip">Totaal: <strong>${money(total)}</strong></span>${openNeeds?`<span class="chip accent">${openNeeds} nog nodig</span>`:''}${openPrep?`<span class="chip accent">${openPrep} voor te bereiden</span>`:''}${(e.wishlist||[]).length?`<span class="chip wish-chip">🎁 ${(e.wishlist||[]).length} wensen</span>`:''}</div></article>`
+    return `<article class="event"><div class="event-head"><div><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':'Aantal personen niet ingevuld'}</div></div><button onclick="openDetail('${e.id}')">Bekijken</button></div><div class="totals">${catTotals(e).filter(x=>x[1]).map(([c,n])=>`<span class="chip">${c}: <strong>${money(n)}</strong></span>`).join('')}<span class="chip">Totaal: <strong>${money(total)}</strong></span>${openNeeds?`<span class="chip accent">${openNeeds} nog nodig</span>`:''}${openPrep?`<span class="chip accent">${openPrep} voor te bereiden</span>`:''}</div></article>`
   }).join('')
 }
 function openForm(e={},fromHistory=false){
@@ -88,6 +98,8 @@ function closeEventForm(){if(history.state?.hcOccasionScreen==='form'){history.b
 function closeOccasionDetail(){if(occasionDirectEvent&&history.state?.hcOccasionScreen==='detail'){occasionDirectEvent=false;history.replaceState({...history.state,hcOccasionScreen:'list',hcOccasionId:''},'',location.href);if($('#detailDialog').open)$('#detailDialog').close();activeEventId='';return}if(history.state?.hcOccasionScreen==='detail'){history.back();return}if($('#detailDialog').open)$('#detailDialog').close();activeEventId=''}
 window.closeOccasionDetail=closeOccasionDetail;
 $('#addEvent').onclick=()=>openForm();
+$('#showEvents').onclick=()=>{mainScreen='events';localStorage.setItem('hc-occasions-screen',mainScreen);render()};
+$('#showWishlists').onclick=()=>{mainScreen='wishlists';localStorage.setItem('hc-occasions-screen',mainScreen);render()};
 $('#cancelEvent').onclick=closeEventForm;
 $('#eventDialog').addEventListener('cancel',ev=>{ev.preventDefault();closeEventForm()});
 $('#eventForm').onsubmit=ev=>{
@@ -138,20 +150,6 @@ window.openDetail=(id,fromHistory=false)=>{
       ${(e.shopping||[]).length?`<p class="meta">${e.shopping.filter(x=>!x.done).length} boodschappen gepland. Wil je iets vanwege een aanbieding eerder kopen, zet het dan op deze week.</p><div class="early-buy-list">${e.shopping.filter(x=>!x.done).map((x,i)=>`<div class="early-buy-row"><span>${esc(x.text)} ${x.qty?`<small>${esc(x.qty)}</small>`:''}</span><button onclick="buyNow(${i})">Nu kopen</button></div>`).join('')}</div>`:'<p class="meta empty-line">Nog geen boodschappen doorgestuurd.</p>'}
     </section>
 
-    <section class="occasion-section wishlist-section">
-      <div class="section-title"><div><h3>Verlanglijst</h3><p>Iedereen kan eigen wensen toevoegen. De verlanglijsten zijn zichtbaar voor de andere gezinsleden.</p></div></div>
-      <div class="wishlist-list">${wishlistHtml(e)}</div>
-      <div class="wishlist-add">
-        <input id="newWishOwner" placeholder="Voor wie?" value="${esc((occasionUser?.displayName||occasionUser?.email||'').split(/\s+/)[0]||'')}">
-        <input id="newWishText" placeholder="Cadeauwens">
-        <input id="newWishPrice" inputmode="decimal" placeholder="Richtprijs €">
-        <input id="newWishShop" placeholder="Winkel of link">
-        <input id="newWishVariant" placeholder="Maat, kleur of uitvoering">
-        <input id="newWishMemo" placeholder="Memo (optioneel)">
-        <button class="primary" onclick="addWish('${id}')">+ Wens toevoegen</button>
-      </div>
-    </section>
-
     <section class="occasion-section">
       <div class="section-title"><div><h3>Gekochte producten</h3><p>Leg achteraf vast hoeveel je kocht en of de hoeveelheid goed was.</p></div></div>
       <div id="items">${(e.items||[]).map((x,i)=>itemHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen producten toegevoegd.</p>'}</div>
@@ -193,6 +191,12 @@ window.addWish=id=>{const e=events.find(x=>String(x.id)===String(id));if(!e)retu
 window.editWish=i=>{const e=current(),x=e?.wishlist?.[i];if(!x)return;const owner=prompt('Voor wie?',x.owner||'');if(owner===null)return;const text=prompt('Cadeauwens',x.text||'');if(text===null)return;const price=prompt('Richtprijs',String(x.price||'').replace('.',','));if(price===null)return;const shop=prompt('Winkel of link',x.shop||'');if(shop===null)return;const variant=prompt('Maat, kleur of uitvoering',x.variant||'');if(variant===null)return;const memo=prompt('Memo',x.memo||'');if(memo===null)return;Object.assign(x,{owner:owner.trim(),text:text.trim(),price:price.trim().replace(',','.'),shop:shop.trim(),variant:variant.trim(),memo:memo.trim()});save();openDetail(e.id)};
 window.deleteWish=i=>{const e=current();if(!e?.wishlist?.[i])return;if(!confirm('Deze wens verwijderen?'))return;e.wishlist.splice(i,1);save();openDetail(e.id)};
 
+async function compressWishImage(file){if(!file)return '';return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(reader.error);reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('Afbeelding kon niet worden gelezen'));img.onload=()=>{const max=640,scale=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',.72))};img.src=reader.result};reader.readAsDataURL(file)})}
+window.addCentralWish=async()=>{const owner=$('#centralWishOwner')?.value.trim(),text=$('#centralWishText')?.value.trim();if(!owner||!text){alert('Vul voor wie de wens is en de cadeauwens in.');return}let image='';const file=$('#centralWishImage')?.files?.[0];if(file){try{image=await compressWishImage(file)}catch(_){alert('De afbeelding kon niet worden toegevoegd.');return}}wishlists.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),owner,text,price:$('#centralWishPrice')?.value.trim().replace(',','.')||'',link:$('#centralWishLink')?.value.trim()||'',variant:$('#centralWishVariant')?.value.trim()||'',memo:$('#centralWishMemo')?.value.trim()||'',image,status:'free',createdAt:Date.now()});save()};
+window.editCentralWish=id=>{const w=wishlists.find(x=>String(x.id)===String(id));if(!w)return;const owner=prompt('Voor wie?',w.owner||'');if(owner===null)return;const text=prompt('Cadeauwens',w.text||'');if(text===null)return;const price=prompt('Richtprijs',String(w.price||'').replace('.',','));if(price===null)return;const link=prompt('Productlink',w.link||'');if(link===null)return;const variant=prompt('Maat, kleur of uitvoering',w.variant||'');if(variant===null)return;const memo=prompt('Memo',w.memo||'');if(memo===null)return;Object.assign(w,{owner:owner.trim(),text:text.trim(),price:price.trim().replace(',','.'),link:link.trim(),variant:variant.trim(),memo:memo.trim()});save()};
+window.deleteCentralWish=id=>{const i=wishlists.findIndex(x=>String(x.id)===String(id));if(i<0||!confirm('Deze wens verwijderen?'))return;wishlists.splice(i,1);save()};
+window.updateCentralWishStatus=(id,status)=>{const w=wishlists.find(x=>String(x.id)===String(id));if(!w)return;w.status=['free','reserved','bought','wrapped'].includes(status)?status:'free';save()};
+window.openWishImage=id=>{const w=wishlists.find(x=>String(x.id)===String(id));if(!w?.image)return;const overlay=document.createElement('div');overlay.className='wish-image-overlay';overlay.innerHTML=`<button type="button" aria-label="Sluiten">×</button><img src="${esc(w.image)}" alt="${esc(w.text||'Verlanglijst afbeelding')}">`;overlay.onclick=e=>{if(e.target===overlay||e.target.tagName==='BUTTON')overlay.remove()};document.body.appendChild(overlay)};
 function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});refreshEventShoppingIfCreated(e);save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};

@@ -1,3 +1,10 @@
+# Huize Chaos V1.4.14
+
+## PWA-titel gecorrigeerd
+- De aparte PWA-manifestnaam van Voorraad & Boodschappen is gewijzigd van **Boodschappen** naar **Huize Chaos**.
+- Daardoor verschijnt **Boodschappen -** niet meer onterecht vóór titels van andere onderdelen.
+- De bestaande paginatitels blijven onderdeel-specifiek, zoals **Feestdagen & gelegenheden · Huize Chaos**.
+
 # Huize Chaos V1.4.10
 
 ## Wijzigingen V1.4.10
@@ -325,14 +332,23 @@ Nieuw:
 - Studieperiode staat standaard t/m 15 november 2026 en kan eerder worden beëindigd of worden verlengd met een nieuwe einddatum.
 - Nieuw onderdeel Mijn notities toegevoegd. Notities worden per eigenaar opgeslagen in privateNotes en zijn niet zichtbaar voor gezinsleden.
 
-### V1.4.12
+### V1.4.14
 - Versienummer en cache-busting van Voorraad & Boodschappen en overige modules gelijkgetrokken.
 - Bij Buiten reguliere boodschappen opent de specificatie nu door op het bedrag te tikken; de tekst “Bekijk specificatie” is verwijderd.
 
 
-### V1.4.12
+### V1.4.14
 - Feestdagen & gelegenheden: gezamenlijke **Verlanglijst** toegevoegd per gelegenheid.
 - Wensen worden per gezinslid gegroepeerd en via de bestaande huishoudsynchronisatie gedeeld.
 - Per wens kunnen cadeauwens, richtprijs, winkel/link, maat/kleur/uitvoering en memo worden opgeslagen.
 - Wensen kunnen worden gewijzigd en verwijderd.
 - Op het overzicht van een gelegenheid is zichtbaar hoeveel wensen zijn toegevoegd.
+
+### V1.4.14 – centrale verlanglijstjes en direct naar bonproduct
+- Verlanglijstjes zijn nu een apart onderdeel binnen Feestdagen & gelegenheden, niet meer gekoppeld aan één feestdag.
+- Eén centrale verlanglijst per persoon, bruikbaar voor verjaardag, Sinterklaas en Kerst.
+- Wensen ondersteunen richtprijs, productlink, maat/kleur/uitvoering, memo en een afbeelding.
+- Bestaande wensen uit gelegenheden worden automatisch naar de centrale verlanglijst gemigreerd.
+- Cadeaustatus is voor andere gezinsleden zichtbaar zonder te tonen wie iets gereserveerd of gekocht heeft; de eigenaar ziet deze status niet.
+- In Inzicht zijn producten in categoriespecificaties en Buiten reguliere boodschappen aanklikbaar.
+- Tikken op een product opent direct de juiste bon en scrollt naar de juiste productregel, die tijdelijk gemarkeerd wordt.

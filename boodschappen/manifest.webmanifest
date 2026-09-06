@@ -1,7 +1,7 @@
 {
-  "name": "Boodschappen",
-  "short_name": "Boodschappen",
-  "description": "Boodschappen- en voorraadapp",
+  "name": "Huize Chaos",
+  "short_name": "Huize Chaos",
+  "description": "Een beetje orde in de chaos.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
