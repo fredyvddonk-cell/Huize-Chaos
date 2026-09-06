@@ -1,10 +1,22 @@
-# Huize Chaos V1.4.4
+# Huize Chaos V1.4.5
+
+## V1.4.5
+
+- Nieuwe kortingssoort **2e halve prijs** toegevoegd aan het rekenscherm van bonproducten.
+- De korting wordt per paar berekend op het goedkoopste artikel.
+- Halve-prijskorting wordt **naar beneden afgerond op hele centen**. Voorbeeld: 50% van €3,99 geeft €1,99 korting.
+- In het rekenscherm achter het bedrag is een **Memo bij dit product** toegevoegd.
+- De productmemo wordt bij de bon opgeslagen en bij het bekijken van de bon weergegeven.
+- De functie **Niet meenemen in reguliere weekboodschappen** blijft behouden.
+- Bestaande bedragen in het rekenscherm kunnen direct worden overschreven doordat de waarde bij aanklikken wordt geselecteerd.
 
 ## V1.4.4
+
 - In bonregels kan een boodschappenproduct worden gemarkeerd als **Niet meenemen in reguliere weekboodschappen**.
 - Het werkelijke boodschappenbedrag blijft volledig meetellen.
 - In weekweergave toont Inzicht daarnaast **Grotere voorraad-aankopen** en **Reguliere weekboodschappen**.
-- Het verschil met het weekbudget gebruikt het reguliere weekbedrag, zodat incidentele grotere voorraadaankopen het normale weekbeeld niet vertekenen.
+- Het verschil met het weekbudget gebruikt het reguliere weekbedrag.
+- Bestaande waarden in bedragvelden van het rekenscherm worden bij aanklikken geselecteerd zodat ze direct overschreven kunnen worden.
 
 # Huize Chaos V1.4.2
 
