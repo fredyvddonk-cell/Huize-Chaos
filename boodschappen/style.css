@@ -649,6 +649,8 @@ body.receipt-reordering #receiptModal{touch-action:none}
 @media(max-width:420px){.insight-cat>span:last-child{grid-template-columns:82px 38px;column-gap:7px;min-width:127px}}
 
 /* V1.4.10 - specificatie buiten reguliere boodschappen */
-.insight-outside-regular-link{appearance:none;border:0;background:transparent;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;gap:.75rem;width:100%}
-.insight-outside-regular-link>span{display:flex;flex-direction:column;gap:.15rem}
-.insight-outside-regular-link>small{color:var(--muted,#7a7183);white-space:nowrap}
+.insight-outside-regular-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.insight-outside-regular-row>small{font-size:11px;color:#655d6a}
+.insight-outside-regular-amount{appearance:none;border:0;background:transparent;padding:2px 0;color:#3f3447;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.insight-outside-regular-amount:hover,.insight-outside-regular-amount:focus-visible{text-decoration:underline}
+.insight-outside-regular-amount span{margin-left:2px;color:#8768b1}

@@ -37,7 +37,7 @@ function formatScaledNumber(n,unit='',ingredient=''){
   return String(Number(v.toFixed(4))).replace('.',',');
 }
 function scaledQty(qty,factor,unit,ingredient){const n=parseQtyNumber(qty);return n==null?String(qty||''):formatScaledNumber(n*factor,unit,ingredient)}
-function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.menu=(e.menu||[]).map(m=>{
+function normalizeEvent(e){e.items=e.items||[];e.needs=e.needs||[];e.prep=e.prep||[];e.wishlist=e.wishlist||[];e.menu=(e.menu||[]).map(m=>{
   const base=String(m.recipeBaseServings||m.recipeServings||'');
   const selected=String(m.servings||m.recipeServings||'');
   return {...m,recipeBaseServings:base,servings:selected,ingredients:(m.ingredients||[]).map(i=>({...i,baseQty:i.baseQty??i.qty??'',enabled:i.enabled!==false}))};
@@ -71,7 +71,7 @@ function render(){
     const total=(e.items||[]).reduce((a,x)=>a+(+x.cost||0),0);
     const openNeeds=(e.needs||[]).filter(x=>!x.done).length;
     const openPrep=(e.prep||[]).filter(x=>!x.done).length;
-    return `<article class="event"><div class="event-head"><div><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':'Aantal personen niet ingevuld'}</div></div><button onclick="openDetail('${e.id}')">Bekijken</button></div><div class="totals">${catTotals(e).filter(x=>x[1]).map(([c,n])=>`<span class="chip">${c}: <strong>${money(n)}</strong></span>`).join('')}<span class="chip">Totaal: <strong>${money(total)}</strong></span>${openNeeds?`<span class="chip accent">${openNeeds} nog nodig</span>`:''}${openPrep?`<span class="chip accent">${openPrep} voor te bereiden</span>`:''}</div></article>`
+    return `<article class="event"><div class="event-head"><div><h2>${esc(e.name)}</h2><div class="meta">${esc(e.date?nlDate(e.date):'Geen datum')} · ${e.people?esc(e.people)+' personen':'Aantal personen niet ingevuld'}</div></div><button onclick="openDetail('${e.id}')">Bekijken</button></div><div class="totals">${catTotals(e).filter(x=>x[1]).map(([c,n])=>`<span class="chip">${c}: <strong>${money(n)}</strong></span>`).join('')}<span class="chip">Totaal: <strong>${money(total)}</strong></span>${openNeeds?`<span class="chip accent">${openNeeds} nog nodig</span>`:''}${openPrep?`<span class="chip accent">${openPrep} voor te bereiden</span>`:''}${(e.wishlist||[]).length?`<span class="chip wish-chip">🎁 ${(e.wishlist||[]).length} wensen</span>`:''}</div></article>`
   }).join('')
 }
 function openForm(e={},fromHistory=false){
@@ -138,6 +138,20 @@ window.openDetail=(id,fromHistory=false)=>{
       ${(e.shopping||[]).length?`<p class="meta">${e.shopping.filter(x=>!x.done).length} boodschappen gepland. Wil je iets vanwege een aanbieding eerder kopen, zet het dan op deze week.</p><div class="early-buy-list">${e.shopping.filter(x=>!x.done).map((x,i)=>`<div class="early-buy-row"><span>${esc(x.text)} ${x.qty?`<small>${esc(x.qty)}</small>`:''}</span><button onclick="buyNow(${i})">Nu kopen</button></div>`).join('')}</div>`:'<p class="meta empty-line">Nog geen boodschappen doorgestuurd.</p>'}
     </section>
 
+    <section class="occasion-section wishlist-section">
+      <div class="section-title"><div><h3>Verlanglijst</h3><p>Iedereen kan eigen wensen toevoegen. De verlanglijsten zijn zichtbaar voor de andere gezinsleden.</p></div></div>
+      <div class="wishlist-list">${wishlistHtml(e)}</div>
+      <div class="wishlist-add">
+        <input id="newWishOwner" placeholder="Voor wie?" value="${esc((occasionUser?.displayName||occasionUser?.email||'').split(/\s+/)[0]||'')}">
+        <input id="newWishText" placeholder="Cadeauwens">
+        <input id="newWishPrice" inputmode="decimal" placeholder="Richtprijs €">
+        <input id="newWishShop" placeholder="Winkel of link">
+        <input id="newWishVariant" placeholder="Maat, kleur of uitvoering">
+        <input id="newWishMemo" placeholder="Memo (optioneel)">
+        <button class="primary" onclick="addWish('${id}')">+ Wens toevoegen</button>
+      </div>
+    </section>
+
     <section class="occasion-section">
       <div class="section-title"><div><h3>Gekochte producten</h3><p>Leg achteraf vast hoeveel je kocht en of de hoeveelheid goed was.</p></div></div>
       <div id="items">${(e.items||[]).map((x,i)=>itemHtml(x,i)).join('')||'<p class="meta empty-line">Nog geen producten toegevoegd.</p>'}</div>
@@ -166,6 +180,19 @@ function itemHtml(x,i){
   const excess=x.result==='Te veel'?`<input class="excess" value="${esc(x.excessQty||'')}" placeholder="Aantal over" aria-label="Aantal over" onchange="updateItem(${i},'excessQty',this.value)">`:'';
   return `<div class="item-wrap"><div class="item"><input class="product" value="${esc(x.product)}" onchange="updateItem(${i},'product',this.value)"><select onchange="updateItem(${i},'category',this.value)">${['Eten','Hapjes','Dranken','Overig'].map(c=>`<option ${x.category===c?'selected':''}>${c}</option>`).join('')}</select><input value="${esc(x.qty||'')}" placeholder="Aantal" onchange="updateItem(${i},'qty',this.value)"><input value="${esc(x.cost||'')}" inputmode="decimal" placeholder="Kosten" onchange="updateItem(${i},'cost',this.value)"><select onchange="updateItemResult(${i},this.value)"><option value="">—</option>${['Te veel','Precies goed','Te weinig'].map(c=>`<option ${x.result===c?'selected':''}>${c}</option>`).join('')}</select><button class="del danger" onclick="deleteItem(${i})">×</button></div>${excess?`<div class="excess-row"><label>Aantal over${excess}</label></div>`:''}</div>`
 }
+function wishlistHtml(e){
+  const list=e.wishlist||[];if(!list.length)return '<p class="meta empty-line">Nog geen wensen toegevoegd.</p>';
+  const groups=new Map();list.forEach((x,i)=>{const owner=String(x.owner||'Onbekend').trim()||'Onbekend';if(!groups.has(owner))groups.set(owner,[]);groups.get(owner).push({x,i})});
+  return [...groups.entries()].map(([owner,rows])=>`<div class="wish-person"><h4>${esc(owner)}</h4>${rows.map(({x,i})=>wishRowHtml(x,i)).join('')}</div>`).join('');
+}
+function wishRowHtml(x,i){
+  const link=String(x.shop||'').trim();const href=/^https?:\/\//i.test(link)?link:'';
+  return `<div class="wish-row"><div class="wish-main"><strong>${esc(x.text||'')}</strong>${x.price?`<span class="wish-price">${money(String(x.price).replace(',','.'))}</span>`:''}${x.variant?`<small>${esc(x.variant)}</small>`:''}${link?`<small>${href?`<a href="${esc(href)}" target="_blank" rel="noopener">${esc(link)}</a>`:esc(link)}</small>`:''}${x.memo?`<small>Memo: ${esc(x.memo)}</small>`:''}</div><button type="button" onclick="editWish(${i})">Wijzigen</button><button class="del danger" type="button" onclick="deleteWish(${i})">×</button></div>`
+}
+window.addWish=id=>{const e=events.find(x=>String(x.id)===String(id));if(!e)return;normalizeEvent(e);const owner=$('#newWishOwner').value.trim(),text=$('#newWishText').value.trim();if(!owner||!text)return;e.wishlist.push({owner,text,price:$('#newWishPrice').value.trim().replace(',','.'),shop:$('#newWishShop').value.trim(),variant:$('#newWishVariant').value.trim(),memo:$('#newWishMemo').value.trim()});save();openDetail(id)};
+window.editWish=i=>{const e=current(),x=e?.wishlist?.[i];if(!x)return;const owner=prompt('Voor wie?',x.owner||'');if(owner===null)return;const text=prompt('Cadeauwens',x.text||'');if(text===null)return;const price=prompt('Richtprijs',String(x.price||'').replace('.',','));if(price===null)return;const shop=prompt('Winkel of link',x.shop||'');if(shop===null)return;const variant=prompt('Maat, kleur of uitvoering',x.variant||'');if(variant===null)return;const memo=prompt('Memo',x.memo||'');if(memo===null)return;Object.assign(x,{owner:owner.trim(),text:text.trim(),price:price.trim().replace(',','.'),shop:shop.trim(),variant:variant.trim(),memo:memo.trim()});save();openDetail(e.id)};
+window.deleteWish=i=>{const e=current();if(!e?.wishlist?.[i])return;if(!confirm('Deze wens verwijderen?'))return;e.wishlist.splice(i,1);save();openDetail(e.id)};
+
 function current(){return events.find(x=>x.id===activeEventId)}
 window.addMenu=id=>{const e=events.find(x=>x.id===id);const dish=$('#newMenuDish').value.trim();if(!e||!dish)return;normalizeEvent(e);e.menu.push({type:$('#newMenuType').value,dish,needed:$('#newMenuNeeded').value.trim()});refreshEventShoppingIfCreated(e);save();openDetail(id)};
 window.updateMenu=(i,k,v)=>{const e=current();if(!e)return;e.menu[i][k]=v;refreshEventShoppingIfCreated(e);save();openDetail(e.id)};
