@@ -1,3 +1,12 @@
+# Huize Chaos V1.4.16
+
+## Actieproducten visueel herkenbaar
+- Bij een bonproduct kan handmatig **Actieproduct** aan of uit worden gezet.
+- Bij een actieproduct krijgt alleen de prijs een afwijkende kleur.
+- Er wordt geen tekst **Actie** achter de prijs gezet.
+- Er is geen einddatum of automatische controle op de geldigheid van een actie.
+- De afwijkende prijskleur is zichtbaar in categoriespecificaties, buiten reguliere boodschappen, bonweergave en tijdens het wijzigen van de bonregel.
+
 # Huize Chaos V1.4.15
 
 ## PWA-titel gecorrigeerd
