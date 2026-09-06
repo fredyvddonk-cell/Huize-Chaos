@@ -626,7 +626,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 /* V1.3.164 - verwijderen vanuit geopend voorraadproduct */
 .product-delete-button{margin-right:auto}
 
-/* V1.4.6 - grotere voorraad-aankopen apart zichtbaar in weekinzicht */
+/* V1.4.7 - grotere voorraad-aankopen apart zichtbaar in weekinzicht */
 #receiptModal .receipt-regular-toggle{grid-column:2/-1;display:flex;align-items:center;gap:8px;margin:1px 0 3px;font-size:11px;color:#615b65;cursor:pointer}
 #receiptModal .receipt-regular-toggle input{width:17px;height:17px;flex:0 0 auto;accent-color:#8768b1}
 .insight-regular-week{display:grid;gap:6px;margin:10px 0 2px;padding:9px 10px;border-radius:10px;background:#f6f1fa;text-align:left}
@@ -636,13 +636,13 @@ body.receipt-reordering #receiptModal{touch-action:none}
 @media(max-width:850px){#receiptModal .receipt-regular-toggle{grid-column:2/5;grid-row:3;margin-top:2px}}
 
 
-/* V1.4.6 - 2e halve prijs en memo per bonproduct */
+/* V1.4.7 - 2e halve prijs en memo per bonproduct */
 .receipt-line-memo-wrap{grid-column:1/-1;display:block;margin-top:2px;font-size:10px;font-weight:800;color:#615b65}
 .receipt-line-memo{display:block;width:100%;margin-top:4px;border:1px solid #dcd3e2;border-radius:7px;padding:8px;font:inherit;font-size:12px;resize:vertical;background:#fff;box-sizing:border-box}
 .receipt-view-product-memo{display:block;margin-top:3px;font-style:italic}
 
 
-/* V1.4.6 - Verdeling boodschappen: vaste kolommen voor bedrag en percentage */
+/* V1.4.7 - Verdeling boodschappen: vaste kolommen voor bedrag en percentage */
 .insight-cat>span:last-child{display:grid;grid-template-columns:100px 44px;align-items:baseline;column-gap:10px;justify-content:end;min-width:154px;font-variant-numeric:tabular-nums}
 .insight-cat>span:last-child strong,.insight-cat>span:last-child small{text-align:right}
 .insight-cat>span:last-child small{margin-top:0}

@@ -1,13 +1,20 @@
-# Huize Chaos V1.4.6
+# Huize Chaos V1.4.7
 
-## Wijzigingen V1.4.6
+## Wijzigingen V1.4.7
+
+- In de **weekweergave** worden producten met **Niet meenemen in reguliere weekboodschappen** nu ook uit **Verdeling reguliere weekboodschappen** en de percentages gehaald.
+- Het werkelijke uitgegeven boodschappenbedrag blijft volledig zichtbaar.
+- De aanduiding **Grotere voorraad-aankopen** is verbreed naar **Buiten reguliere weekboodschappen**, zodat dit ook klopt voor bijvoorbeeld aankopen voor een dochter of andere eenmalige uitgaven.
+- Bij het openen van een categorie vanuit de weekverdeling worden gemarkeerde producten eveneens niet meer in die reguliere specificatie getoond.
+
+## Wijzigingen V1.4.7
 
 - **2e halve prijs** rekent nu de halve prijs van het tweede artikel naar beneden af op hele centen.
 - Voorbeeld: 6 × €7,99 met 2e halve prijs = 3 × (€7,99 + €3,99) = **€35,94**.
 - Bij verschillende prijzen wordt per paar het goedkoopste artikel gehalveerd en de actieprijs van dat artikel naar beneden afgerond.
 - In **Inzicht → Verdeling boodschappen** staan bedragen en percentages nu in vaste, rechts uitgelijnde kolommen met tabular numbers.
 
-## V1.4.6
+## V1.4.7
 
 - Nieuwe kortingssoort **2e halve prijs** toegevoegd aan het rekenscherm van bonproducten.
 - De korting wordt per paar berekend op het goedkoopste artikel.
