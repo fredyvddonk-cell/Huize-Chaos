@@ -1,4 +1,27 @@
-# Huize Chaos V1.4.17
+# Huize Chaos V1.4.19
+
+## V1.4.19 – zoeken op datum
+
+- In de Gezinsplanner staat bovenaan een nieuwe functie **Zoeken op datum**.
+- Kies een datum om direct te zien welke afspraken, werk-/schoolmomenten en taken op die dag gepland staan.
+- Taken waarvan de deadline op de gekozen datum valt, worden ook getoond.
+- Met **Vandaag** spring je direct naar de huidige datum.
+- Met **Wissen** sluit je het datumoverzicht weer.
+- Vanuit de zoekresultaten blijven wijzigen, verwijderen, delen en agenda-export beschikbaar waar dat van toepassing is.
+
+## V1.4.18 – voorraadkoppeling voor bonnen en recepten
+
+- Bonproducten kunnen aan een voorraadproduct worden gekoppeld.
+- De bonbenaming wordt als alias onthouden; dezelfde benaming wordt daarna automatisch herkend.
+- Bij een gekoppeld bonproduct kan de hoeveelheid die naar voorraad moet direct worden ingevuld. Bij aantaleenheden wordt het bon-aantal automatisch voorgesteld.
+- Het wijzigen van een bon corrigeert alleen het verschil en telt dezelfde aankoop niet opnieuw op.
+- Receptingrediënten kunnen bij het recept zelf aan een voorraadproduct worden gekoppeld.
+- Receptbenamingen worden als alias onthouden en hergebruikt.
+- In het weekmenu klapt een recept open en dicht door op de receptregel te tikken.
+- In de uitgeklapte weergave staat alleen een controleoverzicht van ingrediënten en actuele voorraad.
+- De voorraadcontrole vergelijkt waar mogelijk ook de benodigde en aanwezige hoeveelheid.
+- Ingrediënten wijzigen blijft bij het recept zelf.
+
 
 ## Bonregels: actieproduct en reguliere boodschappen netjes uitgelijnd
 - **Actieproduct** en **Niet meenemen in reguliere weekboodschappen** overlappen niet meer.

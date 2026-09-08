@@ -56,6 +56,7 @@ function migrateProduct(x) {
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
   product.temporary = Boolean(product.temporary);
   product.cloudPending = Boolean(product.cloudPending);
+  product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
 
   delete product.amount;
   return product;

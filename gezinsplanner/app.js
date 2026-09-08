@@ -138,7 +138,7 @@ let studyTimerInterval=null;
 let householdTimerInterval=null;
 let plannerHistoryReady=false;
 
-const els={date:document.getElementById('todayDate'),wastePanel:document.getElementById('wasteReminderPanel'),wasteTitle:document.getElementById('wasteReminderTitle'),wasteText:document.getElementById('wasteReminderText'),appointments:document.getElementById('appointmentList'),appointmentSearch:document.getElementById('appointmentSearch'),appointmentSearchStatus:document.getElementById('appointmentSearchStatus'),clearAppointmentSearch:document.getElementById('clearAppointmentSearch'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),participants:document.getElementById('entryParticipants'),schoolTask:document.getElementById('entrySchoolTask'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),participantsField:document.getElementById('participantsField'),schoolTaskField:document.getElementById('schoolTaskField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterYear:document.getElementById('rosterYear'),rosterPeriod:document.getElementById('rosterPeriod'),rosterPeriodRange:document.getElementById('rosterPeriodRange'),rosterWeekTabs:document.getElementById('rosterWeekTabs'),rosterDays:document.getElementById('rosterDays')};
+const els={date:document.getElementById('todayDate'),dateSearch:document.getElementById('plannerDateSearch'),dateSearchToday:document.getElementById('plannerDateToday'),dateSearchClear:document.getElementById('plannerDateClear'),dateSearchStatus:document.getElementById('plannerDateSearchStatus'),dateSearchResults:document.getElementById('plannerDateSearchResults'),wastePanel:document.getElementById('wasteReminderPanel'),wasteTitle:document.getElementById('wasteReminderTitle'),wasteText:document.getElementById('wasteReminderText'),appointments:document.getElementById('appointmentList'),appointmentSearch:document.getElementById('appointmentSearch'),appointmentSearchStatus:document.getElementById('appointmentSearchStatus'),clearAppointmentSearch:document.getElementById('clearAppointmentSearch'),tasks:document.getElementById('taskList'),progress:document.getElementById('taskProgress'),upcoming:document.getElementById('upcomingList'),routines:document.getElementById('routineList'),householdDue:document.getElementById('householdDueList'),householdLibrary:document.getElementById('householdLibrary'),todayPage:document.getElementById('todayPage'),routinesPage:document.getElementById('routinesPage'),householdPage:document.getElementById('householdPage'),modal:document.getElementById('entryModal'),form:document.getElementById('entryForm'),id:document.getElementById('entryId'),type:document.getElementById('entryType'),category:document.getElementById('entryCategory'),title:document.getElementById('entryTitle'),time:document.getElementById('entryTime'),endTime:document.getElementById('entryEndTime'),entryDate:document.getElementById('entryDate'),participants:document.getElementById('entryParticipants'),schoolTask:document.getElementById('entrySchoolTask'),hasDeadline:document.getElementById('entryHasDeadline'),deadline:document.getElementById('entryDeadline'),urgent:document.getElementById('entryUrgent'),private:document.getElementById('entryPrivate'),school:document.getElementById('entrySchool'),repeat:document.getElementById('entryRepeat'),note:document.getElementById('entryNote'),timeField:document.getElementById('timeField'),endTimeField:document.getElementById('endTimeField'),workQuickField:document.getElementById('workQuickField'),participantsField:document.getElementById('participantsField'),schoolTaskField:document.getElementById('schoolTaskField'),hasDeadlineField:document.getElementById('hasDeadlineField'),deadlineField:document.getElementById('deadlineField'),urgentField:document.getElementById('urgentField'),privateField:document.getElementById('privateField'),schoolField:document.getElementById('schoolField'),repeatField:document.getElementById('repeatField'),modalTitle:document.getElementById('modalTitle'),titleLabel:document.getElementById('titleLabel'),rosterModal:document.getElementById('rosterModal'),rosterForm:document.getElementById('rosterForm'),rosterYear:document.getElementById('rosterYear'),rosterPeriod:document.getElementById('rosterPeriod'),rosterPeriodRange:document.getElementById('rosterPeriodRange'),rosterWeekTabs:document.getElementById('rosterWeekTabs'),rosterDays:document.getElementById('rosterDays')};
 
 const checklistEls={
   section:document.getElementById('recurringChecklistSection'),
@@ -212,6 +212,9 @@ document.getElementById('confirmDelete').addEventListener('click',confirmDeleteE
 deleteModal.addEventListener('click',event=>{if(event.target===deleteModal)closeDeleteModal()});
 els.appointmentSearch.addEventListener('input',()=>{els.clearAppointmentSearch.hidden=!els.appointmentSearch.value;render()});
 els.clearAppointmentSearch.addEventListener('click',()=>{els.appointmentSearch.value='';els.clearAppointmentSearch.hidden=true;els.appointmentSearch.focus();render()});
+els.dateSearch?.addEventListener('change',renderDateSearch);
+els.dateSearchToday?.addEventListener('click',()=>{els.dateSearch.value=todayKey();renderDateSearch()});
+els.dateSearchClear?.addEventListener('click',()=>{els.dateSearch.value='';renderDateSearch()});
 document.getElementById('cancelRoster').addEventListener('click',closeRosterModal);
 document.getElementById('exportRoster').addEventListener('click',exportRosterCalendar);
 els.rosterModal.addEventListener('click',event=>{if(event.target===els.rosterModal)closeRosterModal()});
@@ -509,7 +512,39 @@ function deadlineInfo(item){
   return `<span class="deadline-badge">Nog ${days} dagen</span>`;
 }
 
-function render(){renderHouseholdTime();renderStudy();renderRecurringChecklists();
+function dateSearchLabel(value){if(!value)return '';const date=new Date(`${value}T12:00:00`);return new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(date)}
+function dateSearchItems(value){
+  if(!value)return [];
+  return entries.filter(item=>{
+    if(item.type==='appointment')return item.date===value;
+    if(item.type==='task'&&item.category!=='household')return item.date===value||item.deadline===value;
+    return false;
+  }).sort((a,b)=>{
+    const aOrder=a.type==='appointment'?0:1,bOrder=b.type==='appointment'?0:1;
+    return aOrder-bOrder||(a.time||'99:99').localeCompare(b.time||'99:99')||a.title.localeCompare(b.title,'nl');
+  });
+}
+function renderDateSearchItem(item,value){
+  const work=item.category==='work';
+  const typeLabel=item.type==='appointment'?(work?(item.title==='School'?'School':'Werk'):'Afspraak'):'Taak';
+  let meta='';
+  if(item.type==='appointment'&&item.time)meta=`${appointmentTime(item)} uur`;
+  if(item.type==='task'&&item.deadline===value&&item.date!==value)meta='Deadline';
+  else if(item.type==='task'&&item.time)meta=`${item.time} uur`;
+  return `<article class="planner-item date-search-result"><span class="date-result-type">${escapeHtml(typeLabel)}</span><div class="item-copy"><strong>${escapeHtml(item.title)}</strong>${meta?`<small>${escapeHtml(meta)}</small>`:''}${item.note?`<small>${escapeHtml(item.note)}</small>`:''}${item.type==='appointment'&&!work?participantsLine(item):''}${privacyBadge(item)}</div>${actionButtons(item.id,false,item.type==='appointment'&&Boolean(item.time),item.type==='appointment')}</article>`;
+}
+function renderDateSearch(){
+  if(!els.dateSearch||!els.dateSearchResults||!els.dateSearchStatus)return;
+  const value=els.dateSearch.value;
+  els.dateSearchClear.hidden=!value;
+  if(!value){els.dateSearchStatus.textContent='';els.dateSearchResults.hidden=true;els.dateSearchResults.innerHTML='';return}
+  const found=dateSearchItems(value);
+  els.dateSearchStatus.textContent=found.length?`${dateSearchLabel(value)} · ${found.length} ${found.length===1?'item':'items'} gepland`:`${dateSearchLabel(value)} · niets gepland`;
+  els.dateSearchResults.hidden=false;
+  els.dateSearchResults.innerHTML=found.length?found.map(item=>renderDateSearchItem(item,value)).join(''):'<div class="empty">Nog niets gepland op deze datum</div>';
+}
+
+function render(){renderHouseholdTime();renderStudy();renderRecurringChecklists();renderDateSearch();
   const appointments=todayEntries('appointment').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   const tasks=[...todayEntries('task'),...todayHouseholdItems().map(item=>({...item,note:'',completedPeriods:householdTaskDueFromCompletion(item)?[]:item.completedPeriods}))].sort((a,b)=>Number(isTaskDone(a))-Number(isTaskDone(b))||Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||a.createdAt-b.createdAt);const big=currentBigChore();if(big)tasks.push(big);
   const futureEntries=entries.filter(item=>(item.type==='appointment'||item.type==='task')&&item.date>todayKey()).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));

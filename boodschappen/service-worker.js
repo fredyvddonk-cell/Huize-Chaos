@@ -1,5 +1,5 @@
 const CACHE_NAME='boodschappen-v1-4-16-pwa-1';
-const APP_ASSETS=['./','./index.html','./style.css?v=1.4.17','./js/app.js?v=1.4.17','./js/shopping.js?v=1.4.17','./js/stock.js?v=1.4.17','./js/hutsel.js?v=1.4.17','./js/insight.js?v=1.4.17','./js/firebase.js?v=1.4.17','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-maskable-512.png'];
+const APP_ASSETS=['./','./index.html','./style.css?v=1.4.19','./js/app.js?v=1.4.19','./js/shopping.js?v=1.4.19','./js/stock.js?v=1.4.19','./js/hutsel.js?v=1.4.19','./js/insight.js?v=1.4.19','./js/firebase.js?v=1.4.19','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-maskable-512.png'];
 const SHARED_RECEIPT_CACHE='huize-chaos-shared-receipts-v1';
 async function handleSharedReceipt(request){
   const formData=await request.formData();

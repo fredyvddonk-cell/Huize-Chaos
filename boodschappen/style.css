@@ -655,13 +655,13 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .insight-outside-regular-amount:hover,.insight-outside-regular-amount:focus-visible{text-decoration:underline}
 .insight-outside-regular-amount span{margin-left:2px;color:#8768b1}
 
-/* V1.4.17 - vanuit categoriespecificatie direct naar product op bon */
+/* V1.4.19 - vanuit categoriespecificatie direct naar product op bon */
 .insight-product-link{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;border:0;border-top:1px solid #eee8f3;background:#fff;padding:12px 2px;color:inherit;border-radius:0}.insight-product-link:first-child{border-top:0}.insight-product-link>span{min-width:0;display:grid;gap:3px}.insight-product-link small{color:#81758f;font-weight:500}.insight-product-link>strong{white-space:nowrap;color:#2d2d37}.insight-product-link:hover{background:#faf8fc}.receipt-product-target{outline:3px solid rgba(63,167,163,.55);outline-offset:2px;border-radius:12px;animation:hcReceiptTarget 1.15s ease 2}@keyframes hcReceiptTarget{0%,100%{background:transparent}50%{background:#edf9f8}}
 
-/* V1.4.17 - actieproduct alleen herkenbaar aan afwijkende prijskleur */
+/* V1.4.19 - actieproduct alleen herkenbaar aan afwijkende prijskleur */
 .receipt-action-product-toggle{display:flex;align-items:center;gap:8px;margin:7px 0 0;padding:8px 10px;border-radius:10px;background:#f5f1fa;font-size:13px;font-weight:700}.receipt-action-product-toggle input{width:18px;height:18px;margin:0;accent-color:var(--lav)}.action-price,.receipt-action-product .receipt-line-price-calc{color:#287f7b!important;font-weight:800}.receipt-action-product .receipt-line-price-calc{border-color:rgba(40,127,123,.38)}
 
-/* V1.4.17 - bonregelkeuzes zonder overlap */
+/* V1.4.19 - bonregelkeuzes zonder overlap */
 #receiptModal .receipt-action-product-toggle{
   grid-column:2/3;
   display:flex;
@@ -683,3 +683,6 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #receiptModal .receipt-action-product-toggle{grid-column:2/5;grid-row:3;margin-top:2px}
   #receiptModal .receipt-regular-toggle{grid-column:2/5;grid-row:4;margin-top:0}
 }
+
+/* V1.4.19 - bonproduct koppelen aan voorraad */
+.receipt-stock-link{grid-column:1/-1;display:grid;grid-template-columns:minmax(220px,2fr) minmax(170px,1fr);gap:10px;padding:10px 12px;border:1px solid #e7e0ec;background:#fbf9fd;border-radius:11px}.receipt-stock-link label{font-size:12px;font-weight:750;color:#5b347c}.receipt-stock-link select,.receipt-stock-link input{display:block;width:100%;margin-top:4px;border:1px solid #d8d3dc;border-radius:9px;padding:8px;background:#fff;font:inherit}.receipt-stock-unit{display:block;margin-top:3px;color:#77717c;font-weight:600}@media(max-width:650px){.receipt-stock-link{grid-template-columns:1fr}}
