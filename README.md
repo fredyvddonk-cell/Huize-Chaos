@@ -1,4 +1,9 @@
-# Huize Chaos V1.4.19
+# Huize Chaos V1.4.20
+
+## V1.4.20 – voorraad zoeken en starten op hoofdscherm
+
+- Bij **Voorraadproduct** staat nu een zoekveld. De lijst wordt direct gefilterd op de hele productnaam.
+- Bij het starten van de geïnstalleerde app wordt eerst het hoofdscherm van Huize Chaos geopend.
 
 ## V1.4.19 – zoeken op datum
 
