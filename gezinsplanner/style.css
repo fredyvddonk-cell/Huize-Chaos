@@ -43,7 +43,7 @@
 }
 
 
-/* V1.4.27 - Vandaag als rustig dagoverzicht */
+/* V1.4.28 - Vandaag als rustig dagoverzicht */
 #todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
@@ -104,7 +104,7 @@
 }
 
 
-/* V1.4.27 - vervolgafspraak plannen met weekoverzicht */
+/* V1.4.28 - vervolgafspraak plannen met weekoverzicht */
 .followup-quick-section{margin-top:14px;padding:13px;border:1px solid #e7e0ef;border-radius:14px;background:#faf8fc}
 .followup-quick-section>span{display:block;margin-bottom:8px;font-size:14px;font-weight:800}
 .followup-week-button{width:100%;border:0;border-radius:12px;background:var(--lav);color:var(--purple-dark);padding:11px 13px;font-weight:800;text-align:left;cursor:pointer}
@@ -132,7 +132,7 @@
 @media(max-width:430px){.week-navigation{grid-template-columns:1fr 1fr}.week-navigation #resetFourWeek{grid-column:1/-1;grid-row:2}.four-week-card{padding:16px}.availability-day{padding:11px}.availability-day>div{align-items:flex-start}}
 
 
-/* V1.4.27 - vervolgafspraak mobiel binnen schermbreedte */
+/* V1.4.28 - vervolgafspraak mobiel binnen schermbreedte */
 #fourWeekModal{overflow-x:hidden}
 #fourWeekModal .four-week-card{
   width:calc(100vw - 20px);
@@ -191,7 +191,7 @@
 }
 
 
-/* V1.4.27 - Afspraak toevoegen passend op smalle telefoons */
+/* V1.4.28 - Afspraak toevoegen passend op smalle telefoons */
 #entryModal{
   overflow-x:hidden;
 }
@@ -261,7 +261,7 @@
 }
 
 
-/* V1.4.27 - modals stabiel centreren op mobiel */
+/* V1.4.28 - modals stabiel centreren op mobiel */
 #entryModal{
   inset:0;
   width:100%;
@@ -295,12 +295,14 @@
 }
 
 
-/* V1.4.27 - Binnenkort mag de planner niet breder maken */
+/* V1.4.28 - Binnenkort begrenzen zonder desktopbreedte van de planner te wijzigen */
 html, body{
-  max-width:100%;
   overflow-x:hidden;
 }
-.planner-app,
+.planner-app{
+  min-width:0;
+  max-width:720px;
+}
 #todayPage,
 #todayPage > section,
 #upcomingList{

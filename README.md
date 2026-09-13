@@ -1,12 +1,12 @@
-# Huize Chaos V1.4.27
+# Huize Chaos V1.4.28
 
-## V1.4.27 – Vervolgafspraak mobiel verbeterd
+## V1.4.28 – Vervolgafspraak mobiel verbeterd
 - Venster voor vervolgafspraak past nu binnen de telefoonbreedte.
 - Knoppen en dagkaarten kunnen niet meer buiten beeld lopen.
 - Weeknavigatie en intervalknoppen schalen beter op smalle schermen.
 - Afspraken blijven leesbaar zonder horizontaal scrollen.
 
-## V1.4.27 – Vervolgafspraak plannen
+## V1.4.28 – Vervolgafspraak plannen
 
 - In Afspraak toevoegen staat nu **Vervolgafspraak plannen**.
 - Met **+4 weken** en **+6 weken** spring je direct naar de juiste week.
@@ -16,7 +16,7 @@
 - Met vorige/volgende week kun je eenvoudig rond de gewenste periode zoeken.
 
 
-## V1.4.27 – Vandaag als rustig dagoverzicht
+## V1.4.28 – Vandaag als rustig dagoverzicht
 
 - **Afspraken vandaag** verkort naar **Afspraken**.
 - Zoekveld en **Beschikbaarheid over 4 weken** uit het Vandaag-overzicht gehaald.
