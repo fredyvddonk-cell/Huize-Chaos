@@ -41,3 +41,64 @@
   .today-timer-grid h2{font-size:14px}
   .today-timer-grid .household-timer{font-size:17px}
 }
+
+
+/* V1.4.22 - Vandaag als rustig dagoverzicht */
+#todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
+#todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
+#todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
+#todayPage>section[aria-labelledby="tasksTitle"] .household-link,
+#todayPage>section[aria-labelledby="tasksTitle"] .maintenance-hidden-trigger,
+#todayPage>.main-add{display:none!important}
+
+.planner-tabs{margin-bottom:12px}
+#todayPage>section[aria-labelledby="appointmentsTitle"],
+#todayPage>section[aria-labelledby="tasksTitle"]{padding:18px;border-radius:22px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading{margin-bottom:14px;align-items:center}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading>div,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading>div{gap:10px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+#todayPage>section[aria-labelledby="tasksTitle"] h2{font-size:24px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon,
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon{width:34px;height:34px;border-radius:11px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment{font-size:0}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment::before{content:"▣";font-size:17px}
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task{font-size:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task::before{content:"✓";font-size:21px}
+
+.icon-add{display:grid!important;place-items:center;width:38px;height:38px;padding:0!important;border-radius:50%!important;background:var(--lav)!important;color:var(--purple-dark)!important;font-size:25px!important;font-weight:600!important;line-height:1!important}
+#todayPage>section[aria-labelledby="appointmentsTitle"] #openRoster{padding:10px 15px;border-radius:16px;background:var(--green);font-size:14px}
+
+#todayPage>section[aria-labelledby="appointmentsTitle"] .planner-item{padding:14px 13px;border-radius:16px;align-items:center}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .time-badge{padding:8px 10px;border-radius:11px;font-size:15px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .item-copy strong{font-size:17px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .work-badge{margin-top:6px}
+
+.today-timer-grid{gap:10px;margin:12px 0}
+.today-timer-grid .today-timer-panel{padding:13px 14px;border-radius:18px}
+.today-timer-grid .panel-heading{display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center}
+.today-timer-grid .panel-heading>div{display:contents}
+.today-timer-grid .section-icon{grid-row:1/3;width:32px;height:32px;border-radius:10px}
+.today-timer-grid h2{font-size:14px;align-self:end}
+.today-timer-grid .household-timer{grid-column:2;font-size:23px!important;padding:0!important;text-align:left;align-self:start}
+
+#todayPage>section[aria-labelledby="tasksTitle"] .progress-text{margin:-6px 0 12px 44px;font-size:13px}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-list{gap:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .planner-item{border:0;border-bottom:1px solid #ece9ef;border-radius:0;padding:13px 4px;align-items:center}
+#todayPage>section[aria-labelledby="tasksTitle"] .planner-item:last-child{border-bottom:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .check{width:25px;height:25px;border-color:var(--purple);border-radius:7px}
+#todayPage>section[aria-labelledby="tasksTitle"] .check:checked{background:var(--purple)}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-copy strong{font-size:16px}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-actions{opacity:.85}
+
+@media(max-width:430px){
+  #todayPage>section[aria-labelledby="appointmentsTitle"],
+  #todayPage>section[aria-labelledby="tasksTitle"]{padding:15px}
+  #todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+  #todayPage>section[aria-labelledby="tasksTitle"] h2{font-size:22px}
+  #todayPage>section[aria-labelledby="appointmentsTitle"] #openRoster{padding:9px 12px;font-size:13px}
+  .icon-add{width:36px;height:36px;font-size:23px!important}
+  .today-timer-grid .today-timer-panel{padding:12px}
+  .today-timer-grid .household-timer{font-size:21px!important}
+}

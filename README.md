@@ -1,4 +1,15 @@
-# Huize Chaos V1.4.21
+# Huize Chaos V1.4.22
+
+## V1.4.22 – Vandaag als rustig dagoverzicht
+
+- **Afspraken vandaag** verkort naar **Afspraken**.
+- Zoekveld en **Beschikbaarheid over 4 weken** uit het Vandaag-overzicht gehaald.
+- **+ Afspraak** vervangen door een compacte plusknop.
+- **Huishoudtijd** en **Studietijd** rustiger als compacte tijdkaarten weergegeven.
+- Bij **Taken** staat de voortgang direct onder de titel.
+- De knop **Huishouden** en de grote onderhoudsknop zijn uit het dagoverzicht gehaald.
+- Taken worden als rustige lijst onder elkaar getoond.
+- De losse knop **+ Toevoegen** onderaan Vandaag is verwijderd.
 
 ## V1.4.21 – Gezinsplanner rustiger en compacter
 
