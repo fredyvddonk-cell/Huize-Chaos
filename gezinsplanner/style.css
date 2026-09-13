@@ -43,7 +43,7 @@
 }
 
 
-/* V1.4.23 - Vandaag als rustig dagoverzicht */
+/* V1.4.24 - Vandaag als rustig dagoverzicht */
 #todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
@@ -104,7 +104,7 @@
 }
 
 
-/* V1.4.23 - vervolgafspraak plannen met weekoverzicht */
+/* V1.4.24 - vervolgafspraak plannen met weekoverzicht */
 .followup-quick-section{margin-top:14px;padding:13px;border:1px solid #e7e0ef;border-radius:14px;background:#faf8fc}
 .followup-quick-section>span{display:block;margin-bottom:8px;font-size:14px;font-weight:800}
 .followup-week-button{width:100%;border:0;border-radius:12px;background:var(--lav);color:var(--purple-dark);padding:11px 13px;font-weight:800;text-align:left;cursor:pointer}
@@ -130,3 +130,62 @@
 .availability-empty{margin:8px 0 0;color:#318c87;font-size:13px;font-weight:750}
 .availability-day.is-free{background:#fbfefd;border-color:#dcefeb}
 @media(max-width:430px){.week-navigation{grid-template-columns:1fr 1fr}.week-navigation #resetFourWeek{grid-column:1/-1;grid-row:2}.four-week-card{padding:16px}.availability-day{padding:11px}.availability-day>div{align-items:flex-start}}
+
+
+/* V1.4.24 - vervolgafspraak mobiel binnen schermbreedte */
+#fourWeekModal{overflow-x:hidden}
+#fourWeekModal .four-week-card{
+  width:calc(100vw - 20px);
+  max-width:520px;
+  min-width:0;
+  overflow-x:hidden;
+}
+#fourWeekModal .four-week-heading,
+#fourWeekModal .four-week-heading>div,
+#fourWeekModal .followup-intervals,
+#fourWeekModal .week-navigation,
+#fourWeekModal .four-week-days,
+#fourWeekModal .availability-day,
+#fourWeekModal .availability-day>div,
+#fourWeekModal .availability-day li{
+  min-width:0;
+  max-width:100%;
+}
+#fourWeekModal .followup-intervals button,
+#fourWeekModal .week-navigation button{
+  min-width:0;
+  width:100%;
+  white-space:normal;
+}
+#fourWeekModal .availability-day>div>strong{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#fourWeekModal .availability-day button{
+  flex:0 0 auto;
+  max-width:42%;
+  white-space:normal;
+}
+#fourWeekModal .availability-day li span{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media(max-width:430px){
+  #fourWeekModal{padding:8px}
+  #fourWeekModal .four-week-card{width:calc(100vw - 16px);padding:15px}
+  #fourWeekModal .four-week-heading{gap:8px}
+  #fourWeekModal .four-week-heading h2{font-size:26px;line-height:1.08}
+  #fourWeekModal .followup-intervals{grid-template-columns:1fr 1fr}
+  #fourWeekModal .followup-intervals button{padding:10px 6px;font-size:15px}
+  #fourWeekModal .week-navigation{grid-template-columns:1fr 1fr}
+  #fourWeekModal .week-navigation button{padding:10px 6px;font-size:13px}
+  #fourWeekModal .availability-day>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  #fourWeekModal .availability-day button{max-width:none;padding:7px 9px;font-size:11px}
+  #fourWeekModal .availability-day li{grid-template-columns:minmax(88px,auto) minmax(0,1fr);gap:8px}
+}
+@media(max-width:360px){
+  #fourWeekModal .four-week-card{padding:13px}
+  #fourWeekModal .four-week-heading h2{font-size:23px}
+  #fourWeekModal .availability-day>div{grid-template-columns:1fr}
+  #fourWeekModal .availability-day button{justify-self:start}
+}
