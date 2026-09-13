@@ -43,7 +43,7 @@
 }
 
 
-/* V1.4.24 - Vandaag als rustig dagoverzicht */
+/* V1.4.25 - Vandaag als rustig dagoverzicht */
 #todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
@@ -104,7 +104,7 @@
 }
 
 
-/* V1.4.24 - vervolgafspraak plannen met weekoverzicht */
+/* V1.4.25 - vervolgafspraak plannen met weekoverzicht */
 .followup-quick-section{margin-top:14px;padding:13px;border:1px solid #e7e0ef;border-radius:14px;background:#faf8fc}
 .followup-quick-section>span{display:block;margin-bottom:8px;font-size:14px;font-weight:800}
 .followup-week-button{width:100%;border:0;border-radius:12px;background:var(--lav);color:var(--purple-dark);padding:11px 13px;font-weight:800;text-align:left;cursor:pointer}
@@ -132,7 +132,7 @@
 @media(max-width:430px){.week-navigation{grid-template-columns:1fr 1fr}.week-navigation #resetFourWeek{grid-column:1/-1;grid-row:2}.four-week-card{padding:16px}.availability-day{padding:11px}.availability-day>div{align-items:flex-start}}
 
 
-/* V1.4.24 - vervolgafspraak mobiel binnen schermbreedte */
+/* V1.4.25 - vervolgafspraak mobiel binnen schermbreedte */
 #fourWeekModal{overflow-x:hidden}
 #fourWeekModal .four-week-card{
   width:calc(100vw - 20px);
@@ -188,4 +188,74 @@
   #fourWeekModal .four-week-heading h2{font-size:23px}
   #fourWeekModal .availability-day>div{grid-template-columns:1fr}
   #fourWeekModal .availability-day button{justify-self:start}
+}
+
+
+/* V1.4.25 - Afspraak toevoegen passend op smalle telefoons */
+#entryModal{
+  overflow-x:hidden;
+}
+#entryModal .modal-card{
+  width:calc(100vw - 20px);
+  max-width:520px;
+  min-width:0;
+  overflow-x:hidden;
+}
+#entryModal .type-switch,
+#entryModal .field,
+#entryModal .quick-section,
+#entryModal .quick-buttons,
+#entryModal .task-option,
+#entryModal .modal-actions{
+  min-width:0;
+  max-width:100%;
+}
+#entryModal input,
+#entryModal textarea,
+#entryModal select,
+#entryModal button{
+  max-width:100%;
+}
+#entryModal .quick-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+#entryModal .quick-buttons button{
+  width:100%;
+  min-width:0;
+  white-space:normal;
+  line-height:1.25;
+}
+#entryModal .followup-week-button{
+  width:100%;
+  min-width:0;
+  white-space:normal;
+}
+#entryModal .type-switch{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+#entryModal .modal-actions{
+  flex-wrap:wrap;
+}
+#entryModal .modal-actions button{
+  flex:1 1 120px;
+  min-width:0;
+}
+@media(max-width:430px){
+  #entryModal{padding:8px}
+  #entryModal .modal-card{
+    width:calc(100vw - 16px);
+    padding:15px;
+  }
+  #entryModal h2{
+    font-size:26px;
+    line-height:1.1;
+  }
+  #entryModal .quick-buttons{
+    grid-template-columns:1fr;
+  }
+  #entryModal .type-switch button{
+    padding:9px 6px;
+  }
 }
