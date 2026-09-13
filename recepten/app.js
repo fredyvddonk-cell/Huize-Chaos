@@ -121,14 +121,25 @@ function ingredientMatchesProduct(ingredient,product){
   const aliases=Array.isArray(product?.aliases)?product.aliases:[];
   if(a&&aliases.some(alias=>normFood(alias)===a))return true;
   if(!a||!b)return false;
+  const words=s=>s.split(/\s+/).filter(Boolean);
+  const aw=words(a),bw=words(b);
+  const subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));
+
+  // Dressing is te algemeen voor een veilige match. Specifieke smaken moeten overeenkomen.
+  const aDressing=aw.some(w=>w.includes('dressing')),bDressing=bw.some(w=>w.includes('dressing'));
+  if(aDressing||bDressing){
+    if(!(aDressing&&bDressing))return false;
+    const stripDressing=list=>list.filter(w=>!w.includes('dressing'));
+    const ad=stripDressing(aw),bd=stripDressing(bw);
+    if(!ad.length||!bd.length)return false;
+    if(!(subset(ad,bd)||subset(bd,ad)))return false;
+  }
+
   const ai=isGenericPasta(a),bi=isGenericPasta(b),at=pastaType(a),bt=pastaType(b);
   if((ai&&!at&&bt)||(bi&&!bt&&at))return true;
   if(at&&bt&&at!==bt)return false;
-  const words=s=>s.split(/\s+/).filter(Boolean);
-  const aw=words(a),bw=words(b);
   const meaningful=w=>w.length>1 && !/^(rood|rode|geel|gele|groen|groene|wit|witte|zwart|zwarte|klein|kleine|groot|grote|heel|halve|half)$/.test(w);
   const aa=aw.filter(meaningful),bb=bw.filter(meaningful);
-  const subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));
   return subset(bb,aw)||subset(aa,bw);
 }
 function recipeStockScore(r,selected,allInHouse){const ingredients=r.ingredients||[];const hits=selected.filter(p=>ingredients.some(i=>ingredientMatchesProduct(i.ingredient,p))).length;const missing=ingredients.filter(i=>!allInHouse.some(p=>ingredientMatchesProduct(i.ingredient,p))).length;return{hits,missing}}
@@ -191,7 +202,11 @@ function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
   if(glutenMode==='gf')matches=matches.filter(isGlutenFreeProduct);
   if(glutenMode==='regular')matches=matches.filter(p=>!isGlutenFreeProduct(p));
   const genericPasta=isGenericPasta(ingredient.ingredient);
-  const preferred=preferredId?allProducts.find(p=>String(p.id)===preferredId):null;
+  const preferredRaw=preferredId?allProducts.find(p=>String(p.id)===preferredId):null;
+  const preferredValid=preferredRaw&&ingredientMatchesProduct(ingredient.ingredient,preferredRaw)
+    &&(glutenMode!=='gf'||isGlutenFreeProduct(preferredRaw))
+    &&(glutenMode!=='regular'||!isGlutenFreeProduct(preferredRaw));
+  const preferred=preferredValid?preferredRaw:null;
   if(preferred&&preferred.status!=='In huis')return {matched:false,enough:false,label:'Niet in huis',product:preferred,shortage:null,matches,available:''};
   const product=(preferred&&preferred.status==='In huis'?preferred:null)||matches.find(p=>String(p.id)===preferredId)||(genericPasta?matches.find(p=>pastaType(p.name)):null)||matches[0];
   if(!product)return {matched:false,enough:false,label:'Niet in voorraad',product:preferred||null,shortage:null,matches,available:''};

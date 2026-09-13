@@ -180,7 +180,10 @@ function drawGrouped(arr, key, row) {
 }
 
 function refreshCats() {
-  renderCategorySuggestions($('#category')?.value || '');
+  const box = $('#categorySuggestions');
+  if (!box) return;
+  box.innerHTML = '';
+  box.hidden = true;
 }
 
 function renderCategorySuggestions(query='') {
@@ -189,8 +192,7 @@ function renderCategorySuggestions(query='') {
   const q = String(query || '').trim().toLowerCase();
   const matches = categories
     .filter(Boolean)
-    .filter(x => !q || String(x).toLowerCase().includes(q))
-    .slice(0, 8);
+    .filter(x => !q || String(x).toLowerCase().includes(q));
   box.innerHTML = matches.map(x => `<button type="button" class="category-suggestion" role="option" data-category-choice="${esc(x)}">${esc(x)}</button>`).join('');
   box.hidden = !matches.length;
   box.querySelectorAll('[data-category-choice]').forEach(button => {
@@ -198,7 +200,7 @@ function renderCategorySuggestions(query='') {
       const input = $('#category');
       input.value = button.dataset.categoryChoice || '';
       box.hidden = true;
-      input.focus();
+      input.blur();
     };
   });
 }

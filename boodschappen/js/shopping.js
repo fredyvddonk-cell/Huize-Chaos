@@ -141,10 +141,23 @@ function shiftShoppingWeek(delta){const monday=isoWeekMonday(selectedShoppingWee
 function inferShoppingMeta(name){const n=String(name||'').toLowerCase();const p=products.find(x=>String(x.name||'').toLowerCase()===n)||products.find(x=>n.includes(String(x.name||'').toLowerCase())||String(x.name||'').toLowerCase().includes(n));return {category:p?.category||'Overig',store:p?.store||'Overig',status:p?.status||'Niet in huis'} }
 function recipeWeekPlans(){try{return JSON.parse(localStorage.getItem('huize-chaos-recipe-weeks-v1')||'[]')}catch(_){return[]}}
 function recipeNormFood(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(gv\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\b(blik|blikje|pot|zak|pak|stuks?|verse|vers|diepvries|gekookte|gesneden)\b/g,' ').replace(/\s+/g,' ').trim().replace(/en$/,'')}
-const RECIPE_PASTA_TYPES=['spaghetti','macaroni','fusilli','penne','farfalle','rigatoni','tagliatelle','linguine','vermicelli','orzo'];function recipePastaType(s){const w=recipeNormFood(s).split(/\s+/);return RECIPE_PASTA_TYPES.find(x=>w.includes(x))||''}function recipeGenericPasta(s){const w=recipeNormFood(s).split(/\s+/);return w.includes('pasta')&&!recipePastaType(s)}function recipeIngredientMatchesProduct(ingredient,product){const raw=String(ingredient||''),praw=String(product?.name||'')+' '+String(product?.memo||'');if(/glutenvrij|gluten[ -]?vrij|\bgv\b/i.test(raw)&&!/(?:^|\b)(glutenvrij|gluten[ -]?vrij|gv)(?:\b|$)/i.test(praw))return false;const a=recipeNormFood(ingredient),b=recipeNormFood(product?.name);if(!a||!b)return false;const at=recipePastaType(a),bt=recipePastaType(b);if((recipeGenericPasta(a)&&bt)||(recipeGenericPasta(b)&&at))return true;if(at&&bt&&at!==bt)return false;const meaningful=w=>w.length>1&&!/^(rood|rode|geel|gele|groen|groene|wit|witte|zwart|zwarte|klein|kleine|groot|grote|heel|halve|half)$/.test(w),aw=a.split(/\s+/).filter(meaningful),bw=b.split(/\s+/).filter(meaningful),subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));return subset(bw,a.split(/\s+/))||subset(aw,b.split(/\s+/))}
+const RECIPE_PASTA_TYPES=['spaghetti','macaroni','fusilli','penne','farfalle','rigatoni','tagliatelle','linguine','vermicelli','orzo'];function recipePastaType(s){const w=recipeNormFood(s).split(/\s+/);return RECIPE_PASTA_TYPES.find(x=>w.includes(x))||''}function recipeGenericPasta(s){const w=recipeNormFood(s).split(/\s+/);return w.includes('pasta')&&!recipePastaType(s)}function recipeIsGlutenFreeProduct(product){const raw=String(product?.name||'')+' '+String(product?.memo||'');return /(?:^|\b)(glutenvrij|gluten[ -]?vrij|gv)(?:\b|$)/i.test(raw)}
+function recipeIsSensitiveBread(s){const n=recipeNormFood(s);return /(?:^|\b)(naanbrood|naan|stokbrood|wrap|wraps|pita|pitabrood|pitabroodjes|tortilla|tortillas)(?:\b|$)/i.test(n)}
+function recipeIngredientMatchesProduct(ingredient,product){
+  const raw=String(ingredient||''),ingredientGf=/glutenvrij|gluten[ -]?vrij|\bgv\b/i.test(raw);
+  if(ingredientGf&&!recipeIsGlutenFreeProduct(product))return false;
+  if(recipeIsSensitiveBread(raw)&&!ingredientGf&&recipeIsGlutenFreeProduct(product))return false;
+  const a=recipeNormFood(ingredient),b=recipeNormFood(product?.name);if(!a||!b)return false;
+  const words=x=>x.split(/\s+/).filter(Boolean),aw=words(a),bw=words(b),subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));
+  const aDressing=aw.some(w=>w.includes('dressing')),bDressing=bw.some(w=>w.includes('dressing'));
+  if(aDressing||bDressing){if(!(aDressing&&bDressing))return false;const ad=aw.filter(w=>!w.includes('dressing')),bd=bw.filter(w=>!w.includes('dressing'));if(!ad.length||!bd.length||!(subset(ad,bd)||subset(bd,ad)))return false}
+  const at=recipePastaType(a),bt=recipePastaType(b);if((recipeGenericPasta(a)&&bt)||(recipeGenericPasta(b)&&at))return true;if(at&&bt&&at!==bt)return false;
+  const meaningful=w=>w.length>1&&!/^(rood|rode|geel|gele|groen|groene|wit|witte|zwart|zwarte|klein|kleine|groot|grote|heel|halve|half)$/.test(w),aa=aw.filter(meaningful),bb=bw.filter(meaningful);
+  return subset(bb,aw)||subset(aa,bw)
+}
 function recipeUnit(u){const x=String(u||'').trim().toLowerCase();return ({gram:'g',gr:'g',kilogram:'kg',milliliter:'ml',liter:'l',stuk:'stuks',potje:'pot',potten:'pot',blikje:'blik',blikjes:'blik',zakje:'zak',zakjes:'zak',pakje:'pak',pakjes:'pak',flesje:'fles',flesjes:'fles'}[x]||x)}
 function recipeAmount(q,u){const n=parseFloat(String(q??'').replace(',','.'));if(!Number.isFinite(n))return null;u=recipeUnit(u);if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
-function recipeStockCoverage(i){const p=(products||[]).find(x=>x.status==='In huis'&&i.stockProductId&&String(x.id)===String(i.stockProductId))||(products||[]).find(x=>x.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,x));if(!p)return {enough:false,matched:false,shortage:''};const have=recipeAmount(p.quantity,p.unit),need=recipeAmount(i.qty,i.unit);if(have&&need&&have.u&&have.u===need.u){if(have.n>=need.n)return {enough:true,matched:true,shortage:''};let missing=need.n-have.n,unit=need.u;if(recipeUnit(i.unit)==='kg'){missing/=1000;unit='kg'}else if(recipeUnit(i.unit)==='l'){missing/=1000;unit='l'}else unit=i.unit||need.u;return {enough:false,matched:true,shortage:[String(Number(missing.toFixed(3))).replace('.',','),unit].filter(Boolean).join(' ')}}return {enough:true,matched:true,shortage:''}}
+function recipeStockCoverage(i){const preferred=(products||[]).find(x=>x.status==='In huis'&&i.stockProductId&&String(x.id)===String(i.stockProductId)&&recipeIngredientMatchesProduct(i.ingredient,x));const p=preferred||(products||[]).find(x=>x.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,x));if(!p)return {enough:false,matched:false,shortage:''};const have=recipeAmount(p.quantity,p.unit),need=recipeAmount(i.qty,i.unit);if(have&&need&&have.u&&have.u===need.u){if(have.n>=need.n)return {enough:true,matched:true,shortage:''};let missing=need.n-have.n,unit=need.u;if(recipeUnit(i.unit)==='kg'){missing/=1000;unit='kg'}else if(recipeUnit(i.unit)==='l'){missing/=1000;unit='l'}else unit=i.unit||need.u;return {enough:false,matched:true,shortage:[String(Number(missing.toFixed(3))).replace('.',','),unit].filter(Boolean).join(' ')}}return {enough:true,matched:true,shortage:''}}
 function plannedRecipeTitles(){return [...new Set(recipeWeekPlans().filter(p=>p.week===shoppingWeekKey()).map(p=>p.title).filter(Boolean))]}
 function materializeOccasionShopping(e){
   const saved=Array.isArray(e.shopping)?e.shopping:[];
@@ -252,12 +265,16 @@ function renderShopping(allProducts) {
   };
 
   let html = '';
-  let visibleItems = arr;
+  let visibleItems = arr.map(x=>({...x,_shoppingSource:'stock'}));
+  let visibleSource = sourceRows.map(x=>({...x,_shoppingSource:'source'}));
   if (group === 'store' && shoppingStoreFilter !== 'all') {
-    visibleItems = arr.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
+    visibleItems = visibleItems.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
+    visibleSource = visibleSource.filter(x => (x.store || 'Overig') === shoppingStoreFilter);
   }
-  if (visibleItems.length) {
-    html = groups(visibleItems, group).map(([groupName, items]) => renderShoppingGroup(groupName, items, 1, '', row)).join('');
+  const sourceRow=x=>`<div class="item shopping-item source-shopping-item ${x.done?'done':''}" role="button" tabindex="0" onclick="openSourceShoppingEdit('${x.sourceType}','${x.sourceType==='occasion'?String(x.eventId).replace(/'/g,"\\'"):String(x.planId).replace(/'/g,"\\'")}',${x.index})"><input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done?'checked':''} onclick="event.stopPropagation()" onchange="${x.sourceType==='occasion'?`markOccasionBought('${String(x.eventId).replace(/'/g,"\\'")}',${x.index},this.checked)`:`markRecipeIngredientBought('${x.planId}',${x.index},this.checked)`}"><div class="main"><div class="name source-shopping-name">${esc([x.qty,x.name].filter(Boolean).join(' '))}</div><div class="meta source-shopping-meta">${[x.store,x.sourceName].filter(Boolean).map(esc).join(' · ')}</div></div>${x.sourceType==='recipe'&&x.recipeId?`<button class="mini-recipe-button" type="button" title="Recept bekijken" aria-label="Recept bekijken" onclick="event.stopPropagation();openShoppingRecipe('${String(x.recipeId).replace(/'/g,"\\'")}', '${String(x.planId).replace(/'/g,"\\'")}', '${esc(x.servings||'')}')">R</button>`:''}</div>`;
+  const combined=[...visibleSource,...visibleItems];
+  if(combined.length){
+    html=groups(combined,group).map(([groupName,items])=>renderShoppingGroup(groupName,items,1,'',x=>x._shoppingSource==='source'?sourceRow(x):row(x))).join('');
   }
 
   const sourcePrintable=[...occasionShoppingRows(),...recipeShoppingRows()].filter(x=>!x.done).map(x=>({name:x.name,category:x.category||'Overig',quantity:x.qty||'',unit:'',memo:x.sourceName||'',status:x.status||'Niet in huis'})); const printable = [...arr.filter(x => !x.done),...sourcePrintable];
@@ -289,7 +306,7 @@ function renderShopping(allProducts) {
   // daarna pas doorstromen naar de volgende kolom.
   const printHtml=printCategories.map(category=>category.html).join('');
 
-  const recipeHeads=plannedRecipeTitles(); const headsHtml=recipeHeads.length?`<div class="print-week-recipes"><h1>Week ${Number(shoppingWeekKey().slice(-2))}</h1><ul>${recipeHeads.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''; content.innerHTML = `<div class="screen-shopping">${sourceShoppingHtml()}${html}</div>${headsHtml}<div class="print-shopping">${printHtml}</div>`;
+  const recipeHeads=plannedRecipeTitles(); const headsHtml=recipeHeads.length?`<div class="print-week-recipes"><h1>Week ${Number(shoppingWeekKey().slice(-2))}</h1><ul>${recipeHeads.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''; content.innerHTML = `<div class="screen-shopping">${html}</div>${headsHtml}<div class="print-shopping">${printHtml}</div>`;
 }
 
 

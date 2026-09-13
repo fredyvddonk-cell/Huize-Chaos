@@ -1,12 +1,28 @@
-# Huize Chaos V1.4.31
+# Huize Chaos V1.4.32
 
-## V1.4.31 – Vervolgafspraak mobiel verbeterd
+## V1.4.32 – Voorraadmatching en boodschappenlijst gecorrigeerd
+
+- Voorraadcontrole voor naanbrood gecorrigeerd.
+- Regulier en glutenvrij naanbrood worden apart herkend.
+- Naanbrood uit een recept wordt niet meer aan een verkeerde variant gekoppeld.
+- Voorraadmatching voor dressing aangescherpt.
+- Alleen het woord “dressing” is niet meer voldoende voor een productmatch.
+- Honing-Appel Dressing wordt niet meer gekoppeld aan Yoghurt dressing.
+- Hoeveelheden worden pas vergeleken nadat het juiste voorraadproduct is gevonden.
+- Onjuiste meldingen zoals “aanwezig · tekort” bij een verkeerd product worden voorkomen.
+- Dubbele categorieën bij weekrecepten in de boodschappenlijst verwijderd.
+- Receptproducten en gewone boodschappen worden binnen dezelfde categorie samengevoegd.
+- Categoriekeuzelijst opent alleen wanneer je het veld gebruikt.
+- Alle categorieën zijn bereikbaar via verticaal scrollen en zoeken.
+- De categorielijst sluit direct na een keuze.
+
+## V1.4.32 – Vervolgafspraak mobiel verbeterd
 - Venster voor vervolgafspraak past nu binnen de telefoonbreedte.
 - Knoppen en dagkaarten kunnen niet meer buiten beeld lopen.
 - Weeknavigatie en intervalknoppen schalen beter op smalle schermen.
 - Afspraken blijven leesbaar zonder horizontaal scrollen.
 
-## V1.4.31 – Vervolgafspraak plannen
+## V1.4.32 – Vervolgafspraak plannen
 
 - In Afspraak toevoegen staat nu **Vervolgafspraak plannen**.
 - Met **+4 weken** en **+6 weken** spring je direct naar de juiste week.
@@ -16,7 +32,7 @@
 - Met vorige/volgende week kun je eenvoudig rond de gewenste periode zoeken.
 
 
-## V1.4.31 – Vandaag als rustig dagoverzicht
+## V1.4.32 – Vandaag als rustig dagoverzicht
 
 - **Afspraken vandaag** verkort naar **Afspraken**.
 - Zoekveld en **Beschikbaarheid over 4 weken** uit het Vandaag-overzicht gehaald.

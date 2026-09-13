@@ -691,7 +691,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .receipt-line-stock-search{margin-bottom:7px!important;padding-right:34px!important}
 
 
-/* V1.4.31 - categorieën als verticale keuzelijst op mobiel */
+/* V1.4.32 - categorieën als verticale keuzelijst op mobiel */
 .category-suggestions{
   display:grid;
   gap:0;
@@ -718,3 +718,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 .category-suggestion:last-child{border-bottom:0}
 .category-suggestion:active{background:#f5effa}
+
+
+/* V1.4.32 - nette categorie-keuzelijst */
+.category-suggestions{
+  max-height:min(260px,38vh);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.category-suggestions:not([hidden]){display:grid}
+.category-suggestion{flex:0 0 auto}
