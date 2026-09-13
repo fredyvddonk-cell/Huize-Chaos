@@ -1,6 +1,16 @@
-# Huize Chaos V1.4.22
+# Huize Chaos V1.4.23
 
-## V1.4.22 – Vandaag als rustig dagoverzicht
+## V1.4.23 – Vervolgafspraak plannen
+
+- In Afspraak toevoegen staat nu **Vervolgafspraak plannen**.
+- Met **+4 weken** en **+6 weken** spring je direct naar de juiste week.
+- Je ziet per dag welke afspraken en werktijden al gepland zijn.
+- Een lege dag wordt duidelijk als **Geen afspraken** getoond.
+- Met **Kies deze dag** wordt de datum direct in het afspraakformulier gezet.
+- Met vorige/volgende week kun je eenvoudig rond de gewenste periode zoeken.
+
+
+## V1.4.23 – Vandaag als rustig dagoverzicht
 
 - **Afspraken vandaag** verkort naar **Afspraken**.
 - Zoekveld en **Beschikbaarheid over 4 weken** uit het Vandaag-overzicht gehaald.

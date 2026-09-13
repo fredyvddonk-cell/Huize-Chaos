@@ -43,7 +43,7 @@
 }
 
 
-/* V1.4.22 - Vandaag als rustig dagoverzicht */
+/* V1.4.23 - Vandaag als rustig dagoverzicht */
 #todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
 #todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
@@ -102,3 +102,31 @@
   .today-timer-grid .today-timer-panel{padding:12px}
   .today-timer-grid .household-timer{font-size:21px!important}
 }
+
+
+/* V1.4.23 - vervolgafspraak plannen met weekoverzicht */
+.followup-quick-section{margin-top:14px;padding:13px;border:1px solid #e7e0ef;border-radius:14px;background:#faf8fc}
+.followup-quick-section>span{display:block;margin-bottom:8px;font-size:14px;font-weight:800}
+.followup-week-button{width:100%;border:0;border-radius:12px;background:var(--lav);color:var(--purple-dark);padding:11px 13px;font-weight:800;text-align:left;cursor:pointer}
+.followup-quick-section small{display:block;margin-top:7px;color:var(--muted);font-size:12px;line-height:1.35}
+.four-week-card{max-height:min(91vh,850px);overflow:auto}
+.four-week-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.four-week-heading h2{margin:0 0 4px}
+.four-week-heading p{margin:0;color:var(--purple-dark);font-weight:800}
+.four-week-heading small{display:block;margin-top:4px;color:var(--muted)}
+.followup-intervals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.followup-intervals button,.week-navigation button{border-radius:11px;padding:10px;font-weight:800}
+.week-navigation{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}
+.followup-help{margin:10px 0 12px;color:var(--muted);font-size:13px;line-height:1.4}
+.four-week-days{display:grid;gap:9px}
+.availability-day{border:1px solid #e8e4eb;border-radius:14px;padding:12px;background:#fff}
+.availability-day>div{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.availability-day>div>strong{text-transform:capitalize}
+.availability-day button{border:0;border-radius:10px;background:var(--lav);color:var(--purple-dark);padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.availability-day ul{list-style:none;margin:9px 0 0;padding:0;display:grid;gap:6px}
+.availability-day li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding-top:6px;border-top:1px solid #f0edf2}
+.availability-day li strong{color:var(--purple-dark);font-size:13px}
+.availability-day li span{font-size:13px;line-height:1.3}
+.availability-empty{margin:8px 0 0;color:#318c87;font-size:13px;font-weight:750}
+.availability-day.is-free{background:#fbfefd;border-color:#dcefeb}
+@media(max-width:430px){.week-navigation{grid-template-columns:1fr 1fr}.week-navigation #resetFourWeek{grid-column:1/-1;grid-row:2}.four-week-card{padding:16px}.availability-day{padding:11px}.availability-day>div{align-items:flex-start}}

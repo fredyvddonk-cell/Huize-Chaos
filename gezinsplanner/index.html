@@ -6,8 +6,8 @@
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#957AC1" name="theme-color"/>
 <title>Gezinsplanner · Huize Chaos</title>
-<link href="style.css?v=1.4.22" rel="stylesheet"/>
-<link href="planner-v131.css?v=1.4.22" rel="stylesheet"/>
+<link href="style.css?v=1.4.23" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.23" rel="stylesheet"/>
 <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
 </head>
 <body>
@@ -17,7 +17,7 @@
 <span aria-hidden="true" class="calendar-icon">📅</span>
 <img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
 </a>
-<div class="topbar-meta"><span class="version">V1.4.22</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+<div class="topbar-meta"><span class="version">V1.4.23</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
 </header>
 <section class="day-heading"><p>Gezinsplanner</p><div class="day-heading-row"><div class="day-heading-copy"><h1>Vandaag</h1><div class="today-date" id="todayDate"></div></div><label aria-label="Kies een datum" class="calendar-picker-button" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label></div><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
 <nav aria-label="Gezinsplanner onderdelen" class="planner-tabs">
@@ -163,6 +163,11 @@
 <button data-end="22:45" data-shift="Avonddienst" data-start="15:15" type="button">Avond 15.15–22.45</button>
 <button data-end="21:30" data-shift="Korte avonddienst" data-start="16:30" type="button">Kort avond 16.30–21.30</button>
 </div>
+</div>
+<div class="quick-section followup-quick-section" hidden="" id="followupQuickField">
+<span>Vervolgafspraak plannen</span>
+<button class="followup-week-button" id="openFollowupWeek" type="button">Bekijk afspraken rond +6 weken</button>
+<small>Bekijk eerst wat er in die week al staat. Kies daarna direct een geschikte dag.</small>
 </div>
 <label class="field">
 <span>Datum</span>
@@ -319,15 +324,19 @@ Kliko aan de straat" rows="9"></textarea>
 <div aria-hidden="true" class="modal" id="fourWeekModal">
 <div class="modal-card four-week-card">
 <div class="four-week-heading">
-<div><h2>Beschikbaarheid over 4 weken</h2><p id="fourWeekRange"></p></div>
-<button class="secondary small-close" id="closeFourWeek" type="button">Sluiten</button>
+<div><h2>Vervolgafspraak plannen</h2><p id="fourWeekRange"></p><small id="followupBaseDate"></small></div>
+<button class="secondary small-close" id="closeFourWeek" type="button">Terug</button>
+</div>
+<div class="followup-intervals" aria-label="Kies hoeveel weken vooruit">
+<button class="secondary" data-followup-weeks="4" type="button">+4 weken</button>
+<button class="primary" data-followup-weeks="6" type="button">+6 weken</button>
 </div>
 <div class="week-navigation">
-<button class="secondary" id="previousFourWeek" type="button">‹ Week</button>
-<button class="secondary" id="resetFourWeek" type="button">+4 weken</button>
-<button class="secondary" id="nextFourWeek" type="button">Week ›</button>
+<button class="secondary" id="previousFourWeek" type="button">‹ Vorige week</button>
+<button class="secondary" id="resetFourWeek" type="button">Terug naar +6</button>
+<button class="secondary" id="nextFourWeek" type="button">Volgende week ›</button>
 </div>
-<p class="roster-help">Bekijk daarnaast het actuele schoolrooster in Magister.</p>
+<p class="followup-help">Hier zie je de afspraken die al in deze week staan. Tik op een dag om die datum voor de nieuwe afspraak te gebruiken.</p>
 <div class="four-week-days" id="fourWeekDays"></div>
 </div>
 </div>
@@ -376,7 +385,7 @@ Kliko aan de straat" rows="9"></textarea>
 <button class="auth-link" hidden="" id="googleSignOut" type="button">Afmelden</button>
 </div>
 </div>
-<script src="app.js?v=1.4.22"></script>
-<script src="firebase.js?v=1.4.22" type="module"></script>
+<script src="app.js?v=1.4.23"></script>
+<script src="firebase.js?v=1.4.23" type="module"></script>
 </body>
 </html>
