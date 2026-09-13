@@ -313,11 +313,43 @@ window.addEventListener('popstate',event=>{
     if(state.hcRecipeKind==='pending')openPending(state.hcRecipeId,{fromHistory:true});else openRecipe(state.hcRecipeId,{fromHistory:true});
   }
 });
+function updateShoppingPlanServings(recipe,target){
+  const params=new URLSearchParams(location.search),planId=params.get('plan')||'';
+  if(!planId)return;
+  const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(planId));
+  if(!plan)return;
+  const previous=plan.ingredients||[],scaled=scaledRecipe(recipe,target);
+  const gf=Math.max(0,Math.min(target,Number(plan.gfPersons)||0));
+  plan.servings=String(target);
+  plan.ingredients=(scaled.ingredients||[]).map((i,n)=>{
+    const old=previous.find(x=>String(x.id)===String(n))||previous[n]||{};
+    const coverage=stockCoverage(i,old.stockProductId||i.stockProductId||'',/glutenvrij/i.test(i.ingredient)?'gf':'');
+    return {
+      ...old,
+      id:String(n),
+      qty:i.qty||'',
+      unit:i.unit||'',
+      ingredient:i.ingredient||'',
+      memo:i.memo||'',
+      done:Boolean(old.done),
+      ordered:coverage.enough?false:Boolean(old.ordered),
+      stockEnough:Boolean(coverage.enough),
+      stockProductId:coverage.product?.id??old.stockProductId??i.stockProductId??'',
+      stockLabel:coverage.matched?coverage.label:'',
+      shoppingQty:coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):'',
+      store:coverage.product?.store||old.store||'',
+      category:coverage.product?.category||old.category||''
+    };
+  });
+  plan.gfPersons=gf;
+  saveRecipeWeekPlans(plans,plan);
+}
+
 function showReadonlyRecipe(r,view='ingredients'){
   const m=metaFor(r.id),memo=m.memo||'';current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=String(new URLSearchParams(location.search).get('servings')||r.servings||'');hideList();
   const sourceBits=[];if(r.source)sourceBits.push(`Bron: ${esc(r.source)}`);if(r.sourceUrl)sourceBits.push(`<a href="${esc(r.sourceUrl)}" target="_blank" rel="noopener">Bron openen</a>`);
-  const render=tab=>{detail.innerHTML=`<div class="detail-head"><div><h2>${esc(r.title)}</h2><small>Basis: ${esc(r.servings||displayServings||'?')} personen</small>${sourceBits.length?`<div class="recipe-source">${sourceBits.join(' · ')}</div>`:''}</div><div class="actions"><button class="btn primary" id="backShopping">← Terug naar boodschappenlijst</button></div></div><div class="recipe-serving-control"><label>Aantal personen <input id="readonlyServings" type="number" min="1" inputmode="numeric" value="${esc(displayServings||r.servings||1)}"></label><small>Ingrediënten worden direct omgerekend voor deze keer.</small></div>${memo?`<div class="recipe-readonly-memo"><strong>Memo</strong><div>${esc(memo)}</div></div>`:''}<div class="tabs readonly-tabs"><button class="tab ${tab==='ingredients'?'active':''}" data-ro-v="ingredients">Ingrediënten</button><button class="tab ${tab==='directions'?'active':''}" data-ro-v="directions">Bereiding</button></div><div id="recipeViewBody">${tab==='ingredients'?ingredients(r):`<div class="panel directions">${esc(r.directions||'Nog geen bereidingswijze.')}</div>`}</div>`;
-    detail.querySelector('#backShopping').onclick=()=>{window.location.href='../boodschappen/?page=list'};detail.querySelectorAll('[data-ro-v]').forEach(b=>b.onclick=()=>render(b.dataset.roV));const servings=detail.querySelector('#readonlyServings');if(servings){const apply=()=>{displayServings=String(Math.max(1,Number(servings.value)||1));render(tab)};servings.addEventListener('change',apply);servings.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply()}})}
+  const render=tab=>{detail.innerHTML=`<div class="detail-head"><div><h2>${esc(r.title)}</h2><small>Basis: ${esc(r.servings||displayServings||'?')} personen</small>${sourceBits.length?`<div class="recipe-source">${sourceBits.join(' · ')}</div>`:''}</div><div class="actions"><button class="btn primary" id="backShopping">← Terug naar boodschappenlijst</button></div></div><div class="recipe-serving-control"><label>Aantal personen <input id="readonlyServings" type="number" min="1" inputmode="numeric" value="${esc(displayServings||r.servings||1)}"></label><small>Ingrediënten en de gekoppelde boodschappenlijst worden direct aangepast.</small></div>${memo?`<div class="recipe-readonly-memo"><strong>Memo</strong><div>${esc(memo)}</div></div>`:''}<div class="tabs readonly-tabs"><button class="tab ${tab==='ingredients'?'active':''}" data-ro-v="ingredients">Ingrediënten</button><button class="tab ${tab==='directions'?'active':''}" data-ro-v="directions">Bereiding</button></div><div id="recipeViewBody">${tab==='ingredients'?ingredients(r):`<div class="panel directions">${esc(r.directions||'Nog geen bereidingswijze.')}</div>`}</div>`;
+    detail.querySelector('#backShopping').onclick=()=>{window.location.href='../boodschappen/?page=list'};detail.querySelectorAll('[data-ro-v]').forEach(b=>b.onclick=()=>render(b.dataset.roV));const servings=detail.querySelector('#readonlyServings');if(servings){const apply=()=>{const target=Math.max(1,Number(servings.value)||1);displayServings=String(target);updateShoppingPlanServings(r,target);render(tab)};servings.addEventListener('change',apply);servings.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();apply()}})}
   };render(view==='directions'?'directions':'ingredients');
 }
 const directParams=new URLSearchParams(location.search),directRecipe=directParams.get('recipe');

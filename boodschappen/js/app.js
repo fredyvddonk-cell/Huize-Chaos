@@ -180,7 +180,27 @@ function drawGrouped(arr, key, row) {
 }
 
 function refreshCats() {
-  $('#categories').innerHTML = categories.map(x => `<option value="${esc(x)}">`).join('');
+  renderCategorySuggestions($('#category')?.value || '');
+}
+
+function renderCategorySuggestions(query='') {
+  const box = $('#categorySuggestions');
+  if (!box) return;
+  const q = String(query || '').trim().toLowerCase();
+  const matches = categories
+    .filter(Boolean)
+    .filter(x => !q || String(x).toLowerCase().includes(q))
+    .slice(0, 8);
+  box.innerHTML = matches.map(x => `<button type="button" class="category-suggestion" role="option" data-category-choice="${esc(x)}">${esc(x)}</button>`).join('');
+  box.hidden = !matches.length;
+  box.querySelectorAll('[data-category-choice]').forEach(button => {
+    button.onclick = () => {
+      const input = $('#category');
+      input.value = button.dataset.categoryChoice || '';
+      box.hidden = true;
+      input.focus();
+    };
+  });
 }
 
 // V1.3.152 - één geschiedenislaag voor alle schermen en modals in Boodschappen.
@@ -254,11 +274,23 @@ function openModal(x = null, prefillName = '') {
   deleteFromProduct.dataset.productId = x?.id || '';
   openHuizeChaosOverlay('product-edit', $('#modal'));
   const categoryInput = $('#category');
-  categoryInput.onfocus = () => categoryInput.select();
-  categoryInput.onclick = () => categoryInput.select();
+  const categorySuggestions = $('#categorySuggestions');
+  categoryInput.onfocus = () => {
+    categoryInput.select();
+    renderCategorySuggestions(categoryInput.value);
+  };
+  categoryInput.onclick = () => {
+    categoryInput.select();
+    renderCategorySuggestions(categoryInput.value);
+  };
+  categoryInput.oninput = () => renderCategorySuggestions(categoryInput.value);
+  categoryInput.onblur = () => setTimeout(() => {
+    if (categorySuggestions) categorySuggestions.hidden = true;
+  }, 120);
   $('#clearCategory').onclick = () => {
     categoryInput.value = '';
     categoryInput.focus();
+    renderCategorySuggestions('');
   };
 }
 
