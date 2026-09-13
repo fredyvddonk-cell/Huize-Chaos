@@ -1,4 +1,14 @@
-# Huize Chaos V1.4.20
+# Huize Chaos V1.4.21
+
+## V1.4.21 – Gezinsplanner rustiger en compacter
+
+- Bovenkant van **Vandaag** compacter gemaakt; titel en datum nemen minder verticale ruimte in.
+- Het losse blok **Zoeken op datum** is verwijderd.
+- Een datum kiezen gaat nu via het **kalendericoon** naast Vandaag.
+- **Afspraken vandaag** staat direct bovenaan het dagoverzicht.
+- **Huishoudtijd** en **Studietijd** staan compact naast elkaar.
+- **Taken** en **Binnenkort** blijven daaronder zichtbaar.
+- Bestaande datumzoekfunctie blijft behouden via de kalenderknop.
 
 ## V1.4.20 – voorraad zoeken en starten op hoofdscherm
 

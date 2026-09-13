@@ -1,437 +1,382 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="nl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#957AC1">
-  <title>Gezinsplanner · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.4.20">
-  <link rel="stylesheet" href="planner-v131.css?v=1.4.20">
-  <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#957AC1" name="theme-color"/>
+<title>Gezinsplanner · Huize Chaos</title>
+<link href="style.css?v=1.4.21" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.21" rel="stylesheet"/>
+<style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
 </head>
 <body>
-  <main class="planner-app">
-    <header class="topbar">
-      <a class="brand" href="../" aria-label="Terug naar Huize Chaos">
-        <span class="calendar-icon" aria-hidden="true">📅</span>
-        <img src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
-      </a>
-      <div class="topbar-meta"><span class="version">V1.4.20</span><span id="syncStatus" class="sync-status">Niet aangemeld</span></div>
-    </header>
+<main class="planner-app">
+<header class="topbar">
+<a aria-label="Terug naar Huize Chaos" class="brand" href="../">
+<span aria-hidden="true" class="calendar-icon">📅</span>
+<img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
+</a>
+<div class="topbar-meta"><span class="version">V1.4.21</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+</header>
+<section class="day-heading"><p>Gezinsplanner</p><div class="day-heading-row"><div class="day-heading-copy"><h1>Vandaag</h1><div class="today-date" id="todayDate"></div></div><label aria-label="Kies een datum" class="calendar-picker-button" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label></div><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
+<nav aria-label="Gezinsplanner onderdelen" class="planner-tabs">
+<button class="active" data-planner-page="today" type="button">Vandaag</button>
+<button data-planner-page="routines" type="button">Routines</button>
+<button data-planner-page="household" type="button">Huishouden</button>
+</nav>
+<div id="todayPage">
 
-    <section class="day-heading">
-      <p>Gezinsplanner</p>
-      <h1>Vandaag</h1>
-      <div id="todayDate" class="today-date"></div>
-    </section>
 
-    <nav class="planner-tabs" aria-label="Gezinsplanner onderdelen">
-      <button class="active" type="button" data-planner-page="today">Vandaag</button>
-      <button type="button" data-planner-page="routines">Routines</button>
-      <button type="button" data-planner-page="household">Huishouden</button>
-    </nav>
 
-    <div id="todayPage">
 
-    <section class="panel date-search-panel" aria-labelledby="dateSearchTitle">
-      <div class="panel-heading">
-        <div><span class="section-icon appointment">⌕</span><h2 id="dateSearchTitle">Zoeken op datum</h2></div>
-      </div>
-      <p class="date-search-help">Kies een datum om te zien wat er die dag gepland staat.</p>
-      <div class="date-search-controls">
-        <input id="plannerDateSearch" type="date" aria-label="Kies een datum">
-        <button id="plannerDateToday" class="secondary" type="button">Vandaag</button>
-        <button id="plannerDateClear" class="secondary" type="button" hidden>Wissen</button>
-      </div>
-      <div id="plannerDateSearchStatus" class="date-search-status"></div>
-      <div id="plannerDateSearchResults" class="item-list" hidden></div>
-    </section>
 
-    <section class="panel today-timer-panel household-time-panel" aria-labelledby="householdTimeTitle">
-        <div class="panel-heading">
-          <div><span class="section-icon task">◷</span><h2 id="householdTimeTitle">Huishoudtijd</h2></div>
-          <button id="householdTimer" class="household-timer timer-toggle" type="button" aria-label="Huishoudtimer starten">30:00</button>
-        </div>
-      </section>
 
-    <section class="panel today-timer-panel study-time-panel" aria-labelledby="studyTimeTitle">
-      <div class="panel-heading">
-        <div><span class="section-icon task">▣</span><h2 id="studyTimeTitle">Studietijd</h2></div>
-        <button id="studyTimer" class="household-timer timer-toggle" type="button" aria-label="Studietimer starten">60:00</button>
-      </div>
-    </section>
 
-    <section id="wasteReminderPanel" class="panel waste-reminder-panel" aria-labelledby="wasteReminderTitle" role="button" tabindex="0" hidden>
-      <div class="waste-reminder-icon" aria-hidden="true">♻</div>
-      <div><h2 id="wasteReminderTitle"></h2><p id="wasteReminderText"></p><small class="waste-share-hint">Delen via WhatsApp ›</small></div>
-    </section>
 
-    <section id="recurringChecklistSection" class="recurring-checklist-section" aria-labelledby="recurringChecklistTodayTitle" hidden>
-      <div class="recurring-checklist-heading">
-        <div>
-          <span class="eyebrow">HUIZE CHAOS</span>
-          <h2 id="recurringChecklistTodayTitle">Terugkerende checklist</h2>
-        </div>
-      </div>
-      <div id="recurringChecklistToday"></div>
-    </section>
 
-    <section class="panel" aria-labelledby="appointmentsTitle">
-      <div class="panel-heading">
-        <div><span class="section-icon appointment">●</span><h2 id="appointmentsTitle">Afspraken</h2></div>
-        <div class="heading-actions"><button class="add-button compact secondary-add" type="button" id="openRoster">Werkrooster</button><button class="add-button compact" type="button" data-add="appointment">+ Afspraak</button></div>
-      </div>
-      <div class="appointment-search">
-        <span aria-hidden="true">⌕</span>
-        <input id="appointmentSearch" type="search" placeholder="Zoek in alle afspraken" autocomplete="off" aria-label="Zoek in alle afspraken">
-        <button id="clearAppointmentSearch" type="button" aria-label="Zoekopdracht wissen" hidden>×</button>
-      </div>
-      <div id="appointmentSearchStatus" class="search-status"></div>
-      <button id="openFourWeek" class="availability-link" type="button"><span>Bekijk beschikbaarheid over 4 weken</span><span aria-hidden="true">›</span></button>
-      <div id="appointmentList" class="item-list"></div>
-    </section>
-
-    <section class="panel" aria-labelledby="tasksTitle">
-      <div class="panel-heading">
-        <div><span class="section-icon task">✓</span><h2 id="tasksTitle">Taken</h2></div>
-        <div class="heading-actions"><button class="add-button compact secondary-add" type="button" id="openMaintenance">+ Onderhoudsmelding</button><button class="add-button compact" type="button" data-add="task">+ Taak</button></div>
-      </div>
-      <button id="openHouseholdFromTasks" class="household-link" type="button">
-        <span><strong>Huishouden</strong><small>Bekijk huishoudtaken</small></span>
-        <span class="go" aria-hidden="true">›</span>
-      </button>
-      <div id="taskProgress" class="progress-text"></div>
-      <div id="taskList" class="item-list"></div>
-    </section>
-
-    <section class="panel" aria-labelledby="upcomingTitle">
-      <div class="panel-heading">
-        <div><span class="section-icon appointment">›</span><h2 id="upcomingTitle">Binnenkort</h2></div>
-      </div>
-      <div id="upcomingList" class="item-list"></div>
-    </section>
-
-      <button class="add-button main-add" type="button" data-add="task">+ Toevoegen</button>
-    </div>
-
-    <div id="routinesPage" hidden>
-      <section class="panel household-time-panel" aria-labelledby="householdTimeInfoTitle">
-        <div class="panel-heading"><div><span class="section-icon task">◷</span><h2 id="householdTimeInfoTitle">Huishoudtijd</h2></div></div>
-        <p id="householdTimeText" class="routine-help household-time-help">Iedere dag 30 minuten. Doe in die tijd de huishoudtaken die al in je planner staan.</p>
-        <button id="openHouseholdFromTime" class="household-link compact-household-link" type="button"><span><strong>Bekijk wat er gedaan moet worden</strong><small>Open Huishouden</small></span><span class="go" aria-hidden="true">›</span></button>
-        <div class="household-time-actions"><button id="startHouseholdTimer" class="primary" type="button">Start 30 minuten</button><button id="pauseHouseholdTimer" class="secondary" type="button" hidden>Pauze</button><button id="resetHouseholdTimer" class="secondary" type="button" hidden>Stop voor vandaag</button></div>
-        <div id="householdExtraActions" class="household-extra-actions" hidden><span>Wil je doorgaan?</span><button type="button" data-household-extra="15">+ 15 min</button><button type="button" data-household-extra="30">+ 30 min</button></div>
-      </section>
-      <section class="panel study-time-panel" aria-labelledby="studyTimeInfoTitle">
-        <div class="panel-heading"><div><span class="section-icon task">▣</span><h2 id="studyTimeInfoTitle">Studietijd</h2></div></div>
-        <p id="studyTimeText" class="routine-help household-time-help">Iedere dag minimaal 60 minuten. Streefdoel: 90 minuten.</p>
-        <div class="household-time-actions"><button id="startStudyTimer" class="primary" type="button">Start 60 minuten</button><button id="pauseStudyTimer" class="secondary" type="button" hidden>Pauze</button><button id="finishStudyTimer" class="secondary" type="button" hidden>Stop voor vandaag</button></div>
-        <div id="studyExtraActions" class="household-extra-actions" hidden><span>Minimum gehaald. Wil je naar het streefdoel?</span><button id="continueStudy30" type="button">+ 30 min</button></div>
-        <div id="studyPeriodActions" class="study-period-actions"><small id="studyPeriodText">Studieperiode t/m 15 november 2026.</small><button id="finishStudyPeriod" class="text-button" type="button">Alles klaar · beëindigen</button><button id="extendStudyPeriod" class="text-button" type="button">Einddatum wijzigen</button></div>
-      </section>
-      <section class="panel" aria-labelledby="routinesTitle">
-        <div class="panel-heading">
-          <div><span class="section-icon task">✓</span><h2 id="routinesTitle">Dagelijkse routines</h2></div>
-        </div>
-        <p class="routine-help">Morgen begint deze lijst automatisch opnieuw.</p>
-        <div id="routineList" class="item-list"></div>
-      </section>
-      <section class="panel recurring-checklist-library" aria-labelledby="recurringChecklistLibraryTitle">
-        <div class="panel-heading">
-          <div><span class="section-icon task">☑</span><h2 id="recurringChecklistLibraryTitle">Terugkerende checklists</h2></div>
-          <button id="openChecklistModal" class="add-button compact" type="button">+ Checklist</button>
-        </div>
-        <p class="routine-help">Maak de checklist één keer. Huize Chaos toont hem daarna automatisch op het ingestelde moment.</p>
-        <div id="recurringChecklistLibrary"></div>
-      </section>
-    </div>
-
-    <div id="householdPage" hidden>
-        <section class="panel" aria-labelledby="householdTitle">
-        <div class="panel-heading">
-          <div><span class="section-icon task">⌂</span><h2 id="householdTitle">Huishouden</h2></div>
-        </div>
-        <p class="routine-help household-help">Klap een blok open om de onderdelen te bekijken of af te vinken.</p>
-        <div id="householdDueList" class="item-list"></div>
-      </section>
-      <section class="panel household-library" aria-labelledby="libraryTitle">
-        <div class="panel-heading"><div><span class="section-icon appointment">≡</span><h2 id="libraryTitle">Takenbibliotheek</h2></div></div>
-        <p class="routine-help">Hier staat de volledige actieve lijst. Alleen taken die aan de beurt zijn, staan hierboven.</p>
-        <div id="householdLibrary"></div>
-      </section>
-    </div>
-  </main>
-
-  <div id="entryModal" class="modal" aria-hidden="true">
-    <form id="entryForm" class="modal-card">
-      <h2 id="modalTitle">Taak toevoegen</h2>
-      <input id="entryId" type="hidden">
-      <input id="entryType" type="hidden" value="task">
-      <input id="entryCategory" type="hidden">
-
-      <div class="type-switch" role="group" aria-label="Soort item">
-        <button type="button" data-type="task" class="active">Taak</button>
-        <button type="button" data-type="appointment">Afspraak</button>
-      </div>
-
-      <label class="field">
-        <span id="titleLabel">Wat moet er gebeuren? *</span>
-        <input id="entryTitle" required maxlength="100" autocomplete="off">
-      </label>
-
-      <label id="timeField" class="field" hidden>
-        <span>Begintijd (optioneel)</span>
-        <input id="entryTime" type="time">
-      </label>
-
-      <label id="endTimeField" class="field" hidden>
-        <span>Eindtijd (optioneel)</span>
-        <input id="entryEndTime" type="time">
-      </label>
-
-      <div id="workQuickField" class="quick-section" hidden>
-        <span>Werkrooster snel invullen</span>
-        <div class="quick-buttons">
-          <button type="button" data-shift="Dagdienst" data-start="07:00" data-end="13:30">Dag 07.00–13.30</button>
-          <button type="button" data-shift="Lange dagdienst" data-start="07:00" data-end="15:30">Lang 07.00–15.30</button>
-          <button type="button" data-shift="Korte dagdienst" data-start="07:00" data-end="11:00">Kort 07.00–11.00</button>
-          <button type="button" data-shift="Avonddienst" data-start="15:15" data-end="22:45">Avond 15.15–22.45</button>
-          <button type="button" data-shift="Korte avonddienst" data-start="16:30" data-end="21:30">Kort avond 16.30–21.30</button>
-        </div>
-      </div>
-
-      <label class="field">
-        <span>Datum</span>
-        <input id="entryDate" type="date" required>
-      </label>
-
-      <label id="participantsField" class="field" hidden>
-        <span>Voor wie?</span>
-        <input id="entryParticipants" maxlength="120" autocomplete="off" placeholder="Voornamen, gescheiden door komma's">
-        <small>Je eigen voornaam staat standaard ingevuld. Voor meerdere personen gebruik je komma's.</small>
-      </label>
-
-      <label id="schoolTaskField" class="task-option" hidden>
-        <input id="entrySchoolTask" type="checkbox">
-        <span>Urgente taak ‘School informeren over de ziekenhuisafspraak’ toevoegen</span>
-      </label>
-
-      <label id="hasDeadlineField" class="task-option">
-        <input id="entryHasDeadline" type="checkbox">
-        <span>Deze taak heeft een deadline</span>
-      </label>
-
-      <label id="deadlineField" class="field" hidden>
-        <span>Deadline</span>
-        <input id="entryDeadline" type="date">
-      </label>
-
-      <label id="urgentField" class="task-option">
-        <input id="entryUrgent" type="checkbox">
-        <span>Deze taak is urgent</span>
-      </label>
-
-      <label id="privateField" class="task-option" hidden>
-        <input id="entryPrivate" type="checkbox">
-        <span>Privé · alleen zichtbaar voor mij</span>
-      </label>
-
-      <label id="schoolField" class="task-option" hidden>
-        <input id="entrySchool" type="checkbox">
-        <span>School · automatisch privé</span>
-      </label>
-
-      <label id="repeatField" class="field">
-        <span>Herhalen</span>
-        <select id="entryRepeat">
-          <option value="none">Niet herhalen</option>
-          <option value="weekly">Iedere week, zonder vaste dag</option>
-          <option value="biweekly">Iedere twee weken, zonder vaste dag</option>
-          <option value="monthly">Iedere maand, zonder vaste dag</option>
-          <option value="bimonthly">Iedere twee maanden, zonder vaste dag</option>
-          <option value="quarterly">Ieder kwartaal, zonder vaste dag</option>
-          <option value="seasonal">Ieder seizoen, zonder vaste dag</option>
-          <option value="semiannual">Twee keer per jaar, zonder vaste dag</option>
-          <option value="yearly">Ieder jaar, zonder vaste dag</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Extra informatie</span>
-        <textarea id="entryNote" rows="3" maxlength="240" placeholder="Optioneel"></textarea>
-      </label>
-
-      <div class="modal-actions">
-        <button id="cancelEntry" class="secondary" type="button">Annuleren</button>
-        <button class="primary" type="submit">Opslaan</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="checklistModal" class="modal" aria-hidden="true">
-    <form id="checklistForm" class="modal-card checklist-modal-card">
-      <h2 id="checklistModalTitle">Terugkerende checklist toevoegen</h2>
-      <input id="checklistId" type="hidden">
-
-      <label class="field">
-        <span>Naam *</span>
-        <input id="checklistTitle" required maxlength="100" autocomplete="off" placeholder="Bijvoorbeeld Grijze kliko">
-      </label>
-
-      <label class="field">
-        <span>Startdatum *</span>
-        <input id="checklistStartDate" type="date" required>
-      </label>
-
-      <label class="field">
-        <span>Herhaling *</span>
-        <select id="checklistRepeat" required>
-          <option value="daily">Iedere dag</option>
-          <option value="weekly">Iedere week</option>
-          <option value="biweekly">Iedere 2 weken</option>
-          <option value="fourweekly" selected>Iedere 4 weken</option>
-          <option value="monthly">Iedere maand</option>
-          <option value="quarterly">Ieder kwartaal</option>
-          <option value="yearly">Ieder jaar</option>
-        </select>
-      </label>
-
-      <div class="checklist-show-grid">
-        <label class="field">
-          <span>Hoeveel dagen ervoor tonen?</span>
-          <select id="checklistShowBefore">
-            <option value="0">Op de dag zelf</option>
-            <option value="1" selected>1 dag ervoor</option>
-            <option value="2">2 dagen ervoor</option>
-            <option value="3">3 dagen ervoor</option>
-            <option value="7">7 dagen ervoor</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Vanaf welk moment?</span>
-          <select id="checklistShowMoment">
-            <option value="morning">Ochtend</option>
-            <option value="afternoon">Middag</option>
-            <option value="evening" selected>Avond</option>
-          </select>
-        </label>
-      </div>
-
-      <label class="field">
-        <span>Taken (optioneel)</span>
-        <textarea id="checklistTasks" rows="9" placeholder="Eén taak per regel&#10;Afvalbak keuken&#10;Afvalbak woonkamer&#10;Kattenbak&#10;Kliko aan de straat"></textarea>
-        <small class="field-help">Laat dit leeg voor een herinnering zonder afvinkpunten.</small>
-      </label>
-
-      <div class="modal-actions">
-        <button id="cancelChecklist" class="secondary" type="button">Annuleren</button>
-        <button class="primary" type="submit">Opslaan</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="maintenanceModal" class="modal" aria-hidden="true">
-    <form id="maintenanceForm" class="modal-card">
-      <h2>Onderhoudsmelding toevoegen</h2>
-      <label class="field">
-        <span>Welk apparaat? *</span>
-        <select id="maintenanceDevice" required>
-          <option value="">Kies een apparaat</option>
-          <option>Koffiezetapparaat</option>
-          <option>Vaatwasser</option>
-          <option value="Ander apparaat">Ander apparaat</option>
-        </select>
-      </label>
-      <label id="maintenanceOtherDeviceField" class="field" hidden>
-        <span>Naam van het apparaat *</span>
-        <input id="maintenanceOtherDevice" maxlength="60" autocomplete="off">
-      </label>
-      <label class="field">
-        <span>Welk onderhoud is nodig? *</span>
-        <select id="maintenanceAction" required disabled>
-          <option value="">Kies eerst een apparaat</option>
-        </select>
-      </label>
-      <label id="maintenanceOtherActionField" class="field" hidden>
-        <span>Omschrijf het onderhoud *</span>
-        <input id="maintenanceOtherAction" maxlength="100" autocomplete="off">
-      </label>
-      <label class="field">
-        <span>Deadline</span>
-        <input id="maintenanceDeadline" type="date">
-      </label>
-      <div class="modal-actions">
-        <button id="cancelMaintenance" class="secondary" type="button">Annuleren</button>
-        <button class="primary" type="submit">Bij Taken zetten</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="fourWeekModal" class="modal" aria-hidden="true">
-    <div class="modal-card four-week-card">
-      <div class="four-week-heading">
-        <div><h2>Beschikbaarheid over 4 weken</h2><p id="fourWeekRange"></p></div>
-        <button id="closeFourWeek" class="secondary small-close" type="button">Sluiten</button>
-      </div>
-      <div class="week-navigation">
-        <button id="previousFourWeek" class="secondary" type="button">‹ Week</button>
-        <button id="resetFourWeek" class="secondary" type="button">+4 weken</button>
-        <button id="nextFourWeek" class="secondary" type="button">Week ›</button>
-      </div>
-      <p class="roster-help">Bekijk daarnaast het actuele schoolrooster in Magister.</p>
-      <div id="fourWeekDays" class="four-week-days"></div>
-    </div>
-  </div>
-
-  <div id="rosterModal" class="modal" aria-hidden="true">
-    <form id="rosterForm" class="modal-card roster-card">
-      <h2>Werkrooster invullen</h2>
-      <div class="roster-period-selectors">
-        <label class="field"><span>Jaar</span><select id="rosterYear" required></select></label>
-        <label class="field"><span>Periode</span><select id="rosterPeriod" required></select></label>
-      </div>
-      <p id="rosterPeriodRange" class="roster-period-range"></p>
-      <div id="rosterWeekTabs" class="roster-week-tabs" aria-label="Weken binnen de periode"></div>
-      <p class="roster-help">Vul de vier weken van de periode in. Je invoer blijft bewaard wanneer je tussen weken of periodes wisselt. Tik pas op Rooster opslaan als je klaar bent.</p>
-      <p id="rosterDraftStatus" class="roster-draft-status"></p>
-      <div id="rosterDays" class="roster-days"></div>
-      <div class="modal-actions roster-actions">
-        <button id="cancelRoster" class="secondary" type="button">Annuleren</button>
-        <button id="exportRoster" class="secondary" type="button">In telefoonagenda zetten</button>
-        <button class="primary" type="submit">Rooster opslaan</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="deleteModal" class="modal" aria-hidden="true">
-    <div class="modal-card delete-card" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
-      <div class="delete-icon" aria-hidden="true">!</div>
-      <h2 id="deleteTitle">Item verwijderen?</h2>
-      <p id="deleteText"></p>
-      <p id="deleteLinkedText" class="delete-linked" hidden>De gekoppelde schooltaak blijft staan en wordt aangepast omdat de ziekenhuisafspraak niet doorgaat.</p>
-      <div class="modal-actions">
-        <button id="cancelDelete" class="secondary" type="button">Annuleren</button>
-        <button id="confirmDelete" class="danger-button" type="button">Verwijderen</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <div class="auth-card">
-      <h2 id="authTitle">Gezamenlijke gezinsplanner</h2>
-      <p id="authMessage">Meld je aan met Google om de gezinsplanner te openen.</p>
-      <button id="googleSignIn" class="primary auth-primary" type="button">Aanmelden met Google</button>
-      <div id="accessCodeBox" class="access-code-box" hidden>
-        <strong>Nog geen toegang</strong>
-        <p>Stuur deze gebruikerscode naar de beheerder van Huize Chaos:</p>
-        <code id="accessUid"></code>
-        <button id="copyAccessUid" class="secondary" type="button">Code kopiëren</button>
-      </div>
-      <button id="googleSignOut" class="auth-link" type="button" hidden>Afmelden</button>
-    </div>
-  </div>
-
-  <script src="app.js?v=1.4.20"></script>
-  <script type="module" src="firebase.js?v=1.4.20"></script>
+<section aria-labelledby="appointmentsTitle" class="panel">
+<div class="panel-heading">
+<div><span class="section-icon appointment">●</span><h2 id="appointmentsTitle">Afspraken vandaag</h2></div>
+<div class="heading-actions"><button class="add-button compact secondary-add" id="openRoster" type="button">Werkrooster</button><button class="add-button compact" data-add="appointment" type="button">+ Afspraak</button></div>
+</div>
+<div class="appointment-search">
+<span aria-hidden="true">⌕</span>
+<input aria-label="Zoek in alle afspraken" autocomplete="off" id="appointmentSearch" placeholder="Zoek in alle afspraken" type="search"/>
+<button aria-label="Zoekopdracht wissen" hidden="" id="clearAppointmentSearch" type="button">×</button>
+</div>
+<div class="search-status" id="appointmentSearchStatus"></div>
+<button class="availability-link" id="openFourWeek" type="button"><span>Bekijk beschikbaarheid over 4 weken</span><span aria-hidden="true">›</span></button>
+<div class="item-list" id="appointmentList"></div>
+</section><div class="today-timer-grid"><section aria-labelledby="householdTimeTitle" class="panel today-timer-panel household-time-panel">
+<div class="panel-heading">
+<div><span class="section-icon task">◷</span><h2 id="householdTimeTitle">Huishoudtijd</h2></div>
+<button aria-label="Huishoudtimer starten" class="household-timer timer-toggle" id="householdTimer" type="button">30:00</button>
+</div>
+</section><section aria-labelledby="studyTimeTitle" class="panel today-timer-panel study-time-panel">
+<div class="panel-heading">
+<div><span class="section-icon task">▣</span><h2 id="studyTimeTitle">Studietijd</h2></div>
+<button aria-label="Studietimer starten" class="household-timer timer-toggle" id="studyTimer" type="button">60:00</button>
+</div>
+</section></div><section aria-labelledby="wasteReminderTitle" class="panel waste-reminder-panel" hidden="" id="wasteReminderPanel" role="button" tabindex="0">
+<div aria-hidden="true" class="waste-reminder-icon">♻</div>
+<div><h2 id="wasteReminderTitle"></h2><p id="wasteReminderText"></p><small class="waste-share-hint">Delen via WhatsApp ›</small></div>
+</section><section aria-labelledby="recurringChecklistTodayTitle" class="recurring-checklist-section" hidden="" id="recurringChecklistSection">
+<div class="recurring-checklist-heading">
+<div>
+<span class="eyebrow">HUIZE CHAOS</span>
+<h2 id="recurringChecklistTodayTitle">Terugkerende checklist</h2>
+</div>
+</div>
+<div id="recurringChecklistToday"></div>
+</section><section aria-labelledby="tasksTitle" class="panel">
+<div class="panel-heading">
+<div><span class="section-icon task">✓</span><h2 id="tasksTitle">Taken</h2></div>
+<div class="heading-actions"><button class="add-button compact secondary-add" id="openMaintenance" type="button">+ Onderhoudsmelding</button><button class="add-button compact" data-add="task" type="button">+ Taak</button></div>
+</div>
+<button class="household-link" id="openHouseholdFromTasks" type="button">
+<span><strong>Huishouden</strong><small>Bekijk huishoudtaken</small></span>
+<span aria-hidden="true" class="go">›</span>
+</button>
+<div class="progress-text" id="taskProgress"></div>
+<div class="item-list" id="taskList"></div>
+</section><section aria-labelledby="upcomingTitle" class="panel">
+<div class="panel-heading">
+<div><span class="section-icon appointment">›</span><h2 id="upcomingTitle">Binnenkort</h2></div>
+</div>
+<div class="item-list" id="upcomingList"></div>
+</section><button class="add-button main-add" data-add="task" type="button">+ Toevoegen</button></div>
+<div hidden="" id="routinesPage">
+<section aria-labelledby="householdTimeInfoTitle" class="panel household-time-panel">
+<div class="panel-heading"><div><span class="section-icon task">◷</span><h2 id="householdTimeInfoTitle">Huishoudtijd</h2></div></div>
+<p class="routine-help household-time-help" id="householdTimeText">Iedere dag 30 minuten. Doe in die tijd de huishoudtaken die al in je planner staan.</p>
+<button class="household-link compact-household-link" id="openHouseholdFromTime" type="button"><span><strong>Bekijk wat er gedaan moet worden</strong><small>Open Huishouden</small></span><span aria-hidden="true" class="go">›</span></button>
+<div class="household-time-actions"><button class="primary" id="startHouseholdTimer" type="button">Start 30 minuten</button><button class="secondary" hidden="" id="pauseHouseholdTimer" type="button">Pauze</button><button class="secondary" hidden="" id="resetHouseholdTimer" type="button">Stop voor vandaag</button></div>
+<div class="household-extra-actions" hidden="" id="householdExtraActions"><span>Wil je doorgaan?</span><button data-household-extra="15" type="button">+ 15 min</button><button data-household-extra="30" type="button">+ 30 min</button></div>
+</section>
+<section aria-labelledby="studyTimeInfoTitle" class="panel study-time-panel">
+<div class="panel-heading"><div><span class="section-icon task">▣</span><h2 id="studyTimeInfoTitle">Studietijd</h2></div></div>
+<p class="routine-help household-time-help" id="studyTimeText">Iedere dag minimaal 60 minuten. Streefdoel: 90 minuten.</p>
+<div class="household-time-actions"><button class="primary" id="startStudyTimer" type="button">Start 60 minuten</button><button class="secondary" hidden="" id="pauseStudyTimer" type="button">Pauze</button><button class="secondary" hidden="" id="finishStudyTimer" type="button">Stop voor vandaag</button></div>
+<div class="household-extra-actions" hidden="" id="studyExtraActions"><span>Minimum gehaald. Wil je naar het streefdoel?</span><button id="continueStudy30" type="button">+ 30 min</button></div>
+<div class="study-period-actions" id="studyPeriodActions"><small id="studyPeriodText">Studieperiode t/m 15 november 2026.</small><button class="text-button" id="finishStudyPeriod" type="button">Alles klaar · beëindigen</button><button class="text-button" id="extendStudyPeriod" type="button">Einddatum wijzigen</button></div>
+</section>
+<section aria-labelledby="routinesTitle" class="panel">
+<div class="panel-heading">
+<div><span class="section-icon task">✓</span><h2 id="routinesTitle">Dagelijkse routines</h2></div>
+</div>
+<p class="routine-help">Morgen begint deze lijst automatisch opnieuw.</p>
+<div class="item-list" id="routineList"></div>
+</section>
+<section aria-labelledby="recurringChecklistLibraryTitle" class="panel recurring-checklist-library">
+<div class="panel-heading">
+<div><span class="section-icon task">☑</span><h2 id="recurringChecklistLibraryTitle">Terugkerende checklists</h2></div>
+<button class="add-button compact" id="openChecklistModal" type="button">+ Checklist</button>
+</div>
+<p class="routine-help">Maak de checklist één keer. Huize Chaos toont hem daarna automatisch op het ingestelde moment.</p>
+<div id="recurringChecklistLibrary"></div>
+</section>
+</div>
+<div hidden="" id="householdPage">
+<section aria-labelledby="householdTitle" class="panel">
+<div class="panel-heading">
+<div><span class="section-icon task">⌂</span><h2 id="householdTitle">Huishouden</h2></div>
+</div>
+<p class="routine-help household-help">Klap een blok open om de onderdelen te bekijken of af te vinken.</p>
+<div class="item-list" id="householdDueList"></div>
+</section>
+<section aria-labelledby="libraryTitle" class="panel household-library">
+<div class="panel-heading"><div><span class="section-icon appointment">≡</span><h2 id="libraryTitle">Takenbibliotheek</h2></div></div>
+<p class="routine-help">Hier staat de volledige actieve lijst. Alleen taken die aan de beurt zijn, staan hierboven.</p>
+<div id="householdLibrary"></div>
+</section>
+</div>
+</main>
+<div aria-hidden="true" class="modal" id="entryModal">
+<form class="modal-card" id="entryForm">
+<h2 id="modalTitle">Taak toevoegen</h2>
+<input id="entryId" type="hidden"/>
+<input id="entryType" type="hidden" value="task"/>
+<input id="entryCategory" type="hidden"/>
+<div aria-label="Soort item" class="type-switch" role="group">
+<button class="active" data-type="task" type="button">Taak</button>
+<button data-type="appointment" type="button">Afspraak</button>
+</div>
+<label class="field">
+<span id="titleLabel">Wat moet er gebeuren? *</span>
+<input autocomplete="off" id="entryTitle" maxlength="100" required=""/>
+</label>
+<label class="field" hidden="" id="timeField">
+<span>Begintijd (optioneel)</span>
+<input id="entryTime" type="time"/>
+</label>
+<label class="field" hidden="" id="endTimeField">
+<span>Eindtijd (optioneel)</span>
+<input id="entryEndTime" type="time"/>
+</label>
+<div class="quick-section" hidden="" id="workQuickField">
+<span>Werkrooster snel invullen</span>
+<div class="quick-buttons">
+<button data-end="13:30" data-shift="Dagdienst" data-start="07:00" type="button">Dag 07.00–13.30</button>
+<button data-end="15:30" data-shift="Lange dagdienst" data-start="07:00" type="button">Lang 07.00–15.30</button>
+<button data-end="11:00" data-shift="Korte dagdienst" data-start="07:00" type="button">Kort 07.00–11.00</button>
+<button data-end="22:45" data-shift="Avonddienst" data-start="15:15" type="button">Avond 15.15–22.45</button>
+<button data-end="21:30" data-shift="Korte avonddienst" data-start="16:30" type="button">Kort avond 16.30–21.30</button>
+</div>
+</div>
+<label class="field">
+<span>Datum</span>
+<input id="entryDate" required="" type="date"/>
+</label>
+<label class="field" hidden="" id="participantsField">
+<span>Voor wie?</span>
+<input autocomplete="off" id="entryParticipants" maxlength="120" placeholder="Voornamen, gescheiden door komma's"/>
+<small>Je eigen voornaam staat standaard ingevuld. Voor meerdere personen gebruik je komma's.</small>
+</label>
+<label class="task-option" hidden="" id="schoolTaskField">
+<input id="entrySchoolTask" type="checkbox"/>
+<span>Urgente taak ‘School informeren over de ziekenhuisafspraak’ toevoegen</span>
+</label>
+<label class="task-option" id="hasDeadlineField">
+<input id="entryHasDeadline" type="checkbox"/>
+<span>Deze taak heeft een deadline</span>
+</label>
+<label class="field" hidden="" id="deadlineField">
+<span>Deadline</span>
+<input id="entryDeadline" type="date"/>
+</label>
+<label class="task-option" id="urgentField">
+<input id="entryUrgent" type="checkbox"/>
+<span>Deze taak is urgent</span>
+</label>
+<label class="task-option" hidden="" id="privateField">
+<input id="entryPrivate" type="checkbox"/>
+<span>Privé · alleen zichtbaar voor mij</span>
+</label>
+<label class="task-option" hidden="" id="schoolField">
+<input id="entrySchool" type="checkbox"/>
+<span>School · automatisch privé</span>
+</label>
+<label class="field" id="repeatField">
+<span>Herhalen</span>
+<select id="entryRepeat">
+<option value="none">Niet herhalen</option>
+<option value="weekly">Iedere week, zonder vaste dag</option>
+<option value="biweekly">Iedere twee weken, zonder vaste dag</option>
+<option value="monthly">Iedere maand, zonder vaste dag</option>
+<option value="bimonthly">Iedere twee maanden, zonder vaste dag</option>
+<option value="quarterly">Ieder kwartaal, zonder vaste dag</option>
+<option value="seasonal">Ieder seizoen, zonder vaste dag</option>
+<option value="semiannual">Twee keer per jaar, zonder vaste dag</option>
+<option value="yearly">Ieder jaar, zonder vaste dag</option>
+</select>
+</label>
+<label class="field">
+<span>Extra informatie</span>
+<textarea id="entryNote" maxlength="240" placeholder="Optioneel" rows="3"></textarea>
+</label>
+<div class="modal-actions">
+<button class="secondary" id="cancelEntry" type="button">Annuleren</button>
+<button class="primary" type="submit">Opslaan</button>
+</div>
+</form>
+</div>
+<div aria-hidden="true" class="modal" id="checklistModal">
+<form class="modal-card checklist-modal-card" id="checklistForm">
+<h2 id="checklistModalTitle">Terugkerende checklist toevoegen</h2>
+<input id="checklistId" type="hidden"/>
+<label class="field">
+<span>Naam *</span>
+<input autocomplete="off" id="checklistTitle" maxlength="100" placeholder="Bijvoorbeeld Grijze kliko" required=""/>
+</label>
+<label class="field">
+<span>Startdatum *</span>
+<input id="checklistStartDate" required="" type="date"/>
+</label>
+<label class="field">
+<span>Herhaling *</span>
+<select id="checklistRepeat" required="">
+<option value="daily">Iedere dag</option>
+<option value="weekly">Iedere week</option>
+<option value="biweekly">Iedere 2 weken</option>
+<option selected="" value="fourweekly">Iedere 4 weken</option>
+<option value="monthly">Iedere maand</option>
+<option value="quarterly">Ieder kwartaal</option>
+<option value="yearly">Ieder jaar</option>
+</select>
+</label>
+<div class="checklist-show-grid">
+<label class="field">
+<span>Hoeveel dagen ervoor tonen?</span>
+<select id="checklistShowBefore">
+<option value="0">Op de dag zelf</option>
+<option selected="" value="1">1 dag ervoor</option>
+<option value="2">2 dagen ervoor</option>
+<option value="3">3 dagen ervoor</option>
+<option value="7">7 dagen ervoor</option>
+</select>
+</label>
+<label class="field">
+<span>Vanaf welk moment?</span>
+<select id="checklistShowMoment">
+<option value="morning">Ochtend</option>
+<option value="afternoon">Middag</option>
+<option selected="" value="evening">Avond</option>
+</select>
+</label>
+</div>
+<label class="field">
+<span>Taken (optioneel)</span>
+<textarea id="checklistTasks" placeholder="Eén taak per regel
+Afvalbak keuken
+Afvalbak woonkamer
+Kattenbak
+Kliko aan de straat" rows="9"></textarea>
+<small class="field-help">Laat dit leeg voor een herinnering zonder afvinkpunten.</small>
+</label>
+<div class="modal-actions">
+<button class="secondary" id="cancelChecklist" type="button">Annuleren</button>
+<button class="primary" type="submit">Opslaan</button>
+</div>
+</form>
+</div>
+<div aria-hidden="true" class="modal" id="maintenanceModal">
+<form class="modal-card" id="maintenanceForm">
+<h2>Onderhoudsmelding toevoegen</h2>
+<label class="field">
+<span>Welk apparaat? *</span>
+<select id="maintenanceDevice" required="">
+<option value="">Kies een apparaat</option>
+<option>Koffiezetapparaat</option>
+<option>Vaatwasser</option>
+<option value="Ander apparaat">Ander apparaat</option>
+</select>
+</label>
+<label class="field" hidden="" id="maintenanceOtherDeviceField">
+<span>Naam van het apparaat *</span>
+<input autocomplete="off" id="maintenanceOtherDevice" maxlength="60"/>
+</label>
+<label class="field">
+<span>Welk onderhoud is nodig? *</span>
+<select disabled="" id="maintenanceAction" required="">
+<option value="">Kies eerst een apparaat</option>
+</select>
+</label>
+<label class="field" hidden="" id="maintenanceOtherActionField">
+<span>Omschrijf het onderhoud *</span>
+<input autocomplete="off" id="maintenanceOtherAction" maxlength="100"/>
+</label>
+<label class="field">
+<span>Deadline</span>
+<input id="maintenanceDeadline" type="date"/>
+</label>
+<div class="modal-actions">
+<button class="secondary" id="cancelMaintenance" type="button">Annuleren</button>
+<button class="primary" type="submit">Bij Taken zetten</button>
+</div>
+</form>
+</div>
+<div aria-hidden="true" class="modal" id="fourWeekModal">
+<div class="modal-card four-week-card">
+<div class="four-week-heading">
+<div><h2>Beschikbaarheid over 4 weken</h2><p id="fourWeekRange"></p></div>
+<button class="secondary small-close" id="closeFourWeek" type="button">Sluiten</button>
+</div>
+<div class="week-navigation">
+<button class="secondary" id="previousFourWeek" type="button">‹ Week</button>
+<button class="secondary" id="resetFourWeek" type="button">+4 weken</button>
+<button class="secondary" id="nextFourWeek" type="button">Week ›</button>
+</div>
+<p class="roster-help">Bekijk daarnaast het actuele schoolrooster in Magister.</p>
+<div class="four-week-days" id="fourWeekDays"></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="rosterModal">
+<form class="modal-card roster-card" id="rosterForm">
+<h2>Werkrooster invullen</h2>
+<div class="roster-period-selectors">
+<label class="field"><span>Jaar</span><select id="rosterYear" required=""></select></label>
+<label class="field"><span>Periode</span><select id="rosterPeriod" required=""></select></label>
+</div>
+<p class="roster-period-range" id="rosterPeriodRange"></p>
+<div aria-label="Weken binnen de periode" class="roster-week-tabs" id="rosterWeekTabs"></div>
+<p class="roster-help">Vul de vier weken van de periode in. Je invoer blijft bewaard wanneer je tussen weken of periodes wisselt. Tik pas op Rooster opslaan als je klaar bent.</p>
+<p class="roster-draft-status" id="rosterDraftStatus"></p>
+<div class="roster-days" id="rosterDays"></div>
+<div class="modal-actions roster-actions">
+<button class="secondary" id="cancelRoster" type="button">Annuleren</button>
+<button class="secondary" id="exportRoster" type="button">In telefoonagenda zetten</button>
+<button class="primary" type="submit">Rooster opslaan</button>
+</div>
+</form>
+</div>
+<div aria-hidden="true" class="modal" id="deleteModal">
+<div aria-labelledby="deleteTitle" aria-modal="true" class="modal-card delete-card" role="dialog">
+<div aria-hidden="true" class="delete-icon">!</div>
+<h2 id="deleteTitle">Item verwijderen?</h2>
+<p id="deleteText"></p>
+<p class="delete-linked" hidden="" id="deleteLinkedText">De gekoppelde schooltaak blijft staan en wordt aangepast omdat de ziekenhuisafspraak niet doorgaat.</p>
+<div class="modal-actions">
+<button class="secondary" id="cancelDelete" type="button">Annuleren</button>
+<button class="danger-button" id="confirmDelete" type="button">Verwijderen</button>
+</div>
+</div>
+</div>
+<div aria-labelledby="authTitle" aria-modal="true" class="auth-gate" id="authGate" role="dialog">
+<div class="auth-card">
+<h2 id="authTitle">Gezamenlijke gezinsplanner</h2>
+<p id="authMessage">Meld je aan met Google om de gezinsplanner te openen.</p>
+<button class="primary auth-primary" id="googleSignIn" type="button">Aanmelden met Google</button>
+<div class="access-code-box" hidden="" id="accessCodeBox">
+<strong>Nog geen toegang</strong>
+<p>Stuur deze gebruikerscode naar de beheerder van Huize Chaos:</p>
+<code id="accessUid"></code>
+<button class="secondary" id="copyAccessUid" type="button">Code kopiëren</button>
+</div>
+<button class="auth-link" hidden="" id="googleSignOut" type="button">Afmelden</button>
+</div>
+</div>
+<script src="app.js?v=1.4.21"></script>
+<script src="firebase.js?v=1.4.21" type="module"></script>
 </body>
 </html>
