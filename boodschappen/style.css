@@ -691,7 +691,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .receipt-line-stock-search{margin-bottom:7px!important;padding-right:34px!important}
 
 
-/* V1.4.36 - categorieën als verticale keuzelijst op mobiel */
+/* V1.4.37 - categorieën als verticale keuzelijst op mobiel */
 .category-suggestions{
   display:grid;
   gap:0;
@@ -720,7 +720,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .category-suggestion:active{background:#f5effa}
 
 
-/* V1.4.36 - nette categorie-keuzelijst */
+/* V1.4.37 - nette categorie-keuzelijst */
 .category-suggestions{
   max-height:min(260px,38vh);
   overflow-y:auto;

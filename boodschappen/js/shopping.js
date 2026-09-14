@@ -203,11 +203,14 @@ window.markOccasionBought=(eventId,visibleIndex,checked)=>{let events=[];try{eve
 window.removeRecipeIngredientFromShopping=(planId,index)=>{
   const plans=recipeWeekPlans(),p=plans.find(x=>String(x.id)===String(planId));
   if(!p||!p.ingredients?.[index])return;
+  // Alleen van de boodschappenlijst verwijderen; het ingrediënt blijft in het recept.
   p.ingredients[index].shoppingSelected=false;
   p.ingredients[index].done=false;
+  p.ingredients[index].shoppingRemovedAt=Date.now();
   p.changedAt=Date.now();
   localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));
   window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
+  // Meteen opnieuw opbouwen zodat de rij direct uit beeld verdwijnt.
   render();
 };
 window.markRecipeIngredientBought=(planId,index,checked)=>{

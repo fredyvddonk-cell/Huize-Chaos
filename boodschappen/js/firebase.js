@@ -231,7 +231,14 @@ async function startRecipeWeeksSync(){
     stopRecipeWeeks=onSnapshot(recipesRef,snapshot=>{
       if(!snapshot.exists()||applyingRecipeWeeksCloud)return;
       const plans=snapshot.data()?.weekPlans;
-      if(Array.isArray(plans)){const deleted=mergeRecipeWeekDeleted(snapshot.data()?.deletedWeekPlans||{},localRecipeWeekDeleted());saveRecipeWeekDeleted(deleted);applyRecipeWeekPlans(mergeRecipeWeekPlans(plans,[],deleted));}
+      if(Array.isArray(plans)){
+        const deleted=mergeRecipeWeekDeleted(snapshot.data()?.deletedWeekPlans||{},localRecipeWeekDeleted());
+        saveRecipeWeekDeleted(deleted);
+        // V1.4.37: vergelijk cloud altijd met de lokale versie. Een nog niet
+        // geüploade wijziging (zoals een verwijderd receptingrediënt) mag niet
+        // door een oudere snapshot worden teruggedraaid.
+        applyRecipeWeekPlans(mergeRecipeWeekPlans(plans,localRecipeWeekPlans(),deleted));
+      }
     },error=>console.error('Weekmenu live synchronisatie mislukt',error));
   }catch(error){
     console.error('Weekmenu synchronisatie starten mislukt',error);
