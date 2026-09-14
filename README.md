@@ -1,4 +1,12 @@
-# Huize Chaos V1.4.37
+# Huize Chaos V1.4.38
+
+## V1.4.38 – Gekochte receptproducten verwijderen
+
+- Afgevinkte receptingrediënten worden bij **Gekochte producten verwijderen** echt uit de boodschappenlijst gehaald.
+- De verwijdering wordt per gepland receptingrediënt opgeslagen en blijft behouden na synchroniseren.
+- Bij aanvinken van een receptingrediënt wordt de wijzigingstijd van het weekmenu bijgewerkt, zodat telefoon en laptop dezelfde nieuwste versie gebruiken.
+- Een verwijderd receptingrediënt blijft verwijderd wanneer het aantal personen later wordt aangepast.
+- Gelijke ingrediënten uit verschillende recepten blijven afzonderlijke boodschappenregels.
 
 ## V1.4.37 – Receptboodschappen en synchronisatie
 

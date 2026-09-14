@@ -218,6 +218,7 @@ window.markRecipeIngredientBought=(planId,index,checked)=>{
   if(!p||!p.ingredients?.[index])return;
   const ingredient=p.ingredients[index];
   ingredient.done=Boolean(checked);
+  p.changedAt=Date.now();
   localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));
 
   // V1.3.116 - gekocht receptingrediënt wordt één keer als 'In huis' in Voorraad gezet.
@@ -396,7 +397,7 @@ function bindShoppingEvents() {
     let events=[];try{events=JSON.parse(localStorage.getItem('huize-chaos-occasions-v1')||'[]')||[]}catch(_){}
     events.forEach(e=>{if(Array.isArray(e.shopping))e.shopping=e.shopping.filter(x=>!x.done)});
     localStorage.setItem('huize-chaos-occasions-v1',JSON.stringify(events));window.syncHuizeChaosOccasions?.(events);
-    const plans=recipeWeekPlans();plans.forEach(p=>{let changed=false;if(Array.isArray(p.ingredients))p.ingredients.forEach(x=>{if(x.done){x.done=false;changed=true}});if(changed)p.changedAt=Date.now()});
+    const plans=recipeWeekPlans();plans.forEach(p=>{let changed=false;if(Array.isArray(p.ingredients))p.ingredients.forEach(x=>{if(x.done){x.done=false;x.shoppingSelected=false;x.shoppingRemovedAt=Date.now();changed=true}});if(changed)p.changedAt=Date.now()});
     localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
     save();
     render();

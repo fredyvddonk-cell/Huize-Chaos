@@ -234,7 +234,7 @@ async function startRecipeWeeksSync(){
       if(Array.isArray(plans)){
         const deleted=mergeRecipeWeekDeleted(snapshot.data()?.deletedWeekPlans||{},localRecipeWeekDeleted());
         saveRecipeWeekDeleted(deleted);
-        // V1.4.37: vergelijk cloud altijd met de lokale versie. Een nog niet
+        // V1.4.38: vergelijk cloud altijd met de lokale versie. Een nog niet
         // geüploade wijziging (zoals een verwijderd receptingrediënt) mag niet
         // door een oudere snapshot worden teruggedraaid.
         applyRecipeWeekPlans(mergeRecipeWeekPlans(plans,localRecipeWeekPlans(),deleted));
