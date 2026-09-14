@@ -1,6 +1,12 @@
-# Huize Chaos V1.4.35
+# Huize Chaos V1.4.36
 
-## V1.4.35 – Voorraadmatching en boodschappenlijst gecorrigeerd
+## V1.4.36 – Receptboodschappen en synchronisatie
+
+- Receptingrediënten kunnen nu los van de boodschappenlijst worden verwijderd zonder het recept aan te passen.
+- Verwijderde geplande maaltijden krijgen een synchronisatie-markering, zodat een ander apparaat ze niet opnieuw kan terugzetten.
+- Weekmenu synchroniseert verwijderingen en wijzigingen tussen laptop en telefoon betrouwbaarder.
+
+## V1.4.36 – Voorraadmatching en boodschappenlijst gecorrigeerd
 
 - Voorraadcontrole voor naanbrood gecorrigeerd.
 - Regulier en glutenvrij naanbrood worden apart herkend.
@@ -16,13 +22,13 @@
 - Alle categorieën zijn bereikbaar via verticaal scrollen en zoeken.
 - De categorielijst sluit direct na een keuze.
 
-## V1.4.35 – Vervolgafspraak mobiel verbeterd
+## V1.4.36 – Vervolgafspraak mobiel verbeterd
 - Venster voor vervolgafspraak past nu binnen de telefoonbreedte.
 - Knoppen en dagkaarten kunnen niet meer buiten beeld lopen.
 - Weeknavigatie en intervalknoppen schalen beter op smalle schermen.
 - Afspraken blijven leesbaar zonder horizontaal scrollen.
 
-## V1.4.35 – Vervolgafspraak plannen
+## V1.4.36 – Vervolgafspraak plannen
 
 - In Afspraak toevoegen staat nu **Vervolgafspraak plannen**.
 - Met **+4 weken** en **+6 weken** spring je direct naar de juiste week.
@@ -32,7 +38,7 @@
 - Met vorige/volgende week kun je eenvoudig rond de gewenste periode zoeken.
 
 
-## V1.4.35 – Vandaag als rustig dagoverzicht
+## V1.4.36 – Vandaag als rustig dagoverzicht
 
 - **Afspraken vandaag** verkort naar **Afspraken**.
 - Zoekveld en **Beschikbaarheid over 4 weken** uit het Vandaag-overzicht gehaald.

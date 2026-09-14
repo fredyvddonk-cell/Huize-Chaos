@@ -22,6 +22,7 @@ const occasionsRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'occasions')
 const inventoryRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'products');
 const recipesRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'recipes');
 const RECIPE_WEEK_KEY = 'huize-chaos-recipe-weeks-v1';
+const RECIPE_WEEK_DELETED_KEY = 'huize-chaos-recipe-weeks-deleted-v1';
 
 let role = '';
 let user = null;
@@ -184,14 +185,17 @@ function localRecipeWeekPlans(){
   try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_KEY)||'[]')||[]}catch(_){return[]}
 }
 
-function mergeRecipeWeekPlans(remote=[],local=[]){
+function localRecipeWeekDeleted(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_DELETED_KEY)||'{}')||{}}catch(_){return {}}}
+function saveRecipeWeekDeleted(value){localStorage.setItem(RECIPE_WEEK_DELETED_KEY,JSON.stringify(value||{}))}
+function mergeRecipeWeekDeleted(remote={},local={}){const out={...remote};Object.entries(local||{}).forEach(([id,ts])=>out[id]=Math.max(Number(out[id]||0),Number(ts||0)));return out}
+function mergeRecipeWeekPlans(remote=[],local=[],deleted=localRecipeWeekDeleted()){
   const merged=new Map();
   remote.forEach(plan=>merged.set(String(plan.id),plan));
   local.forEach(plan=>{
     const id=String(plan.id),current=merged.get(id);
     if(!current||Number(plan.changedAt||0)>Number(current.changedAt||0))merged.set(id,plan);
   });
-  return [...merged.values()];
+  return [...merged.values()].filter(plan=>Number(deleted[String(plan.id)]||0)<Number(plan.changedAt||0));
 }
 
 function applyRecipeWeekPlans(plans){
@@ -203,7 +207,7 @@ function applyRecipeWeekPlans(plans){
 
 async function syncRecipeWeeksNow(){
   if(!recipeWeeksCloudReady||!user||applyingRecipeWeeksCloud)return;
-  await setDoc(recipesRef,{weekPlans:localRecipeWeekPlans(),updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:true});
+  await setDoc(recipesRef,{weekPlans:localRecipeWeekPlans(),deletedWeekPlans:localRecipeWeekDeleted(),updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:true});
 }
 
 function scheduleRecipeWeeksSync(){
@@ -217,7 +221,9 @@ async function startRecipeWeeksSync(){
   try{
     const snap=await getDoc(recipesRef);
     const remote=snap.exists()&&Array.isArray(snap.data()?.weekPlans)?snap.data().weekPlans:[];
-    const merged=mergeRecipeWeekPlans(remote,localRecipeWeekPlans());
+    const deleted=mergeRecipeWeekDeleted(snap.data()?.deletedWeekPlans||{},localRecipeWeekDeleted());
+    saveRecipeWeekDeleted(deleted);
+    const merged=mergeRecipeWeekPlans(remote,localRecipeWeekPlans(),deleted);
     applyRecipeWeekPlans(merged);
     recipeWeeksCloudReady=true;
     await syncRecipeWeeksNow();
@@ -225,7 +231,7 @@ async function startRecipeWeeksSync(){
     stopRecipeWeeks=onSnapshot(recipesRef,snapshot=>{
       if(!snapshot.exists()||applyingRecipeWeeksCloud)return;
       const plans=snapshot.data()?.weekPlans;
-      if(Array.isArray(plans))applyRecipeWeekPlans(plans);
+      if(Array.isArray(plans)){const deleted=mergeRecipeWeekDeleted(snapshot.data()?.deletedWeekPlans||{},localRecipeWeekDeleted());saveRecipeWeekDeleted(deleted);applyRecipeWeekPlans(mergeRecipeWeekPlans(plans,[],deleted));}
     },error=>console.error('Weekmenu live synchronisatie mislukt',error));
   }catch(error){
     console.error('Weekmenu synchronisatie starten mislukt',error);
@@ -356,7 +362,7 @@ async function refreshSharedStateFromServer(){
     applyingInsightCloud=false;
   }
   if(recipesSnap.exists() && Array.isArray(recipesSnap.data()?.weekPlans)){
-    applyRecipeWeekPlans(recipesSnap.data().weekPlans);
+    const deleted=mergeRecipeWeekDeleted(recipesSnap.data()?.deletedWeekPlans||{},localRecipeWeekDeleted()); saveRecipeWeekDeleted(deleted); applyRecipeWeekPlans(mergeRecipeWeekPlans(recipesSnap.data().weekPlans,localRecipeWeekPlans(),deleted));
   }
 }
 
