@@ -1,10 +1,10 @@
-# Huize Chaos V1.4.67
+# Huize Chaos V1.4.68
 
-## Wijziging V1.4.67
+## Wijziging V1.4.68
 
-- Bulkactie Vaste plek werkt vanaf 1 geselecteerd product.
-- Bulkactie Controleren bij werkt vanaf 1 geselecteerd product.
-- Keuze en toepassen zijn los van elkaar gemaakt.
-- Eerst waarde kiezen, daarna op Toepassen tikken.
-- Werkt hetzelfde bij 1, 2 of meer geselecteerde producten.
-- Bestaande selectie, categoriefilter en Alles selecteren/deselecteren blijven behouden.
+- Categorie als bulkactie toegevoegd aan Beheer.
+- Werkt vanaf 1 geselecteerd product.
+- Categorie kan voor 1, 2 of meer geselecteerde producten tegelijk worden gewijzigd.
+- Eerst categorie kiezen, daarna op Toepassen tikken.
+- Vaste plek en Controleren bij blijven op dezelfde manier werken.
+- Categoriefilter, Alles selecteren en Alles deselecteren blijven behouden.

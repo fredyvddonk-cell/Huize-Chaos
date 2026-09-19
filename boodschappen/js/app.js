@@ -408,8 +408,17 @@ function manageBulkToolbar() {
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
       <button type="button" class="small" onclick="deselectAllManageProducts()" ${hasManageSelection ? '' : 'disabled'}>Alles deselecteren</button>
     </div>
-    ${hasManageSelection ? `<div class="manage-bulk-message">Bulkacties actief voor ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product om Vaste plek of Controleren bij in te stellen.</div>`}
+    ${hasManageSelection ? `<div class="manage-bulk-message">Bulkacties actief voor ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product om Categorie, Vaste plek of Controleren bij in te stellen.</div>`}
     <div class="manage-bulk-actions">
+      <label>Categorie
+        <div class="manage-bulk-field-row">
+          <select id="manageBulkCategory" ${hasManageSelection ? '' : 'disabled'}>
+            <option value="">Kies categorie…</option>
+            ${categories.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join('')}
+          </select>
+          <button type="button" class="small" onclick="applyManageBulkCategory(document.getElementById('manageBulkCategory')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+        </div>
+      </label>
       <label>Vaste plek
         <div class="manage-bulk-field-row">
           <select id="manageBulkLocation" ${hasManageSelection ? '' : 'disabled'}>
@@ -471,6 +480,15 @@ window.deselectAllManageProducts = () => {
 window.setManageCategoryFilter = value => {
   manageCategoryFilter = String(value || '');
   manageBulkMessage = '';
+  render();
+};
+window.applyManageBulkCategory = value => {
+  if (!value || !manageSelectedProducts.size) return;
+  products.forEach(product => {
+    if (manageSelectedProducts.has(String(product.id))) product.category = value;
+  });
+  manageBulkMessage = `Categorie ingesteld op ${value} voor ${manageSelectedProducts.size} product${manageSelectedProducts.size === 1 ? '' : 'en'}.`;
+  save();
   render();
 };
 window.applyManageBulkLocation = value => {
