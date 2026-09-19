@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.42
+# Huize Chaos V1.4.43
 
 - Maaltijdsuggesties zijn direct aanklikbaar en worden met één tik aan het gekozen weekmenu toegevoegd.
 - Het aantal personen blijft daarna direct aanpasbaar in het weekmenu.
@@ -8,9 +8,9 @@
 - Nieuwe wensen worden aan de ingelogde gebruiker gekoppeld.
 - Mobiele titel Feestdagen & gelegenheden blijft op één regel.
 
-# Huize Chaos V1.4.42
+# Huize Chaos V1.4.43
 
-## V1.4.42 – Gekochte receptproducten verwijderen
+## V1.4.43 – Gekochte receptproducten verwijderen
 
 - Afgevinkte receptingrediënten worden bij **Gekochte producten verwijderen** echt uit de boodschappenlijst gehaald.
 - De verwijdering wordt per gepland receptingrediënt opgeslagen en blijft behouden na synchroniseren.
