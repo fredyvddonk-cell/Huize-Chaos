@@ -1,15 +1,17 @@
-# Huize Chaos V1.4.45
+# Huize Chaos V1.4.46
 
-- Receptenmenu rustiger gemaakt met één overzicht en compacte filters.
-- Receptenlijst laadt niet meer volledig bij het openen; zoeken toont alleen gerichte resultaten.
-- Receptgegevens worden lokaal hergebruikt om het receptenmenu sneller te openen.
-- Tikken op een recept opent voortaan eerst het recept.
-- Toevoegen aan het weekmenu gebeurt pas vanuit het geopende recept.
-- Categorie van een recept kan worden gewijzigd bij Wijzigen.
-- Filter Past bij voorraad toegevoegd met aanduiding hoeveel producten nog nodig zijn.
-- Filter Variatie toegevoegd om herhaling van pasta, rijst, aardappel en hetzelfde hoofdingrediënt te beperken.
-- Vaak gegeten blijft als aparte keuze beschikbaar.
-- Categorieën blijven compact horizontaal beschikbaar.
+- Recept opent voortaan als eigen scherm; de receptenlijst blijft niet erboven staan.
+- Weekmenu en Recepten blijven vanuit een geopend recept bereikbaar.
+- Terug naar Recepten brengt je terug naar dezelfde lijstpositie.
+- Categorie kan bij Wijzigen worden aangepast.
+- Soort kan bij Wijzigen worden aangepast: kip, rund, varken, vis, vegetarisch of anders.
+- Tijd thuis toegevoegd: Kort, Middellang of Lang.
+- Kort betekent praktisch binnen ongeveer 30 minuten op tafel.
+- Recepten kunnen op Tijd thuis worden gefilterd.
+- Voorraadcontrole noemt een product niet meer automatisch tekort als de hoeveelheden niet eerlijk vergelijkbaar zijn.
+- Receptaantallen zonder eenheid worden bij voorraad in stuks slimmer herkend.
+- Past bij voorraad, Variatie, Vaak gegeten en voorraadproduct-suggesties blijven behouden.
+- Online zoeken vanuit een voorraadproduct blijft een kleine tweede stap.
 
 # Huize Chaos V1.4.43
 
