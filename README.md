@@ -1,11 +1,8 @@
-# Huize Chaos V1.4.72
+# Huize Chaos V1.4.73
 
-## Wijziging V1.4.72
-
-- Toepassen-knoppen in Beheer technisch opnieuw gekoppeld
-- Categorie toepassen werkt op 1 of meer geselecteerde producten
-- Vaste plek toepassen werkt op 1 of meer geselecteerde producten
-- Controleren bij toepassen werkt op 1 of meer geselecteerde producten
-- Duidelijke melding wanneer nog geen keuze is gemaakt
-- Selectie blijft behouden na toepassen
-- Vaste plek en Controleren bij blijven standaard zichtbaar in Beheer
+- Bulkactie Vaste plek in Beheer opnieuw gekoppeld
+- Toepassen van Vaste plek gebruikt nu centrale klikafhandeling
+- Actie blijft werken na selecteren, filteren, zoeken en opnieuw renderen
+- Werkt vanaf 1 geselecteerd product
+- Categorie en Controleren bij blijven behouden
+- Vaste plek en Controleren bij blijven zichtbaar in Beheer

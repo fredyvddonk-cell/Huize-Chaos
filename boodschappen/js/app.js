@@ -416,7 +416,7 @@ function manageBulkToolbar() {
             <option value="">Kies categorie…</option>
             ${categories.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join('')}
           </select>
-          <button type="button" class="small" id="applyManageBulkCategoryBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkCategoryBtn" data-manage-bulk-action="category" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Vaste plek
@@ -426,7 +426,7 @@ function manageBulkToolbar() {
             <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
             <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
           </select>
-          <button type="button" class="small" id="applyManageBulkLocationBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkLocationBtn" data-manage-bulk-action="location" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Controleren bij
@@ -438,7 +438,7 @@ function manageBulkToolbar() {
             <option value="rare">Zelden checken</option>
             <option value="work">Alleen meenemen bij ‘Wat kan ik maken?’</option>
           </select>
-          <button type="button" class="small" id="applyManageBulkCheckCycleBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkCheckCycleBtn" data-manage-bulk-action="checkCycle" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
     </div>
@@ -511,34 +511,35 @@ window.applyManageBulkCheckCycle = value => {
   render();
 };
 
-function bindManageBulkApplyButtons() {
-  const categoryBtn = document.getElementById('applyManageBulkCategoryBtn');
-  const locationBtn = document.getElementById('applyManageBulkLocationBtn');
-  const checkBtn = document.getElementById('applyManageBulkCheckCycleBtn');
-  if (categoryBtn) categoryBtn.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
+function handleManageBulkApplyClick(event) {
+  const button = event.target.closest('[data-manage-bulk-action]');
+  if (!button || !content?.contains(button)) return;
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!manageSelectedProducts.size) {
+    alert('Selecteer eerst minimaal 1 product.');
+    return;
+  }
+
+  const action = button.dataset.manageBulkAction;
+  if (action === 'category') {
     const value = document.getElementById('manageBulkCategory')?.value || '';
-    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
     if (!value) return alert('Kies eerst een categorie.');
     window.applyManageBulkCategory(value);
-  });
-  if (locationBtn) locationBtn.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
+    return;
+  }
+  if (action === 'location') {
     const value = document.getElementById('manageBulkLocation')?.value || '';
-    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
     if (!value) return alert('Kies eerst een vaste plek.');
     window.applyManageBulkLocation(value);
-  });
-  if (checkBtn) checkBtn.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
+    return;
+  }
+  if (action === 'checkCycle') {
     const value = document.getElementById('manageBulkCheckCycle')?.value || '';
-    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
     if (!value) return alert('Kies eerst wanneer je deze producten wilt controleren.');
     window.applyManageBulkCheckCycle(value);
-  });
+  }
 }
 
 function renderManage(arr) {
@@ -559,7 +560,6 @@ function renderManage(arr) {
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
   content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Winkels','stores',shops);
-  bindManageBulkApplyButtons();
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};
@@ -681,6 +681,7 @@ window.editProduct = id => openModal(products.find(x => x.id === id));
 function initApp() {
   content = $('#content');
   search = $('#search');
+  content.addEventListener('click', handleManageBulkApplyClick);
 
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('#unit').innerHTML = '<option value="">Geen eenheid</option>' + UNITS.filter(Boolean).map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
