@@ -408,7 +408,7 @@ function manageBulkToolbar() {
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
       <button type="button" class="small" onclick="deselectAllManageProducts()" ${hasManageSelection ? '' : 'disabled'}>Alles deselecteren</button>
     </div>
-    ${hasManageSelection ? `<div class="manage-bulk-message">Bulkacties actief voor ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product om Categorie, Vaste plek of Controleren bij in te stellen.</div>`}
+    ${hasManageSelection ? `<div class="manage-bulk-message">Wijzig ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}; je keuze wordt direct opgeslagen.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product. Kies daarna Categorie, Vaste plek of Controleren bij; de keuze wordt direct opgeslagen.</div>`}
     <div class="manage-bulk-actions">
       <label>Categorie
         <div class="manage-bulk-field-row">
@@ -416,7 +416,6 @@ function manageBulkToolbar() {
             <option value="">Kies categorie…</option>
             ${categories.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join('')}
           </select>
-          <button type="button" class="small" id="applyManageBulkCategoryBtn" data-manage-bulk-action="category" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Vaste plek
@@ -426,7 +425,6 @@ function manageBulkToolbar() {
             <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
             <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
           </select>
-          <button type="button" class="small" id="applyManageBulkLocationBtn" data-manage-bulk-action="location" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Controleren bij
@@ -438,7 +436,6 @@ function manageBulkToolbar() {
             <option value="rare">Zelden checken</option>
             <option value="work">Alleen meenemen bij ‘Wat kan ik maken?’</option>
           </select>
-          <button type="button" class="small" id="applyManageBulkCheckCycleBtn" data-manage-bulk-action="checkCycle" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
     </div>
@@ -511,33 +508,23 @@ window.applyManageBulkCheckCycle = value => {
   render();
 };
 
-function handleManageBulkApplyClick(event) {
-  const button = event.target.closest('[data-manage-bulk-action]');
-  if (!button || !content?.contains(button)) return;
-  event.preventDefault();
-  event.stopPropagation();
+function handleManageBulkChange(event) {
+  const select = event.target;
+  if (!(select instanceof HTMLSelectElement) || !content?.contains(select)) return;
+  if (!manageSelectedProducts.size) return;
 
-  if (!manageSelectedProducts.size) {
-    alert('Selecteer eerst minimaal 1 product.');
-    return;
-  }
+  const value = select.value || '';
+  if (!value) return;
 
-  const action = button.dataset.manageBulkAction;
-  if (action === 'category') {
-    const value = document.getElementById('manageBulkCategory')?.value || '';
-    if (!value) return alert('Kies eerst een categorie.');
+  if (select.id === 'manageBulkCategory') {
     window.applyManageBulkCategory(value);
     return;
   }
-  if (action === 'location') {
-    const value = document.getElementById('manageBulkLocation')?.value || '';
-    if (!value) return alert('Kies eerst een vaste plek.');
+  if (select.id === 'manageBulkLocation') {
     window.applyManageBulkLocation(value);
     return;
   }
-  if (action === 'checkCycle') {
-    const value = document.getElementById('manageBulkCheckCycle')?.value || '';
-    if (!value) return alert('Kies eerst wanneer je deze producten wilt controleren.');
+  if (select.id === 'manageBulkCheckCycle') {
     window.applyManageBulkCheckCycle(value);
   }
 }
@@ -681,7 +668,7 @@ window.editProduct = id => openModal(products.find(x => x.id === id));
 function initApp() {
   content = $('#content');
   search = $('#search');
-  content.addEventListener('click', handleManageBulkApplyClick);
+  content.addEventListener('change', handleManageBulkChange);
 
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('#unit').innerHTML = '<option value="">Geen eenheid</option>' + UNITS.filter(Boolean).map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');

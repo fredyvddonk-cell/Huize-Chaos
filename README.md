@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.73
+# Huize Chaos V1.4.74
 
 - Bulkactie Vaste plek in Beheer opnieuw gekoppeld
 - Toepassen van Vaste plek gebruikt nu centrale klikafhandeling
