@@ -96,30 +96,54 @@ function bindStockSwipeActions(){
     const card = shell.querySelector('.stock-swipe-content');
     if (!card || shell.dataset.swipeBound === '1') return;
     shell.dataset.swipeBound = '1';
-    let startX = 0, startY = 0, dx = 0, tracking = false, moved = false;
-    const reset = () => { card.style.transform = ''; shell.classList.remove('swipe-delete-open','swipe-cycle-open'); };
-    shell.addEventListener('touchstart', e => {
-      if (e.touches.length !== 1) return;
-      startX = e.touches[0].clientX; startY = e.touches[0].clientY; dx = 0; tracking = true; moved = false;
+    let startX = 0, startY = 0, dx = 0, tracking = false, moved = false, horizontal = false, pointerId = null;
+    const reset = () => {
+      card.style.transform = '';
+      shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping');
+      horizontal = false; tracking = false; pointerId = null; dx = 0;
+    };
+    shell.addEventListener('pointerdown', e => {
+      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      pointerId = e.pointerId;
+      startX = e.clientX; startY = e.clientY; dx = 0; tracking = true; moved = false; horizontal = false;
       shell.classList.add('stock-swiping');
-    }, {passive:true});
-    shell.addEventListener('touchmove', e => {
-      if (!tracking || e.touches.length !== 1) return;
-      const x = e.touches[0].clientX - startX;
-      const y = e.touches[0].clientY - startY;
-      if (Math.abs(y) > Math.abs(x) && !moved) return;
-      if (Math.abs(x) < 6) return;
-      moved = true; dx = Math.max(-285, Math.min(105, x));
+      try { shell.setPointerCapture(pointerId); } catch (_) {}
+    });
+    shell.addEventListener('pointermove', e => {
+      if (!tracking || e.pointerId !== pointerId) return;
+      const x = e.clientX - startX;
+      const y = e.clientY - startY;
+      if (!horizontal) {
+        if (Math.abs(x) < 8 && Math.abs(y) < 8) return;
+        if (Math.abs(y) > Math.abs(x)) { reset(); return; }
+        horizontal = true;
+      }
+      moved = true;
+      dx = Math.max(-285, Math.min(105, x));
       card.style.transform = `translateX(${dx}px)`;
       if (e.cancelable) e.preventDefault();
     }, {passive:false});
-    shell.addEventListener('touchend', () => {
-      tracking = false; shell.classList.remove('stock-swiping');
-      if (dx > 48) { card.style.transform = 'translateX(96px)'; shell.classList.add('swipe-delete-open'); shell.classList.remove('swipe-cycle-open'); }
-      else if (dx < -48) { card.style.transform = 'translateX(-270px)'; shell.classList.add('swipe-cycle-open'); shell.classList.remove('swipe-delete-open'); }
-      else reset();
-      setTimeout(() => { moved = false; }, 80);
-    });
+    const finish = e => {
+      if (!tracking || (e && e.pointerId !== pointerId)) return;
+      tracking = false;
+      shell.classList.remove('stock-swiping');
+      try { shell.releasePointerCapture(pointerId); } catch (_) {}
+      pointerId = null;
+      if (dx > 42) {
+        card.style.transform = 'translateX(96px)';
+        shell.classList.add('swipe-delete-open');
+        shell.classList.remove('swipe-cycle-open');
+      } else if (dx < -42) {
+        card.style.transform = 'translateX(-270px)';
+        shell.classList.add('swipe-cycle-open');
+        shell.classList.remove('swipe-delete-open');
+      } else {
+        reset();
+      }
+      setTimeout(() => { moved = false; }, 120);
+    };
+    shell.addEventListener('pointerup', finish);
+    shell.addEventListener('pointercancel', finish);
     card.addEventListener('click', e => {
       if (moved || shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
         e.preventDefault(); e.stopPropagation(); reset();

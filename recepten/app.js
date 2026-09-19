@@ -249,7 +249,7 @@ function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
   if(preferred&&preferred.status!=='In huis')return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:'',comparable:false};
   const product=(preferred&&preferred.status==='In huis'?preferred:null)||matches.find(p=>String(p.id)===preferredId)||(genericPasta?matches.find(p=>pastaType(p.name)):null)||matches[0];
   if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:'',comparable:false};
-  // V1.4.51: voor receptcontrole telt alleen of het juiste product in huis is.
+  // V1.4.53: voor receptcontrole telt alleen of het juiste product in huis is.
   // Recept- en voorraadhoeveelheden worden bewust niet met elkaar vergeleken,
   // omdat hoeveelheden in de praktijk tussentijds kunnen wijzigen.
   const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';

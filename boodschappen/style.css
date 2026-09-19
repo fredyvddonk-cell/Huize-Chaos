@@ -736,12 +736,12 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-recipe-suggestion-link span{font-size:17px;line-height:1}
 .stock-recipe-suggestion-link:hover{text-decoration:underline}
 
-/* V1.4.51 - voorraad: locatie los van checkmoment */
+/* V1.4.53 - voorraad: locatie los van checkmoment */
 .stock-check-controls{margin:0 0 12px}.stock-check-mode{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.stock-check-mode::-webkit-scrollbar{display:none}.stock-check-mode button{white-space:nowrap;border:1px solid #d7cdea;background:#fff;color:#5f467d;border-radius:999px;padding:8px 11px;font:inherit}.stock-check-mode button.active{background:#7655a5;color:#fff;border-color:#7655a5}.stock-view-help{margin:4px 2px 0;color:#6d6873;font-size:.88rem}.stock-classification-help{margin:-4px 0 12px;color:#777;font-size:.82rem;line-height:1.35}.stock-location-head{margin:10px 0 6px;padding:8px 10px;background:#f4effa;border-radius:10px;font-weight:700;color:#5f467d}.stock-item-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.stock-mini-badge{font-size:.72rem;background:#f3f0f7;color:#655d6e;border-radius:999px;padding:2px 7px}
 
 
-/* V1.4.51 - snelle swipe-acties in Voorraad */
-.stock-swipe-shell{position:relative;overflow:hidden;border-radius:12px;background:#fff}
+/* V1.4.53 - snelle swipe-acties in Voorraad */
+.stock-swipe-shell{position:relative;overflow:hidden;border-radius:12px;background:#fff;touch-action:pan-y}
 .stock-swipe-shell+.stock-swipe-shell{border-top:1px solid #eee8f1}
 .stock-swipe-shell .stock-item{position:relative;z-index:2;background:#fff;transition:transform .18s ease;will-change:transform;border:0}
 .stock-swipe-shell.stock-swiping .stock-item{transition:none}

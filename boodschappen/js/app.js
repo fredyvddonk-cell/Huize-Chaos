@@ -68,6 +68,16 @@ function migrateProduct(x) {
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
 
+function normalizedProductName(value) {
+  return String(value || '').trim().toLocaleLowerCase('nl-NL').replace(/\s+/g,' ');
+}
+function findExistingProductByName(name, excludeId = 0) {
+  const key = normalizedProductName(name);
+  if (!key) return null;
+  return products.find(product => Number(product.id) !== Number(excludeId || 0) && normalizedProductName(product.name) === key) || null;
+}
+window.findExistingHuizeChaosProductByName = name => findExistingProductByName(name);
+
 // V1.3.116: voeg de uitgebreide kruidendatabase éénmalig toe aan bestaande voorraden.
 // Bestaande producten blijven leidend: status, hoeveelheid, winkel en memo worden nooit overschreven.
 (function migrateCompleteHerbDatabase() {
@@ -515,8 +525,31 @@ function initApp() {
     };
 
     if (id) {
+      const duplicate = findExistingProductByName(name, id);
+      if (duplicate) {
+        alert(`${duplicate.name} staat al in Voorraad.`);
+        return;
+      }
       Object.assign(products.find(x => x.id === id), data);
     } else {
+      const existing = findExistingProductByName(name);
+      if (existing) {
+        if (page === 'list') {
+          existing.shopping = true;
+          existing.done = false;
+          if (data.quantity) existing.quantity = data.quantity;
+          if (data.unit) existing.unit = data.unit;
+          if (data.store) existing.store = data.store;
+          if (data.memo) existing.memo = data.memo;
+          alert(`${existing.name} stond al in Voorraad en is op de boodschappenlijst gezet.`);
+        } else {
+          alert(`${existing.name} staat al in Voorraad.`);
+        }
+        save();
+        closeModal();
+        render();
+        return;
+      }
       products.push({
         id: Date.now(),
         ...data,
