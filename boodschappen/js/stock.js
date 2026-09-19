@@ -67,7 +67,7 @@ function stockItemHtml(x){
       <button type="button" onclick="setStockCheckCycle(${x.id},'work')">Maken</button>
     </div>
     <div class="item stock-item stock-swipe-content">
-      <div class="main" onclick="editProduct(${x.id})" role="button" tabindex="0">
+      <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0">
         <div class="name">${esc(x.name)}</div>
         ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
         ${stockBadges(x)}
@@ -94,71 +94,107 @@ window.setStockCheckCycle = (id, cycle) => {
 function bindStockSwipeActions(){
   document.querySelectorAll('[data-stock-swipe]').forEach(shell => {
     const card = shell.querySelector('.stock-swipe-content');
+    const main = shell.querySelector('[data-stock-edit]');
     if (!card || shell.dataset.swipeBound === '1') return;
     shell.dataset.swipeBound = '1';
-    let startX = 0, startY = 0, dx = 0, tracking = false, moved = false, horizontal = false, pointerId = null;
-    let suppressClickUntil = 0;
-    const reset = () => {
+
+    let startX = 0, startY = 0, dx = 0, dy = 0;
+    let tracking = false, horizontal = false, swiped = false;
+
+    const closeSwipe = () => {
       card.style.transform = '';
       shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping');
-      horizontal = false; tracking = false; pointerId = null; dx = 0;
+      dx = 0; dy = 0; horizontal = false; tracking = false;
     };
-    shell.addEventListener('pointerdown', e => {
-      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
-      pointerId = e.pointerId;
-      startX = e.clientX; startY = e.clientY; dx = 0; tracking = true; moved = false; horizontal = false;
+
+    const begin = (x,y) => {
+      startX=x; startY=y; dx=0; dy=0; tracking=true; horizontal=false; swiped=false;
       shell.classList.add('stock-swiping');
-      try { shell.setPointerCapture(pointerId); } catch (_) {}
-    });
-    shell.addEventListener('pointermove', e => {
-      if (!tracking || e.pointerId !== pointerId) return;
-      const x = e.clientX - startX;
-      const y = e.clientY - startY;
+    };
+
+    const move = (x,y,e) => {
+      if (!tracking) return;
+      dx=x-startX; dy=y-startY;
       if (!horizontal) {
-        if (Math.abs(x) < 8 && Math.abs(y) < 8) return;
-        if (Math.abs(y) > Math.abs(x)) { reset(); return; }
-        horizontal = true;
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          shell.classList.remove('stock-swiping');
+          tracking=false;
+          return;
+        }
+        horizontal=true;
       }
-      moved = true;
-      dx = Math.max(-285, Math.min(105, x));
-      card.style.transform = `translateX(${dx}px)`;
-      if (e.cancelable) e.preventDefault();
-    }, {passive:false});
-    const finish = e => {
-      if (!tracking || (e && e.pointerId !== pointerId)) return;
-      tracking = false;
+      swiped=true;
+      const limited=Math.max(-280,Math.min(110,dx));
+      card.style.transform=`translateX(${limited}px)`;
+      if (e?.cancelable) e.preventDefault();
+    };
+
+    const end = () => {
+      if (!tracking && !horizontal) return;
       shell.classList.remove('stock-swiping');
-      try { shell.releasePointerCapture(pointerId); } catch (_) {}
-      pointerId = null;
-      if (dx > 42) {
-        card.style.transform = 'translateX(108px)';
+      tracking=false;
+      if (horizontal && dx > 45) {
+        card.style.transform='translateX(108px)';
         shell.classList.add('swipe-delete-open');
         shell.classList.remove('swipe-cycle-open');
-        suppressClickUntil = Date.now() + 550;
-      } else if (dx < -42) {
-        card.style.transform = 'translateX(-270px)';
+      } else if (horizontal && dx < -45) {
+        card.style.transform='translateX(-270px)';
         shell.classList.add('swipe-cycle-open');
         shell.classList.remove('swipe-delete-open');
-        suppressClickUntil = Date.now() + 550;
-      } else {
-        reset();
+      } else if (horizontal) {
+        closeSwipe();
       }
-      setTimeout(() => { moved = false; }, 600);
     };
-    shell.addEventListener('pointerup', finish);
-    shell.addEventListener('pointercancel', finish);
-    card.addEventListener('click', e => {
-      if (Date.now() < suppressClickUntil || moved) {
+
+    // Mobiel: echte touch-events. Dit voorkomt dat Android/Chrome de tik en swipe door elkaar haalt.
+    shell.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      const t=e.touches[0];
+      begin(t.clientX,t.clientY);
+    }, {passive:true});
+    shell.addEventListener('touchmove', e => {
+      if (!tracking || e.touches.length !== 1) return;
+      const t=e.touches[0];
+      move(t.clientX,t.clientY,e);
+    }, {passive:false});
+    shell.addEventListener('touchend', end, {passive:true});
+    shell.addEventListener('touchcancel', closeSwipe, {passive:true});
+
+    // Desktop/muis fallback.
+    shell.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      begin(e.clientX,e.clientY);
+    });
+    shell.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse' || !tracking) return;
+      move(e.clientX,e.clientY,e);
+    });
+    shell.addEventListener('pointerup', e => {
+      if (e.pointerType === 'mouse') end();
+    });
+
+    // Een product openen gebeurt alleen bij een echte korte tik, nooit via de swipe.
+    if (main) {
+      main.addEventListener('click', e => {
         e.preventDefault();
-        e.stopImmediatePropagation();
-        return;
-      }
-      if (shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        reset();
-      }
-    }, true);
+        e.stopPropagation();
+        if (swiped || horizontal) return;
+        if (shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
+          closeSwipe();
+          return;
+        }
+        const id=Number(main.dataset.stockEdit);
+        if (Number.isFinite(id)) editProduct(id);
+      });
+      main.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const id=Number(main.dataset.stockEdit);
+          if (Number.isFinite(id)) editProduct(id);
+        }
+      });
+    }
   });
 }
 
