@@ -416,7 +416,7 @@ function manageBulkToolbar() {
             <option value="">Kies categorie…</option>
             ${categories.map(category => `<option value="${esc(category)}">${esc(category)}</option>`).join('')}
           </select>
-          <button type="button" class="small" onclick="applyManageBulkCategory(document.getElementById('manageBulkCategory')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkCategoryBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Vaste plek
@@ -426,7 +426,7 @@ function manageBulkToolbar() {
             <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
             <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
           </select>
-          <button type="button" class="small" onclick="applyManageBulkLocation(document.getElementById('manageBulkLocation')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkLocationBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
       <label>Controleren bij
@@ -438,7 +438,7 @@ function manageBulkToolbar() {
             <option value="rare">Zelden checken</option>
             <option value="work">Alleen meenemen bij ‘Wat kan ik maken?’</option>
           </select>
-          <button type="button" class="small" onclick="applyManageBulkCheckCycle(document.getElementById('manageBulkCheckCycle')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+          <button type="button" class="small" id="applyManageBulkCheckCycleBtn" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
         </div>
       </label>
     </div>
@@ -511,6 +511,36 @@ window.applyManageBulkCheckCycle = value => {
   render();
 };
 
+function bindManageBulkApplyButtons() {
+  const categoryBtn = document.getElementById('applyManageBulkCategoryBtn');
+  const locationBtn = document.getElementById('applyManageBulkLocationBtn');
+  const checkBtn = document.getElementById('applyManageBulkCheckCycleBtn');
+  if (categoryBtn) categoryBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    const value = document.getElementById('manageBulkCategory')?.value || '';
+    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
+    if (!value) return alert('Kies eerst een categorie.');
+    window.applyManageBulkCategory(value);
+  });
+  if (locationBtn) locationBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    const value = document.getElementById('manageBulkLocation')?.value || '';
+    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
+    if (!value) return alert('Kies eerst een vaste plek.');
+    window.applyManageBulkLocation(value);
+  });
+  if (checkBtn) checkBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    const value = document.getElementById('manageBulkCheckCycle')?.value || '';
+    if (!manageSelectedProducts.size) return alert('Selecteer eerst minimaal 1 product.');
+    if (!value) return alert('Kies eerst wanneer je deze producten wilt controleren.');
+    window.applyManageBulkCheckCycle(value);
+  });
+}
+
 function renderManage(arr) {
   const hasSearch = Boolean(search.value.trim());
   if (hasSearch) openManageSection = 'products';
@@ -529,6 +559,7 @@ function renderManage(arr) {
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
   content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Winkels','stores',shops);
+  bindManageBulkApplyButtons();
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};
