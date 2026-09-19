@@ -520,7 +520,7 @@ function renderManage(arr) {
   const sorted = categoryFiltered.slice().sort(sortProducts);
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
-      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
+      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(this.dataset.manageProductId, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
       <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${memoHtml(x)}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;

@@ -780,12 +780,12 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #modal .card{width:100%;padding:20px 16px 28px}
 }
 
-/* V1.4.68 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
+/* V1.4.69 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
 .stock-swipe-shell.swipe-delete-open .stock-swipe-delete{background:#c93636}
 .stock-swipe-shell.swipe-cycle-open .stock-swipe-cycle{background:#f2edf8}
 
 
-/* V1.4.68 - tijdelijke bulkindeling in Beheer */
+/* V1.4.69 - tijdelijke bulkindeling in Beheer */
 .manage-bulk-start{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 8px;background:#f7f3fa;border:1px solid #e5dced;border-radius:12px;color:#6d6670;font-size:.86rem}
 .manage-select-button{font-weight:800;color:#654487}
 .manage-bulk-toolbar{position:sticky;top:0;z-index:20;margin:0 0 10px;padding:11px 12px;background:#f7f3fa;border:1px solid #dfd3e9;border-radius:12px;box-shadow:0 5px 14px rgba(58,42,72,.08)}
@@ -802,14 +802,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .manage-product-list{display:grid}
 @media(max-width:650px){.manage-bulk-actions{grid-template-columns:1fr}.manage-bulk-toolbar{top:4px}.manage-product-select{padding-right:10px}}
 
-/* V1.4.68 - alles selecteren/deselecteren in Beheer */
+/* V1.4.69 - alles selecteren/deselecteren in Beheer */
 .manage-bulk-selection-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 9px}.manage-bulk-selection-actions .small{flex:0 0 auto}.manage-bulk-selection-actions button:disabled{opacity:.5}
 
-/* V1.4.68 - categoriefilter in tijdelijke selectiemodus Beheer */
+/* V1.4.69 - categoriefilter in tijdelijke selectiemodus Beheer */
 .manage-bulk-filter{margin:0 0 9px}.manage-bulk-filter label{font-size:.78rem;font-weight:800;color:#61586a}.manage-bulk-filter select{display:block;width:100%;margin-top:4px;padding:9px 10px;border:1px solid #d9cee4;border-radius:10px;background:#fff;font:inherit;color:#3f3943}
 
-/* V1.4.68 - bulkacties expliciet toepassen zodat 1 of 2 geselecteerde producten betrouwbaar werken */
+/* V1.4.69 - bulkacties expliciet toepassen zodat 1 of 2 geselecteerde producten betrouwbaar werken */
 .manage-bulk-field-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.manage-bulk-field-row .small{min-height:42px;white-space:nowrap}@media(max-width:520px){.manage-bulk-field-row{grid-template-columns:1fr}.manage-bulk-field-row .small{width:100%}}
 
-/* V1.4.68 - categorie als bulkactie in Beheer */
+/* V1.4.69 - categorie als bulkactie in Beheer */
 @media(max-width:900px){.manage-bulk-actions{grid-template-columns:1fr}}

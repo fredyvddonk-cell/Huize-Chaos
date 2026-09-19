@@ -1,10 +1,8 @@
-# Huize Chaos V1.4.68
+# Huize Chaos V1.4.69
 
-## Wijziging V1.4.68
+## Wijziging V1.4.69
 
-- Categorie als bulkactie toegevoegd aan Beheer.
-- Werkt vanaf 1 geselecteerd product.
-- Categorie kan voor 1, 2 of meer geselecteerde producten tegelijk worden gewijzigd.
-- Eerst categorie kiezen, daarna op Toepassen tikken.
-- Vaste plek en Controleren bij blijven op dezelfde manier werken.
-- Categoriefilter, Alles selecteren en Alles deselecteren blijven behouden.
+- Selectievinkjes in Beheer geven hun product-ID weer correct door.
+- Teller geselecteerde producten wordt direct bijgewerkt.
+- Bulkacties Categorie, Vaste plek en Controleren bij worden vanaf 1 selectie actief.
+- Werkt bij 1, 2 of meer geselecteerde producten.
