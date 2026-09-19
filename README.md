@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.65
+# Huize Chaos V1.4.66
 
-## Wijziging V1.4.65
+## Wijziging V1.4.66
 
 - In Beheer kan de tijdelijke selectiemodus nu op categorie worden gefilterd.
 - Alles selecteren selecteert alleen de producten die binnen de gekozen categorie zichtbaar zijn.

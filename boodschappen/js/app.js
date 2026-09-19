@@ -387,6 +387,7 @@ function bindCategoryDrag() {
 
 function manageBulkToolbar() {
   const selectedCount = manageSelectedProducts.size;
+  const hasManageSelection = selectedCount >= 1;
   if (!manageSelectMode) {
     return `<div class="manage-bulk-start"><button type="button" class="small manage-select-button" onclick="toggleManageSelectionMode()">Selecteren</button><span>Meerdere producten tegelijk indelen</span></div>`;
   }
@@ -405,18 +406,19 @@ function manageBulkToolbar() {
     </div>
     <div class="manage-bulk-selection-actions">
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
-      <button type="button" class="small" onclick="deselectAllManageProducts()" ${selectedCount ? '' : 'disabled'}>Alles deselecteren</button>
+      <button type="button" class="small" onclick="deselectAllManageProducts()" ${hasManageSelection ? '' : 'disabled'}>Alles deselecteren</button>
     </div>
+    ${hasManageSelection ? `<div class="manage-bulk-message">Bulkacties actief voor ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product om Vaste plek of Controleren bij in te stellen.</div>`}
     <div class="manage-bulk-actions">
       <label>Vaste plek
-        <select onchange="applyManageBulkLocation(this.value); this.selectedIndex=0" ${selectedCount ? '' : 'disabled'}>
+        <select onchange="applyManageBulkLocation(this.value); this.selectedIndex=0" ${hasManageSelection ? '' : 'disabled'}>
           <option value="">Kies vaste plek…</option>
           <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
           <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
         </select>
       </label>
       <label>Controleren bij
-        <select onchange="applyManageBulkCheckCycle(this.value); this.selectedIndex=0" ${selectedCount ? '' : 'disabled'}>
+        <select onchange="applyManageBulkCheckCycle(this.value); this.selectedIndex=0" ${hasManageSelection ? '' : 'disabled'}>
           <option value="">Kies checkmoment…</option>
           <option value="week">Weekcheck</option>
           <option value="month">Maandcheck</option>
