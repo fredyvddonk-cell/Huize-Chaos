@@ -764,8 +764,95 @@ function showManualRecipeForm(){
 }
 document.querySelector('#addRecipeManual')?.addEventListener('click',showManualRecipeForm);
 
+// V1.4.85 - Picnic-recept importeren vanaf 1 of 2 screenshots.
+async function recipeImportImageData(file, cropPhoto=false){
+  const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(file)});
+  const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
+  const canvas=document.createElement('canvas');
+  let sx=0,sy=0,sw=img.width,sh=img.height;
+  if(cropPhoto && img.width/img.height>1.6){sw=Math.round(img.width*.535)}
+  else if(cropPhoto && img.height>img.width*1.25){sh=Math.round(img.height*.42)}
+  const max=1200,scale=Math.min(1,max/sw,max/sh);canvas.width=Math.max(1,Math.round(sw*scale));canvas.height=Math.max(1,Math.round(sh*scale));
+  canvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/jpeg',.82)
+}
+function normalizeOcrLines(text){return String(text||'').replace(/\r/g,'').split('\n').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean)}
+function looksAmount(s){return /(?:^|\s)(?:\d+(?:[.,]\d+)?|[¼½¾⅓⅔])\s*(?:g|gr|kg|ml|cl|dl|l|el|tl|stuks?|stuk|tenen?|blik(?:je)?s?|zak(?:je)?s?)\b/i.test(s)||/naar smaak/i.test(s)}
+function parsePicnicIngredientLine(line){
+  let s=String(line||'').replace(/^[•\-–]\s*/,'').trim();
+  let m=s.match(/^(.*?)(\d+(?:[.,]\d+)?|[¼½¾⅓⅔])\s*(g|gr|kg|ml|cl|dl|l|el|tl|stuks?|stuk|tenen?|blik(?:je)?s?|zak(?:je)?s?)\s*$/i);
+  if(m&&m[1].trim())return {qty:m[2].replace(',','.'),unit:m[3],ingredient:m[1].trim(),memo:''};
+  m=s.match(/^(.*?)(naar smaak)\s*$/i);if(m&&m[1].trim())return {qty:'',unit:'',ingredient:m[1].trim(),memo:'naar smaak'};
+  return parseIngredient(s)
+}
+function parsePicnicOcr(texts){
+  const lines=texts.flatMap(normalizeOcrLines), all=lines.join('\n');
+  let title='';
+  const skip=/^(alle recepten|ingrediënten|bereiding|waarschijnlijk al in huis|picnic|\d+\s*min)$/i;
+  for(const l of lines){if(skip.test(l)||looksAmount(l)||/^\d+[.)]?$/.test(l)||l.length<8)continue;if(/[.!?]$/.test(l)&&l.length>55)continue;if(l.length>=12&&l.length<=90){title=l;break}}
+  const directionLines=[];let inDirections=false;
+  for(const l of lines){
+    if(/^bereiding$/i.test(l)){inDirections=true;continue}
+    if(inDirections||/^\d+[.)]?\s+/.test(l)||/^\d+[.)]?$/.test(l))directionLines.push(l)
+  }
+  let directions=parseBulkDirections(directionLines.join('\n'));
+  const ingredientLines=[];let inIngredients=false;
+  for(const l of lines){
+    if(/^ingrediënten$/i.test(l)){inIngredients=true;continue}
+    if(/^bereiding$/i.test(l)){inIngredients=false;continue}
+    if(inIngredients){if(/^(waarschijnlijk al in huis|variatie tip)[:]?$/i.test(l))continue;ingredientLines.push(l)}
+  }
+  if(!ingredientLines.length){
+    for(const l of lines){if(looksAmount(l)&&!/^\d+\s*min$/i.test(l))ingredientLines.push(l)}
+  }
+  const ingredients=[];let pendingName='';
+  for(const l of ingredientLines){
+    if(/^(ingrediënten|bereiding|waarschijnlijk al in huis)$/i.test(l))continue;
+    if(looksAmount(l)){
+      let parsed=parsePicnicIngredientLine(l);
+      if(pendingName && (!parsed.ingredient || /^\d/.test(parsed.ingredient))){parsed.ingredient=pendingName;pendingName=''}
+      if(parsed.ingredient&&parsed.ingredient.length>1)ingredients.push(parsed)
+    } else if(!/^\d+[.)]?$/.test(l)&&l.length<70){
+      if(pendingName){ingredients.push({qty:'',unit:'',ingredient:pendingName,memo:''})}
+      pendingName=l
+    }
+  }
+  if(pendingName&&!ingredients.some(x=>x.ingredient===pendingName))ingredients.push({qty:'',unit:'',ingredient:pendingName,memo:''});
+  const cleanIngredients=ingredients.filter(x=>x.ingredient&&!/^(alle recepten|ingrediënten|bereiding)$/i.test(x.ingredient));
+  directions=stripIngredientAmountsFromDirections(directions,cleanIngredients);
+  return {title:title||'Picnic recept',servings:'4',ingredients:cleanIngredients,directions,source:'Picnic'}
+}
+async function importRecipeFromPhotos(files){
+  files=[...files].slice(0,2);if(!files.length)return;
+  if(!window.Tesseract){alert('De foto-import kon niet worden geladen. Controleer je internetverbinding en probeer opnieuw.');return}
+  hideList();
+  detail.innerHTML='<div class="panel bulk-recipe-panel"><h2>Recept uit foto\'s halen</h2><p id="photoImportStatus">Foto 1 van '+files.length+' lezen…</p><div class="recipe-import-progress"><span id="photoImportBar"></span></div><p class="field-help">Dit kan op je telefoon even duren. Je krijgt daarna eerst een controlescherm.</p></div>';
+  try{
+    const texts=[];
+    for(let i=0;i<files.length;i++){
+      const status=detail.querySelector('#photoImportStatus'),bar=detail.querySelector('#photoImportBar');if(status)status.textContent=`Foto ${i+1} van ${files.length} lezen…`;
+      const result=await Tesseract.recognize(files[i],'nld',{logger:m=>{if(m.status==='recognizing text'){const pct=Math.round((m.progress||0)*100);if(status)status.textContent=`Foto ${i+1} van ${files.length} lezen… ${pct}%`;if(bar)bar.style.width=`${Math.round(((i+(m.progress||0))/files.length)*100)}%`}}});
+      texts.push(result?.data?.text||'')
+    }
+    const parsed=parsePicnicOcr(texts),id=crypto.randomUUID();
+    let photo='';try{photo=await recipeImportImageData(files[0],true)}catch(_){photo=''}
+    edited={id:'custom-'+id,...parsed,photo,category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',sourceUrl:'',imported:true};current='new:'+id;displayServings='4';
+    showImportedPhotoRecipeReview();
+  }catch(err){console.error(err);detail.innerHTML=`<div class="panel bulk-recipe-panel"><h2>Foto-import niet gelukt</h2><p>De tekst kon niet goed uit de foto worden gelezen.</p><div class="actions"><button class="btn" id="photoImportBack" type="button">Terug</button></div></div>`;detail.querySelector('#photoImportBack').onclick=backList}
+}
+function showImportedPhotoRecipeReview(){
+  detail.innerHTML=`<div class="detail-head"><div><div class="review-label">Uit foto gehaald</div><h2>Controleer het recept</h2><small>Picnic · standaard 4 personen</small></div></div>${editForm(edited,false)}`;
+  bindCommonEdit();
+  const actions=detail.querySelector('.review-actions');if(actions)actions.innerHTML='<button class="btn primary" id="savePhotoRecipe">Recept opslaan</button><button class="btn" id="cancelPhotoRecipe">Annuleren</button>';
+  detail.querySelector('#savePhotoRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'4');showView('ingredients')};
+  detail.querySelector('#cancelPhotoRecipe').onclick=backList;
+}
+function setupPhotoRecipeImport(){const b=document.querySelector('#addRecipeFromPhotos'),input=document.querySelector('#recipePhotoImportInput');if(!b||!input)return;b.onclick=()=>{input.value='';input.click()};input.onchange=()=>{const files=[...(input.files||[])];if(files.length>2){alert('Kies maximaal 2 foto\'s.');return}importRecipeFromPhotos(files)}}
+setupPhotoRecipeImport();
+
+
 // V1.3.116 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.type==='search')return;e.preventDefault();input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();});
 
-// V1.4.84 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
-// V1.4.84 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.
+// V1.4.85 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
+// V1.4.85 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.

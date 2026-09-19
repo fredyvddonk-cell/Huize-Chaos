@@ -106,7 +106,7 @@
 /* V1.4.47 - tekstuele Picnic-achtige keuze-indeling */
 .smart-filter-block{display:grid;gap:6px;margin-top:10px}.smart-filter-block>span,.smart-time-row>span{font-size:.82rem;font-weight:700;color:#6f6480}.smart-filter-block .smart-categories,.smart-filter-block .smart-times{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.smart-filter-block .smart-categories::-webkit-scrollbar,.smart-filter-block .smart-times::-webkit-scrollbar{display:none}.smart-filter-block button,.smart-time-row button{white-space:nowrap}
 
-/* V1.4.84 - weekmenu direct en gevarieerd aanvullen */
+/* V1.4.85 - weekmenu direct en gevarieerd aanvullen */
 .week-add-recipe{justify-self:start;margin-top:2px}
 .week-quick-picker{display:grid;gap:10px;background:#fff;border:1px solid #e7e0ec;border-radius:13px;padding:11px 12px}
 .week-quick-picker.hidden{display:none}
@@ -118,7 +118,7 @@
 @media(max-width:600px){.week-add-recipe{width:100%}.week-quick-picker .meal-suggestion-group{display:grid;grid-template-columns:1fr}.week-quick-picker .meal-suggestion-group>strong{grid-column:1}.week-quick-picker .meal-suggestion-group button{width:100%}}
 
 
-/* V1.4.84 - A6 weekoverzicht printen */
+/* V1.4.85 - A6 weekoverzicht printen */
 .week-menu-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.week-print-button{white-space:nowrap}.week-print-sheet{display:none}
 @media(max-width:600px){.week-menu-tools{display:grid;grid-template-columns:1fr 1fr}.week-menu-tools .btn{width:100%}}
 @media print{
@@ -137,7 +137,7 @@
 }
 
 
-/* V1.4.84 - foto's bij recepten */
+/* V1.4.85 - foto's bij recepten */
 .recipe-card.compact.has-photo{display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px}
 .recipe-card-photo{width:76px;height:64px;object-fit:cover;border-radius:9px;background:#f2eef5}
 .recipe-card-copy{min-width:0;display:grid;gap:3px;text-align:left}
@@ -158,5 +158,8 @@
   .recipe-detail-photo-wrap,.recipe-detail-photo{max-height:300px}
 }
 
-/* V1.4.84 - betrouwbare fotokiezer voor recepten */
+/* V1.4.85 - betrouwbare fotokiezer voor recepten */
 .recipe-photo-pick{position:static;overflow:visible}
+
+/* V1.4.85 - import van 1 of 2 receptscreenshots */
+.recipe-library-actions{display:flex;gap:8px;flex-wrap:wrap}.recipe-import-progress{height:8px;background:#eee;border-radius:999px;overflow:hidden;margin:12px 0}.recipe-import-progress span{display:block;height:100%;width:0;background:currentColor;transition:width .2s}

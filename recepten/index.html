@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Weekmenu & Recepten · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.4.84">
+  <link rel="stylesheet" href="style.css?v=1.4.85">
 </head>
 <body>
 <main class="recipes">
@@ -12,7 +12,7 @@
     <a class="module-brand" href="../" aria-label="Terug naar Huize Chaos">
       <img class="module-app-icon" src="../icons/icon-192.png" alt=""><img class="module-wordmark" src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
     </a>
-    <div class="module-meta"><span class="module-version">V1.4.84</span><span id="recipeSyncStatus" class="module-sync">Recepten laden…</span></div>
+    <div class="module-meta"><span class="module-version">V1.4.85</span><span id="recipeSyncStatus" class="module-sync">Recepten laden…</span></div>
   </header>
   <section class="module-heading">
     <p>Huize Chaos</p>
@@ -37,7 +37,7 @@
   </section>
 
   <section id="recipeLibraryPanel" class="hidden">
-    <div class="recipe-library-actions"><button class="btn primary" id="addRecipeManual" type="button">+ Recept toevoegen</button></div>
+    <div class="recipe-library-actions"><button class="btn primary" id="addRecipeManual" type="button">+ Recept toevoegen</button><button class="btn" id="addRecipeFromPhotos" type="button">Recept uit foto's</button><input id="recipePhotoImportInput" class="recipe-photo-input" type="file" accept="image/*" multiple></div>
     <div class="search"><input id="search" placeholder="Zoek recept…" autocomplete="off"></div><div id="smartRecipePicker"></div>
     <div class="stock-recipe-tools"><button class="btn" id="stockRecipeButton" type="button">Uit voorraad recepten zoeken</button><div id="stockPicker"></div></div>
     <div id="pending"></div>
@@ -46,7 +46,8 @@
 
   <section id="detail" class="detail hidden"></section>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="recipes-data.js"></script>
-<script type="module" src="app.js?v=1.4.84"></script>
+<script type="module" src="app.js?v=1.4.85"></script>
 </body>
 </html>
