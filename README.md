@@ -1,4 +1,11 @@
-# Huize Chaos V1.4.46
+# Huize Chaos V1.4.47
+
+- Receptcategorie is nu de keuken/smaakrichting.
+- Receptsoort is nu de gerechtvorm.
+- Hoofdingrediënt toegevoegd voor kip/rund/varken/vis/vegetarisch/anders.
+- Recept kiezen heeft compacte tekstfilters voor categorie, soort, hoofdingrediënt en tijd thuis.
+- Weekmenuvariatie gebruikt alle drie kenmerken.
+
 
 - Recept opent voortaan als eigen scherm; de receptenlijst blijft niet erboven staan.
 - Weekmenu en Recepten blijven vanuit een geopend recept bereikbaar.
