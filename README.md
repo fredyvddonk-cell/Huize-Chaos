@@ -1,8 +1,13 @@
-# Huize Chaos V1.4.74
+# Huize Chaos V1.4.75
 
-- Bulkactie Vaste plek in Beheer opnieuw gekoppeld
-- Toepassen van Vaste plek gebruikt nu centrale klikafhandeling
-- Actie blijft werken na selecteren, filteren, zoeken en opnieuw renderen
-- Werkt vanaf 1 geselecteerd product
-- Categorie en Controleren bij blijven behouden
-- Vaste plek en Controleren bij blijven zichtbaar in Beheer
+- Vaste plek direct per product aanpasbaar in Beheer
+- Controleren bij direct per product aanpasbaar in Beheer
+- Selectiemodus blijft beschikbaar voor meerdere producten tegelijk
+- Vaste plekken als aparte beheerlijst toegevoegd
+- Nieuwe vaste plekken kunnen worden toegevoegd
+- Bestaande vaste plekken kunnen worden hernoemd
+- Producten bewegen automatisch mee bij hernoemen van een vaste plek
+- Vaste plekken kunnen worden verwijderd
+- Producten van een verwijderde vaste plek worden op Niet ingesteld gezet
+- Aangepaste vaste plekken beschikbaar in productbewerking en bulkselectie
+- Cache bijgewerkt naar V1.4.75

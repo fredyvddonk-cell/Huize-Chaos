@@ -1,5 +1,6 @@
 const DEFAULT_STORES = ['Picnic','Jumbo','Albert Heijn','Lidl','Aldi','Bakker','Overig'];
 const UNITS = ['', 'stuks', 'g', 'kg', 'ml', 'l', 'pakje', 'pak', 'zakje', 'zak', 'fles', 'blik', 'pot', 'doos', 'bakje', 'rol'];
+const DEFAULT_STOCK_LOCATIONS = ['Kast 1','Kast 2','Kast 3','Kast 4','Kruidenrek','Koelkast','Vriezer','Overig'];
 const DEFAULT_CATEGORIES = ['Bakproducten','Broodbeleg (zoet)','Broodbeleg (hartig)','Brood & ontbijtproducten','Diepvries','Dranken','Fruit','Groente','Kruiden','Olie / saus','Zuivel','Bewaarproducten (voorraad)','Snacks & tussendoor','Schoonmaak & huishouden','Huisdier','Persoonlijke verzorging','Keukenbenodigdheden'];
 
 const rawSeed = [
@@ -24,6 +25,9 @@ const rawSeed = [
 ];
 const seed = rawSeed.map((r,i)=>({id:i+1,name:r[0],category:r[1],quantity:r[2]||'',unit:r[3]||'',store:r[4]||'',memo:r[5]||'',status:'In huis',shopping:false,done:false}));
 let stores = JSON.parse(localStorage.getItem('household-stores') || 'null') || [...DEFAULT_STORES];
+let stockLocations = JSON.parse(localStorage.getItem('household-stock-locations') || 'null') || [...DEFAULT_STOCK_LOCATIONS];
+stockLocations = [...new Set(stockLocations.map(v => String(v || '').trim()).filter(Boolean))];
+if (!stockLocations.length) stockLocations = [...DEFAULT_STOCK_LOCATIONS];
 let categories = JSON.parse(localStorage.getItem('household-categories') || 'null') || [...DEFAULT_CATEGORIES];
 if (!categories.includes('Overig')) categories.push('Overig');
 categories = categories.filter(x => x !== 'Overig').concat('Overig');
@@ -67,6 +71,7 @@ function migrateProduct(x) {
 }
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
+stockLocations = [...new Set([...stockLocations, ...products.map(product => String(product.stockLocation || '').trim()).filter(Boolean)])];
 
 function normalizedProductName(value) {
   return String(value || '').trim().toLocaleLowerCase('nl-NL').replace(/\s+/g,' ');
@@ -118,6 +123,7 @@ function save() {
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));
+  localStorage.setItem('household-stock-locations', JSON.stringify(stockLocations));
   const status = document.getElementById('syncStatus');
   // Toon alleen een synchronisatiewachtrij wanneer er echt een aangemelde
   // cloudsessie is. Anders kon mobiel na lokaal opslaan ten onrechte
@@ -272,6 +278,7 @@ window.pushHuizeChaosState = patch => {
 
 function openModal(x = null, prefillName = '') {
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  refreshStockLocationSelect();
   $('#modalTitle').textContent = x ? 'Product wijzigen' : 'Product toevoegen';
   $('#editId').value = x?.id || '';
   $('#productName').value = x?.name || prefillName || '';
@@ -385,6 +392,24 @@ function bindCategoryDrag() {
   });
 }
 
+function refreshStockLocationSelect() {
+  const select = document.getElementById('stockLocation');
+  if (!select) return;
+  const current = select.value;
+  select.innerHTML = stockLocationOptions(current, true);
+  if ([...select.options].some(option => option.value === current)) select.value = current;
+}
+
+function stockLocationOptions(selected = '', includeUnset = true) {
+  const first = includeUnset ? `<option value="">Niet ingesteld</option>` : '';
+  return first + stockLocations.map(location => `<option value="${esc(location)}" ${String(selected||'') === location ? 'selected' : ''}>${esc(location)}</option>`).join('');
+}
+
+function checkCycleOptions(selected = '') {
+  const labels = [['week','Weekcheck'],['month','Maandcheck'],['rare','Zelden checken'],['work','Alleen meenemen bij ‘Wat kan ik maken?’']];
+  return labels.map(([value,label]) => `<option value="${value}" ${selected === value ? 'selected' : ''}>${label}</option>`).join('');
+}
+
 function manageBulkToolbar() {
   const selectedCount = manageSelectedProducts.size;
   const hasManageSelection = selectedCount >= 1;
@@ -422,8 +447,7 @@ function manageBulkToolbar() {
         <div class="manage-bulk-field-row">
           <select id="manageBulkLocation" ${hasManageSelection ? '' : 'disabled'}>
             <option value="">Kies vaste plek…</option>
-            <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
-            <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
+            ${stockLocations.map(location => `<option value="${esc(location)}">${esc(location)}</option>`).join('')}
           </select>
         </div>
       </label>
@@ -529,6 +553,63 @@ function handleManageBulkChange(event) {
   }
 }
 
+window.updateManageProductLocation = (id, value) => {
+  const product = products.find(x => Number(x.id) === Number(id));
+  if (!product) return;
+  product.stockLocation = String(value || '');
+  save();
+  render();
+};
+window.updateManageProductCheckCycle = (id, value) => {
+  if (!['week','month','rare','work'].includes(value)) return;
+  const product = products.find(x => Number(x.id) === Number(id));
+  if (!product) return;
+  product.checkCycle = value;
+  save();
+  render();
+};
+
+function stockLocationRows() {
+  return `<div class="manage-add"><input id="newStockLocation" placeholder="Nieuwe vaste plek"><button onclick="addStockLocation()">+</button></div>` +
+    stockLocations.map(location => {
+      const count = products.filter(product => product.stockLocation === location).length;
+      return `<div class="manage-row"><span>${esc(location)} <small>(${count})</small></span><button onclick="renameStockLocation('${encodeURIComponent(location)}')">Wijzig</button><button onclick="deleteStockLocation('${encodeURIComponent(location)}')">Verwijder</button></div>`;
+    }).join('');
+}
+window.addStockLocation = () => {
+  const input = document.getElementById('newStockLocation');
+  const value = String(input?.value || '').trim();
+  if (!value || stockLocations.includes(value)) return;
+  stockLocations.push(value);
+  save();
+  refreshStockLocationSelect();
+  render();
+};
+window.renameStockLocation = encoded => {
+  const oldName = decodeURIComponent(encoded);
+  const value = prompt('Nieuwe naam voor vaste plek:', oldName)?.trim();
+  if (!value || value === oldName) return;
+  if (stockLocations.includes(value)) { alert('Deze vaste plek bestaat al.'); return; }
+  products.forEach(product => { if (product.stockLocation === oldName) product.stockLocation = value; });
+  stockLocations = stockLocations.map(location => location === oldName ? value : location);
+  save();
+  refreshStockLocationSelect();
+  render();
+};
+window.deleteStockLocation = encoded => {
+  const name = decodeURIComponent(encoded);
+  const count = products.filter(product => product.stockLocation === name).length;
+  const message = count
+    ? `${name} verwijderen? Bij ${count} product${count === 1 ? '' : 'en'} wordt Vaste plek daarna 'Niet ingesteld'.`
+    : `${name} verwijderen?`;
+  if (!confirm(message)) return;
+  products.forEach(product => { if (product.stockLocation === name) product.stockLocation = ''; });
+  stockLocations = stockLocations.filter(location => location !== name);
+  save();
+  refreshStockLocationSelect();
+  render();
+};
+
 function renderManage(arr) {
   const hasSearch = Boolean(search.value.trim());
   if (hasSearch) openManageSection = 'products';
@@ -539,14 +620,15 @@ function renderManage(arr) {
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
       ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(this.dataset.manageProductId, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
-      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label">Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>${memoHtml(x)}</div>
+      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${manageSelectMode ? `<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label">Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>` : `<div class="manage-inline-fields"><label>Vaste plek<select onchange="updateManageProductLocation(${JSON.stringify(x.id)}, this.value)">${stockLocationOptions(x.stockLocation, true)}</select></label><label>Controleren bij<select onchange="updateManageProductCheckCycle(${JSON.stringify(x.id)}, this.value)">${checkCycleOptions(x.checkCycle)}</select></label></div>`}${memoHtml(x)}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;
 
   const cats = `<div class="manage-add"><input id="newCategory" placeholder="Nieuwe categorie"><button onclick="addCategory()">+</button></div><p class="manage-help">Sleep met ☰ of gebruik ↑ en ↓ om de volgorde te wijzigen. Overig blijft onderaan.</p>${categoryRows()}`;
+  const locations = stockLocationRows();
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
-  content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Winkels','stores',shops);
+  content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Vaste plekken','locations',locations) + accordion('Winkels','stores',shops);
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};
@@ -614,6 +696,8 @@ window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
   products = nextProducts.map(migrateProduct);
+  stockLocations = [...new Set([...stockLocations, ...products.map(product => String(product.stockLocation || '').trim()).filter(Boolean)])];
+  refreshStockLocationSelect();
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   render();
 };
@@ -671,6 +755,7 @@ function initApp() {
   content.addEventListener('change', handleManageBulkChange);
 
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  refreshStockLocationSelect();
   $('#unit').innerHTML = '<option value="">Geen eenheid</option>' + UNITS.filter(Boolean).map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
 
   $('#form').onsubmit = event => {
