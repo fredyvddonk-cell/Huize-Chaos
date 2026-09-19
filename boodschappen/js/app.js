@@ -3,6 +3,36 @@ const UNITS = ['', 'stuks', 'g', 'kg', 'ml', 'l', 'pakje', 'pak', 'zakje', 'zak'
 const DEFAULT_STOCK_LOCATIONS = ['Kast 1','Kast 2','Kast 3','Kast 4','Kruidenrek','Koelkast','Vriezer','Overig'];
 const DEFAULT_CATEGORIES = ['Bakproducten','Broodbeleg (zoet)','Broodbeleg (hartig)','Brood & ontbijtproducten','Diepvries','Dranken','Fruit','Groente','Kruiden','Olie / saus','Zuivel','Bewaarproducten (voorraad)','Snacks & tussendoor','Schoonmaak & huishouden','Huisdier','Persoonlijke verzorging','Keukenbenodigdheden'];
 
+// V1.4.77 - rustige standaardvoorraad op basis van de oude Plan to Eat-controlelijst.
+const STANDARD_STOCK_LAYOUT = [
+  ['Bakproducten',['Bakpoeder','(GV) bloem','Droge gist','Suiker','Vanillesuiker']],
+  ['Broodbeleg (zoet)',['Appelstroop','Hagelslag','Jam','(GV) pindakaas','Pindakaas','Speculoos','Vlokken','Vruchtenhagel']],
+  ['Broodbeleg (hartig)',['Boterhamworst','Gelderse worst','Grillworst','Leverpastei','Palingworst','Salami','(GV) Smeerkaas','Smeerkaas']],
+  ['Brood & ontbijtproducten',['(GV) broodjes','(GV) havermout','(GV) knackebrod','(GV) pitabroodjes','(GV) wraps']],
+  ['Diepvries',['Bitterballen','Friet','Frikandellen','Gedroogd/diepvries fruit','Kroketten','(GV) Snacks']],
+  ['Dranken',['Appelsap','Cola','Fanta lemon','Ice tea sparkling','Karvan Cevitam Aardbei','Karvan Cevitam Framboos','Karvan Cevitam Grenadine','Koffiebonen','Sinas','Thee green','Thee aardbeien','Thee Munt','Thee zwart','Wijn - Rood','Wijn - Rosé','Wijn - Wit']],
+  ['Fruit',['Appels','Bananen','Druiven','Fruit','Kiwi']],
+  ['Olie / saus',['Azijn','Curry','Frietsaus','Ketjap','Mayonaise','Olijfolie extra virgine','Sojasaus','Zonnebloemolie']],
+  ['Zuivel',['Eieren','Halfvolle melk 2 liter','Halfvolle melk 1 liter','(GV) Halvarine','Halvarine','Jong belegen kaas','Yoghurt / kwark','Yoghurtdrink']],
+  ['Bewaarproducten (voorraad)',['Augurk','Bouillonblokjes - Groente','Bouillonblokjes - kip','Bouillonblokjes - rund','Bouillonblokjes - vis','Frituurolie','Suikerklontjes','Tonijn op water']],
+  ['Kruiden',['Zout','Peper']],
+  ['Schoonmaak & huishouden',['Afwasmiddel','Allesreiniger','Bleek','GFT zakken','Glansspoelmiddel','Handzeep','Wc papier','Pedaalemmerzakken','PMD zakken','Schuursponsjes','Stofzuigerzakken','Vaatwastabletten','Vaatwaszout','Vuilniszakken','Waspoeder','Wasverzachter']],
+  ['Huisdier',['Kattenbakvulling','Kattenbrokjes','Kattensnoepjes','Natvoer']],
+  ['Persoonlijke verzorging',['Conditioner','Deodorant','Douchegel','Excedrin','Inlegkruisjes','Maandverband/tampons','Paracetamol','Pleisters','Scheerproducten','Shampoo','Tandpasta']],
+  ['Keukenbenodigdheden',['Aluminiumfolie','Bakpapier','Boterhamzakjes','Diepvrieszakjes','Extra plastic bakjes','Vershoudfolie']]
+];
+const STANDARD_STOCK_NAMES = new Set(STANDARD_STOCK_LAYOUT.flatMap(([,names])=>names.map(normalizeStockName)));
+const DURABLE_MEAL_RE = /(?:spaghetti|macaroni|pasta|penne|fusilli|tagliatelle|lasagne|orzo|rijst|couscous|bulgur|quinoa|linzen|kikkererwt|bonen|kokosmelk|tomatenblok|tomatenpuree|passata|noedel|mie|tortilla|wrap|naan|pitabrood|polenta|risotto)/i;
+function normalizeStockName(value){return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim()}
+function defaultStockRole(product){
+  const name=String(product?.name||''),category=String(product?.category||'');
+  if(STANDARD_STOCK_NAMES.has(normalizeStockName(name))) return 'standard';
+  if(category==='Kruiden') return /^(zout|peper)$/i.test(name.trim()) ? 'standard' : 'hidden';
+  if(/^(Schoonmaak & huishouden|Huisdier|Persoonlijke verzorging|Keukenbenodigdheden)$/i.test(category)) return 'standard';
+  if(category==='Bewaarproducten (voorraad)' || /maaltijd/i.test(category) || DURABLE_MEAL_RE.test(name)) return 'meal';
+  return 'hidden';
+}
+
 const rawSeed = [
 ['Bakpoeder','Bakproducten'],['(GV) bloem','Bakproducten'],['Droge gist','Bakproducten'],['Suiker','Bakproducten'],['Vanillesuiker','Bakproducten'],
 ['Appelstroop','Broodbeleg (zoet)','1','pot'],['Hagelslag','Broodbeleg (zoet)'],['Jam','Broodbeleg (zoet)','1','pot','','aardbeien'],['(GV) pindakaas','Broodbeleg (zoet)'],['Pindakaas','Broodbeleg (zoet)','1','pot'],['Speculoos','Broodbeleg (zoet)'],['Vlokken','Broodbeleg (zoet)'],['Vruchtenhagel','Broodbeleg (zoet)'],
@@ -64,6 +94,7 @@ function migrateProduct(x) {
   product.cloudPending = Boolean(product.cloudPending);
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
   product.stockLocation = String(product.stockLocation || '');
+  if (!['standard','meal','hidden'].includes(product.stockRole)) product.stockRole = defaultStockRole(product);
   if (!['week','month','work','rare'].includes(product.checkCycle)) {
     product.checkCycle = product.category === 'Kruiden' || product.category === 'Bakproducten' ? 'rare' : (product.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week');
   }
@@ -73,6 +104,17 @@ function migrateProduct(x) {
 }
 
 let products = (JSON.parse(localStorage.getItem('household-products-v2') || 'null') || seed).map(migrateProduct);
+// Voeg ontbrekende regels uit de oude PTE-controlelijst éénmalig terug toe. Bestaande producten blijven onaangetast.
+if (!localStorage.getItem('hc-standard-stock-pte-v1')) {
+  const existingNames = new Set(products.map(p=>normalizeStockName(p.name)));
+  let nextId = Math.max(0,...products.map(p=>Number(p.id)||0)) + 1;
+  STANDARD_STOCK_LAYOUT.forEach(([category,names])=>names.forEach(name=>{
+    if(existingNames.has(normalizeStockName(name))) return;
+    products.push(migrateProduct({id:nextId++,name,category,quantity:'',unit:'',store:'',memo:'',status:'In huis',shopping:false,done:false,stockRole:'standard'}));
+  }));
+  localStorage.setItem('hc-standard-stock-pte-v1','1');
+  localStorage.setItem('household-products-v2', JSON.stringify(products));
+}
 stockLocations = [...new Set([...stockLocations, ...products.map(product => String(product.stockLocation || '').trim()).filter(Boolean)])];
 
 function normalizedProductName(value) {
@@ -295,6 +337,7 @@ function openModal(x = null, prefillName = '') {
   $('#memo').value = x?.memo || '';
   $('#stockLocation').value = x?.stockLocation || '';
   $('#checkCycle').value = x?.checkCycle || (x?.category === 'Kruiden' || x?.category === 'Bakproducten' ? 'rare' : (x?.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week'));
+  $('#stockRole').value = x?.stockRole || (page === 'stock' && typeof stockView !== 'undefined' && stockView === 'meal' ? 'meal' : 'standard');
   updatePackageSizeFields();
   $('#buyDirectWhenOut').checked = Boolean(x?.buyDirectWhenOut);
   const fixedProductOption = $('#fixedProductOption');
@@ -796,6 +839,7 @@ function initApp() {
       category: $('#category').value.trim(),
       stockLocation: $('#stockLocation').value,
       checkCycle: $('#checkCycle').value,
+      stockRole: $('#stockRole').value,
       memo: $('#memo').value.trim(),
       buyDirectWhenOut: $('#buyDirectWhenOut').checked,
       temporary: page === 'list' && !$('#fixedProduct').checked

@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.76</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.77</span></div>
     </div>
 
     <nav class="tabs">
@@ -40,14 +40,11 @@
 
     <div id="stockControls" class="stock-check-controls" hidden>
       <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
-        <button type="button" data-stock-view="all" class="active">Alles</button>
+        <button type="button" data-stock-view="standard" class="active">Standaard voorraad</button>
+        <button type="button" data-stock-view="meal">Maaltijdvoorraad</button>
         <button type="button" data-stock-view="location">Per vaste plek</button>
-        <button type="button" data-stock-view="week">Weekcheck</button>
-        <button type="button" data-stock-view="month">Maandcheck</button>
-        <button type="button" data-stock-view="work">Alleen bij maken</button>
-        <button type="button" data-stock-view="rare">Zelden</button>
       </div>
-      <p id="stockViewHelp" class="stock-view-help">Volledige voorraad. Alles blijft beschikbaar voor receptsuggesties.</p>
+      <p id="stockViewHelp" class="stock-view-help">Je vaste controlelijst volgens je oude Plan to Eat-indeling.</p>
     </div>
 
     <div id="listControls">
@@ -170,6 +167,16 @@
       <div class="field">
         <label for="store">Winkel</label>
         <select id="store"></select>
+      </div>
+
+      <div class="field">
+        <label for="stockRole">Voorraadsoort</label>
+        <select id="stockRole">
+          <option value="standard">Standaard voorraad</option>
+          <option value="meal">Maaltijdvoorraad</option>
+          <option value="hidden">Niet in Voorraad tonen</option>
+        </select>
+        <small class="field-help">Maaltijdvoorraad wordt automatisch gebruikt bij receptcontrole. Hoeveelheden controleer je zelf.</small>
       </div>
 
       <div class="field-row stock-classification-row">

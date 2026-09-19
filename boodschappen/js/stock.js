@@ -1,14 +1,11 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
-let stockView = localStorage.getItem('household-stock-view') || 'all';
-if (!['all','location','week','month','work','rare'].includes(stockView)) stockView = 'all';
+let stockView = localStorage.getItem('household-stock-view') || 'standard';
+if (!['standard','meal','location'].includes(stockView)) stockView = 'standard';
 
 const STOCK_VIEW_HELP = {
-  all: 'Volledige voorraad. Alles blijft beschikbaar voor receptsuggesties.',
-  location: 'Alle producten gegroepeerd op hun vaste plek. Zo zie je per kast of andere plek wat daar hoort te staan.',
-  week: 'Alleen producten die je standaard wilt nalopen voor je gewone boodschappen.',
-  month: 'Houdbare voorraad per vaste plek. Loop één kast tegelijk langs.',
-  work: 'Alleen meenemen bij “Wat kan ik maken?”; niet standaard opnemen in je voorraadcheck.',
-  rare: 'Producten die je maar af en toe hoeft te controleren, zoals veel kruiden en bakproducten.'
+  standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
+  meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
+  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 
@@ -28,8 +25,8 @@ window.toggleAllStock = () => {
   if (expandedStockCategories.size) {
     expandedStockCategories.clear();
   } else {
-    const visible = ['all','location'].includes(stockView) ? products : products.filter(p => p.checkCycle === stockView);
-    const groupKey = ['month','location'].includes(stockView) ? 'stockLocation' : 'category';
+    const visible = stockProductsForView(products);
+    const groupKey = stockView === 'location' ? 'stockLocation' : 'category';
     groups(visible, groupKey).forEach(([groupName]) => expandedStockCategories.add(groupName || 'Niet ingesteld'));
   }
   saveStockExpansion();
@@ -37,7 +34,7 @@ window.toggleAllStock = () => {
 };
 
 window.setStockView = next => {
-  if (!['all','location','week','month','work','rare'].includes(next)) return;
+  if (!['standard','meal','location'].includes(next)) return;
   stockView = next;
   localStorage.setItem('household-stock-view', stockView);
   expandedStockCategories.clear();
@@ -51,26 +48,19 @@ function updateStockViewControls(){
   if (help) help.textContent = STOCK_VIEW_HELP[stockView] || '';
 }
 
-function stockBadges(product){
-  const bits=[];
-  if (product.stockLocation) bits.push(`<span class="stock-mini-badge">${esc(product.stockLocation)}</span>`);
-  if (stockView === 'all' && product.checkCycle) bits.push(`<span class="stock-mini-badge">${CHECK_LABEL[product.checkCycle] || esc(product.checkCycle)}</span>`);
-  return bits.length ? `<div class="stock-item-badges">${bits.join('')}</div>` : '';
-}
+function stockBadges(product){ return ''; }
 
 function stockItemHtml(x){
   return `<div class="stock-swipe-shell" data-stock-swipe data-id="${x.id}">
     <div class="stock-swipe-back stock-swipe-delete"><button type="button" class="stock-swipe-delete-button">Verwijderen</button></div>
     <div class="stock-swipe-back stock-swipe-cycle">
-      <button type="button" onclick="setStockCheckCycle(${x.id},'week')">Week</button>
-      <button type="button" onclick="setStockCheckCycle(${x.id},'month')">Maand</button>
-      <button type="button" onclick="setStockCheckCycle(${x.id},'rare')">Zelden</button>
-      <button type="button" onclick="setStockCheckCycle(${x.id},'work')">Maken</button>
+      <button type="button" onclick="setStockRole(${x.id},'standard')">Standaard</button>
+      <button type="button" onclick="setStockRole(${x.id},'meal')">Maaltijd</button>
+      <button type="button" onclick="setStockRole(${x.id},'hidden')">Niet tonen</button>
     </div>
     <div class="item stock-item stock-swipe-content">
       <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0">
         <div class="name">${esc(x.name)}</div>
-        ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
         ${stockBadges(x)}
         ${memoHtml(x)}
       </div>
@@ -88,6 +78,15 @@ window.setStockCheckCycle = (id, cycle) => {
   const product = products.find(x => x.id === id);
   if (!product) return;
   product.checkCycle = cycle;
+  save();
+  render();
+};
+
+window.setStockRole = (id, role) => {
+  if (!['standard','meal','hidden'].includes(role)) return;
+  const product = products.find(x => Number(x.id) === Number(id));
+  if (!product) return;
+  product.stockRole = role;
   save();
   render();
 };
@@ -220,35 +219,52 @@ function bindStockSwipeActions(){
   });
 }
 
+function stockProductsForView(arr){
+  const base=(arr||[]).filter(p=>p.stockRole!=='hidden');
+  if(stockView==='standard') return base.filter(p=>p.stockRole==='standard');
+  if(stockView==='meal') return base.filter(p=>p.stockRole==='meal'&&p.status==='In huis');
+  return base;
+}
+
 function renderStock(arr) {
   updateStockViewControls();
-  const visible = ['all','location'].includes(stockView) ? arr : arr.filter(x => x.checkCycle === stockView);
+  const visible = stockProductsForView(arr);
   if (!visible.length) {
-    content.innerHTML = `<div class="empty">${['all','location'].includes(stockView) ? 'Geen producten gevonden.' : 'Geen producten in deze controlelijst.'}</div>`;
+    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen houdbare maaltijdproducten op In huis.':'Geen producten gevonden.'}</div>`;
     return;
   }
 
-  const groupKey = ['month','location'].includes(stockView) ? 'stockLocation' : 'category';
-  const rows = groups(visible, groupKey).map(([rawName, items]) => {
-    const categoryName = rawName || (['month','location'].includes(stockView) ? 'Locatie nog instellen' : 'Overig');
-    const collapsed = !expandedStockCategories.has(categoryName);
-    const canBulk = stockView === 'all' && ['Kruiden', 'Bewaarproducten (voorraad)'].includes(categoryName);
-    const bulkStatus = canBulk ? `<div class="stock-bulk-status"><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','In huis')">Alles in huis</button><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','Niet in huis')">Alles niet in huis</button></div>` : '';
-    const addButton = stockView === 'all' ? `<button class="stock-category-add" type="button" onclick="openStockCategoryAdd('${encodeURIComponent(categoryName)}')" aria-label="Product toevoegen aan ${esc(categoryName)}" title="Product toevoegen">+</button>` : '';
-    return `<section class="stock-category ${collapsed ? 'collapsed' : ''}">
-      <div class="shopping-group-head stock-category-head ${['month','location'].includes(stockView) ? 'stock-location-head' : ''}">
-        <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')" aria-label="${esc(categoryName)} ${collapsed ? 'uitklappen' : 'inklappen'}">
-          <span>${esc(categoryName)} <small>(${items.length})</small></span><span class="chevron">⌄</span>
-        </button>${addButton}
-      </div>
-      <div class="shopping-group-body">${bulkStatus}${items.map(stockItemHtml).join('')}</div>
-    </section>`;
-  }).join('');
-
-  content.innerHTML = `<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size ? 'Alles inklappen' : 'Alles uitklappen'}</button></div>${rows}`;
+  let rows='';
+  if(stockView==='standard'){
+    const byName=new Map(visible.map(p=>[normalizeStockName(p.name),p]));
+    rows=STANDARD_STOCK_LAYOUT.map(([category,names])=>{
+      const items=names.map(name=>byName.get(normalizeStockName(name))).filter(Boolean);
+      if(!items.length)return '';
+      const collapsed=!expandedStockCategories.has(category);
+      return `<section class="stock-category ${collapsed?'collapsed':''}">
+        <div class="shopping-group-head stock-category-head">
+          <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(category)}')"><span>${esc(category)}</span><span>${collapsed?'⌄':'⌃'}</span></button>
+        </div>
+        <div class="shopping-group-body">${items.map(stockItemHtml).join('')}</div>
+      </section>`;
+    }).join('');
+  }else{
+    const groupKey=stockView==='location'?'stockLocation':'category';
+    rows=groups(visible,groupKey).map(([rawName,items])=>{
+      const categoryName=rawName||(stockView==='location'?'Locatie nog instellen':'Overig');
+      const collapsed=!expandedStockCategories.has(categoryName);
+      return `<section class="stock-category ${collapsed?'collapsed':''}">
+        <div class="shopping-group-head stock-category-head ${stockView==='location'?'stock-location-head':''}">
+          <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')"><span>${esc(categoryName)}</span><span>${collapsed?'⌄':'⌃'}</span></button>
+        </div>
+        <div class="shopping-group-body">${items.sort(sortProducts).map(stockItemHtml).join('')}</div>
+      </section>`;
+    }).join('');
+  }
+  const intro=stockView==='meal'?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Alles hieronder staat als houdbare maaltijdvoorraad op <b>In huis</b>. Bij recepten telt aanwezigheid mee; jij controleert zelf of er genoeg is.</span></div>`:'';
+  content.innerHTML = `${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
   bindStockSwipeActions();
 }
-
 
 window.openStockCategoryAdd = encodedCategory => {
   openModal(null);

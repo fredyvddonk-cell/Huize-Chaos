@@ -125,12 +125,12 @@ function isFoodProduct(product){
   const category=String(product?.category||'').trim();
   return !/^(Schoonmaak(?:\s*&\s*huishouden)?|Huishouden|Huisdier(?:en)?|Persoonlijke verzorging|Verzorging|Keukenbenodigdheden)$/i.test(category);
 }
-function relevantStock(){return stockProducts().filter(x=>x.status==='In huis'&&isFoodProduct(x)).sort((a,b)=>String(a.category||'').localeCompare(String(b.category||''),'nl',{sensitivity:'base'})||String(a.name||'').localeCompare(String(b.name||''),'nl',{sensitivity:'base'}))}
+function relevantStock(){return stockProducts().filter(x=>x.stockRole!=='hidden'&&x.status==='In huis'&&isFoodProduct(x)).sort((a,b)=>String(a.category||'').localeCompare(String(b.category||''),'nl',{sensitivity:'base'})||String(a.name||'').localeCompare(String(b.name||''),'nl',{sensitivity:'base'}))}
 function normFood(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(gv\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\b(blik|blikje|pot|zak|pak|stuks?|verse|vers|diepvries|gekookte|gesneden)\b/g,' ').replace(/\s+/g,' ').trim().replace(/en$/,'')}
 const PASTA_TYPES=['spaghetti','macaroni','fusilli','penne','farfalle','rigatoni','tagliatelle','linguine','vermicelli','orzo','noedels','noedel','mie','lasagne'];
 function isGlutenFreeProduct(p){const raw=String(p?.name||'')+' '+String(p?.memo||'');return /(?:^|\b)(glutenvrij|gluten[ -]?vrij|gv)(?:\b|$)/i.test(raw)}
 function isGlutenSensitiveBread(s){const n=normFood(s);return /(?:^|\b)(naanbrood|naan|stokbrood|wrap|wraps|pita|pitabrood|pitabroodjes|tortilla|tortillas)(?:\b|$)/i.test(n)}
-function pastaStockOptions(includeUnavailable=false){return stockProducts().filter(p=>pastaType(p.name)&&(includeUnavailable||p.status==='In huis'))}
+function pastaStockOptions(includeUnavailable=false){return stockProducts().filter(p=>p.stockRole!=='hidden'&&pastaType(p.name)&&(includeUnavailable||p.status==='In huis'))}
 function pastaStockOptionsForIngredient(ingredient,includeUnavailable=false){const type=pastaType(ingredient);return pastaStockOptions(includeUnavailable).filter(p=>!type||pastaType(p.name)===type)}
 function explicitGlutenFree(s){return /glutenvrij|gluten[ -]?vrij|\bgv\b/i.test(String(s||''))}
 function stripGlutenWords(s){return normFood(String(s||'').replace(/glutenvrij|gluten[ -]?vrij|\bgv\b/ig,' '))}
@@ -146,7 +146,7 @@ function sensitiveBreadKey(s){
 function sensitiveBreadStockOptions(ingredient,includeUnavailable=false){
   const key=sensitiveBreadKey(ingredient);
   if(!key)return [];
-  return stockProducts().filter(p=>sensitiveBreadKey(p.name)===key&&(includeUnavailable||p.status==='In huis'));
+  return stockProducts().filter(p=>p.stockRole!=='hidden'&&sensitiveBreadKey(p.name)===key&&(includeUnavailable||p.status==='In huis'));
 }
 
 function splitQty(qty,part,total,unit,ingredient){const n=qtyNumber(qty);if(n==null||!total)return qty;return formatScaledNumber(n*part/total,unit,ingredient)}
@@ -176,15 +176,7 @@ function stockAvailableAmount(product){
   }
   return null;
 }
-function stockAvailableLabel(product){
-  const qty=[product?.quantity,product?.unit].filter(Boolean).join(' ')||'aanwezig';
-  const total=stockAvailableAmount(product);
-  if(product?.packageSize&&product?.packageUnit&&total){
-    const totalText=Number.isInteger(total.n)?String(total.n):String(Math.round(total.n*10)/10).replace('.',',');
-    return `${qty} × ${product.packageSize} ${product.packageUnit} = ${totalText} ${total.u}`;
-  }
-  return qty;
-}
+function stockAvailableLabel(product){ return 'aanwezig'; }
 function ingredientMatchesProduct(ingredient,product){
   const raw=String(ingredient||'');
   const ingredientIsGf=/glutenvrij|gluten[ -]?vrij|\bgv\b/i.test(raw);
@@ -217,8 +209,8 @@ function ingredientMatchesProduct(ingredient,product){
 }
 function recipeStockScore(r,selected,allInHouse){const ingredients=r.ingredients||[];const hits=selected.filter(p=>ingredients.some(i=>ingredientMatchesProduct(i.ingredient,p))).length;const missing=ingredients.filter(i=>!allInHouse.some(p=>ingredientMatchesProduct(i.ingredient,p))).length;return{hits,missing}}
 function renderStockResults(){const q=search.value.trim().toLowerCase();const ranked=stockRankCache.filter(x=>(x.r.title||'').toLowerCase().includes(q)).slice(0,150);pendingBox.innerHTML='';list.innerHTML=ranked.length?ranked.map(({r,s})=>`<button class="recipe-card" data-id="${esc(r.id)}"><span><strong>${esc(r.title)}</strong><small>${r.servings?esc(r.servings)+' personen':''}</small><div class="match-label">${s.missing===0?'Alles in huis':s.missing<=1?'Bijna compleet':'Past bij voorraad'} · ${s.hits} gekozen product${s.hits===1?'':'en'}</div></span><span class="go">›</span></button>`).join(''):'<div class="empty">Geen passende recepten gevonden.</div>';list.querySelectorAll('.recipe-card').forEach(b=>b.onclick=()=>openRecipe(b.dataset.id))}
-function buildStockRecipeResults(){const selected=relevantStock().filter(x=>stockFilterIds.includes(String(x.id)));if(!selected.length){stockRankCache=[];stockResultsReady=true;renderStockResults();return}const allInHouse=stockProducts().filter(p=>p.status==='In huis');stockRankCache=allRecipes().map(r=>({r,s:recipeStockScore(r,selected,allInHouse)})).filter(x=>x.s.hits>0).sort((a,b)=>b.s.hits-a.s.hits||a.s.missing-b.s.missing);stockResultsReady=true;renderStockResults()}
-function renderStockPicker(){const a=relevantStock();stockPicker.innerHTML=`<div class="stock-picker"><h2>Kies uit alle voedingsmiddelen</h2><p>Alle eet- en drinkbare producten die op In huis staan. Kies één of meer producten.</p>${a.length?`<div class="stock-product-search"><input id="stockProductSearch" type="search" placeholder="Zoek voedingsmiddel…" autocomplete="off"></div><div class="actions stock-picker-actions"><button class="btn" id="clearStockSelection">Alles deselecteren</button></div><div class="stock-options">${a.map(x=>`<label class="stock-option" data-stock-name="${esc(`${x.name||''} ${x.category||''}`.toLowerCase())}"><input type="checkbox" data-stock-id="${esc(x.id)}" ${stockFilterIds.includes(String(x.id))?'checked':''}><span>${esc(x.name)} <small>${esc([x.quantity,x.unit].filter(Boolean).join(' '))}${x.category?` · ${esc(x.category)}`:''}</small></span></label>`).join('')}</div><div class="actions"><button class="btn primary" id="findStockRecipes">Passende recepten zoeken</button><button class="btn" id="closeStockPicker">Sluiten</button></div>`:'<div class="empty">Er staan geen voedingsmiddelen op In huis.</div>'}</div>`;stockPicker.querySelector('#closeStockPicker')?.addEventListener('click',()=>stockPicker.innerHTML='');stockPicker.querySelector('#stockProductSearch')?.addEventListener('input',e=>{const q=String(e.target.value||'').trim().toLowerCase();stockPicker.querySelectorAll('.stock-option').forEach(row=>row.hidden=q&&!String(row.dataset.stockName||'').includes(q))});stockPicker.querySelector('#clearStockSelection')?.addEventListener('click',()=>{stockFilterIds=[];stockRankCache=[];stockResultsReady=false;stockPicker.querySelectorAll('[data-stock-id]').forEach(x=>x.checked=false);renderList()});stockPicker.querySelector('#findStockRecipes')?.addEventListener('click',()=>{stockFilterIds=[...stockPicker.querySelectorAll('[data-stock-id]:checked')].map(x=>x.dataset.stockId);buildStockRecipeResults()})}
+function buildStockRecipeResults(){const selected=relevantStock().filter(x=>stockFilterIds.includes(String(x.id)));if(!selected.length){stockRankCache=[];stockResultsReady=true;renderStockResults();return}const allInHouse=stockProducts().filter(p=>p.stockRole!=='hidden'&&p.status==='In huis');stockRankCache=allRecipes().map(r=>({r,s:recipeStockScore(r,selected,allInHouse)})).filter(x=>x.s.hits>0).sort((a,b)=>b.s.hits-a.s.hits||a.s.missing-b.s.missing);stockResultsReady=true;renderStockResults()}
+function renderStockPicker(){const a=relevantStock();stockPicker.innerHTML=`<div class="stock-picker"><h2>Kies uit alle voedingsmiddelen</h2><p>Alle eet- en drinkbare producten die op In huis staan. Kies één of meer producten.</p>${a.length?`<div class="stock-product-search"><input id="stockProductSearch" type="search" placeholder="Zoek voedingsmiddel…" autocomplete="off"></div><div class="actions stock-picker-actions"><button class="btn" id="clearStockSelection">Alles deselecteren</button></div><div class="stock-options">${a.map(x=>`<label class="stock-option" data-stock-name="${esc(`${x.name||''} ${x.category||''}`.toLowerCase())}"><input type="checkbox" data-stock-id="${esc(x.id)}" ${stockFilterIds.includes(String(x.id))?'checked':''}><span>${esc(x.name)} <small>${x.category?esc(x.category):''}</small></span></label>`).join('')}</div><div class="actions"><button class="btn primary" id="findStockRecipes">Passende recepten zoeken</button><button class="btn" id="closeStockPicker">Sluiten</button></div>`:'<div class="empty">Er staan geen voedingsmiddelen op In huis.</div>'}</div>`;stockPicker.querySelector('#closeStockPicker')?.addEventListener('click',()=>stockPicker.innerHTML='');stockPicker.querySelector('#stockProductSearch')?.addEventListener('input',e=>{const q=String(e.target.value||'').trim().toLowerCase();stockPicker.querySelectorAll('.stock-option').forEach(row=>row.hidden=q&&!String(row.dataset.stockName||'').includes(q))});stockPicker.querySelector('#clearStockSelection')?.addEventListener('click',()=>{stockFilterIds=[];stockRankCache=[];stockResultsReady=false;stockPicker.querySelectorAll('[data-stock-id]').forEach(x=>x.checked=false);renderList()});stockPicker.querySelector('#findStockRecipes')?.addEventListener('click',()=>{stockFilterIds=[...stockPicker.querySelectorAll('[data-stock-id]:checked')].map(x=>x.dataset.stockId);buildStockRecipeResults()})}
 stockRecipeButton?.addEventListener('click',renderStockPicker);
 const originalRenderList=renderList;
 renderList=function(){if(!stockFilterIds.length)return originalRenderList();if(stockResultsReady)return renderStockResults();return originalRenderList()};
@@ -269,7 +261,7 @@ function normalizedUnit(u){
 function qtyNumber(v){const n=parseFloat(String(v??'').replace(',','.'));return Number.isFinite(n)?n:null}
 function toBaseAmount(qty,unit){const n=qtyNumber(qty),u=normalizedUnit(unit);if(n==null)return null;if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
 function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
-  const allProducts=stockProducts();
+  const allProducts=stockProducts().filter(p=>p.stockRole!=='hidden');
   const preferredId=String(preferredProductId||ingredient?.stockProductId||'');
   const pasta=isPastaIngredient(ingredient?.ingredient);
   let matches=(pasta?pastaStockOptionsForIngredient(ingredient?.ingredient,true):allProducts.filter(p=>ingredientMatchesProduct(ingredient.ingredient,p))).filter(p=>p.status==='In huis');
@@ -292,23 +284,13 @@ function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
   }
   if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:'',comparable:false,alternative:false};
 
-  const required=toBaseAmount(ingredient?.qty,ingredient?.unit),availableAmount=stockAvailableAmount(product);
-  const comparable=Boolean(required&&availableAmount&&required.u===availableAmount.u);
-  const available=stockAvailableLabel(product);
+  // V1.4.77: voorraad is aanwezig/niet aanwezig. De gebruiker controleert de hoeveelheid zelf.
+  const comparable=false,available='aanwezig',enough=true,shortage=null;
   const alternative=pasta&&pastaVariantRelation(ingredient?.ingredient,product)==='alternative';
-  let enough=true,shortage=null;
-  if(comparable){
-    enough=availableAmount.n+1e-9>=required.n;
-    if(!enough){
-      const missing=Math.max(0,required.n-availableAmount.n);
-      const rounded=Math.round(missing*10)/10;
-      shortage={qty:String(rounded).replace('.',','),unit:required.u};
-    }
-  }
   const prefix=alternative?'Alternatief in huis':'In huis';
   const productName=String(product.name||'').trim();
   const showName=pasta||alternative;
-  const label=`${prefix}${showName&&productName?`: ${productName}`:''} · ${available}`;
+  const label=`${prefix}${showName&&productName?`: ${productName}`:''}`;
   return {matched:true,enough,label,product,shortage,matches,available,comparable,alternative};
 }
 
@@ -338,9 +320,8 @@ function breadVariantCoverage(ingredient,options,preferredId=''){
   const candidates=(options||[]).filter(p=>p.status==='In huis');
   const product=candidates.find(p=>preferredId&&String(p.id)===String(preferredId))||candidates[0]||null;
   if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches:options||[],available:'',comparable:false};
-  const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';
-  // Ook bij brood/naan/wraps geldt: aanwezig = in huis; hoeveelheid controleert de gebruiker zelf.
-  return {matched:true,enough:true,label:`In huis: ${available}`,product,shortage:null,matches:options||[],available,comparable:false};
+  const available='aanwezig';
+  return {matched:true,enough:true,label:'In huis',product,shortage:null,matches:options||[],available,comparable:false};
 }
 function breadSplitRows(i,n,oldRows,gfPersons,totalPersons){
   const prevFor=mode=>(Array.isArray(oldRows)?oldRows.find(x=>String(x.id)===`${n}-bread-${mode}`):null)||{};
@@ -495,7 +476,7 @@ function stockIngredientMatches(r){
 }
 function renderStockIngredientSuggestions(box){
   const plans=recipeWeekPlans().filter(p=>p.week===selectedMenuWeek);
-  const inhouse=stockProducts().filter(p=>p.status==='In huis'&&isFoodProduct(p));
+  const inhouse=stockProducts().filter(p=>p.stockRole!=='hidden'&&p.status==='In huis'&&isFoodProduct(p));
   const matches=allRecipes().filter(stockIngredientMatches).map(r=>({r,f:recipeStockFit(r,inhouse),v:variationScore(r,plans)})).sort((a,b)=>b.f.ratio-a.f.ratio||a.f.missing-b.f.missing||b.v.score-a.v.score||String(a.r.title).localeCompare(String(b.r.title),'nl'));
   const visible=matches.slice(0,24);
   const onlineUrl=`https://www.google.com/search?q=${encodeURIComponent('recept met '+stockIngredientQuery)}`;
@@ -512,7 +493,7 @@ function renderSmartRecipePicker(){
   const cats=['Alles',...RECIPE_CATEGORIES];
   let rows=[...all],labelFor=()=>'';
   if(smartRecipeMode==='stock'){
-    const inhouse=stockProducts().filter(p=>p.status==='In huis'&&isFoodProduct(p));
+    const inhouse=stockProducts().filter(p=>p.stockRole!=='hidden'&&p.status==='In huis'&&isFoodProduct(p));
     rows=rows.map(r=>({r,f:recipeStockFit(r,inhouse)})).filter(x=>x.f.need>=2&&x.f.ratio>=.45).sort((a,b)=>b.f.ratio-a.f.ratio||a.f.missing-b.f.missing).map(x=>x.r);
     labelFor=r=>{const f=recipeStockFit(r,inhouse);return f.missing===0?'Alles in huis':`${f.missing} ${f.missing===1?'product':'producten'} nodig`}
   }else if(smartRecipeMode==='variation'){
@@ -547,7 +528,7 @@ function renderWeekMenu(){
   const plans=recipeWeekPlans().filter(p=>p.week===selectedMenuWeek);
   renderWeekContext(plans);
   if(!plans.length){weekMenuList.innerHTML=`<div class="week-menu-empty">Voor deze week zijn nog geen recepten geselecteerd.<br><button class="btn primary" id="weekMenuFindRecipes" type="button">Recept kiezen</button></div>`;weekMenuList.querySelector('#weekMenuFindRecipes')?.addEventListener('click',()=>showRecipeModule('recipes'));return}
-  const stockStatusText=(coverage)=>{if(!coverage.matched)return 'Niet in voorraad';if(coverage.comparable===false)return `In huis · ${coverage.available}`;if(coverage.enough)return `Voldoende · ${coverage.available} op voorraad`;if(coverage.shortage)return `Onvoldoende · ${coverage.available} op voorraad · tekort ${[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' ')}`;return `Hoeveelheid controleren · ${coverage.available} op voorraad`};
+  const stockStatusText=(coverage)=>{if(!coverage.matched)return 'Niet in voorraad';return coverage.alternative?`Alternatief in huis: ${coverage.product?.name||''}`:'In huis'};
   weekMenuList.innerHTML=plans.map(p=>{const expanded=expandedWeekPlans.has(String(p.id));return `<article class="week-menu-card ${expanded?'expanded':''}" data-plan-card="${esc(p.id)}"><button class="week-menu-recipe-link" data-toggle-week-recipe="${esc(p.id)}" type="button" aria-expanded="${expanded?'true':'false'}"><span><strong>${esc(p.title||'Recept')}</strong><small>${p.servings?esc(p.servings)+' personen · ':''}${(p.ingredients||[]).length} ingrediënten</small></span><span class="go">${expanded?'⌃':'⌄'}</span></button>${expanded?`<div class="week-menu-stock-check"><div class="week-menu-stock-title">Ingrediënten & voorraad</div>${(p.ingredients||[]).map(i=>{const coverage=stockCoverage(i,i.stockProductId||'',/glutenvrij/i.test(i.ingredient)?'gf':'');return `<div class="week-stock-row ${coverage.enough?'enough':coverage.matched?'partial':'missing'}"><span><strong>${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</strong>${coverage.product?`<small>Gekoppeld aan ${esc(coverage.product.name)}</small>`:''}</span><span class="week-stock-status">${esc(stockStatusText(coverage))}</span></div>`}).join('')}<button class="btn week-open-recipe" data-open-week-recipe="${esc(p.recipeId)}" type="button">Recept bekijken / wijzigen</button></div>`:''}<label class="week-menu-servings">Aantal personen <input type="number" min="1" inputmode="numeric" enterkeyhint="go" data-plan-servings="${esc(p.id)}" value="${esc(p.servings||getRecipe(p.recipeId)?.servings||1)}"></label><div class="week-menu-actions"><select data-move-week="${esc(p.id)}" aria-label="Andere week">${menuWeekOptions(p.week)}</select><button class="btn" data-move-plan="${esc(p.id)}" type="button">Verplaatsen</button><button class="btn danger remove-week-plan" data-remove-plan="${esc(p.id)}" type="button">Uit deze week verwijderen</button></div></article>`}).join('');
   weekMenuList.querySelectorAll('[data-toggle-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const id=String(btn.dataset.toggleWeekRecipe);if(expandedWeekPlans.has(id))expandedWeekPlans.delete(id);else expandedWeekPlans.add(id);renderWeekMenu()}));
   const applyPlannedServings=(input)=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(input.dataset.planServings)),target=Math.max(1,Number(input.value)||1);if(!plan)return;const recipe=getRecipe(plan.recipeId);if(!recipe)return;const previous=plan.ingredients||[],scaled=scaledRecipe(recipe,target),gf=Math.max(0,Math.min(target,Number(plan.gfPersons)||0));plan.servings=String(target);plan.ingredients=(scaled.ingredients||[]).map((i,n)=>{const old=previous.find(x=>String(x.id)===String(n))||previous[n]||{},coverage=stockCoverage(i,old.stockProductId||i.stockProductId||'',/glutenvrij/i.test(i.ingredient)?'gf':'');return {...old,id:String(n),qty:i.qty||'',unit:i.unit||'',ingredient:i.ingredient||'',memo:i.memo||'',done:Boolean(old.done),ordered:coverage.enough?false:Boolean(old.ordered),stockEnough:Boolean(coverage.enough),stockProductId:coverage.matched?(coverage.product?.id??''):'',stockLabel:coverage.matched?coverage.label:'',shoppingQty:coverage.enough?'':(coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):[i.qty,i.unit].filter(Boolean).join(' ')),store:coverage.matched?(coverage.product?.store||''):'',category:coverage.matched?(coverage.product?.category||''):(old.category||'')}});plan.gfPersons=gf;saveRecipeWeekPlans(plans,plan);input.blur();renderWeekMenu()};
