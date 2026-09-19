@@ -1,14 +1,11 @@
-# Huize Chaos V1.4.59
+# Huize Chaos V1.4.60
 
-## Wijziging V1.4.59
+## Wijziging V1.4.60
 
-- Swipe naar rechts op een voorraadproduct start direct de verwijderactie.
-- Er blijft geen half geopende verwijderknop meer onder het product staan.
-- Een gewone tik op een voorraadproduct opent weer alleen het product om te wijzigen.
-- Swipe en tik worden technisch van elkaar gescheiden zodat ze elkaar niet meer activeren.
-- Swipe naar links voor het snel wijzigen van het checkmoment blijft behouden.
-- De voorraadrij springt na een swipe altijd terug naar een vaste stand.
-- Cacheversie verhoogd zodat mobiel de nieuwe swipe-code direct gebruikt.
+- Rechter swipe-actie en linker checkmoment-swipe fysiek van elkaar gescheiden.
+- Verwijdervlak verbreed zodat “Verwijderen” volledig zichtbaar is.
+- Voorraadrij schuift bij rechts swipen exact tot de breedte van het verwijdervlak.
+- Apart bewerkscherm blijft ongewijzigd.
 
 ## V1.4.43 – Gekochte receptproducten verwijderen
 

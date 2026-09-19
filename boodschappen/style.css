@@ -745,10 +745,10 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-swipe-shell+.stock-swipe-shell{border-top:1px solid #eee8f1}
 .stock-swipe-shell .stock-item{position:relative;z-index:2;background:#fff;transition:transform .18s ease;will-change:transform;border:0;touch-action:pan-y}
 .stock-swipe-shell.stock-swiping .stock-item{transition:none}
-.stock-swipe-back{position:absolute;inset:0;display:flex;align-items:stretch;z-index:1}
-.stock-swipe-delete{justify-content:flex-start;background:#c93636}
-.stock-swipe-delete-button{width:108px;border:0;background:transparent;color:#fff;font:inherit;font-weight:800;padding:0 10px;display:flex;align-items:center;justify-content:center}
-.stock-swipe-cycle{justify-content:flex-end;background:#f2edf8;padding-left:96px}
+.stock-swipe-back{position:absolute;top:0;bottom:0;display:flex;align-items:stretch;z-index:1}
+.stock-swipe-delete{left:0;right:auto;width:132px;justify-content:flex-start;background:#c93636}
+.stock-swipe-delete-button{width:132px;border:0;background:transparent;color:#fff;font:inherit;font-weight:800;padding:0 12px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.stock-swipe-cycle{left:auto;right:0;width:280px;justify-content:flex-end;background:#f2edf8;padding-left:0}
 .stock-swipe-cycle button{width:67px;border:0;border-left:1px solid #ddd2ea;background:#f2edf8;color:#5f3d82;font-size:11px;font-weight:800;padding:0 4px}
 .stock-swipe-cycle button:active{background:#e4d9f0}
 @media(min-width:851px) and (hover:hover) and (pointer:fine){.stock-swipe-back{display:none}.stock-swipe-shell .stock-item{transform:none!important}}
@@ -780,6 +780,6 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #modal .card{width:100%;padding:20px 16px 28px}
 }
 
-/* V1.4.59 - swipeacties hersteld: rechts controleveld, links checkmoment */
+/* V1.4.60 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
 .stock-swipe-shell.swipe-delete-open .stock-swipe-delete{background:#c93636}
 .stock-swipe-shell.swipe-cycle-open .stock-swipe-cycle{background:#f2edf8}

@@ -163,7 +163,7 @@ function bindStockSwipeActions(){
 
       if (wasHorizontal && finalDx > 65) {
         suppressClickUntil = Date.now() + 700;
-        card.style.transform = 'translateX(108px)';
+        card.style.transform = 'translateX(132px)';
         shell.classList.add('swipe-delete-open');
         shell.classList.remove('swipe-cycle-open','swipe-delete-armed');
         dx = 0; dy = 0; gesture = '';
