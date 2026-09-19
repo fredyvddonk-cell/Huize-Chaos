@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.38
+# Huize Chaos V1.4.39
 
-## V1.4.38 – Gekochte receptproducten verwijderen
+## V1.4.39 – Gekochte receptproducten verwijderen
 
 - Afgevinkte receptingrediënten worden bij **Gekochte producten verwijderen** echt uit de boodschappenlijst gehaald.
 - De verwijdering wordt per gepland receptingrediënt opgeslagen en blijft behouden na synchroniseren.

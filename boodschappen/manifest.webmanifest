@@ -2,7 +2,7 @@
   "name": "Huize Chaos",
   "short_name": "Huize Chaos",
   "description": "Een beetje orde in de chaos.",
-  "id": "../boodschappen/",
+  "id": "./",
   "start_url": "../",
   "scope": "../",
   "display": "standalone",

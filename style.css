@@ -26,3 +26,5 @@
 .home-brand-wordmark{width:auto;height:48px;max-width:min(245px,58vw);object-fit:contain;object-position:left center;flex:0 1 auto}
 @media(max-width:430px){.home-brand{justify-content:flex-start;gap:10px}.home-brand-icon{width:76px;height:76px;border-radius:17px}.home-brand-wordmark{height:39px;max-width:58vw}}
 .planner-icon{background:#eaf7f7}
+
+.home-hutsel-signal{margin:0 0 12px;background:#fff7df;border:1px solid #ead9a6;border-radius:14px;padding:10px 12px;font-weight:750;color:#6a5520;cursor:pointer}
