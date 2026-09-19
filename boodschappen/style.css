@@ -780,12 +780,12 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #modal .card{width:100%;padding:20px 16px 28px}
 }
 
-/* V1.4.63 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
+/* V1.4.64 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
 .stock-swipe-shell.swipe-delete-open .stock-swipe-delete{background:#c93636}
 .stock-swipe-shell.swipe-cycle-open .stock-swipe-cycle{background:#f2edf8}
 
 
-/* V1.4.63 - tijdelijke bulkindeling in Beheer */
+/* V1.4.64 - tijdelijke bulkindeling in Beheer */
 .manage-bulk-start{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 8px;background:#f7f3fa;border:1px solid #e5dced;border-radius:12px;color:#6d6670;font-size:.86rem}
 .manage-select-button{font-weight:800;color:#654487}
 .manage-bulk-toolbar{position:sticky;top:0;z-index:20;margin:0 0 10px;padding:11px 12px;background:#f7f3fa;border:1px solid #dfd3e9;border-radius:12px;box-shadow:0 5px 14px rgba(58,42,72,.08)}
@@ -801,3 +801,6 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .manage-product-select input{width:20px;height:20px;margin:0;accent-color:#7655a5}
 .manage-product-list{display:grid}
 @media(max-width:650px){.manage-bulk-actions{grid-template-columns:1fr}.manage-bulk-toolbar{top:4px}.manage-product-select{padding-right:10px}}
+
+/* V1.4.64 - alles selecteren/deselecteren in Beheer */
+.manage-bulk-selection-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 9px}.manage-bulk-selection-actions .small{flex:0 0 auto}.manage-bulk-selection-actions button:disabled{opacity:.5}

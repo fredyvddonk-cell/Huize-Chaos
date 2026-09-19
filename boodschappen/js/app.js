@@ -394,6 +394,10 @@ function manageBulkToolbar() {
       <strong>${selectedCount} geselecteerd</strong>
       <button type="button" class="small" onclick="toggleManageSelectionMode()">Klaar</button>
     </div>
+    <div class="manage-bulk-selection-actions">
+      <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
+      <button type="button" class="small" onclick="deselectAllManageProducts()" ${selectedCount ? '' : 'disabled'}>Alles deselecteren</button>
+    </div>
     <div class="manage-bulk-actions">
       <label>Vaste plek
         <select onchange="applyManageBulkLocation(this.value); this.selectedIndex=0" ${selectedCount ? '' : 'disabled'}>
@@ -434,6 +438,18 @@ window.toggleManageProductSelection = (id, checked) => {
   manageBulkMessage = '';
   render();
 };
+window.selectAllVisibleManageProducts = () => {
+  document.querySelectorAll('.manage-product-select input[data-manage-product-id]').forEach(input => {
+    manageSelectedProducts.add(String(input.dataset.manageProductId));
+  });
+  manageBulkMessage = '';
+  render();
+};
+window.deselectAllManageProducts = () => {
+  manageSelectedProducts.clear();
+  manageBulkMessage = '';
+  render();
+};
 window.applyManageBulkLocation = value => {
   if (!value || !manageSelectedProducts.size) return;
   products.forEach(product => {
@@ -460,7 +476,7 @@ function renderManage(arr) {
   const sorted = arr.slice().sort(sortProducts);
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
-      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
+      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
       <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${memoHtml(x)}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;

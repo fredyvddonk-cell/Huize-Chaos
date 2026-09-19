@@ -1,13 +1,10 @@
-# Huize Chaos V1.4.63
+# Huize Chaos V1.4.64
 
-## Wijziging V1.4.63
+## Wijziging V1.4.64
 
-- Selectiemodus in Beheer start altijd met 0 geselecteerde producten.
-- Vinkjes worden nooit automatisch aangezet.
-
-- In Beheer is een selectiemodus toegevoegd voor de eerste voorraadindeling.
-- Meerdere producten kunnen tegelijk worden geselecteerd.
-- Voor de selectie kan in één keer dezelfde Vaste plek worden ingesteld.
-- Voor dezelfde selectie kan ook in één keer Controleren bij worden ingesteld.
-- De selectie blijft actief zodat locatie en checkmoment achter elkaar kunnen worden toegepast.
+- In Beheer zijn knoppen Alles selecteren en Alles deselecteren toegevoegd.
+- Alles selecteren selecteert alle op dat moment zichtbare producten.
+- Alles deselecteren maakt de volledige selectie leeg.
+- Handmatig losse producten aan- en uitvinken blijft mogelijk.
+- Bulk instellen van Vaste plek en Controleren bij blijft behouden.
 - De gewone Voorraad-weergave blijft ongewijzigd.
