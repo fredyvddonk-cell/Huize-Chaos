@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.53
+# Huize Chaos V1.4.54
 
-## Wijziging V1.4.53
+## Wijziging V1.4.54
 
 - Voorraadproducten kunnen op mobiel naar rechts worden geswipet om **Verwijderen** te tonen.
 - Verwijderen gebeurt pas na tikken op **Verwijderen**, zodat een losse veeg niet direct wist.

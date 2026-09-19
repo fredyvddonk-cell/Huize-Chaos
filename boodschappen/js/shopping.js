@@ -163,7 +163,7 @@ function recipeStockCoverage(i){
   const preferred=preferredRaw&&preferredRaw.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,preferredRaw)?preferredRaw:null;
   const p=preferred||all.find(x=>x.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,x));
   if(!p)return {enough:false,matched:false,shortage:[i.qty,i.unit].filter(Boolean).join(' '),product:null};
-  // V1.4.53: voorraadmatching voor recepten gebeurt alleen op product/variant.
+  // V1.4.54: voorraadmatching voor recepten gebeurt alleen op product/variant.
   // Hoeveelheden worden niet meer automatisch vergeleken; gebruiker controleert zelf of er genoeg is.
   return {enough:true,matched:true,shortage:'',product:p};
 }

@@ -97,6 +97,7 @@ function bindStockSwipeActions(){
     if (!card || shell.dataset.swipeBound === '1') return;
     shell.dataset.swipeBound = '1';
     let startX = 0, startY = 0, dx = 0, tracking = false, moved = false, horizontal = false, pointerId = null;
+    let suppressClickUntil = 0;
     const reset = () => {
       card.style.transform = '';
       shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping');
@@ -130,23 +131,32 @@ function bindStockSwipeActions(){
       try { shell.releasePointerCapture(pointerId); } catch (_) {}
       pointerId = null;
       if (dx > 42) {
-        card.style.transform = 'translateX(96px)';
+        card.style.transform = 'translateX(108px)';
         shell.classList.add('swipe-delete-open');
         shell.classList.remove('swipe-cycle-open');
+        suppressClickUntil = Date.now() + 550;
       } else if (dx < -42) {
         card.style.transform = 'translateX(-270px)';
         shell.classList.add('swipe-cycle-open');
         shell.classList.remove('swipe-delete-open');
+        suppressClickUntil = Date.now() + 550;
       } else {
         reset();
       }
-      setTimeout(() => { moved = false; }, 120);
+      setTimeout(() => { moved = false; }, 600);
     };
     shell.addEventListener('pointerup', finish);
     shell.addEventListener('pointercancel', finish);
     card.addEventListener('click', e => {
-      if (moved || shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
-        e.preventDefault(); e.stopPropagation(); reset();
+      if (Date.now() < suppressClickUntil || moved) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
+      if (shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        reset();
       }
     }, true);
   });
