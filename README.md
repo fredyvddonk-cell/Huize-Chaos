@@ -1,9 +1,9 @@
-# Huize Chaos V1.4.80
+# Huize Chaos V1.4.81
 
-- Weekoverzicht van gekozen recepten printbaar vanuit Weekmenu
-- Printweergave op A6-formaat toegevoegd
-- Weeknummer en gekozen recepten compact op één overzicht
-- Aantal personen per recept wordt meegeprint
-- Printweergave bevat geen knoppen, voorraadstatus of andere schermonderdelen
+- Foto toevoegen aan recepten
+- Receptfoto vervangen of verwijderen
+- Receptfoto zichtbaar in receptenoverzicht
+- Receptfoto zichtbaar bij receptkeuze en in receptdetails
+- Foto's worden automatisch verkleind voor een snelle app
 
 Een beetje orde in de chaos.
