@@ -98,93 +98,91 @@ function bindStockSwipeActions(){
     if (!card || shell.dataset.swipeBound === '1') return;
     shell.dataset.swipeBound = '1';
 
+    let pointerId = null;
     let startX = 0, startY = 0, dx = 0, dy = 0;
-    let tracking = false, horizontal = false;
+    let tracking = false, gesture = '';
     let suppressClickUntil = 0;
     const id = Number(shell.dataset.id);
 
     const resetPosition = () => {
       card.style.transform = '';
       shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping','swipe-delete-armed');
-      dx = 0; dy = 0; horizontal = false; tracking = false;
+      dx = 0; dy = 0; gesture = ''; tracking = false; pointerId = null;
     };
 
-    const begin = (x,y,target) => {
-      if (target?.closest?.('button,input,label,select,textarea,a')) return;
-      startX=x; startY=y; dx=0; dy=0; tracking=true; horizontal=false;
+    const closeOtherSwipes = () => {
+      document.querySelectorAll('[data-stock-swipe].swipe-cycle-open').forEach(other => {
+        if (other === shell) return;
+        other.classList.remove('swipe-cycle-open');
+        const otherCard = other.querySelector('.stock-swipe-content');
+        if (otherCard) otherCard.style.transform = '';
+      });
+    };
+
+    card.addEventListener('pointerdown', e => {
+      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (e.target.closest('button,input,label,select,textarea,a')) return;
+      closeOtherSwipes();
+      pointerId = e.pointerId;
+      startX = e.clientX; startY = e.clientY; dx = 0; dy = 0;
+      tracking = true; gesture = '';
       shell.classList.add('stock-swiping');
-    };
+      try { card.setPointerCapture(pointerId); } catch (_) {}
+    });
 
-    const move = (x,y,e) => {
-      if (!tracking) return;
-      dx=x-startX; dy=y-startY;
-      if (!horizontal) {
-        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-        if (Math.abs(dy) > Math.abs(dx)) {
+    card.addEventListener('pointermove', e => {
+      if (!tracking || e.pointerId !== pointerId) return;
+      dx = e.clientX - startX;
+      dy = e.clientY - startY;
+
+      if (!gesture) {
+        if (Math.abs(dx) < 9 && Math.abs(dy) < 9) return;
+        if (Math.abs(dy) > Math.abs(dx) * 1.1) {
+          // Verticaal: laat de browser gewoon scrollen en behandel dit niet als swipe.
           resetPosition();
           return;
         }
-        horizontal=true;
+        gesture = 'horizontal';
       }
-      const limited=Math.max(-280,Math.min(120,dx));
-      card.style.transform=`translateX(${limited}px)`;
-      shell.classList.toggle('swipe-delete-armed', dx > 70);
-      if (e?.cancelable) e.preventDefault();
-    };
 
-    const end = () => {
-      if (!tracking) return;
-      const wasHorizontal = horizontal;
+      if (gesture !== 'horizontal') return;
+      const limited = Math.max(-280, Math.min(125, dx));
+      card.style.transform = `translateX(${limited}px)`;
+      shell.classList.toggle('swipe-delete-armed', dx > 85);
+      if (e.cancelable) e.preventDefault();
+    });
+
+    const finishPointer = e => {
+      if (!tracking || e.pointerId !== pointerId) return;
       const finalDx = dx;
+      const wasHorizontal = gesture === 'horizontal';
       shell.classList.remove('stock-swiping');
-      tracking=false;
+      tracking = false;
+      try { card.releasePointerCapture(pointerId); } catch (_) {}
+      pointerId = null;
 
-      if (wasHorizontal && finalDx > 70) {
-        suppressClickUntil = Date.now() + 650;
+      if (wasHorizontal && finalDx > 85) {
+        suppressClickUntil = Date.now() + 700;
         resetPosition();
-        if (Number.isFinite(id)) requestProductDelete(id,'product');
+        if (Number.isFinite(id)) window.deleteStockProductDirect?.(id);
         return;
       }
-      if (wasHorizontal && finalDx < -55) {
-        suppressClickUntil = Date.now() + 650;
-        card.style.transform='translateX(-270px)';
+
+      if (wasHorizontal && finalDx < -65) {
+        suppressClickUntil = Date.now() + 700;
+        card.style.transform = 'translateX(-270px)';
         shell.classList.add('swipe-cycle-open');
         shell.classList.remove('swipe-delete-open','swipe-delete-armed');
-        dx=0; dy=0; horizontal=false;
+        dx = 0; dy = 0; gesture = '';
         return;
       }
-      if (wasHorizontal) {
-        suppressClickUntil = Date.now() + 350;
-        resetPosition();
-      } else {
-        shell.classList.remove('stock-swiping');
-      }
+
+      if (wasHorizontal) suppressClickUntil = Date.now() + 400;
+      resetPosition();
     };
 
-    card.addEventListener('touchstart', e => {
-      if (e.touches.length !== 1) return;
-      const t=e.touches[0];
-      begin(t.clientX,t.clientY,e.target);
-    }, {passive:true});
-    card.addEventListener('touchmove', e => {
-      if (!tracking || e.touches.length !== 1) return;
-      const t=e.touches[0];
-      move(t.clientX,t.clientY,e);
-    }, {passive:false});
-    card.addEventListener('touchend', end, {passive:true});
-    card.addEventListener('touchcancel', resetPosition, {passive:true});
-
-    card.addEventListener('pointerdown', e => {
-      if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      begin(e.clientX,e.clientY,e.target);
-    });
-    card.addEventListener('pointermove', e => {
-      if (e.pointerType !== 'mouse' || !tracking) return;
-      move(e.clientX,e.clientY,e);
-    });
-    card.addEventListener('pointerup', e => {
-      if (e.pointerType === 'mouse') end();
-    });
+    card.addEventListener('pointerup', finishPointer);
+    card.addEventListener('pointercancel', resetPosition);
 
     if (main) {
       main.addEventListener('click', e => {
@@ -195,13 +193,13 @@ function bindStockSwipeActions(){
           resetPosition();
           return;
         }
-        const editId=Number(main.dataset.stockEdit);
+        const editId = Number(main.dataset.stockEdit);
         if (Number.isFinite(editId)) editProduct(editId);
       });
       main.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          const editId=Number(main.dataset.stockEdit);
+          const editId = Number(main.dataset.stockEdit);
           if (Number.isFinite(editId)) editProduct(editId);
         }
       });

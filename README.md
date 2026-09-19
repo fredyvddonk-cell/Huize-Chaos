@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.56
+# Huize Chaos V1.4.57
 
-## Wijziging V1.4.56
+## Wijziging V1.4.57
 
 - Swipe naar rechts op een voorraadproduct start direct de verwijderactie.
 - Er blijft geen half geopende verwijderknop meer onder het product staan.

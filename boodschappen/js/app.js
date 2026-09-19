@@ -495,6 +495,19 @@ function closeProductDelete() {
 
 window.removeProduct = id => requestProductDelete(id, 'product');
 
+// Alleen voor de mobiele swipe in Voorraad: direct verwijderen zonder
+// bevestigingsvenster. De gewone verwijderknoppen blijven de veilige
+// bevestigingsstap gebruiken.
+window.deleteStockProductDirect = id => {
+  const product = products.find(x => x.id === id);
+  if (!product) return;
+  products = products.filter(x => x.id !== id);
+  if (Number($('#editId').value) === id) closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
+  save();
+  refreshCats();
+  render();
+};
+
 window.editProduct = id => openModal(products.find(x => x.id === id));
 
 function initApp() {
