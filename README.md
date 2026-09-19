@@ -1,8 +1,10 @@
-# Huize Chaos V1.4.66
+# Huize Chaos V1.4.67
 
-## Wijziging V1.4.66
+## Wijziging V1.4.67
 
-- In Beheer kan de tijdelijke selectiemodus nu op categorie worden gefilterd.
-- Alles selecteren selecteert alleen de producten die binnen de gekozen categorie zichtbaar zijn.
-- Een bestaande selectie blijft behouden als daarna naar een andere categorie wordt gewisseld.
-- Vaste plek en Controleren bij blijven als bulkacties beschikbaar.
+- Bulkactie Vaste plek werkt vanaf 1 geselecteerd product.
+- Bulkactie Controleren bij werkt vanaf 1 geselecteerd product.
+- Keuze en toepassen zijn los van elkaar gemaakt.
+- Eerst waarde kiezen, daarna op Toepassen tikken.
+- Werkt hetzelfde bij 1, 2 of meer geselecteerde producten.
+- Bestaande selectie, categoriefilter en Alles selecteren/deselecteren blijven behouden.

@@ -411,20 +411,26 @@ function manageBulkToolbar() {
     ${hasManageSelection ? `<div class="manage-bulk-message">Bulkacties actief voor ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product om Vaste plek of Controleren bij in te stellen.</div>`}
     <div class="manage-bulk-actions">
       <label>Vaste plek
-        <select onchange="applyManageBulkLocation(this.value); this.selectedIndex=0" ${hasManageSelection ? '' : 'disabled'}>
-          <option value="">Kies vaste plek…</option>
-          <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
-          <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
-        </select>
+        <div class="manage-bulk-field-row">
+          <select id="manageBulkLocation" ${hasManageSelection ? '' : 'disabled'}>
+            <option value="">Kies vaste plek…</option>
+            <option value="Kast 1">Kast 1</option><option value="Kast 2">Kast 2</option><option value="Kast 3">Kast 3</option><option value="Kast 4">Kast 4</option>
+            <option value="Kruidenrek">Kruidenrek</option><option value="Koelkast">Koelkast</option><option value="Vriezer">Vriezer</option><option value="Overig">Overig</option>
+          </select>
+          <button type="button" class="small" onclick="applyManageBulkLocation(document.getElementById('manageBulkLocation')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+        </div>
       </label>
       <label>Controleren bij
-        <select onchange="applyManageBulkCheckCycle(this.value); this.selectedIndex=0" ${hasManageSelection ? '' : 'disabled'}>
-          <option value="">Kies checkmoment…</option>
-          <option value="week">Weekcheck</option>
-          <option value="month">Maandcheck</option>
-          <option value="rare">Zelden checken</option>
-          <option value="work">Alleen meenemen bij ‘Wat kan ik maken?’</option>
-        </select>
+        <div class="manage-bulk-field-row">
+          <select id="manageBulkCheckCycle" ${hasManageSelection ? '' : 'disabled'}>
+            <option value="">Kies checkmoment…</option>
+            <option value="week">Weekcheck</option>
+            <option value="month">Maandcheck</option>
+            <option value="rare">Zelden checken</option>
+            <option value="work">Alleen meenemen bij ‘Wat kan ik maken?’</option>
+          </select>
+          <button type="button" class="small" onclick="applyManageBulkCheckCycle(document.getElementById('manageBulkCheckCycle')?.value || '')" ${hasManageSelection ? '' : 'disabled'}>Toepassen</button>
+        </div>
       </label>
     </div>
     ${manageBulkMessage ? `<div class="manage-bulk-message">${esc(manageBulkMessage)}</div>` : ''}
