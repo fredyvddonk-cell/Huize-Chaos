@@ -105,3 +105,14 @@
 
 /* V1.4.47 - tekstuele Picnic-achtige keuze-indeling */
 .smart-filter-block{display:grid;gap:6px;margin-top:10px}.smart-filter-block>span,.smart-time-row>span{font-size:.82rem;font-weight:700;color:#6f6480}.smart-filter-block .smart-categories,.smart-filter-block .smart-times{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.smart-filter-block .smart-categories::-webkit-scrollbar,.smart-filter-block .smart-times::-webkit-scrollbar{display:none}.smart-filter-block button,.smart-time-row button{white-space:nowrap}
+
+/* V1.4.79 - weekmenu direct en gevarieerd aanvullen */
+.week-add-recipe{justify-self:start;margin-top:2px}
+.week-quick-picker{display:grid;gap:10px;background:#fff;border:1px solid #e7e0ec;border-radius:13px;padding:11px 12px}
+.week-quick-picker.hidden{display:none}
+.week-quick-title{display:grid;gap:2px}.week-quick-title strong{color:#563773}.week-quick-title small{font-size:12px;color:#7c7382}
+.week-quick-picker .meal-suggestion-group button{display:grid;gap:2px;min-width:0;flex:1 1 190px}
+.week-quick-picker .meal-suggestion-group button span{font-weight:750;line-height:1.2}
+.week-quick-picker .meal-suggestion-group button small{font-size:11px;color:#81758f}
+.week-quick-actions{display:flex;justify-content:flex-start;padding-top:2px}
+@media(max-width:600px){.week-add-recipe{width:100%}.week-quick-picker .meal-suggestion-group{display:grid;grid-template-columns:1fr}.week-quick-picker .meal-suggestion-group>strong{grid-column:1}.week-quick-picker .meal-suggestion-group button{width:100%}}

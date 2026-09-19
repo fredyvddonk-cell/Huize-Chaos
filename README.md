@@ -1,4 +1,10 @@
-# Huize Chaos V1.4.77
+# Huize Chaos V1.4.79
+
+- Weekmenu direct aanvullen met meerdere recepten achter elkaar
+- Variatiesuggesties verversen na elke gekozen maaltijd
+- Suggesties houden rekening met categorie, soort en hoofdingrediënt
+- Snel naar alle recepten vanuit de weekmenu-kiezer
+
 
 Een beetje orde in de chaos.
 

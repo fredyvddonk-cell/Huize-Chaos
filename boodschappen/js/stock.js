@@ -59,7 +59,7 @@ function stockItemHtml(x){
       <button type="button" onclick="setStockRole(${x.id},'hidden')">Niet tonen</button>
     </div>
     <div class="item stock-item stock-swipe-content">
-      <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0">
+      <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0" onclick="editProduct(${x.id})">
         <div class="name">${esc(x.name)}</div>
         ${stockBadges(x)}
         ${memoHtml(x)}
