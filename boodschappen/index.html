@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.81">
+  <link rel="stylesheet" href="style.css?v=1.4.82">
 </head>
 <body>
   <main class="app">
@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.81</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.82</span></div>
     </div>
 
     <nav class="tabs">
@@ -42,6 +42,7 @@
       <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
         <button type="button" data-stock-view="standard" class="active">Standaard voorraad</button>
         <button type="button" data-stock-view="meal">Maaltijdvoorraad</button>
+        <button type="button" data-stock-view="hidden">Niet in voorraad</button>
         <button type="button" data-stock-view="location">Per vaste plek</button>
       </div>
       <p id="stockViewHelp" class="stock-view-help">Je vaste controlelijst volgens je oude Plan to Eat-indeling.</p>
@@ -174,9 +175,9 @@
         <select id="stockRole">
           <option value="standard">Standaard voorraad</option>
           <option value="meal">Maaltijdvoorraad</option>
-          <option value="hidden">Niet in Voorraad tonen</option>
+          <option value="hidden">Niet in voorraad</option>
         </select>
-        <small class="field-help">Maaltijdvoorraad wordt automatisch gebruikt bij receptcontrole. Hoeveelheden controleer je zelf.</small>
+        <small class="field-help">Maaltijdvoorraad wordt automatisch gebruikt bij receptcontrole. ‘Niet in voorraad’ blijft beschikbaar in Beheer en bij recepten, maar staat niet in je gewone voorraad.</small>
       </div>
 
       <div class="field-row stock-classification-row">
@@ -338,12 +339,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.81"></script>
-  <script src="js/shopping.js?v=1.4.81"></script>
-  <script src="js/stock.js?v=1.4.81"></script>
-  <script src="js/hutsel.js?v=1.4.81"></script>
-  <script src="js/insight.js?v=1.4.81"></script>
-  <script type="module" src="js/firebase.js?v=1.4.81"></script>
+  <script src="js/app.js?v=1.4.82"></script>
+  <script src="js/shopping.js?v=1.4.82"></script>
+  <script src="js/stock.js?v=1.4.82"></script>
+  <script src="js/hutsel.js?v=1.4.82"></script>
+  <script src="js/insight.js?v=1.4.82"></script>
+  <script type="module" src="js/firebase.js?v=1.4.82"></script>
 
 </body>
 </html>

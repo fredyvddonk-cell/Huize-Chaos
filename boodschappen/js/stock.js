@@ -1,10 +1,11 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
 let stockView = localStorage.getItem('household-stock-view') || 'standard';
-if (!['standard','meal','location'].includes(stockView)) stockView = 'standard';
+if (!['standard','meal','hidden','location'].includes(stockView)) stockView = 'standard';
 
 const STOCK_VIEW_HELP = {
   standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
   meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
+  hidden: 'Producten die je niet als gewone voorraad bijhoudt. Ze blijven wel beschikbaar in Beheer en voor recepten.',
   location: 'Je zichtbare voorraad gegroepeerd op vaste plek.'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
@@ -34,7 +35,7 @@ window.toggleAllStock = () => {
 };
 
 window.setStockView = next => {
-  if (!['standard','meal','location'].includes(next)) return;
+  if (!['standard','meal','hidden','location'].includes(next)) return;
   stockView = next;
   localStorage.setItem('household-stock-view', stockView);
   expandedStockCategories.clear();
@@ -56,7 +57,7 @@ function stockItemHtml(x){
     <div class="stock-swipe-back stock-swipe-cycle">
       <button type="button" onclick="setStockRole(${x.id},'standard')">Standaard</button>
       <button type="button" onclick="setStockRole(${x.id},'meal')">Maaltijd</button>
-      <button type="button" onclick="setStockRole(${x.id},'hidden')">Niet tonen</button>
+      <button type="button" onclick="setStockRole(${x.id},'hidden')">Niet in voorraad</button>
     </div>
     <div class="item stock-item stock-swipe-content">
       <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0" onclick="editProduct(${x.id})">
@@ -220,17 +221,18 @@ function bindStockSwipeActions(){
 }
 
 function stockProductsForView(arr){
-  const base=(arr||[]).filter(p=>p.stockRole!=='hidden');
-  if(stockView==='standard') return base.filter(p=>p.stockRole==='standard');
-  if(stockView==='meal') return base.filter(p=>p.stockRole==='meal'&&p.status==='In huis');
-  return base;
+  const all=(arr||[]);
+  if(stockView==='standard') return all.filter(p=>p.stockRole==='standard');
+  if(stockView==='meal') return all.filter(p=>p.stockRole==='meal'&&p.status==='In huis');
+  if(stockView==='hidden') return all.filter(p=>p.stockRole==='hidden');
+  return all.filter(p=>p.stockRole!=='hidden');
 }
 
 function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
-    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen houdbare maaltijdproducten op In huis.':'Geen producten gevonden.'}</div>`;
+    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen houdbare maaltijdproducten op In huis.':stockView==='hidden'?'Geen producten bij Niet in voorraad.':'Geen producten gevonden.'}</div>`;
     return;
   }
 

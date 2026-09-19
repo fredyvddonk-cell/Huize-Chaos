@@ -1,4 +1,10 @@
-# Huize Chaos V1.4.81
+# Huize Chaos V1.4.82
+## Wijzigingen V1.4.82
+- Voorraad heeft nu naast Standaard voorraad en Maaltijdvoorraad ook Niet in voorraad.
+- Producten met voorraadsoort Niet in voorraad zijn in een eigen overzicht terug te vinden.
+- Voorraadsoort “Niet in Voorraad tonen” is hernoemd naar “Niet in voorraad”.
+- Vanuit een voorraadproduct kan direct worden gewisseld tussen Standaard, Maaltijd en Niet in voorraad.
+
 
 - Foto toevoegen aan recepten
 - Receptfoto vervangen of verwijderen
