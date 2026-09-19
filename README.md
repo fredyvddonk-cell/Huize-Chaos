@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.60
+# Huize Chaos V1.4.61
 
-## Wijziging V1.4.60
+## Wijziging V1.4.61
 
 - Rechter swipe-actie en linker checkmoment-swipe fysiek van elkaar gescheiden.
 - Verwijdervlak verbreed zodat “Verwijderen” volledig zichtbaar is.

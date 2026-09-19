@@ -780,6 +780,18 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #modal .card{width:100%;padding:20px 16px 28px}
 }
 
-/* V1.4.60 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
+/* V1.4.61 - swipegebieden fysiek gescheiden zodat rechts en links niet overlappen */
 .stock-swipe-shell.swipe-delete-open .stock-swipe-delete{background:#c93636}
 .stock-swipe-shell.swipe-cycle-open .stock-swipe-cycle{background:#f2edf8}
+
+
+/* V1.4.61 - slechts één swipe-actie per richting zichtbaar */
+.stock-swipe-delete,.stock-swipe-cycle{visibility:hidden;pointer-events:none}
+.stock-swipe-shell.stock-swipe-right .stock-swipe-delete,
+.stock-swipe-shell.swipe-delete-open .stock-swipe-delete{visibility:visible;pointer-events:auto}
+.stock-swipe-shell.stock-swipe-left .stock-swipe-cycle,
+.stock-swipe-shell.swipe-cycle-open .stock-swipe-cycle{visibility:visible;pointer-events:auto}
+.stock-swipe-shell.stock-swipe-right .stock-swipe-cycle,
+.stock-swipe-shell.swipe-delete-open .stock-swipe-cycle{visibility:hidden!important;pointer-events:none!important}
+.stock-swipe-shell.stock-swipe-left .stock-swipe-delete,
+.stock-swipe-shell.swipe-cycle-open .stock-swipe-delete{visibility:hidden!important;pointer-events:none!important}

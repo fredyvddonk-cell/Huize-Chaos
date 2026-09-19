@@ -106,7 +106,7 @@ function bindStockSwipeActions(){
 
     const resetPosition = () => {
       card.style.transform = '';
-      shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping','swipe-delete-armed');
+      shell.classList.remove('swipe-delete-open','swipe-cycle-open','stock-swiping','swipe-delete-armed','stock-swipe-right','stock-swipe-left');
       dx = 0; dy = 0; gesture = ''; tracking = false; pointerId = null;
     };
 
@@ -149,6 +149,8 @@ function bindStockSwipeActions(){
       const limited = Math.max(-280, Math.min(125, dx));
       card.style.transform = `translateX(${limited}px)`;
       shell.classList.toggle('swipe-delete-armed', dx > 85);
+      shell.classList.toggle('stock-swipe-right', dx > 0);
+      shell.classList.toggle('stock-swipe-left', dx < 0);
       if (e.cancelable) e.preventDefault();
     });
 
@@ -165,7 +167,8 @@ function bindStockSwipeActions(){
         suppressClickUntil = Date.now() + 700;
         card.style.transform = 'translateX(132px)';
         shell.classList.add('swipe-delete-open');
-        shell.classList.remove('swipe-cycle-open','swipe-delete-armed');
+        shell.classList.remove('swipe-cycle-open','swipe-delete-armed','stock-swipe-left');
+        shell.classList.add('stock-swipe-right');
         dx = 0; dy = 0; gesture = '';
         return;
       }
@@ -174,7 +177,8 @@ function bindStockSwipeActions(){
         suppressClickUntil = Date.now() + 700;
         card.style.transform = 'translateX(-270px)';
         shell.classList.add('swipe-cycle-open');
-        shell.classList.remove('swipe-delete-open','swipe-delete-armed');
+        shell.classList.remove('swipe-delete-open','swipe-delete-armed','stock-swipe-right');
+        shell.classList.add('stock-swipe-left');
         dx = 0; dy = 0; gesture = '';
         return;
       }
