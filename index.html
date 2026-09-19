@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.41">
+  <link rel="stylesheet" href="style.css?v=1.4.42">
 </head>
 <body>
   <main class="home">
@@ -37,11 +37,11 @@
       <a class="module-card available" href="notities/?hcnav=home"><span class="placeholder-icon">🔒</span><div><strong>Mijn notities</strong><small>Persoonlijke notities · alleen voor mij</small></div><span class="go">›</span></a>
       <a class="module-card available" href="gelegenheden/?hcnav=home"><span class="placeholder-icon">🎉</span><div><strong>Feestdagen &amp; gelegenheden</strong><small>Gasten, aankopen, kosten en evaluatie</small></div><span class="go">›</span></a>
     </section>
-    <footer>Huize Chaos · V1.4.41</footer>
+    <footer>Huize Chaos · V1.4.42</footer>
   </main>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=1.4.41'));
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=1.4.42'));
 }
   try { const h=JSON.parse(localStorage.getItem('household-hutsel-v1')||'[]'); const el=document.getElementById('homeHutselSignal'); if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel';} } catch(e){}
 </script>
