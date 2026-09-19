@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.47
+# Huize Chaos V1.4.48
 
 - Receptcategorie is nu de keuken/smaakrichting.
 - Receptsoort is nu de gerechtvorm.

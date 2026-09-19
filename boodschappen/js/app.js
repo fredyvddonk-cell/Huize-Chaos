@@ -57,6 +57,10 @@ function migrateProduct(x) {
   product.temporary = Boolean(product.temporary);
   product.cloudPending = Boolean(product.cloudPending);
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
+  product.stockLocation = String(product.stockLocation || '');
+  if (!['week','month','work','rare'].includes(product.checkCycle)) {
+    product.checkCycle = product.category === 'Kruiden' || product.category === 'Bakproducten' ? 'rare' : (product.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week');
+  }
 
   delete product.amount;
   return product;
@@ -266,6 +270,8 @@ function openModal(x = null, prefillName = '') {
   $('#store').value = x?.store || '';
   $('#category').value = x?.category || '';
   $('#memo').value = x?.memo || '';
+  $('#stockLocation').value = x?.stockLocation || '';
+  $('#checkCycle').value = x?.checkCycle || (x?.category === 'Kruiden' || x?.category === 'Bakproducten' ? 'rare' : (x?.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week'));
   $('#buyDirectWhenOut').checked = Boolean(x?.buyDirectWhenOut);
   const fixedProductOption = $('#fixedProductOption');
   const showFixedProductChoice = page === 'list';
@@ -390,6 +396,8 @@ function render() {
   });
 
   $('#title').textContent = page === 'list' ? 'Boodschappen' : page === 'stock' ? 'Voorraad' : page === 'hutsel' ? 'Hutsel Frutsel' : page === 'insight' ? 'Inzicht' : 'Beheer';
+  const stockControls = $('#stockControls');
+  if (stockControls) stockControls.hidden = page !== 'stock';
   search.placeholder = page === 'list' ? 'Zoek boodschap...' : 'Zoek product...';
   document.body.classList.toggle('shopping-page', page === 'list');
   document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
@@ -499,6 +507,8 @@ function initApp() {
       unit: $('#unit').value,
       store: $('#store').value,
       category: $('#category').value.trim(),
+      stockLocation: $('#stockLocation').value,
+      checkCycle: $('#checkCycle').value,
       memo: $('#memo').value.trim(),
       buyDirectWhenOut: $('#buyDirectWhenOut').checked,
       temporary: page === 'list' && !$('#fixedProduct').checked

@@ -735,3 +735,6 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-recipe-suggestion-link{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:#6a4389;padding:5px 2px;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
 .stock-recipe-suggestion-link span{font-size:17px;line-height:1}
 .stock-recipe-suggestion-link:hover{text-decoration:underline}
+
+/* V1.4.48 - voorraad: locatie los van checkmoment */
+.stock-check-controls{margin:0 0 12px}.stock-check-mode{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.stock-check-mode::-webkit-scrollbar{display:none}.stock-check-mode button{white-space:nowrap;border:1px solid #d7cdea;background:#fff;color:#5f467d;border-radius:999px;padding:8px 11px;font:inherit}.stock-check-mode button.active{background:#7655a5;color:#fff;border-color:#7655a5}.stock-view-help{margin:4px 2px 0;color:#6d6873;font-size:.88rem}.stock-classification-help{margin:-4px 0 12px;color:#777;font-size:.82rem;line-height:1.35}.stock-location-head{margin:10px 0 6px;padding:8px 10px;background:#f4effa;border-radius:10px;font-weight:700;color:#5f467d}.stock-item-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.stock-mini-badge{font-size:.72rem;background:#f3f0f7;color:#655d6e;border-radius:999px;padding:2px 7px}

@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.47">
+  <link rel="stylesheet" href="style.css?v=1.4.48">
 </head>
 <body>
   <main class="app">
@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.47</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.48</span></div>
     </div>
 
     <nav class="tabs">
@@ -36,6 +36,17 @@
         <button id="clearSearch" class="search-clear" type="button" aria-label="Zoekveld leegmaken">×</button>
       </div>
       <button id="add" class="plus add-labelled" aria-label="Product toevoegen">+ Toevoegen</button>
+    </div>
+
+    <div id="stockControls" class="stock-check-controls" hidden>
+      <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
+        <button type="button" data-stock-view="all" class="active">Alles</button>
+        <button type="button" data-stock-view="week">Weekcheck</button>
+        <button type="button" data-stock-view="month">Maandcheck</button>
+        <button type="button" data-stock-view="work">Werkvoorraad</button>
+        <button type="button" data-stock-view="rare">Zelden</button>
+      </div>
+      <p id="stockViewHelp" class="stock-view-help">Volledige voorraad. Alles blijft beschikbaar voor receptsuggesties.</p>
     </div>
 
     <div id="listControls">
@@ -140,6 +151,27 @@
         <label for="store">Winkel</label>
         <select id="store"></select>
       </div>
+
+      <div class="field-row stock-classification-row">
+        <div class="field">
+          <label for="stockLocation">Vaste plek</label>
+          <select id="stockLocation">
+            <option value="">Niet ingesteld</option>
+            <option>Kast 1</option><option>Kast 2</option><option>Kast 3</option><option>Kast 4</option>
+            <option>Kruidenrek</option><option>Koelkast</option><option>Vriezer</option><option>Overig</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="checkCycle">Controleren bij</label>
+          <select id="checkCycle">
+            <option value="week">Weekcheck</option>
+            <option value="month">Maandcheck</option>
+            <option value="work">Werkvoorraad</option>
+            <option value="rare">Zelden checken</option>
+          </select>
+        </div>
+      </div>
+      <div class="stock-classification-help">De plek zegt waar het ligt. Het checkmoment bepaalt alleen wanneer Huize Chaos het aan je toont.</div>
 
       <div class="field">
         <label for="category">Categorie</label>
@@ -283,12 +315,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.47"></script>
-  <script src="js/shopping.js?v=1.4.47"></script>
-  <script src="js/stock.js?v=1.4.47"></script>
-  <script src="js/hutsel.js?v=1.4.47"></script>
-  <script src="js/insight.js?v=1.4.47"></script>
-  <script type="module" src="js/firebase.js?v=1.4.47"></script>
+  <script src="js/app.js?v=1.4.48"></script>
+  <script src="js/shopping.js?v=1.4.48"></script>
+  <script src="js/stock.js?v=1.4.48"></script>
+  <script src="js/hutsel.js?v=1.4.48"></script>
+  <script src="js/insight.js?v=1.4.48"></script>
+  <script type="module" src="js/firebase.js?v=1.4.48"></script>
 
 </body>
 </html>
