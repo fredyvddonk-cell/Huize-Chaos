@@ -1,14 +1,14 @@
-# Huize Chaos V1.4.55
+# Huize Chaos V1.4.56
 
-## Wijziging V1.4.55
+## Wijziging V1.4.56
 
-- Voorraadproducten kunnen op mobiel naar rechts worden geswipet om **Verwijderen** te tonen.
-- Verwijderen gebeurt pas na tikken op **Verwijderen**, zodat een losse veeg niet direct wist.
-- Naar links swipen toont direct de vier checkmomenten.
-- Een gekozen checkmoment wordt meteen opgeslagen.
-- **Werkvoorraad** heet in beeld voortaan **Alleen meenemen bij ‘Wat kan ik maken?’**. Bestaande gegevens blijven behouden.
-- Alleen een Hutsel Frutsel-product met vaste plek **Vriezer** komt onder **Hutsel Frutsel – Diepvries**.
-- De categorie **Diepvries** alleen verplaatst een product niet meer automatisch naar Hutsel Frutsel – Diepvries.
+- Swipe naar rechts op een voorraadproduct start direct de verwijderactie.
+- Er blijft geen half geopende verwijderknop meer onder het product staan.
+- Een gewone tik op een voorraadproduct opent weer alleen het product om te wijzigen.
+- Swipe en tik worden technisch van elkaar gescheiden zodat ze elkaar niet meer activeren.
+- Swipe naar links voor het snel wijzigen van het checkmoment blijft behouden.
+- De voorraadrij springt na een swipe altijd terug naar een vaste stand.
+- Cacheversie verhoogd zodat mobiel de nieuwe swipe-code direct gebruikt.
 
 ## V1.4.43 – Gekochte receptproducten verwijderen
 
