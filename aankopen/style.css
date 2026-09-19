@@ -2,3 +2,5 @@
 
 /* V1.3.153 */
 .category-entry{display:flex;gap:8px;align-items:stretch}.category-entry select{flex:1;min-width:0}.category-add{white-space:nowrap;padding:0 12px}@media(max-width:560px){.category-entry{flex-direction:column}.category-add{min-height:42px}}
+
+.hc-module-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}.hc-brand{display:flex;align-items:center;gap:8px;text-decoration:none}.hc-brand img:first-child{width:44px;height:44px;object-fit:contain}.hc-brand img:last-child{height:31px;width:auto;max-width:180px}.hc-version{margin-left:auto;font-size:12px;color:#8a8490}

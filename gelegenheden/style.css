@@ -32,3 +32,6 @@
 
 /* V1.4.20 - wens wijzigen gebruikt hetzelfde formulier als wens toevoegen */
 .central-wish-form-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.wish-current-image{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:8px 10px;background:#faf8fc;border:1px solid #e6dfec;border-radius:10px;color:#81758f}.wish-current-image img{width:58px;height:58px;object-fit:cover;border-radius:9px}.wish-current-image span{font-size:13px;font-weight:700}
+
+/* V1.4.41 uniforme Huize Chaos-kop */
+.module-brand{gap:8px}.module-brand .module-app-icon{width:44px;height:44px;object-fit:contain}.module-brand .module-wordmark{height:31px;width:auto;max-width:180px}.module-sync:empty,.module-sync[data-ok='1']{display:none}

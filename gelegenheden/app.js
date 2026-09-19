@@ -6,7 +6,7 @@ const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp),
 const plannerItemRef=id=>doc(db,'households','huize-chaos','plannerItems',`occasion-${String(id).replace(/[^a-zA-Z0-9_-]/g,'_')}`);
 let occasionUser=null,cloudReady=false,applyingCloud=false,syncTimer=0,stopCloud=null;
 const occasionSyncStatus=document.querySelector('#occasionSyncStatus');
-function setOccasionSyncStatus(t){if(occasionSyncStatus)occasionSyncStatus.textContent=t}
+function setOccasionSyncStatus(t){if(occasionSyncStatus){occasionSyncStatus.textContent=t;occasionSyncStatus.hidden=/^(Gesynchroniseerd|Laden…)$/.test(t)}}
 
 const KEY='huize-chaos-occasions-v1';
 const WISH_KEY='huize-chaos-wishlists-v1';

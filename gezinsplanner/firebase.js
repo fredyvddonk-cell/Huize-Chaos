@@ -34,7 +34,7 @@ let stopListeners=[];
 const LEGACY_HOUSEHOLD_IDS=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
 const firstName=value=>String(value||'').trim().split(/\s+/)[0]||'Gezinslid';
 
-function setStatus(text,state=''){syncStatus.textContent=text;syncStatus.className=`sync-status ${state}`.trim()}
+function setStatus(text,state=''){syncStatus.textContent=text;syncStatus.className=`sync-status ${state}`.trim();syncStatus.hidden=/^(Gesynchroniseerd|Niet aangemeld)$/.test(text)}
 function stopAll(){stopListeners.forEach(stop=>stop());stopListeners=[]}
 function showSignedOut(){gate.classList.remove('ready');message.textContent='Meld je aan met Google om de gezamenlijke gezinsplanner te openen.';signInButton.hidden=false;signOutButton.hidden=true;accessBox.hidden=true;setStatus('Niet aangemeld')}
 function showWaiting(currentUser){gate.classList.remove('ready');message.textContent=`Je bent aangemeld als ${currentUser.displayName||currentUser.email||'Google-gebruiker'}, maar hebt nog geen toegang.`;signInButton.hidden=true;signOutButton.hidden=false;accessBox.hidden=false;accessUid.textContent=currentUser.uid;setStatus('Wacht op toegang')}
