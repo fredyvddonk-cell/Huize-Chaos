@@ -76,3 +76,17 @@
 .module-brand{gap:8px}.module-brand .module-app-icon{width:44px;height:44px;object-fit:contain}.module-brand .module-wordmark{height:31px;width:auto;max-width:180px}.module-sync:empty,.module-sync[data-ok='1']{display:none}
 /* V1.4.43 rustig recept kiezen: relevante keuzes op één scherm */
 .smart-picker{display:grid;gap:14px;margin:8px 0 16px}.smart-picker-title{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.smart-picker-title small{color:#81758f}.smart-group{display:grid;gap:7px}.smart-group h3{font-size:14px;margin:0;color:#5f4c83}.smart-group>div,.smart-category-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:7px}.smart-recipe{border:1px solid #e3dcec;background:#fff;border-radius:12px;padding:9px 11px;text-align:left;display:grid;gap:2px;color:#43374e}.smart-recipe small{font-size:11px;color:#81758f}.smart-recipe:active{background:#f2ecf8}.smart-categories{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.smart-categories::-webkit-scrollbar{display:none}.smart-categories button{white-space:nowrap;border:1px solid #e3dcec;background:#fff;border-radius:999px;padding:7px 10px}.smart-categories button.active{background:#eee5f7;color:#5f4c83;border-color:#cdbce0}.stock-recipe-tools{display:none}@media(max-width:600px){.smart-picker-title{display:grid;gap:2px}.smart-group>div,.smart-category-results{grid-template-columns:1fr}.smart-recipe{padding:9px 10px}}
+
+/* V1.4.45 - rustiger receptenmenu */
+.smart-picker.calm{gap:10px;margin-top:10px}.smart-modes{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.smart-modes::-webkit-scrollbar{display:none}.smart-modes button{white-space:nowrap;border:1px solid #ddd4e7;background:#fff;border-radius:999px;padding:8px 11px;font:inherit;font-size:13px;font-weight:750;color:#574b60}.smart-modes button.active{background:#e9def4;border-color:#c8b3dc;color:#583579}.smart-picker.calm .smart-categories{padding-top:2px}.smart-picker.calm .smart-category-results{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:5px}.smart-picker.calm .smart-recipe{min-height:0;padding:8px 10px;border-radius:10px}.smart-picker.calm .smart-recipe span{line-height:1.25}.smart-picker.calm .smart-recipe small{margin-top:1px}.smart-more{justify-self:start;margin-top:2px}.recipe-card.compact{padding:9px 11px}.review-fields select{width:100%;min-height:42px;border:1px solid #d8d3dc;border-radius:10px;padding:9px 10px;background:#fff;font:inherit}
+@media(max-width:600px){.smart-picker.calm{gap:9px}.smart-picker.calm .smart-category-results{grid-template-columns:1fr}.smart-picker.calm .smart-recipe{padding:8px 9px}.smart-picker-title small{font-size:12px}.smart-modes button,.smart-categories button{padding:7px 9px;font-size:12px}}
+
+/* V1.4.45 - suggesties vanuit een voorraadproduct */
+.stock-ingredient-suggestions{display:grid;gap:10px;margin:8px 0 16px}
+.stock-suggestion-back{justify-self:start;border:0;background:transparent;color:#6a4389;padding:4px 0;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.stock-suggestion-head{display:grid;gap:3px}
+.stock-suggestion-head strong{font-size:15px;color:#4f3a62}
+.stock-suggestion-head small,.stock-more-note{color:#81758f;font-size:12px}
+.stock-online-step{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px;font-size:12px;color:#81758f}
+.stock-online-step a{color:#6a4389;font-weight:750;text-decoration:none;border-bottom:1px solid #cdbce0}
+.stock-online-step a:hover{border-color:#6a4389}

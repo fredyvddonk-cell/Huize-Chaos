@@ -729,3 +729,9 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 .category-suggestions:not([hidden]){display:grid}
 .category-suggestion{flex:0 0 auto}
+
+/* V1.4.45 - rustige receptsuggestie vanuit Voorraad */
+.stock-recipe-suggestion-wrap{margin:-2px 0 8px}
+.stock-recipe-suggestion-link{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:#6a4389;padding:5px 2px;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.stock-recipe-suggestion-link span{font-size:17px;line-height:1}
+.stock-recipe-suggestion-link:hover{text-decoration:underline}

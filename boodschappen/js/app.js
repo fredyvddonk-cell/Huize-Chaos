@@ -274,6 +274,16 @@ function openModal(x = null, prefillName = '') {
   const deleteFromProduct = $('#deleteFromProduct');
   deleteFromProduct.hidden = !(x && page === 'stock');
   deleteFromProduct.dataset.productId = x?.id || '';
+  const stockRecipeWrap = $('#stockRecipeSuggestionWrap');
+  const stockRecipeSuggestions = $('#stockRecipeSuggestions');
+  const showRecipeSuggestions = Boolean(x && page === 'stock' && String(x.name||'').trim());
+  if (stockRecipeWrap) stockRecipeWrap.hidden = !showRecipeSuggestions;
+  if (stockRecipeSuggestions) {
+    stockRecipeSuggestions.onclick = showRecipeSuggestions ? (() => {
+      const params = new URLSearchParams({ ingredient: String(x.name||'').trim(), stockProductId: String(x.id||''), hcnav: '1' });
+      window.location.href = `../recepten/?${params.toString()}`;
+    }) : null;
+  }
   openHuizeChaosOverlay('product-edit', $('#modal'));
   const categoryInput = $('#category');
   const categorySuggestions = $('#categorySuggestions');

@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.43">
+  <link rel="stylesheet" href="style.css?v=1.4.45">
 </head>
 <body>
   <main class="app">
@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.43</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.45</span></div>
     </div>
 
     <nav class="tabs">
@@ -163,6 +163,10 @@
         <textarea id="memo" rows="3" placeholder="Bijv. halfvol, aanbieding, voor recept..."></textarea>
       </div>
 
+      <div id="stockRecipeSuggestionWrap" class="stock-recipe-suggestion-wrap" hidden>
+        <button type="button" id="stockRecipeSuggestions" class="stock-recipe-suggestion-link">Wat kan ik hiermee maken? <span aria-hidden="true">›</span></button>
+      </div>
+
       <div class="modal-actions">
         <button type="button" id="deleteFromProduct" class="btn danger-button product-delete-button" hidden>Verwijderen</button>
         <button type="button" id="cancel" class="btn secondary">Annuleren</button>
@@ -279,12 +283,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.43"></script>
-  <script src="js/shopping.js?v=1.4.43"></script>
-  <script src="js/stock.js?v=1.4.43"></script>
-  <script src="js/hutsel.js?v=1.4.43"></script>
-  <script src="js/insight.js?v=1.4.43"></script>
-  <script type="module" src="js/firebase.js?v=1.4.43"></script>
+  <script src="js/app.js?v=1.4.45"></script>
+  <script src="js/shopping.js?v=1.4.45"></script>
+  <script src="js/stock.js?v=1.4.45"></script>
+  <script src="js/hutsel.js?v=1.4.45"></script>
+  <script src="js/insight.js?v=1.4.45"></script>
+  <script type="module" src="js/firebase.js?v=1.4.45"></script>
 
 </body>
 </html>
