@@ -6,10 +6,10 @@ const STOCK_VIEW_HELP = {
   all: 'Volledige voorraad. Alles blijft beschikbaar voor receptsuggesties.',
   week: 'Alleen producten die je standaard wilt nalopen voor je gewone boodschappen.',
   month: 'Houdbare voorraad per vaste plek. Loop één kast tegelijk langs.',
-  work: 'Tijdelijke werkvoorraad: meenemen bij “Wat kan ik maken?”, maar niet standaard aanvullen.',
+  work: 'Alleen meenemen bij “Wat kan ik maken?”; niet standaard opnemen in je voorraadcheck.',
   rare: 'Producten die je maar af en toe hoeft te controleren, zoals veel kruiden en bakproducten.'
 };
-const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Werkvoorraad',rare:'Zelden'};
+const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 
 function saveStockExpansion() {
   localStorage.setItem('household-expanded-stock', JSON.stringify([...expandedStockCategories]));
@@ -58,19 +58,74 @@ function stockBadges(product){
 }
 
 function stockItemHtml(x){
-  return `<div class="item stock-item">
-    <div class="main" onclick="editProduct(${x.id})" role="button" tabindex="0">
-      <div class="name">${esc(x.name)}</div>
-      ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
-      ${stockBadges(x)}
-      ${memoHtml(x)}
+  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${x.id}">
+    <div class="stock-swipe-back stock-swipe-delete"><button type="button" onclick="requestProductDelete(${x.id},'product')">Verwijderen</button></div>
+    <div class="stock-swipe-back stock-swipe-cycle">
+      <button type="button" onclick="setStockCheckCycle(${x.id},'week')">Week</button>
+      <button type="button" onclick="setStockCheckCycle(${x.id},'month')">Maand</button>
+      <button type="button" onclick="setStockCheckCycle(${x.id},'rare')">Zelden</button>
+      <button type="button" onclick="setStockCheckCycle(${x.id},'work')">Maken</button>
     </div>
-    <div class="stock-actions stock-actions-compact">
-      <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${x.id})">${x.status}</button>
-      <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${x.id}, this.checked)"><span>Kopen</span></label>
-      <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
+    <div class="item stock-item stock-swipe-content">
+      <div class="main" onclick="editProduct(${x.id})" role="button" tabindex="0">
+        <div class="name">${esc(x.name)}</div>
+        ${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}
+        ${stockBadges(x)}
+        ${memoHtml(x)}
+      </div>
+      <div class="stock-actions stock-actions-compact">
+        <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${x.id})">${x.status}</button>
+        <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${x.id}, this.checked)"><span>Kopen</span></label>
+        <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
+      </div>
     </div>
   </div>`;
+}
+
+window.setStockCheckCycle = (id, cycle) => {
+  if (!['week','month','work','rare'].includes(cycle)) return;
+  const product = products.find(x => x.id === id);
+  if (!product) return;
+  product.checkCycle = cycle;
+  save();
+  render();
+};
+
+function bindStockSwipeActions(){
+  document.querySelectorAll('[data-stock-swipe]').forEach(shell => {
+    const card = shell.querySelector('.stock-swipe-content');
+    if (!card || shell.dataset.swipeBound === '1') return;
+    shell.dataset.swipeBound = '1';
+    let startX = 0, startY = 0, dx = 0, tracking = false, moved = false;
+    const reset = () => { card.style.transform = ''; shell.classList.remove('swipe-delete-open','swipe-cycle-open'); };
+    shell.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX; startY = e.touches[0].clientY; dx = 0; tracking = true; moved = false;
+      shell.classList.add('stock-swiping');
+    }, {passive:true});
+    shell.addEventListener('touchmove', e => {
+      if (!tracking || e.touches.length !== 1) return;
+      const x = e.touches[0].clientX - startX;
+      const y = e.touches[0].clientY - startY;
+      if (Math.abs(y) > Math.abs(x) && !moved) return;
+      if (Math.abs(x) < 6) return;
+      moved = true; dx = Math.max(-285, Math.min(105, x));
+      card.style.transform = `translateX(${dx}px)`;
+      if (e.cancelable) e.preventDefault();
+    }, {passive:false});
+    shell.addEventListener('touchend', () => {
+      tracking = false; shell.classList.remove('stock-swiping');
+      if (dx > 48) { card.style.transform = 'translateX(96px)'; shell.classList.add('swipe-delete-open'); shell.classList.remove('swipe-cycle-open'); }
+      else if (dx < -48) { card.style.transform = 'translateX(-270px)'; shell.classList.add('swipe-cycle-open'); shell.classList.remove('swipe-delete-open'); }
+      else reset();
+      setTimeout(() => { moved = false; }, 80);
+    });
+    card.addEventListener('click', e => {
+      if (moved || shell.classList.contains('swipe-delete-open') || shell.classList.contains('swipe-cycle-open')) {
+        e.preventDefault(); e.stopPropagation(); reset();
+      }
+    }, true);
+  });
 }
 
 function renderStock(arr) {
@@ -99,7 +154,9 @@ function renderStock(arr) {
   }).join('');
 
   content.innerHTML = `<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size ? 'Alles inklappen' : 'Alles uitklappen'}</button></div>${rows}`;
+  bindStockSwipeActions();
 }
+
 
 window.openStockCategoryAdd = encodedCategory => {
   openModal(null);

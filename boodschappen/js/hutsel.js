@@ -36,15 +36,28 @@ window.sendStockToHutsel = id => {
   if (!product) return;
 
   const quantity = [product.quantity, product.unit].filter(Boolean).join(' ');
-  $('#hutselEditId').value = '';
-  $('#hutselName').value = product.name || '';
-  $('#hutselNote').value = quantity || product.memo || '';
-  document.querySelector('input[name="hutselDay"][value="today"]').checked = true;
-  window.openHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal'));
-  setTimeout(() => {
-    const tomorrow = document.querySelector('input[name="hutselDay"][value="tomorrow"]');
-    if (tomorrow) tomorrow.focus();
-  }, 50);
+  const note = quantity || product.memo || '';
+  const isFreezer = String(product.stockLocation || '').toLowerCase() === 'vriezer';
+  const existing = hutselItems.find(x => Number(x.sourceProductId) === Number(product.id));
+
+  if (existing) {
+    existing.name = product.name || existing.name;
+    existing.note = note;
+    existing.freezer = isFreezer;
+    if (!isFreezer && !existing.useDate) existing.useDate = localDateKey();
+  } else {
+    hutselItems.push({
+      id: Date.now(),
+      sourceProductId: product.id,
+      name: product.name || '',
+      note,
+      useDate: isFreezer ? '' : localDateKey(),
+      freezer: isFreezer
+    });
+  }
+
+  saveHutsel();
+  render();
 };
 
 
@@ -52,7 +65,7 @@ window.sendStockToHutsel = id => {
 function renderHutsel() {
   normalizeHutselDates();
   const q = search.value.trim().toLowerCase();
-  const arr = hutselItems.filter(x => x.name.toLowerCase().includes(q) || (x.note||'').toLowerCase().includes(q));
+  const arr = hutselItems.filter(x => !x.freezer && (x.name.toLowerCase().includes(q) || (x.note||'').toLowerCase().includes(q)));
   const today=localDateKey(), tomorrow=tomorrowKey();
   const section=(title,items,cls)=>`
     <section class="hutsel-section ${cls}">
@@ -107,15 +120,23 @@ function openFreezerModal(item=null){
 }
 function closeFreezerModal(){window.closeHuizeChaosOverlay?.('freezer-edit', $('#freezerModal'));}
 function freezerHtml(q=''){
-  const arr=freezerMeals.filter(x=>x.name.toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q));
-  return `<section class="hutsel-section freezer-section">
-    <div class="freezer-heading"><h2 class="section">Diepvries <span class="hutsel-count">${arr.reduce((n,x)=>n+Number(x.portions||0),0)} porties</span></h2><button class="small freezer-add" type="button" onclick="openFreezerModal()">+ Maaltijd</button></div>
-    ${arr.length?arr.sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(x=>`
+  const meals=freezerMeals.filter(x=>x.name.toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q));
+  const stockItems=hutselItems.filter(x=>x.freezer && (x.name.toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)));
+  const count=meals.reduce((n,x)=>n+Number(x.portions||0),0)+stockItems.length;
+  const mealRows=meals.sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(x=>`
       <div class="item hutsel-item">
         <button class="freezer-take" type="button" onclick="decrementFreezerMeal(${x.id})">−1</button>
         <div class="main" onclick="editFreezerMeal(${x.id})" role="button"><div class="name">${esc(x.name)}</div><div class="meta">${x.portions} ${Number(x.portions)===1?'portie':'porties'}${x.frozenDate?' · '+esc(x.frozenDate):''}${x.note?' · '+esc(x.note):''}</div></div>
         <button class="small" type="button" onclick="editFreezerMeal(${x.id})">Wijzig</button>
-      </div>`).join(''):'<div class="hutsel-empty">Nog geen maaltijden in de diepvries.</div>'}
+      </div>`).join('');
+  const stockRows=stockItems.sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(x=>`
+      <div class="item hutsel-item">
+        <button class="hutsel-done" type="button" onclick="finishHutsel(${x.id})" aria-label="${esc(x.name)} uit Hutsel Frutsel verwijderen">✓</button>
+        <div class="main" role="button"><div class="name">${esc(x.name)}</div>${x.note?`<div class="meta">${esc(x.note)}</div>`:''}</div>
+      </div>`).join('');
+  return `<section class="hutsel-section freezer-section">
+    <div class="freezer-heading"><h2 class="section">Diepvries <span class="hutsel-count">${count}</span></h2><button class="small freezer-add" type="button" onclick="openFreezerModal()">+ Maaltijd</button></div>
+    ${stockRows}${mealRows}${(!stockRows&&!mealRows)?'<div class="hutsel-empty">Nog niets in Hutsel Frutsel diepvries.</div>':''}
   </section>`;
 }
 window.openFreezerModal=openFreezerModal;

@@ -1,36 +1,14 @@
-# Huize Chaos V1.4.48
+# Huize Chaos V1.4.51
 
-- Receptcategorie is nu de keuken/smaakrichting.
-- Receptsoort is nu de gerechtvorm.
-- Hoofdingrediënt toegevoegd voor kip/rund/varken/vis/vegetarisch/anders.
-- Recept kiezen heeft compacte tekstfilters voor categorie, soort, hoofdingrediënt en tijd thuis.
-- Weekmenuvariatie gebruikt alle drie kenmerken.
+## Wijziging V1.4.51
 
-
-- Recept opent voortaan als eigen scherm; de receptenlijst blijft niet erboven staan.
-- Weekmenu en Recepten blijven vanuit een geopend recept bereikbaar.
-- Terug naar Recepten brengt je terug naar dezelfde lijstpositie.
-- Categorie kan bij Wijzigen worden aangepast.
-- Soort kan bij Wijzigen worden aangepast: kip, rund, varken, vis, vegetarisch of anders.
-- Tijd thuis toegevoegd: Kort, Middellang of Lang.
-- Kort betekent praktisch binnen ongeveer 30 minuten op tafel.
-- Recepten kunnen op Tijd thuis worden gefilterd.
-- Voorraadcontrole noemt een product niet meer automatisch tekort als de hoeveelheden niet eerlijk vergelijkbaar zijn.
-- Receptaantallen zonder eenheid worden bij voorraad in stuks slimmer herkend.
-- Past bij voorraad, Variatie, Vaak gegeten en voorraadproduct-suggesties blijven behouden.
-- Online zoeken vanuit een voorraadproduct blijft een kleine tweede stap.
-
-# Huize Chaos V1.4.43
-
-- Maaltijdsuggesties zijn direct aanklikbaar en worden met één tik aan het gekozen weekmenu toegevoegd.
-- Het aantal personen blijft daarna direct aanpasbaar in het weekmenu.
-- Verlanglijstjes compacter en rustiger gemaakt.
-- Het formulier Wens toevoegen staat standaard dicht en opent pas na + Wens toevoegen.
-- Wijzigen en verwijderen worden alleen bij het eigen verlanglijstje getoond.
-- Nieuwe wensen worden aan de ingelogde gebruiker gekoppeld.
-- Mobiele titel Feestdagen & gelegenheden blijft op één regel.
-
-# Huize Chaos V1.4.43
+- Voorraadproducten kunnen op mobiel naar rechts worden geswipet om **Verwijderen** te tonen.
+- Verwijderen gebeurt pas na tikken op **Verwijderen**, zodat een losse veeg niet direct wist.
+- Naar links swipen toont direct de vier checkmomenten.
+- Een gekozen checkmoment wordt meteen opgeslagen.
+- **Werkvoorraad** heet in beeld voortaan **Alleen meenemen bij ‘Wat kan ik maken?’**. Bestaande gegevens blijven behouden.
+- Alleen een Hutsel Frutsel-product met vaste plek **Vriezer** komt onder **Hutsel Frutsel – Diepvries**.
+- De categorie **Diepvries** alleen verplaatst een product niet meer automatisch naar Hutsel Frutsel – Diepvries.
 
 ## V1.4.43 – Gekochte receptproducten verwijderen
 

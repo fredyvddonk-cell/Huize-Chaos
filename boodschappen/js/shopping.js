@@ -162,16 +162,10 @@ function recipeStockCoverage(i){
   const preferredRaw=i.stockProductId?all.find(x=>String(x.id)===String(i.stockProductId)):null;
   const preferred=preferredRaw&&preferredRaw.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,preferredRaw)?preferredRaw:null;
   const p=preferred||all.find(x=>x.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,x));
-  const need=recipeAmount(i.qty,i.unit),fullNeed=[i.qty,i.unit].filter(Boolean).join(' ');
-  if(!p)return {enough:false,matched:false,shortage:fullNeed,product:null};
-  const have=recipeAmount(p.quantity,p.unit);
-  if(have&&need&&have.u&&need.u&&have.u===need.u){
-    if(have.n>=need.n)return {enough:true,matched:true,shortage:'',product:p};
-    let missing=need.n-have.n,unit=need.u;
-    if(recipeUnit(i.unit)==='kg'){missing/=1000;unit='kg'}else if(recipeUnit(i.unit)==='l'){missing/=1000;unit='l'}else unit=i.unit||need.u;
-    return {enough:false,matched:true,shortage:[String(Number(missing.toFixed(3))).replace('.',','),unit].filter(Boolean).join(' '),product:p};
-  }
-  return {enough:false,matched:true,shortage:fullNeed,product:p};
+  if(!p)return {enough:false,matched:false,shortage:[i.qty,i.unit].filter(Boolean).join(' '),product:null};
+  // V1.4.51: voorraadmatching voor recepten gebeurt alleen op product/variant.
+  // Hoeveelheden worden niet meer automatisch vergeleken; gebruiker controleert zelf of er genoeg is.
+  return {enough:true,matched:true,shortage:'',product:p};
 }
 function plannedRecipeTitles(){return [...new Set(recipeWeekPlans().filter(p=>p.week===shoppingWeekKey()).map(p=>p.title).filter(Boolean))]}
 function materializeOccasionShopping(e){

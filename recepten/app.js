@@ -246,24 +246,16 @@ function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
     &&(glutenMode!=='gf'||isGlutenFreeProduct(preferredRaw))
     &&(glutenMode!=='regular'||!isGlutenFreeProduct(preferredRaw));
   const preferred=preferredValid?preferredRaw:null;
-  if(preferred&&preferred.status!=='In huis')return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:''};
+  if(preferred&&preferred.status!=='In huis')return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:'',comparable:false};
   const product=(preferred&&preferred.status==='In huis'?preferred:null)||matches.find(p=>String(p.id)===preferredId)||(genericPasta?matches.find(p=>pastaType(p.name)):null)||matches[0];
-  if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:''};
-  let have=toBaseAmount(product.quantity,product.unit),need=toBaseAmount(ingredient.qty,ingredient.unit);
-  // Een getal zonder eenheid in een recept is bij een product in stuks vrijwel altijd een stukaantal.
-  if(need&& !need.u && have?.u==='stuks')need={...need,u:'stuks'};
-  let enough=true,shortage=null,comparable=true;
-  if(need){
-    if(!have||!have.u||!need.u||have.u!==need.u){
-      // Product is wel aantoonbaar in huis, maar pak/zak/stuk en gram/ml zijn niet betrouwbaar om te rekenen.
-      // Noem dit daarom niet automatisch een tekort en zet het ook niet automatisch op de boodschappenlijst.
-      enough=true;comparable=false;
-    }else{enough=have.n>=need.n;if(!enough){let missing=need.n-have.n,unit=need.u;if(normalizedUnit(ingredient.unit)==='kg'){missing/=1000;unit='kg'}else if(normalizedUnit(ingredient.unit)==='l'){missing/=1000;unit='l'}else unit=ingredient.unit||need.u;shortage={qty:formatScaledNumber(missing,unit,ingredient.ingredient),unit}}}
-  }
+  if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches,available:'',comparable:false};
+  // V1.4.51: voor receptcontrole telt alleen of het juiste product in huis is.
+  // Recept- en voorraadhoeveelheden worden bewust niet met elkaar vergeleken,
+  // omdat hoeveelheden in de praktijk tussentijds kunnen wijzigen.
   const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';
   const productName=String(product.name||'').trim();
   const label=genericPasta&&pastaType(productName)?`In huis: ${productName} · ${available}`:`In huis: ${available}`;
-  return {matched:true,enough,label,product,shortage,matches,available,comparable};
+  return {matched:true,enough:true,label,product,shortage:null,matches,available,comparable:false};
 }
 function pastaSplitRows(i,n,oldRows,gfPersons,totalPersons){
   const prevFor=mode=>(Array.isArray(oldRows)?oldRows.find(x=>String(x.id)===`${n}-${mode}`):oldRows)||{};
@@ -277,26 +269,11 @@ function pastaSplitRows(i,n,oldRows,gfPersons,totalPersons){
 function breadVariantCoverage(ingredient,options,preferredId=''){
   const candidates=(options||[]).filter(p=>p.status==='In huis');
   const product=candidates.find(p=>preferredId&&String(p.id)===String(preferredId))||candidates[0]||null;
-  if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches:options||[],available:''};
-  const have=toBaseAmount(product.quantity,product.unit),need=toBaseAmount(ingredient.qty,ingredient.unit);
-  let enough=true,shortage=null,comparable=true;
-  if(need){
-    if(!have||!have.u||!need.u||have.u!==need.u){enough=false;comparable=false}
-    else{
-      enough=have.n>=need.n;
-      if(!enough){
-        let missing=need.n-have.n,unit=need.u;
-        if(normalizedUnit(ingredient.unit)==='kg'){missing/=1000;unit='kg'}
-        else if(normalizedUnit(ingredient.unit)==='l'){missing/=1000;unit='l'}
-        else unit=ingredient.unit||need.u;
-        shortage={qty:formatScaledNumber(missing,unit,ingredient.ingredient),unit};
-      }
-    }
-  }
+  if(!product)return {matched:false,enough:false,label:'',product:null,shortage:null,matches:options||[],available:'',comparable:false};
   const available=[product.quantity,product.unit].filter(Boolean).join(' ')||'aanwezig';
-  return {matched:true,enough,label:`In huis: ${available}`,product,shortage,matches:options||[],available,comparable};
+  // Ook bij brood/naan/wraps geldt: aanwezig = in huis; hoeveelheid controleert de gebruiker zelf.
+  return {matched:true,enough:true,label:`In huis: ${available}`,product,shortage:null,matches:options||[],available,comparable:false};
 }
-
 function breadSplitRows(i,n,oldRows,gfPersons,totalPersons){
   const prevFor=mode=>(Array.isArray(oldRows)?oldRows.find(x=>String(x.id)===`${n}-bread-${mode}`):null)||{};
   const regularPersons=Math.max(0,totalPersons-gfPersons),rows=[];
@@ -327,7 +304,7 @@ function stockCheckWeek(week){return week===isoWeekKey(new Date())||week===upcom
 function plannerOrderRows(shown,existing,week,gfPersons=1){
   if(!stockCheckWeek(week))return '';
   const old=existing?.ingredients||[],total=Math.max(1,Number(shown.servings)||1);
-  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert steeds de actuele voorraad. Pasta en broodachtige producten worden waar nodig glutenvol en glutenvrij apart verdeeld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{if(isGenericPasta(i.ingredient)){return `<div class="recipe-order-row pasta-split"><span class="pasta-split-wrap"><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Pasta'].filter(Boolean).join(' '))}</span>${pastaSplitRows(i,n,old,gfPersons,total)}</span></div>`}if(isGlutenSensitiveBread(i.ingredient)&&!explicitGlutenFree(i.ingredient)&&gfPersons>0){return `<div class="recipe-order-row pasta-split"><span class="pasta-split-wrap"><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Brood'].filter(Boolean).join(' '))}</span>${breadSplitRows(i,n,old,gfPersons,total)}</span></div>`}const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'',info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';const linked=linkedRecipeForIngredient(i);return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${linked&&!coverage.enough?`<label class="make-subrecipe-choice"><input type="checkbox" data-make-subrecipe="${n}" ${prev?.makeSubrecipe?'checked':''}> Zelf maken: ${esc(linked.title)}</label>${subrecipePreview(linked,n,Boolean(prev?.makeSubrecipe))}`:''}</span></label>`}).join('')}</div></div>`
+  return `<div class="recipe-order-box"><h4>Voorraad & besteld</h4><p>Huize Chaos controleert of het product in huis is. De hoeveelheid controleer je zelf. Pasta en broodachtige producten worden waar nodig glutenvol en glutenvrij apart verdeeld.</p><div class="recipe-order-list">${(shown.ingredients||[]).map((i,n)=>{if(isGenericPasta(i.ingredient)){return `<div class="recipe-order-row pasta-split"><span class="pasta-split-wrap"><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Pasta'].filter(Boolean).join(' '))}</span>${pastaSplitRows(i,n,old,gfPersons,total)}</span></div>`}if(isGlutenSensitiveBread(i.ingredient)&&!explicitGlutenFree(i.ingredient)&&gfPersons>0){return `<div class="recipe-order-row pasta-split"><span class="pasta-split-wrap"><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Brood'].filter(Boolean).join(' '))}</span>${breadSplitRows(i,n,old,gfPersons,total)}</span></div>`}const prev=old[n],coverage=stockCoverage(i),disabled=coverage.enough?'disabled':'',info=coverage.matched?(coverage.enough?coverage.label:`${coverage.label} · tekort ${[coverage.shortage?.qty,coverage.shortage?.unit].filter(Boolean).join(' ')}`):'Niet in huis';const linked=linkedRecipeForIngredient(i);return `<label class="recipe-order-row ${coverage.enough?'in-stock':''}"><input type="checkbox" data-plan-ordered="${n}" ${prev?.ordered?'checked':''} ${disabled}><span><span class="order-ingredient-line">${esc([i.qty,i.unit,i.ingredient||'Ingrediënt'].filter(Boolean).join(' '))}</span><small class="stock-coverage ${coverage.enough?'enough':coverage.matched?'partial':'missing'}">${esc(info)}</small>${linked&&!coverage.enough?`<label class="make-subrecipe-choice"><input type="checkbox" data-make-subrecipe="${n}" ${prev?.makeSubrecipe?'checked':''}> Zelf maken: ${esc(linked.title)}</label>${subrecipePreview(linked,n,Boolean(prev?.makeSubrecipe))}`:''}</span></label>`}).join('')}</div></div>`
 }
 function showWeekPlanner(r,preferredWeek='',preferredGf=null){
   detail.querySelector('.recipe-week-picker')?.remove();
