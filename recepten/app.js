@@ -717,15 +717,27 @@ function parseBulkIngredients(text){
 function parseBulkDirections(text){
   const lines=cleanBulkLines(text).filter(x=>!/^bereiding(?:swijze)?$/i.test(x));
   const steps=[];let current='';
-  for(const line of lines){
+  const push=()=>{if(current.trim())steps.push(current.trim());current=''};
+  for(let rawLine of lines){
+    let line=String(rawLine||'').trim();
+    const expected=steps.length+(current.trim()?2:1);
+    // OCR zet stapnummers soms vast aan een extra teken: 71 -> 1, 16 -> 6, 18 -> 8.
+    let noisy=line.match(/^(?:[17])([1-9])\s+(.+)$/);
+    if(noisy && Number(noisy[1])===expected){push();current=noisy[2];continue}
     if(/^\d+[.)]?$/.test(line)){
-      if(current.trim())steps.push(current.trim());current='';continue;
+      const n=Number(line.replace(/\D/g,''));
+      if(!n || n===expected || n===steps.length+1){push();continue}
     }
-    const numbered=line.match(/^\d+[.)]\s+(.+)$/);
-    if(numbered){if(current.trim())steps.push(current.trim());current=numbered[1];continue}
+    let numbered=line.match(/^(\d{1,2})[.)]\s+(.+)$/);
+    if(!numbered) numbered=line.match(/^(\d{1,2})\s+(.+)$/);
+    if(numbered){
+      const n=Number(numbered[1]);
+      const likelyStep=n===expected || n===steps.length+1 || (steps.length===0&&n===1);
+      if(likelyStep){push();current=numbered[2];continue}
+    }
     current+=(current?'\n':'')+line;
   }
-  if(current.trim())steps.push(current.trim());
+  push();
   return steps.map((x,i)=>`${i+1}. ${x}`).join('\n\n');
 }
 function escapeRegExp(value){return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
@@ -764,7 +776,7 @@ function showManualRecipeForm(){
 }
 document.querySelector('#addRecipeManual')?.addEventListener('click',showManualRecipeForm);
 
-// V1.4.85 - Picnic-recept importeren vanaf 1 of 2 screenshots.
+// V1.4.86 - Picnic-recept importeren vanaf 1 of 2 screenshots, met verbeterde OCR.
 async function recipeImportImageData(file, cropPhoto=false){
   const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(file)});
   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
@@ -775,6 +787,32 @@ async function recipeImportImageData(file, cropPhoto=false){
   const max=1200,scale=Math.min(1,max/sw,max/sh);canvas.width=Math.max(1,Math.round(sw*scale));canvas.height=Math.max(1,Math.round(sh*scale));
   canvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
   return canvas.toDataURL('image/jpeg',.82)
+}
+
+async function recipeOcrImageData(file){
+  const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(file)});
+  const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
+  let sx=0,sy=0,sw=img.width,sh=img.height;
+  // Bij een brede Picnic-screenshot staat de recepttekst rechts van de grote gerechtfoto.
+  if(img.width/img.height>1.8){sx=Math.round(img.width*.52);sw=img.width-sx}
+  const targetW=Math.min(2200,Math.max(1500,sw*2));
+  const scale=targetW/sw;
+  const canvas=document.createElement('canvas');canvas.width=Math.round(sw*scale);canvas.height=Math.round(sh*scale);
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  // Rustige grijswaarde + extra contrast geeft Tesseract meer houvast bij screenshots.
+  const im=ctx.getImageData(0,0,canvas.width,canvas.height),d=im.data;
+  for(let i=0;i<d.length;i+=4){let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];g=(g-128)*1.35+128;g=Math.max(0,Math.min(255,g));d[i]=d[i+1]=d[i+2]=g}
+  ctx.putImageData(im,0,0);return canvas;
+}
+function cleanPicnicOcrText(text){
+  return String(text||'')
+    .replace(/\bmiddelnoog\b/gi,'middelhoog')
+    .replace(/\bmiddelhoog\s+vuur\s+ul\b/gi,'middelhoog vuur uit')
+    .replace(/\bVeri\b/g,'Verhit')
+    .replace(/\bSnijg\b/gi,'Snij')
+    .replace(/\bnet vuur ager\b/gi,'het vuur lager')
+    .replace(/\baat afgedekt\b/gi,'laat afgedekt')
+    .replace(/\bot de\b/gi,'tot de');
 }
 function normalizeOcrLines(text){return String(text||'').replace(/\r/g,'').split('\n').map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean)}
 function looksAmount(s){return /(?:^|\s)(?:\d+(?:[.,]\d+)?|[¼½¾⅓⅔])\s*(?:g|gr|kg|ml|cl|dl|l|el|tl|stuks?|stuk|tenen?|blik(?:je)?s?|zak(?:je)?s?)\b/i.test(s)||/naar smaak/i.test(s)}
@@ -831,8 +869,9 @@ async function importRecipeFromPhotos(files){
     const texts=[];
     for(let i=0;i<files.length;i++){
       const status=detail.querySelector('#photoImportStatus'),bar=detail.querySelector('#photoImportBar');if(status)status.textContent=`Foto ${i+1} van ${files.length} lezen…`;
-      const result=await Tesseract.recognize(files[i],'nld',{logger:m=>{if(m.status==='recognizing text'){const pct=Math.round((m.progress||0)*100);if(status)status.textContent=`Foto ${i+1} van ${files.length} lezen… ${pct}%`;if(bar)bar.style.width=`${Math.round(((i+(m.progress||0))/files.length)*100)}%`}}});
-      texts.push(result?.data?.text||'')
+      const ocrImage=await recipeOcrImageData(files[i]);
+      const result=await Tesseract.recognize(ocrImage,'nld',{logger:m=>{if(m.status==='recognizing text'){const pct=Math.round((m.progress||0)*100);if(status)status.textContent=`Foto ${i+1} van ${files.length} lezen… ${pct}%`;if(bar)bar.style.width=`${Math.round(((i+(m.progress||0))/files.length)*100)}%`}}});
+      texts.push(cleanPicnicOcrText(result?.data?.text||''))
     }
     const parsed=parsePicnicOcr(texts),id=crypto.randomUUID();
     let photo='';try{photo=await recipeImportImageData(files[0],true)}catch(_){photo=''}
@@ -854,5 +893,5 @@ setupPhotoRecipeImport();
 // V1.3.116 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.type==='search')return;e.preventDefault();input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();});
 
-// V1.4.85 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
-// V1.4.85 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.
+// V1.4.86 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
+// V1.4.86 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.

@@ -1,5 +1,11 @@
-# Huize Chaos V1.4.85
-## Wijzigingen V1.4.85
+
+## V1.4.86
+- Foto-import voor Picnic-recepten verbeterd: brede screenshots worden voor tekstherkenning automatisch op het tekstgedeelte bijgesneden.
+- Screenshots worden voor OCR vergroot, grijs gemaakt en krijgen extra contrast.
+- Stapnummers zonder punt worden beter herkend.
+- Veelvoorkomende OCR-fouten in Picnic-bereidingsstappen worden voorzichtig opgeschoond.
+# Huize Chaos V1.4.86
+## Wijzigingen V1.4.86
 - Recept kan nu rechtstreeks uit 1 of 2 foto's/screenshots worden toegevoegd.
 - Picnic-import gebruikt standaard 4 personen.
 - Herkende hoeveelheden worden bij ingrediënten gezet en uit de bereidingsstappen verwijderd.
