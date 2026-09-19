@@ -59,7 +59,7 @@ function stockBadges(product){
 
 function stockItemHtml(x){
   return `<div class="stock-swipe-shell" data-stock-swipe data-id="${x.id}">
-    <div class="stock-swipe-back stock-swipe-delete"><span>Verwijderen</span></div>
+    <div class="stock-swipe-back stock-swipe-delete"><button type="button" class="stock-swipe-delete-button">Verwijderen</button></div>
     <div class="stock-swipe-back stock-swipe-cycle">
       <button type="button" onclick="setStockCheckCycle(${x.id},'week')">Week</button>
       <button type="button" onclick="setStockCheckCycle(${x.id},'month')">Maand</button>
@@ -111,9 +111,9 @@ function bindStockSwipeActions(){
     };
 
     const closeOtherSwipes = () => {
-      document.querySelectorAll('[data-stock-swipe].swipe-cycle-open').forEach(other => {
+      document.querySelectorAll('[data-stock-swipe].swipe-cycle-open,[data-stock-swipe].swipe-delete-open').forEach(other => {
         if (other === shell) return;
-        other.classList.remove('swipe-cycle-open');
+        other.classList.remove('swipe-cycle-open','swipe-delete-open');
         const otherCard = other.querySelector('.stock-swipe-content');
         if (otherCard) otherCard.style.transform = '';
       });
@@ -161,10 +161,12 @@ function bindStockSwipeActions(){
       try { card.releasePointerCapture(pointerId); } catch (_) {}
       pointerId = null;
 
-      if (wasHorizontal && finalDx > 85) {
+      if (wasHorizontal && finalDx > 65) {
         suppressClickUntil = Date.now() + 700;
-        resetPosition();
-        if (Number.isFinite(id)) window.deleteStockProductDirect?.(id);
+        card.style.transform = 'translateX(108px)';
+        shell.classList.add('swipe-delete-open');
+        shell.classList.remove('swipe-cycle-open','swipe-delete-armed');
+        dx = 0; dy = 0; gesture = '';
         return;
       }
 
@@ -184,12 +186,22 @@ function bindStockSwipeActions(){
     card.addEventListener('pointerup', finishPointer);
     card.addEventListener('pointercancel', resetPosition);
 
+    const deleteButton = shell.querySelector('.stock-swipe-delete-button');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        resetPosition();
+        if (Number.isFinite(id)) window.requestProductDelete?.(id, 'product');
+      });
+    }
+
     if (main) {
       main.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
         if (Date.now() < suppressClickUntil) return;
-        if (shell.classList.contains('swipe-cycle-open')) {
+        if (shell.classList.contains('swipe-cycle-open') || shell.classList.contains('swipe-delete-open')) {
           resetPosition();
           return;
         }

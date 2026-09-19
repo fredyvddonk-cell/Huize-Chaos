@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.57
+# Huize Chaos V1.4.59
 
-## Wijziging V1.4.57
+## Wijziging V1.4.59
 
 - Swipe naar rechts op een voorraadproduct start direct de verwijderactie.
 - Er blijft geen half geopende verwijderknop meer onder het product staan.
@@ -472,3 +472,7 @@ Nieuw:
 - Cadeaustatus is voor andere gezinsleden zichtbaar zonder te tonen wie iets gereserveerd of gekocht heeft; de eigenaar ziet deze status niet.
 - In Inzicht zijn producten in categoriespecificaties en Buiten reguliere boodschappen aanklikbaar.
 - Tikken op een product opent direct de juiste bon en scrollt naar de juiste productregel, die tijdelijk gemarkeerd wordt.
+- Product bewerken opent nu als zelfstandig volledig scherm.
+- Andere voorraadproducten zijn tijdens bewerken niet meer zichtbaar.
+- Na Opslaan of Annuleren kom je terug bij de voorraadlijst op dezelfde scrollpositie.
+- Swipe-acties blijven beperkt tot de lijstweergave.
