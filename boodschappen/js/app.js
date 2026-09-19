@@ -339,6 +339,7 @@ let openManageSection = localStorage.getItem('household-manage-section') || '';
 let manageSelectMode = false;
 let manageSelectedProducts = new Set();
 let manageBulkMessage = '';
+let manageCategoryFilter = '';
 window.toggleManageSection = key => {
   openManageSection = openManageSection === key ? '' : key;
   localStorage.setItem('household-manage-section', openManageSection);
@@ -394,6 +395,14 @@ function manageBulkToolbar() {
       <strong>${selectedCount} geselecteerd</strong>
       <button type="button" class="small" onclick="toggleManageSelectionMode()">Klaar</button>
     </div>
+    <div class="manage-bulk-filter">
+      <label>Categorie
+        <select onchange="setManageCategoryFilter(this.value)">
+          <option value="">Alle categorieën</option>
+          ${categories.map(category => `<option value="${esc(category)}" ${manageCategoryFilter === category ? 'selected' : ''}>${esc(category)}</option>`).join('')}
+        </select>
+      </label>
+    </div>
     <div class="manage-bulk-selection-actions">
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
       <button type="button" class="small" onclick="deselectAllManageProducts()" ${selectedCount ? '' : 'disabled'}>Alles deselecteren</button>
@@ -426,6 +435,7 @@ window.toggleManageSelectionMode = () => {
   // Iedere nieuwe selectieronde begint bewust leeg. Nooit automatisch producten aanvinken.
   manageSelectedProducts.clear();
   manageBulkMessage = '';
+  manageCategoryFilter = '';
   if (manageSelectMode) {
     openManageSection = 'products';
     localStorage.setItem('household-manage-section', openManageSection);
@@ -447,6 +457,11 @@ window.selectAllVisibleManageProducts = () => {
 };
 window.deselectAllManageProducts = () => {
   manageSelectedProducts.clear();
+  manageBulkMessage = '';
+  render();
+};
+window.setManageCategoryFilter = value => {
+  manageCategoryFilter = String(value || '');
   manageBulkMessage = '';
   render();
 };
@@ -473,7 +488,10 @@ window.applyManageBulkCheckCycle = value => {
 function renderManage(arr) {
   const hasSearch = Boolean(search.value.trim());
   if (hasSearch) openManageSection = 'products';
-  const sorted = arr.slice().sort(sortProducts);
+  const categoryFiltered = manageSelectMode && manageCategoryFilter
+    ? arr.filter(product => product.category === manageCategoryFilter)
+    : arr;
+  const sorted = categoryFiltered.slice().sort(sortProducts);
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
       ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}

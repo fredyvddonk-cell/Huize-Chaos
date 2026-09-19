@@ -1,10 +1,8 @@
-# Huize Chaos V1.4.64
+# Huize Chaos V1.4.65
 
-## Wijziging V1.4.64
+## Wijziging V1.4.65
 
-- In Beheer zijn knoppen Alles selecteren en Alles deselecteren toegevoegd.
-- Alles selecteren selecteert alle op dat moment zichtbare producten.
-- Alles deselecteren maakt de volledige selectie leeg.
-- Handmatig losse producten aan- en uitvinken blijft mogelijk.
-- Bulk instellen van Vaste plek en Controleren bij blijft behouden.
-- De gewone Voorraad-weergave blijft ongewijzigd.
+- In Beheer kan de tijdelijke selectiemodus nu op categorie worden gefilterd.
+- Alles selecteren selecteert alleen de producten die binnen de gekozen categorie zichtbaar zijn.
+- Een bestaande selectie blijft behouden als daarna naar een andere categorie wordt gewisseld.
+- Vaste plek en Controleren bij blijven als bulkacties beschikbaar.
