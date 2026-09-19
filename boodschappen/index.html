@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.75</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.76</span></div>
     </div>
 
     <nav class="tabs">
@@ -147,6 +147,25 @@
           <select id="unit"></select>
         </div>
       </div>
+
+      <div id="packageSizeRow" class="field-row" hidden>
+        <div class="field">
+          <label for="packageSize">Inhoud per verpakking</label>
+          <input id="packageSize" inputmode="decimal" placeholder="Bijv. 500">
+        </div>
+        <div class="field">
+          <label for="packageUnit">Eenheid inhoud</label>
+          <select id="packageUnit">
+            <option value="">Kies eenheid</option>
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="l">l</option>
+            <option value="stuks">stuks</option>
+          </select>
+        </div>
+      </div>
+      <div id="packageSizeHelp" class="stock-classification-help" hidden>Bij verpakkingen kan Huize Chaos zo uitrekenen hoeveel je totaal in huis hebt. Bijvoorbeeld 3 pakken van 500 g.</div>
 
       <div class="field">
         <label for="store">Winkel</label>
@@ -312,7 +331,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.73"></script>
+  <script src="js/app.js?v=1.4.76"></script>
   <script src="js/shopping.js?v=1.4.73"></script>
   <script src="js/stock.js?v=1.4.73"></script>
   <script src="js/hutsel.js?v=1.4.73"></script>

@@ -49,6 +49,8 @@ function migrateProduct(x) {
 
   product.quantity = String(product.quantity || '');
   product.unit = String(product.unit || '');
+  product.packageSize = String(product.packageSize || '');
+  product.packageUnit = String(product.packageUnit || '');
   product.memo = String(product.memo || '');
   product.store = String(product.store || '');
   product.category = String(product.category || '');
@@ -147,7 +149,9 @@ function sortProducts(a, b) {
 }
 
 function quantityText(x) {
-  return [x.quantity, x.unit].filter(Boolean).join(' ');
+  const base = [x.quantity, x.unit].filter(Boolean).join(' ');
+  const packaged = x.packageSize && x.packageUnit && /^(pakje|pak|zakje|zak|fles|blik|pot|doos|bakje)$/i.test(String(x.unit||''));
+  return packaged ? `${base} · ${x.packageSize} ${x.packageUnit} per verpakking` : base;
 }
 
 function meta(x) {
@@ -284,11 +288,14 @@ function openModal(x = null, prefillName = '') {
   $('#productName').value = x?.name || prefillName || '';
   $('#quantity').value = x?.quantity || '';
   $('#unit').value = x?.unit || '';
+  $('#packageSize').value = x?.packageSize || '';
+  $('#packageUnit').value = x?.packageUnit || '';
   $('#store').value = x?.store || '';
   $('#category').value = x?.category || '';
   $('#memo').value = x?.memo || '';
   $('#stockLocation').value = x?.stockLocation || '';
   $('#checkCycle').value = x?.checkCycle || (x?.category === 'Kruiden' || x?.category === 'Bakproducten' ? 'rare' : (x?.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week'));
+  updatePackageSizeFields();
   $('#buyDirectWhenOut').checked = Boolean(x?.buyDirectWhenOut);
   const fixedProductOption = $('#fixedProductOption');
   const showFixedProductChoice = page === 'list';
@@ -749,6 +756,18 @@ window.deleteStockProductDirect = id => {
 
 window.editProduct = id => openModal(products.find(x => x.id === id));
 
+function updatePackageSizeFields() {
+  const unit = String($('#unit')?.value || '');
+  const show = /^(pakje|pak|zakje|zak|fles|blik|pot|doos|bakje)$/i.test(unit);
+  const row = $('#packageSizeRow'), help = $('#packageSizeHelp');
+  if (row) row.hidden = !show;
+  if (help) help.hidden = !show;
+  if (!show) {
+    if ($('#packageSize')) $('#packageSize').value = '';
+    if ($('#packageUnit')) $('#packageUnit').value = '';
+  }
+}
+
 function initApp() {
   content = $('#content');
   search = $('#search');
@@ -757,6 +776,8 @@ function initApp() {
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
   refreshStockLocationSelect();
   $('#unit').innerHTML = '<option value="">Geen eenheid</option>' + UNITS.filter(Boolean).map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  $('#unit').addEventListener('change', updatePackageSizeFields);
+  updatePackageSizeFields();
 
   $('#form').onsubmit = event => {
     event.preventDefault();
@@ -769,6 +790,8 @@ function initApp() {
       name,
       quantity: $('#quantity').value.trim(),
       unit: $('#unit').value,
+      packageSize: $('#packageSize').value.trim(),
+      packageUnit: $('#packageUnit').value,
       store: $('#store').value,
       category: $('#category').value.trim(),
       stockLocation: $('#stockLocation').value,
@@ -793,6 +816,8 @@ function initApp() {
           existing.done = false;
           if (data.quantity) existing.quantity = data.quantity;
           if (data.unit) existing.unit = data.unit;
+          if (data.packageSize) existing.packageSize = data.packageSize;
+          if (data.packageUnit) existing.packageUnit = data.packageUnit;
           if (data.store) existing.store = data.store;
           if (data.memo) existing.memo = data.memo;
           alert(`${existing.name} stond al in Voorraad en is op de boodschappenlijst gezet.`);
