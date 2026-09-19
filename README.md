@@ -1,6 +1,9 @@
-# Huize Chaos V1.4.61
+# Huize Chaos V1.4.63
 
-## Wijziging V1.4.61
+## Wijziging V1.4.63
+
+- Selectiemodus in Beheer start altijd met 0 geselecteerde producten.
+- Vinkjes worden nooit automatisch aangezet.
 
 - In Beheer is een selectiemodus toegevoegd voor de eerste voorraadindeling.
 - Meerdere producten kunnen tegelijk worden geselecteerd.

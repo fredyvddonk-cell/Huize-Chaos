@@ -417,9 +417,15 @@ function manageBulkToolbar() {
 }
 
 window.toggleManageSelectionMode = () => {
-  manageSelectMode = !manageSelectMode;
+  const opening = !manageSelectMode;
+  manageSelectMode = opening;
+  // Iedere nieuwe selectieronde begint bewust leeg. Nooit automatisch producten aanvinken.
   manageSelectedProducts.clear();
   manageBulkMessage = '';
+  if (manageSelectMode) {
+    openManageSection = 'products';
+    localStorage.setItem('household-manage-section', openManageSection);
+  }
   render();
 };
 window.toggleManageProductSelection = (id, checked) => {
@@ -452,9 +458,9 @@ function renderManage(arr) {
   const hasSearch = Boolean(search.value.trim());
   if (hasSearch) openManageSection = 'products';
   const sorted = arr.slice().sort(sortProducts);
-  const productsHtml = sorted.length ? `${manageBulkToolbar()}<div class="manage-product-list">${sorted.map(x => `
+  const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
-      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
+      ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(${JSON.stringify(String(x.id))}, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
       <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${memoHtml(x)}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;
@@ -462,7 +468,7 @@ function renderManage(arr) {
   const cats = `<div class="manage-add"><input id="newCategory" placeholder="Nieuwe categorie"><button onclick="addCategory()">+</button></div><p class="manage-help">Sleep met ☰ of gebruik ↑ en ↓ om de volgorde te wijzigen. Overig blijft onderaan.</p>${categoryRows()}`;
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
-  content.innerHTML = accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Winkels','stores',shops);
+  content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Winkels','stores',shops);
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};
