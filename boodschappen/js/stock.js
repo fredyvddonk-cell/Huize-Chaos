@@ -1,9 +1,10 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
 let stockView = localStorage.getItem('household-stock-view') || 'all';
-if (!['all','week','month','work','rare'].includes(stockView)) stockView = 'all';
+if (!['all','location','week','month','work','rare'].includes(stockView)) stockView = 'all';
 
 const STOCK_VIEW_HELP = {
   all: 'Volledige voorraad. Alles blijft beschikbaar voor receptsuggesties.',
+  location: 'Alle producten gegroepeerd op hun vaste plek. Zo zie je per kast of andere plek wat daar hoort te staan.',
   week: 'Alleen producten die je standaard wilt nalopen voor je gewone boodschappen.',
   month: 'Houdbare voorraad per vaste plek. Loop één kast tegelijk langs.',
   work: 'Alleen meenemen bij “Wat kan ik maken?”; niet standaard opnemen in je voorraadcheck.',
@@ -27,8 +28,8 @@ window.toggleAllStock = () => {
   if (expandedStockCategories.size) {
     expandedStockCategories.clear();
   } else {
-    const visible = stockView === 'all' ? products : products.filter(p => p.checkCycle === stockView);
-    const groupKey = stockView === 'month' ? 'stockLocation' : 'category';
+    const visible = ['all','location'].includes(stockView) ? products : products.filter(p => p.checkCycle === stockView);
+    const groupKey = ['month','location'].includes(stockView) ? 'stockLocation' : 'category';
     groups(visible, groupKey).forEach(([groupName]) => expandedStockCategories.add(groupName || 'Niet ingesteld'));
   }
   saveStockExpansion();
@@ -36,7 +37,7 @@ window.toggleAllStock = () => {
 };
 
 window.setStockView = next => {
-  if (!['all','week','month','work','rare'].includes(next)) return;
+  if (!['all','location','week','month','work','rare'].includes(next)) return;
   stockView = next;
   localStorage.setItem('household-stock-view', stockView);
   expandedStockCategories.clear();
@@ -221,21 +222,21 @@ function bindStockSwipeActions(){
 
 function renderStock(arr) {
   updateStockViewControls();
-  const visible = stockView === 'all' ? arr : arr.filter(x => x.checkCycle === stockView);
+  const visible = ['all','location'].includes(stockView) ? arr : arr.filter(x => x.checkCycle === stockView);
   if (!visible.length) {
-    content.innerHTML = `<div class="empty">${stockView === 'all' ? 'Geen producten gevonden.' : 'Geen producten in deze controlelijst.'}</div>`;
+    content.innerHTML = `<div class="empty">${['all','location'].includes(stockView) ? 'Geen producten gevonden.' : 'Geen producten in deze controlelijst.'}</div>`;
     return;
   }
 
-  const groupKey = stockView === 'month' ? 'stockLocation' : 'category';
+  const groupKey = ['month','location'].includes(stockView) ? 'stockLocation' : 'category';
   const rows = groups(visible, groupKey).map(([rawName, items]) => {
-    const categoryName = rawName || (stockView === 'month' ? 'Locatie nog instellen' : 'Overig');
+    const categoryName = rawName || (['month','location'].includes(stockView) ? 'Locatie nog instellen' : 'Overig');
     const collapsed = !expandedStockCategories.has(categoryName);
     const canBulk = stockView === 'all' && ['Kruiden', 'Bewaarproducten (voorraad)'].includes(categoryName);
     const bulkStatus = canBulk ? `<div class="stock-bulk-status"><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','In huis')">Alles in huis</button><button type="button" class="clear" onclick="event.stopPropagation();setCategoryStockStatus('${encodeURIComponent(categoryName)}','Niet in huis')">Alles niet in huis</button></div>` : '';
     const addButton = stockView === 'all' ? `<button class="stock-category-add" type="button" onclick="openStockCategoryAdd('${encodeURIComponent(categoryName)}')" aria-label="Product toevoegen aan ${esc(categoryName)}" title="Product toevoegen">+</button>` : '';
     return `<section class="stock-category ${collapsed ? 'collapsed' : ''}">
-      <div class="shopping-group-head stock-category-head ${stockView === 'month' ? 'stock-location-head' : ''}">
+      <div class="shopping-group-head stock-category-head ${['month','location'].includes(stockView) ? 'stock-location-head' : ''}">
         <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')" aria-label="${esc(categoryName)} ${collapsed ? 'uitklappen' : 'inklappen'}">
           <span>${esc(categoryName)} <small>(${items.length})</small></span><span class="chevron">⌄</span>
         </button>${addButton}
@@ -252,9 +253,9 @@ function renderStock(arr) {
 window.openStockCategoryAdd = encodedCategory => {
   openModal(null);
   const name = decodeURIComponent(encodedCategory);
-  if (stockView === 'month') {
+  if (['month','location'].includes(stockView)) {
     $('#stockLocation').value = name === 'Locatie nog instellen' ? '' : name;
-    $('#checkCycle').value = 'month';
+    if (stockView === 'month') $('#checkCycle').value = 'month';
   } else {
     $('#category').value = name;
   }

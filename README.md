@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.69
+# Huize Chaos V1.4.70
 
-## Wijziging V1.4.69
+## Wijziging V1.4.70
 
 - Selectievinkjes in Beheer geven hun product-ID weer correct door.
 - Teller geselecteerde producten wordt direct bijgewerkt.
