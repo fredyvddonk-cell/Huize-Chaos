@@ -106,7 +106,7 @@
 /* V1.4.47 - tekstuele Picnic-achtige keuze-indeling */
 .smart-filter-block{display:grid;gap:6px;margin-top:10px}.smart-filter-block>span,.smart-time-row>span{font-size:.82rem;font-weight:700;color:#6f6480}.smart-filter-block .smart-categories,.smart-filter-block .smart-times{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.smart-filter-block .smart-categories::-webkit-scrollbar,.smart-filter-block .smart-times::-webkit-scrollbar{display:none}.smart-filter-block button,.smart-time-row button{white-space:nowrap}
 
-/* V1.4.79 - weekmenu direct en gevarieerd aanvullen */
+/* V1.4.80 - weekmenu direct en gevarieerd aanvullen */
 .week-add-recipe{justify-self:start;margin-top:2px}
 .week-quick-picker{display:grid;gap:10px;background:#fff;border:1px solid #e7e0ec;border-radius:13px;padding:11px 12px}
 .week-quick-picker.hidden{display:none}
@@ -116,3 +116,22 @@
 .week-quick-picker .meal-suggestion-group button small{font-size:11px;color:#81758f}
 .week-quick-actions{display:flex;justify-content:flex-start;padding-top:2px}
 @media(max-width:600px){.week-add-recipe{width:100%}.week-quick-picker .meal-suggestion-group{display:grid;grid-template-columns:1fr}.week-quick-picker .meal-suggestion-group>strong{grid-column:1}.week-quick-picker .meal-suggestion-group button{width:100%}}
+
+
+/* V1.4.80 - A6 weekoverzicht printen */
+.week-menu-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.week-print-button{white-space:nowrap}.week-print-sheet{display:none}
+@media(max-width:600px){.week-menu-tools{display:grid;grid-template-columns:1fr 1fr}.week-menu-tools .btn{width:100%}}
+@media print{
+  @page{size:A6 portrait;margin:8mm}
+  body>*{display:none!important}
+  body>#weekPrintSheet{display:block!important}
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  .week-print-sheet{font-family:Arial,sans-serif;color:#111;font-size:10pt;line-height:1.25}
+  .week-print-sheet header{border-bottom:1px solid #999;padding-bottom:3mm;margin-bottom:4mm}
+  .week-print-sheet h1{font-size:15pt;line-height:1.1;margin:0 0 1mm}
+  .week-print-sheet header p{font-size:8.5pt;margin:0;color:#555}
+  .week-print-sheet ol{margin:0;padding-left:5mm}
+  .week-print-sheet li{break-inside:avoid;page-break-inside:avoid;margin:0 0 3mm;padding-left:1mm}
+  .week-print-sheet li strong{display:block;font-size:10.5pt;line-height:1.2}
+  .week-print-sheet li span{display:block;font-size:8.5pt;color:#555;margin-top:.5mm}
+}
