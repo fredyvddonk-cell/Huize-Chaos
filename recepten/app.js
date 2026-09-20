@@ -1,3 +1,4 @@
+// V1.4.105 - Allerhande-import robuuster gemaakt; receptclassificatie en handmatig wijzigen betrouwbaar opgeslagen.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
@@ -132,10 +133,14 @@ function editForm(r,review){return `${photoEditor(r)}<div class="review-fields">
 function bindCommonEdit(){detail.querySelector('#titleEdit').oninput=e=>edited.title=e.target.value;detail.querySelector('#servingsEdit').oninput=e=>edited.servings=e.target.value;detail.querySelector('#categoryEdit')?.addEventListener('change',e=>edited.category=e.target.value);detail.querySelector('#typeEdit')?.addEventListener('change',e=>edited.type=e.target.value);detail.querySelector('#mainIngredientEdit')?.addEventListener('change',e=>edited.mainIngredient=e.target.value);detail.querySelector('#homeTimeEdit')?.addEventListener('change',e=>edited.homeTime=e.target.value);detail.querySelector('#sourceEdit')?.addEventListener('input',e=>edited.source=e.target.value);detail.querySelector('#sourceUrlEdit')?.addEventListener('input',e=>edited.sourceUrl=e.target.value);bindRecipePhotoControls(showReviewOrEdit);detail.querySelector('#directionsEdit').oninput=e=>edited.directions=e.target.value;detail.querySelectorAll('.edit-section>button').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'));detail.querySelectorAll('input[data-f]').forEach(el=>el.oninput=()=>edited.ingredients[+el.dataset.i][el.dataset.f]=el.value);detail.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{edited.ingredients.splice(+b.dataset.remove,1);showReviewOrEdit()});detail.querySelectorAll('[data-link-subrecipe]').forEach(b=>b.onclick=()=>chooseSubrecipe(+b.dataset.linkSubrecipe));detail.querySelectorAll('[data-unlink-subrecipe]').forEach(b=>b.onclick=()=>{delete edited.ingredients[+b.dataset.unlinkSubrecipe].linkedRecipeId;showReviewOrEdit()});detail.querySelectorAll('[data-stock-product]').forEach(sel=>sel.onchange=()=>{const i=+sel.dataset.stockProduct,ing=edited.ingredients[i];if(!ing)return;ing.stockProductId=sel.value||'';if(sel.value){const all=stockProducts(),prod=all.find(p=>String(p.id)===String(sel.value)),alias=String(ing.ingredient||'').trim();if(prod&&alias){prod.aliases=Array.isArray(prod.aliases)?prod.aliases:[];if(!prod.aliases.some(a=>normFood(a)===normFood(alias))&&normFood(prod.name)!==normFood(alias))prod.aliases.push(alias);localStorage.setItem(STOCK_KEY,JSON.stringify(all));window.dispatchEvent(new Event('huize-chaos-products-changed'))}}});detail.querySelector('#addIngredient').onclick=()=>{edited.ingredients.push({qty:'',unit:'',ingredient:'',memo:'',linkedRecipeId:'',stockProductId:''});showReviewOrEdit()}}
 function showReviewOrEdit(){if(String(current).startsWith('pending:'))showReview();else showView('edit')}
 function deleteCurrentRecipe(){const id=String(current||edited?.id||''),title=edited?.title||'Dit recept';if(!id||id.startsWith('pending:'))return;if(!confirm(`Weet je zeker dat je \"${title}\" wilt verwijderen?`))return;if(isCustom(id)){write(CUSTOM_KEY,custom().filter(r=>String(r.id)!==id))}else{saveDeletedRecipes([...deletedRecipes(),id]);localStorage.removeItem('hc_recipe_'+id)}write(META_KEY,recipeMeta().filter(m=>String(m.id)!==id));stockRankCache=stockRankCache.filter(x=>String(x.r?.id)!==id);stockResultsReady=Boolean(stockFilterIds.length);scheduleSync();backList(true)}
-function bindEdit(){bindCommonEdit();detail.querySelector('#save').onclick=()=>{if(isCustom(current)){const a=custom(),i=a.findIndex(x=>String(x.id)===String(current));a[i]={...edited,imported:true};saveCustom(a)}else{localStorage.setItem('hc_recipe_'+edited.id,JSON.stringify(edited))}invalidateRecipeCaches();stockResultsReady=false;showView('ingredients')};detail.querySelector('#cancel').onclick=()=>{edited=JSON.parse(JSON.stringify(getRecipe(current)));showView('ingredients')};detail.querySelector('#deleteRecipe')?.addEventListener('click',deleteCurrentRecipe)}
+function readClassificationEdits(){
+  const category=detail.querySelector('#categoryEdit'),type=detail.querySelector('#typeEdit'),main=detail.querySelector('#mainIngredientEdit'),home=detail.querySelector('#homeTimeEdit');
+  if(category)edited.category=category.value;if(type)edited.type=type.value;if(main)edited.mainIngredient=main.value;if(home)edited.homeTime=home.value;
+}
+function bindEdit(){bindCommonEdit();detail.querySelector('#save').onclick=()=>{readClassificationEdits();if(isCustom(current)){const a=custom(),i=a.findIndex(x=>String(x.id)===String(current));a[i]={...edited,imported:true};saveCustom(a)}else{localStorage.setItem('hc_recipe_'+edited.id,JSON.stringify(edited))}invalidateRecipeCaches();stockResultsReady=false;showView('ingredients')};detail.querySelector('#cancel').onclick=()=>{edited=JSON.parse(JSON.stringify(getRecipe(current)));showView('ingredients')};detail.querySelector('#deleteRecipe')?.addEventListener('click',deleteCurrentRecipe)}
 function showReview(){detail.innerHTML=`<div class="detail-head"><div><div class="review-label">Te controleren</div><h2>${esc(edited.title||'Gedeeld recept')}</h2><small>${esc(sourceLabel(edited))}</small></div><div class="actions"><button class="btn" id="backList">Terug</button></div></div><div class="review-note">Controleer het recept. Je kunt dit nu doen of later op een ander apparaat.</div>${editForm(edited,true)}`;detail.querySelector('#backList').onclick=()=>{savePendingEdit();backList()};bindCommonEdit();detail.querySelector('#keepPending').onclick=()=>{savePendingEdit();backList()};detail.querySelector('#approve').onclick=approvePending;detail.querySelector('#deletePending').onclick=()=>{const id=String(current).replace('pending:','');savePending(pending().filter(x=>String(x.id)!==id));backList()}}
 function savePendingEdit(){const id=String(current).replace('pending:','');const a=pending(),i=a.findIndex(x=>String(x.id)===id);if(i>=0){a[i]={...edited,id};savePending(a)}}
-function approvePending(){if(!edited.title.trim()){alert('Vul eerst een titel in.');return}const id=String(current).replace('pending:',''),clean={...edited,id:'import-'+id,title:edited.title.trim(),ingredients:(edited.ingredients||[]).filter(x=>x.ingredient.trim()),status:'approved',imported:true};saveCustom([...custom(),clean]);savePending(pending().filter(x=>String(x.id)!==id));current=clean.id;edited=JSON.parse(JSON.stringify(clean));showView('ingredients')}
+function approvePending(){readClassificationEdits();if(!edited.title.trim()){alert('Vul eerst een titel in.');return}const id=String(current).replace('pending:',''),clean={...edited,id:'import-'+id,title:edited.title.trim(),ingredients:(edited.ingredients||[]).filter(x=>x.ingredient.trim()),status:'approved',imported:true};saveCustom([...custom(),clean]);savePending(pending().filter(x=>String(x.id)!==id));current=clean.id;edited=JSON.parse(JSON.stringify(clean));showView('ingredients')}
 function parseIngredient(line){let s=String(line||'').replace(/^[-•*]\s*/,'').trim();const m=s.match(/^(\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])?\s*(g|gr|kg|ml|cl|dl|l|el|tl|eetlepel(?:s)?|theelepel(?:s)?|stuks?|stuk|blik(?:je)?|zak(?:je)?|teen|tenen|snuf(?:je)?)?\s*(.*)$/i);return{qty:(m?.[1]||'').replace(',','.'),unit:(m?.[2]||'').replace(/eetlepels?/i,'el').replace(/theelepels?/i,'tl'),ingredient:(m?.[3]||s).trim(),memo:''}}
 function parseSharedText(payload){const raw=[payload.title,payload.text].filter(Boolean).join('\n').replace(/\r/g,'').trim(),url=payload.url||raw.match(/https?:\/\/\S+/)?.[0]||'';const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>!/^https?:\/\//.test(x));let title=(payload.title||lines[0]||'Gedeeld recept').replace(/https?:\/\/\S+/g,'').trim();let ingStart=lines.findIndex(x=>/^ingred/i.test(x)),dirStart=lines.findIndex(x=>/^(bereiding|bereidingswijze|werkwijze|instructies?)/i.test(x));let ingLines=[],directions='';if(ingStart>=0){const end=dirStart>ingStart?dirStart:lines.length;ingLines=lines.slice(ingStart+1,end)}if(dirStart>=0)directions=lines.slice(dirStart+1).join('\n');else if(lines.length>1&&ingStart<0)directions=lines.slice(1).join('\n');return{id:crypto.randomUUID(),title,servings:'',ingredients:ingLines.map(parseIngredient).filter(x=>x.ingredient),directions,sourceUrl:url,source:sourceFromUrl(url),status:'pending',sharedAt:new Date().toISOString()}}
 function sourceFromUrl(url){try{const h=new URL(url).hostname.toLowerCase();if(h.includes('picnic'))return 'Picnic';if(h.includes('ah.nl'))return 'Allerhande';return h.replace(/^www\./,'')}catch(_){return 'Gedeeld'}}
@@ -148,8 +153,9 @@ async function fetchRecipeHtml(url){
     ()=>fetch(url,{credentials:'omit'}),
     ()=>fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url)),
     ()=>fetch('https://corsproxy.io/?url='+encodeURIComponent(url)),
-    // Publieke leesweergave als receptsites directe browsertoegang blokkeren (CORS).
-    ()=>fetch('https://r.jina.ai/'+url,{headers:{'Accept':'text/plain'}})
+    // Publieke leesweergaven als receptsites directe browsertoegang blokkeren (CORS).
+    ()=>fetch('https://r.jina.ai/'+url,{headers:{'Accept':'text/plain'},credentials:'omit'}),
+    ()=>fetch('https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url),{credentials:'omit'})
   ];
   let lastErr=null;
   for(const attempt of attempts){
@@ -225,6 +231,12 @@ function recipeFromAhHtml(docu,url,draft={}){
   return {...draft,title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),sourceUrl:url,source:'Allerhande',category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
 }
 function recipeFromHtml(html,url,draft={}){
+  // Jina/proxy kan leesbare Markdown/tekst teruggeven in plaats van HTML.
+  // Voor Allerhande proberen we die bron eerst rechtstreeks te lezen.
+  if(isAllerhandeUrl(url)){
+    const readable=recipeFromAhReadableText(html,url,draft);
+    if(readable)return readable;
+  }
   const docu=new DOMParser().parseFromString(html,'text/html');
   for(const el of docu.querySelectorAll('script[type="application/ld+json"]')){
     try{
@@ -260,12 +272,21 @@ function recipeFromAhApi(r,url,draft={}){
   if(!ingredients.length||!directions)throw new Error('Onvolledige Allerhande receptgegevens');
   return {...draft,title:r.title||draft.title||'Geïmporteerd recept',servings:String(r.servings||draft.servings||''),ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),photo,sourceUrl:url,source:'Allerhande',category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
 }
+function classifyImportedRecipe(r){
+  const out={...r};
+  if(!out.category||out.category==='Overig'){const probe={...out,category:''};out.category=recipeCategory(probe)}
+  if(!out.type||out.type==='Anders'){const probe={...out,type:''};out.type=recipeType(probe)}
+  if(!out.mainIngredient||out.mainIngredient==='Anders'){const probe={...out,mainIngredient:''};out.mainIngredient=recipeMainIngredient(probe)}
+  return out;
+}
 async function importRecipeFromUrl(url,base){
   // Allerhande heeft een eigen route. Dit verandert de bestaande Jumbo/HelloFresh/algemene import niet.
   if(isAllerhandeUrl(url)){
-    try{return recipeFromAhApi(await fetchAhRecipeApi(url),url,base)}catch(apiErr){
-      console.info('Allerhande API-route niet beschikbaar; bestaande HTML-route wordt geprobeerd.',apiErr);
-      return recipeFromHtml(await fetchRecipeHtml(url),url,base);
+    // In een gewone browser blokkeert de AH API vaak cross-origin toegang.
+    // Daarom eerst de publieke pagina/leesweergave; de API blijft een extra terugvalroute.
+    try{return recipeFromHtml(await fetchRecipeHtml(url),url,base)}catch(htmlErr){
+      console.info('Allerhande pagina-route niet beschikbaar; API-route wordt geprobeerd.',htmlErr);
+      return recipeFromAhApi(await fetchAhRecipeApi(url),url,base);
     }
   }
   return recipeFromHtml(await fetchRecipeHtml(url),url,base);
@@ -285,7 +306,7 @@ function showRecipeUrlImport(){
     try{
       const id=crypto.randomUUID();
       const base={id,title:'Geïmporteerd recept',servings:'',ingredients:[],directions:'',sourceUrl:url,source:sourceFromUrl(url),photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',status:'pending',sharedAt:new Date().toISOString()};
-      const draft=await importRecipeFromUrl(url,base);
+      const draft=classifyImportedRecipe(await importRecipeFromUrl(url,base));
       savePending([...pending(),draft]);
       current='pending:'+id;edited=JSON.parse(JSON.stringify(draft));displayServings=String(draft.servings||'');
       showReview();

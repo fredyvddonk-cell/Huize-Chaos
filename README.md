@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.104
+# Huize Chaos V1.4.105
 - Bereiding verwerken gebruikt voortaan Stap 1, Stap 2, Stap 3 zonder extra 1. vooraan.
 - Bestaande stapnummers worden herkend en niet dubbel genummerd.
 - Lege regels tussen losse handelingen worden toegevoegd voor betere leesbaarheid.
