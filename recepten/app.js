@@ -537,6 +537,17 @@ function stockIngredientMatches(r){
   if(!stockIngredientQuery)return false;
   const known=stockProducts().find(p=>String(p.id)===stockIngredientProductId);
   const pseudo=known||{name:stockIngredientQuery,aliases:[]};
+
+  // Bij een specifieke pastasoort alleen recepten tonen die dezelfde soort gebruiken.
+  // Een generieke ingrediëntregel "pasta" mag nog wel, behalve wanneer titel of andere
+  // ingrediënten duidelijk een andere pastasoort noemen (bijv. spaghetti bij orzo).
+  const selectedPastaType=pastaType(pseudo.name)||pastaType(stockIngredientQuery);
+  if(selectedPastaType){
+    const recipeText=[r.title||'',...(r.ingredients||[]).map(i=>i.ingredient||'')].join(' ');
+    const recipeTypes=new Set(normFood(recipeText).split(/\s+/).filter(w=>PASTA_TYPES.includes(w)));
+    if([...recipeTypes].some(type=>type!==selectedPastaType))return false;
+  }
+
   return (r.ingredients||[]).some(i=>ingredientMatchesProduct(i.ingredient,pseudo));
 }
 function renderStockIngredientSuggestions(box){
