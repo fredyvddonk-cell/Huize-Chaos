@@ -1,17 +1,24 @@
-# Huize Chaos V1.4.89
+# Huize Chaos V1.4.90
+
+- Actie `x voor €` in de boncalculator hersteld.
+- Velden voor aantal per actie en actieprijs reageren nu ook betrouwbaar op mobiel.
+- `x voor €` werkt nu ook als tweede korting.
+- Picnic-regels zoals `4 voor €4` worden aan de bijbehorende producten gekoppeld en over die producten verdeeld.
+
+# Huize Chaos V1.4.90
 
 - Picnic PDF-bonnen herkennen productregels weer over alle pagina’s.
 - Picnic-prijzen worden ook herkend wanneer euro’s en centen als losse PDF-elementen staan.
 - Het Picnic totaalbedrag wordt herkend als “Totaal” en “Al betaald via iDeal” op aparte regels staan.
 
 
-## V1.4.89
+## V1.4.90
 - Foto-import voor Picnic-recepten verbeterd: brede screenshots worden voor tekstherkenning automatisch op het tekstgedeelte bijgesneden.
 - Screenshots worden voor OCR vergroot, grijs gemaakt en krijgen extra contrast.
 - Stapnummers zonder punt worden beter herkend.
 - Veelvoorkomende OCR-fouten in Picnic-bereidingsstappen worden voorzichtig opgeschoond.
-# Huize Chaos V1.4.89
-## Wijzigingen V1.4.89
+# Huize Chaos V1.4.90
+## Wijzigingen V1.4.90
 
 - Receptsuggesties vanuit voorraad corrigeren voor specifieke pastasoorten.
 - Orzo koppelt niet meer aan spaghetti, penne of andere specifieke pastasoorten.
