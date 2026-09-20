@@ -1,3 +1,12 @@
+# Huize Chaos V1.4.95
+
+- Bij een recept staat nu de knop `Bestellen bij Picnic`.
+- Huize Chaos toont alleen ingrediënten die volgens de voorraad nog nodig zijn.
+- Per ingrediënt kan de zoekterm worden gekopieerd voor Picnic.
+- De complete ontbrekende ingrediëntenlijst kan in één keer worden gekopieerd.
+- Glutenvrije productnamen blijven intact bij het overnemen naar de Picnic-bestellijst.
+- Picnic kan vanuit het bestelscherm worden geopend.
+
 # Huize Chaos V1.4.94
 
 - Actie `x voor €` in de boncalculator hersteld.

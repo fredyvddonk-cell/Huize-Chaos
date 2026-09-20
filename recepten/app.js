@@ -269,6 +269,39 @@ function ensureRecipeActions(){
     if(!plan){plan=document.createElement('button');plan.className='btn';plan.id='planRecipeWeek';plan.textContent='Toevoegen aan weekmenu';actions.appendChild(plan)}
     plan.onclick=()=>showWeekPlanner(edited);
   }
+  let picnic=actions.querySelector('#orderAtPicnic');
+  if(!picnic){picnic=document.createElement('button');picnic.className='btn';picnic.id='orderAtPicnic';picnic.textContent='Bestellen bij Picnic';actions.appendChild(picnic)}
+  picnic.onclick=()=>showPicnicOrder(edited);
+}
+function picnicOrderItems(recipe){
+  const shown=scaledRecipe(recipe);
+  return (shown.ingredients||[]).map((ingredient,index)=>{
+    const coverage=stockCoverage(ingredient,ingredient.stockProductId||'',/glutenvrij/i.test(ingredient.ingredient)?'gf':'');
+    if(coverage.enough)return null;
+    const qty=coverage.shortage?[coverage.shortage.qty,coverage.shortage.unit].filter(Boolean).join(' '):[ingredient.qty,ingredient.unit].filter(Boolean).join(' ');
+    return {index,ingredient:String(ingredient.ingredient||'Ingrediënt').trim(),qty,memo:String(ingredient.memo||'').trim(),coverage};
+  }).filter(Boolean)
+}
+async function copyPicnicText(text,button){
+  try{
+    await navigator.clipboard.writeText(text);
+    if(button){const old=button.textContent;button.textContent='Gekopieerd';setTimeout(()=>button.textContent=old,1200)}
+    return true;
+  }catch(_){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();
+    if(ok&&button){const old=button.textContent;button.textContent='Gekopieerd';setTimeout(()=>button.textContent=old,1200)}
+    return ok;
+  }
+}
+function showPicnicOrder(recipe){
+  detail.querySelector('.picnic-order-panel')?.remove();
+  const items=picnicOrderItems(recipe),allText=items.map(x=>`${x.qty?x.qty+' ':''}${x.ingredient}${x.memo?' · '+x.memo:''}`).join('\n');
+  const panel=document.createElement('section');panel.className='panel picnic-order-panel';
+  panel.innerHTML=`<div class="picnic-order-head"><div><h3>Bestellen bij Picnic</h3><p>Alleen wat volgens je voorraad nog nodig is. Tik per product op <strong>Kopieer</strong> en zoek het daarna in Picnic.</p></div><button class="picnic-order-close" type="button" aria-label="Sluiten">×</button></div>${items.length?`<div class="picnic-order-list">${items.map((x,n)=>`<div class="picnic-order-row"><span><strong>${esc(x.ingredient)}</strong><small>${esc(x.qty||'Hoeveelheid niet ingesteld')}${x.memo?` · ${esc(x.memo)}`:''}</small></span><button class="btn picnic-copy-one" type="button" data-picnic-copy="${n}">Kopieer</button></div>`).join('')}</div><div class="actions picnic-order-actions"><button class="btn primary" id="copyPicnicList" type="button">Kopieer hele lijst</button><a class="btn picnic-open" href="https://picnic.app/nl/" target="_blank" rel="noopener">Open Picnic</a></div><small class="picnic-order-note">Huize Chaos kan producten niet rechtstreeks in je Picnic-mandje zetten. De lijst gebruikt wel je huidige voorraad, zodat producten die al in huis zijn worden overgeslagen.</small>`:`<div class="empty">Voor dit recept hoef je volgens je voorraad niets meer te bestellen.</div>`}`;
+  const anchor=detail.querySelector('.recipe-occasion-actions')||detail.querySelector('#recipeViewBody');anchor?.insertAdjacentElement('afterend',panel);
+  panel.querySelector('.picnic-order-close').onclick=()=>panel.remove();
+  panel.querySelectorAll('[data-picnic-copy]').forEach(btn=>btn.onclick=()=>{const item=items[Number(btn.dataset.picnicCopy)];if(item)copyPicnicText(item.ingredient,btn)});
+  panel.querySelector('#copyPicnicList')?.addEventListener('click',e=>copyPicnicText(allText,e.currentTarget));
 }
 const originalShowView=showView;
 showView=function(view){originalShowView(view);if(view==='ingredients'&&edited)ensureRecipeActions()};
