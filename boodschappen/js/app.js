@@ -939,6 +939,7 @@ function initApp() {
       product.shopping = false;
       product.done = false;
     } else {
+      window.markInventoryProductDeleted?.(id);
       products = products.filter(x => String(x.id) !== String(id));
       if (String($('#editId').value) === String(id)) {
         closeHuizeChaosOverlayDirect('product-edit', $('#modal'));

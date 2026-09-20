@@ -114,13 +114,20 @@ function inventoryProducts(){
   return window.getHuizeChaosProducts().filter(product => !product.temporary).map(inventoryProductData);
 }
 
+const INVENTORY_DELETED_KEY='huize-chaos-inventory-deleted-v1';
+function inventoryDeleted(){try{return JSON.parse(localStorage.getItem(INVENTORY_DELETED_KEY)||'{}')||{}}catch(_){return {}}}
+function saveInventoryDeleted(value){localStorage.setItem(INVENTORY_DELETED_KEY,JSON.stringify(value||{}))}
+window.markInventoryProductDeleted=id=>{const deleted=inventoryDeleted();deleted[String(id)]=Date.now();saveInventoryDeleted(deleted);scheduleInventorySync();};
+
 async function syncInventoryNow(){
   if(!inventoryCloudReady || !user || applyingInventoryCloud) return;
   const localProducts = inventoryProducts();
   const latest = await getDoc(inventoryRef);
   const remoteProducts = latest.exists() && Array.isArray(latest.data()?.products) ? latest.data().products : [];
-  const remoteById = new Map(remoteProducts.map(product => [String(product.id), product]));
-  const products = localProducts.map(local => {
+  const deleted={...(latest.data()?.deletedProducts||{}),...inventoryDeleted()};
+  saveInventoryDeleted(deleted);
+  const remoteById = new Map(remoteProducts.filter(p=>!deleted[String(p.id)]).map(product => [String(product.id), product]));
+  const products = localProducts.filter(p=>!deleted[String(p.id)]).map(local => {
     const remote = remoteById.get(String(local.id));
     if(!remote) return local;
     const localChanged = Number(local.inventoryUpdatedAt) || 0;
@@ -128,14 +135,14 @@ async function syncInventoryNow(){
     return remoteChanged > localChanged ? remote : local;
   });
   remoteProducts.forEach(remote => {
-    if(!products.some(local => String(local.id) === String(remote.id))) products.push(remote);
+    if(!deleted[String(remote.id)] && !products.some(local => String(local.id) === String(remote.id))) products.push(remote);
   });
   await setDoc(inventoryRef, {
-    products,
+    products, deletedProducts:deleted,
     updatedAt: serverTimestamp(),
     updatedBy: user.uid
   }, { merge: false });
-  mergeInventoryFromCloud(products);
+  mergeInventoryFromCloud(products,deleted);
 }
 
 function scheduleInventorySync(){
@@ -147,8 +154,10 @@ function scheduleInventorySync(){
   }),300);
 }
 
-function mergeInventoryFromCloud(remoteProducts){
-  const local=window.getHuizeChaosProducts();
+function mergeInventoryFromCloud(remoteProducts,remoteDeleted={}){
+  const deleted={...remoteDeleted,...inventoryDeleted()}; saveInventoryDeleted(deleted);
+  remoteProducts=(remoteProducts||[]).filter(p=>!deleted[String(p.id)]);
+  const local=window.getHuizeChaosProducts().filter(p=>!deleted[String(p.id)]);
   const localById=new Map(local.map(product=>[String(product.id),product]));
   let localNewer=false;
   // Per product wint de nieuwste wijziging. Daardoor kan een toestel met een
@@ -187,7 +196,7 @@ async function startInventorySync(){
   try{
     const snap=await getDoc(inventoryRef);
     if(snap.exists() && Array.isArray(snap.data()?.products)){
-      mergeInventoryFromCloud(snap.data().products);
+      mergeInventoryFromCloud(snap.data().products,snap.data()?.deletedProducts||{});
     }else{
       inventoryCloudReady=true;
       await syncInventoryNow();
@@ -198,7 +207,7 @@ async function startInventorySync(){
       if(!snapshot.exists() || applyingInventoryCloud) return;
       const data=snapshot.data()||{};
       if(!Array.isArray(data.products)) return;
-      mergeInventoryFromCloud(data.products);
+      mergeInventoryFromCloud(data.products,data.deletedProducts||{});
       setSyncStatus('Gesynchroniseerd','online');
     },error=>console.error('Voorraad live synchronisatie mislukt',error));
   }catch(error){
@@ -386,7 +395,7 @@ async function refreshSharedStateFromServer(){
     getDoc(inventoryRef), getDoc(insightRef), getDoc(recipesRef)
   ]);
   if(inventorySnap.exists() && Array.isArray(inventorySnap.data()?.products)){
-    mergeInventoryFromCloud(inventorySnap.data().products);
+    mergeInventoryFromCloud(inventorySnap.data().products,inventorySnap.data()?.deletedProducts||{});
   }
   if(insightSnap.exists()){
     applyingInsightCloud=true;
