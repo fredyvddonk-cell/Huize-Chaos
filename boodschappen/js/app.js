@@ -163,7 +163,28 @@ let content;
 let search;
 let pendingProductDelete = null;
 
+function inventoryComparable(product = {}) {
+  const copy = { ...product };
+  ['shopping','done','cloudPending','cloudId','cloudSource','cloudAddedBy','cloudAddedByName','inventoryUpdatedAt'].forEach(key => delete copy[key]);
+  return JSON.stringify(copy);
+}
+
+function stampChangedInventoryProducts() {
+  let previous = [];
+  try { previous = JSON.parse(localStorage.getItem('household-products-v2') || '[]') || []; } catch (_) {}
+  const previousById = new Map(previous.map(product => [String(product.id), product]));
+  const now = Date.now();
+  products.forEach(product => {
+    if (product.temporary) return;
+    const before = previousById.get(String(product.id));
+    if (!before || inventoryComparable(before) !== inventoryComparable(product)) {
+      product.inventoryUpdatedAt = Math.max(now, Number(product.inventoryUpdatedAt) || 0);
+    }
+  });
+}
+
 function save() {
+  stampChangedInventoryProducts();
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));

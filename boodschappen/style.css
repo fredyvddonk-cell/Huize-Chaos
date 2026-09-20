@@ -829,6 +829,6 @@ body.receipt-reordering #receiptModal{touch-action:none}
 /* V1.4.77 */
 .stock-meal-intro{display:flex;flex-direction:column;gap:3px;margin:2px 0 10px;padding:10px 12px;border-radius:12px;background:#f5f0fa;color:#51485a}.stock-meal-intro strong{color:#5f467d}.stock-meal-intro span{font-size:.88rem;line-height:1.35}.stock-category-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left}
 
-/* V1.4.109 - In huis / Niet in huis weer duidelijk en betrouwbaar bedienbaar */
+/* V1.4.110 - In huis / Niet in huis weer duidelijk en betrouwbaar bedienbaar */
 .stock-status-toggle{cursor:pointer;touch-action:manipulation;min-height:28px}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}

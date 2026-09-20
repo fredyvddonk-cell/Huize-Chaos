@@ -116,12 +116,26 @@ function inventoryProducts(){
 
 async function syncInventoryNow(){
   if(!inventoryCloudReady || !user || applyingInventoryCloud) return;
-  const products = inventoryProducts();
+  const localProducts = inventoryProducts();
+  const latest = await getDoc(inventoryRef);
+  const remoteProducts = latest.exists() && Array.isArray(latest.data()?.products) ? latest.data().products : [];
+  const remoteById = new Map(remoteProducts.map(product => [String(product.id), product]));
+  const products = localProducts.map(local => {
+    const remote = remoteById.get(String(local.id));
+    if(!remote) return local;
+    const localChanged = Number(local.inventoryUpdatedAt) || 0;
+    const remoteChanged = Number(remote.inventoryUpdatedAt) || 0;
+    return remoteChanged > localChanged ? remote : local;
+  });
+  remoteProducts.forEach(remote => {
+    if(!products.some(local => String(local.id) === String(remote.id))) products.push(remote);
+  });
   await setDoc(inventoryRef, {
     products,
     updatedAt: serverTimestamp(),
     updatedBy: user.uid
   }, { merge: false });
+  mergeInventoryFromCloud(products);
 }
 
 function scheduleInventorySync(){
@@ -136,14 +150,19 @@ function scheduleInventorySync(){
 function mergeInventoryFromCloud(remoteProducts){
   const local=window.getHuizeChaosProducts();
   const localById=new Map(local.map(product=>[String(product.id),product]));
-  // Voorraadvelden komen uit inventory. Boodschappenstatus + cloud-identiteit
-  // blijven lokaal en worden uitsluitend door shoppingItems beheerd.
+  let localNewer=false;
+  // Per product wint de nieuwste wijziging. Daardoor kan een toestel met een
+  // oudere lokale kopie niet meer een recentere voorraadstatus terugzetten.
   const merged=remoteProducts.map(remote=>{
     const current=localById.get(String(remote.id));
     if(!current) return { ...remote, shopping:false, done:false };
+    const localChanged=Number(current.inventoryUpdatedAt)||0;
+    const remoteChanged=Number(remote.inventoryUpdatedAt)||0;
+    const inventory = localChanged > remoteChanged ? current : remote;
+    if(localChanged > remoteChanged) localNewer=true;
     return {
       ...current,
-      ...remote,
+      ...inventory,
       shopping:Boolean(current.shopping),
       done:Boolean(current.done),
       cloudId:current.cloudId,
@@ -160,6 +179,7 @@ function mergeInventoryFromCloud(remoteProducts){
   applyingInventoryCloud=true;
   window.replaceHuizeChaosProducts(merged);
   applyingInventoryCloud=false;
+  if(localNewer) scheduleInventorySync();
 }
 
 async function startInventorySync(){

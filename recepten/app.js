@@ -1,4 +1,4 @@
-// V1.4.109 - eerdere recept- en PDF-importfuncties behouden; boodschappenmodule cache vernieuwd.
+// V1.4.110 - eerdere recept- en PDF-importfuncties behouden; boodschappenmodule cache vernieuwd.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
