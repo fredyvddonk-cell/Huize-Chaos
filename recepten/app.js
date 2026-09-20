@@ -1,5 +1,5 @@
-// V1.4.112 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
-// V1.4.112 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
+// V1.4.113 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
+// V1.4.113 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
