@@ -52,23 +52,23 @@ function updateStockViewControls(){
 function stockBadges(product){ return ''; }
 
 function stockItemHtml(x){
-  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${x.id}">
+  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${esc(String(x.id))}">
     <div class="stock-swipe-back stock-swipe-delete"><button type="button" class="stock-swipe-delete-button">Verwijderen</button></div>
     <div class="stock-swipe-back stock-swipe-cycle">
-      <button type="button" onclick="setStockRole(${x.id},'standard')">Standaard</button>
-      <button type="button" onclick="setStockRole(${x.id},'meal')">Maaltijd</button>
-      <button type="button" onclick="setStockRole(${x.id},'hidden')">Niet in voorraad</button>
+      <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'standard')">Standaard</button>
+      <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'meal')">Maaltijd</button>
+      <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'hidden')">Niet in voorraad</button>
     </div>
     <div class="item stock-item stock-swipe-content">
-      <div class="main" data-stock-edit="${x.id}" role="button" tabindex="0" onclick="editProduct(${x.id})">
+      <div class="main" data-stock-edit="${esc(String(x.id))}" role="button" tabindex="0">
         <div class="name">${esc(x.name)}</div>
         ${stockBadges(x)}
         ${memoHtml(x)}
       </div>
       <div class="stock-actions stock-actions-compact">
-        <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${x.id})">${x.status}</button>
-        <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${x.id}, this.checked)"><span>Kopen</span></label>
-        <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${x.id})">→ Hutsel</button>
+        <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${JSON.stringify(String(x.id))})">${x.status}</button>
+        <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${JSON.stringify(String(x.id))}, this.checked)"><span>Kopen</span></label>
+        <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
       </div>
     </div>
   </div>`;
@@ -76,7 +76,7 @@ function stockItemHtml(x){
 
 window.setStockCheckCycle = (id, cycle) => {
   if (!['week','month','work','rare'].includes(cycle)) return;
-  const product = products.find(x => x.id === id);
+  const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
   product.checkCycle = cycle;
   save();
@@ -85,7 +85,7 @@ window.setStockCheckCycle = (id, cycle) => {
 
 window.setStockRole = (id, role) => {
   if (!['standard','meal','hidden'].includes(role)) return;
-  const product = products.find(x => Number(x.id) === Number(id));
+  const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
   product.stockRole = role;
   save();
@@ -103,7 +103,7 @@ function bindStockSwipeActions(){
     let startX = 0, startY = 0, dx = 0, dy = 0;
     let tracking = false, gesture = '';
     let suppressClickUntil = 0;
-    const id = Number(shell.dataset.id);
+    const id = String(shell.dataset.id || '');
 
     const resetPosition = () => {
       card.style.transform = '';
@@ -193,7 +193,7 @@ function bindStockSwipeActions(){
         e.preventDefault();
         e.stopPropagation();
         resetPosition();
-        if (Number.isFinite(id)) window.requestProductDelete?.(id, 'product');
+        if (id) window.requestProductDelete?.(id, 'product');
       });
     }
 
@@ -206,14 +206,14 @@ function bindStockSwipeActions(){
           resetPosition();
           return;
         }
-        const editId = Number(main.dataset.stockEdit);
-        if (Number.isFinite(editId)) editProduct(editId);
+        const editId = String(main.dataset.stockEdit || '');
+        if (editId) editProduct(editId);
       });
       main.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          const editId = Number(main.dataset.stockEdit);
-          if (Number.isFinite(editId)) editProduct(editId);
+          const editId = String(main.dataset.stockEdit || '');
+          if (editId) editProduct(editId);
         }
       });
     }
@@ -295,7 +295,7 @@ window.setCategoryStockStatus = (encodedCategory, status) => {
 };
 
 window.cycleStatus = id => {
-  const x = products.find(x => x.id === id);
+  const x = products.find(x => String(x.id) === String(id));
   if (!x) return;
   const statuses = ['In huis', 'Niet in huis'];
   x.status = statuses[(statuses.indexOf(x.status) + 1) % statuses.length];
@@ -305,7 +305,7 @@ window.cycleStatus = id => {
 };
 
 window.toggleStockBuy = (id, checked) => {
-  const x = products.find(x => x.id === id);
+  const x = products.find(x => String(x.id) === String(id));
   if (!x) return;
   x.shopping = Boolean(checked);
   x.done = false;

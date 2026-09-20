@@ -1,11 +1,11 @@
 
-## V1.4.87
+## V1.4.88
 - Foto-import voor Picnic-recepten verbeterd: brede screenshots worden voor tekstherkenning automatisch op het tekstgedeelte bijgesneden.
 - Screenshots worden voor OCR vergroot, grijs gemaakt en krijgen extra contrast.
 - Stapnummers zonder punt worden beter herkend.
 - Veelvoorkomende OCR-fouten in Picnic-bereidingsstappen worden voorzichtig opgeschoond.
-# Huize Chaos V1.4.87
-## Wijzigingen V1.4.87
+# Huize Chaos V1.4.88
+## Wijzigingen V1.4.88
 
 - Receptsuggesties vanuit voorraad corrigeren voor specifieke pastasoorten.
 - Orzo koppelt niet meer aan spaghetti, penne of andere specifieke pastasoorten.

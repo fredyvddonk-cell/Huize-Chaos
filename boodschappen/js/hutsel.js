@@ -32,7 +32,7 @@ function openHutselModal(item=null) {
 function closeHutselModal(){ window.closeHuizeChaosOverlay?.('hutsel-edit', $('#hutselModal')); }
 
 window.sendStockToHutsel = id => {
-  const product = products.find(x => x.id === id);
+  const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
 
   const quantity = [product.quantity, product.unit].filter(Boolean).join(' ');

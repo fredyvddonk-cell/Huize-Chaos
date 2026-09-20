@@ -787,7 +787,7 @@ function showManualRecipeForm(){
 }
 document.querySelector('#addRecipeManual')?.addEventListener('click',showManualRecipeForm);
 
-// V1.4.86 - Picnic-recept importeren vanaf 1 of 2 screenshots, met verbeterde OCR.
+// V1.4.88 - Picnic-recept importeren vanaf 1 of 2 screenshots, met verbeterde OCR.
 async function recipeImportImageData(file, cropPhoto=false){
   const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(file)});
   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src});
@@ -904,5 +904,5 @@ setupPhotoRecipeImport();
 // V1.3.116 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='TEXTAREA')return;const input=e.target;if(!(input instanceof HTMLInputElement))return;if(input.type==='search')return;e.preventDefault();input.dispatchEvent(new Event('change',{bubbles:true}));input.blur();});
 
-// V1.4.86 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
-// V1.4.86 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.
+// V1.4.88 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
+// V1.4.88 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.

@@ -762,9 +762,9 @@ window.applyHuizeChaosRole = role => {
 };
 
 window.requestProductDelete = (id, mode = 'product') => {
-  const product = products.find(x => x.id === id);
+  const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
-  pendingProductDelete = { id, mode };
+  pendingProductDelete = { id: product.id, mode };
   const fromShopping = mode === 'shopping';
   $('#deleteTitle').textContent = fromShopping ? 'Boodschap verwijderen' : 'Product definitief verwijderen';
   $('#deleteProductName').textContent = product.name;
@@ -788,16 +788,16 @@ window.removeProduct = id => requestProductDelete(id, 'product');
 // bevestigingsvenster. De gewone verwijderknoppen blijven de veilige
 // bevestigingsstap gebruiken.
 window.deleteStockProductDirect = id => {
-  const product = products.find(x => x.id === id);
+  const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
-  products = products.filter(x => x.id !== id);
-  if (Number($('#editId').value) === id) closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
+  products = products.filter(x => String(x.id) !== String(id));
+  if (String($('#editId').value) === String(id)) closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
   save();
   refreshCats();
   render();
 };
 
-window.editProduct = id => openModal(products.find(x => x.id === id));
+window.editProduct = id => openModal(products.find(x => String(x.id) === String(id)));
 
 function updatePackageSizeFields() {
   const unit = String($('#unit')?.value || '');
@@ -917,7 +917,7 @@ function initApp() {
       product.done = false;
     } else {
       products = products.filter(x => x.id !== id);
-      if (Number($('#editId').value) === id) {
+      if (String($('#editId').value) === String(id)) {
         closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
       }
     }
