@@ -174,3 +174,15 @@
 
 /* V1.4.99 - recept importeren via link */
 .recipe-url-import{display:grid;gap:10px;max-width:760px}.recipe-url-import label{display:grid;gap:6px;font-weight:700}.recipe-url-import input{width:100%;box-sizing:border-box}.recipe-url-import-status{min-height:20px;color:#756d7a;font-size:13px;line-height:1.4}.recipe-url-import .actions{margin-top:0}
+
+
+/* V1.4.111 - laptop: alle receptfilters zichtbaar, zonder horizontaal afsnijden */
+@media(min-width:701px){
+  .smart-filter-block .smart-categories,
+  .smart-filter-block .smart-times,
+  .smart-time-row .smart-times{
+    flex-wrap:wrap;
+    overflow-x:visible;
+    row-gap:7px;
+  }
+}

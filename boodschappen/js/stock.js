@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
   });
-  // V1.4.110: voorraadstatus en Kopen via event-delegatie. Zo blijven beide acties
+  // V1.4.111: voorraadstatus en Kopen via event-delegatie. Zo blijven beide acties
   // los van elkaar werken, ook op mobiel en na een her-render van de voorraadlijst.
   document.addEventListener('click', event => {
     const button=event.target.closest?.('button[data-stock-status]');

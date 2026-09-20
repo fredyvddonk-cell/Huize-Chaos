@@ -1,4 +1,4 @@
-// V1.4.110 - eerdere recept- en PDF-importfuncties behouden; boodschappenmodule cache vernieuwd.
+// V1.4.111 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
@@ -807,8 +807,13 @@ function renderSmartRecipePicker(){
   const cats=['Alles',...RECIPE_CATEGORIES];
   let rows=[...all],labelFor=()=>'';
   if(smartRecipeMode==='stock'){
+    // Gebruik bij iedere nieuwe voorraadkeuze de actuele voorraad. Een eerdere cache mag
+    // niet zorgen dat laptop/telefoon na synchronisatie oude matches blijven tonen.
+    stockFitCache.clear();
     const inhouse=stockProducts().filter(p=>p.stockRole!=='hidden'&&p.status==='In huis'&&isFoodProduct(p));
-    rows=rows.map(r=>({r,f:recipeStockFit(r,inhouse)})).filter(x=>x.f.need>=2&&x.f.ratio>=.45).sort((a,b)=>b.f.ratio-a.f.ratio||a.f.missing-b.f.missing).map(x=>x.r);
+    // 'Past bij voorraad' is een rangschikking, geen 45%-drempel. Zodra minimaal één
+    // relevant ingrediënt in huis is, blijft het recept zichtbaar; beste matches eerst.
+    rows=rows.map(r=>({r,f:recipeStockFit(r,inhouse)})).filter(x=>x.f.need>=1&&x.f.have>0).sort((a,b)=>b.f.ratio-a.f.ratio||a.f.missing-b.f.missing||String(a.r.title).localeCompare(String(b.r.title),'nl')).map(x=>x.r);
     labelFor=r=>{const f=recipeStockFit(r,inhouse);return f.missing===0?'Alles in huis':`${f.missing} ${f.missing===1?'product':'producten'} nodig`}
   }else if(smartRecipeMode==='variation'){
     rows=rows.map(r=>({r,v:variationScore(r,plans)})).sort((a,b)=>b.v.score-a.v.score||String(a.r.title).localeCompare(String(b.r.title),'nl')).map(x=>x.r);
