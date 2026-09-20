@@ -1,3 +1,4 @@
+// V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
 // V1.4.47 - voorraadproduct opent eigen receptsuggesties; online zoeken blijft een rustige tweede stap.
@@ -12,9 +13,9 @@ const list=document.querySelector('#list'),pendingBox=document.querySelector('#p
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false,returnEventId='',displayServings='';
 let recipeModuleView='weekmenu',recipeHistoryReady=false;
 const launchParams=new URLSearchParams(location.search),stockIngredientQuery=String(launchParams.get('ingredient')||'').trim(),stockIngredientProductId=String(launchParams.get('stockProductId')||'').trim();
-const RECIPE_CATEGORIES=['Nederlands','Italiaans','Aziatisch','Grieks / Mediterraan','Mexicaans / Tex-Mex','Midden-Oosters','Amerikaans','Overig'];
-const RECIPE_TYPES=['Pastagerecht','Rijstgerecht','Aardappelgerecht','Bowl','Wrap / tortilla','Ovenschotel','Soep','Salade','Pizza / plaatgerecht','Broodgerecht','Stamppot','Eenpansgerecht','Anders'];
-const MAIN_INGREDIENT_OPTIONS=['Kip','Rund','Varken','Vis','Vegetarisch','Anders'];
+const RECIPE_CATEGORIES=['Nederlands','Italiaans','Aziatisch','Thais','Indonesisch','Indiaas','Japans','Chinees','Koreaans','Grieks / Mediterraan','Mexicaans / Tex-Mex','Midden-Oosters','Amerikaans','Frans','Spaans','Overig'];
+const RECIPE_TYPES=['Pastagerecht','Rijstgerecht','Noedelgerecht','Aardappelgerecht','Bowl','Wrap / tortilla','Ovenschotel','Stoofgerecht','Curry','Soep','Salade','Pizza / plaatgerecht','Broodgerecht','Stamppot','Eenpansgerecht','Anders'];
+const MAIN_INGREDIENT_OPTIONS=['Kip','Rund','Varken','Vis','Schaal- en schelpdieren','Ei','Kaas','Peulvruchten','Tofu / tempeh','Groente','Vegetarisch','Anders'];
 const HOME_TIME_OPTIONS=['Kort','Middellang','Lang'];
 let allRecipesCache=null,stockFitCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',recipeListScrollY=0;
 function invalidateRecipeCaches(){allRecipesCache=null;stockFitCache.clear()}
@@ -723,13 +724,16 @@ function recipeType(r){
   const saved=String(r?.type||'').trim();if(RECIPE_TYPES.includes(saved))return saved;
   const t=`${r.title||''} ${(r.ingredients||[]).map(i=>i.ingredient||'').join(' ')}`.toLowerCase();
   if(/bowl/.test(t))return 'Bowl';
+  if(/stoof|stew/.test(t))return 'Stoofgerecht';
+  if(/curry/.test(t))return 'Curry';
   if(/wrap|tortilla|burrito|taco|lahmacun/.test(t))return 'Wrap / tortilla';
   if(/stamppot/.test(t))return 'Stamppot';
   if(/soep/.test(t))return 'Soep';
   if(/salade/.test(t))return 'Salade';
   if(/pizza|flammkuchen|plaat/.test(t))return 'Pizza / plaatgerecht';
   if(/oven|ovenschotel|schotel|lasagne/.test(t))return 'Ovenschotel';
-  if(/pasta|spaghetti|macaroni|tagliatelle|penne|orzo|noedel/.test(t))return 'Pastagerecht';
+  if(/noedel|noodle|bami/.test(t))return 'Noedelgerecht';
+  if(/pasta|spaghetti|macaroni|tagliatelle|penne|orzo/.test(t))return 'Pastagerecht';
   if(/rijst|nasi|risotto/.test(t))return 'Rijstgerecht';
   if(/aardappel|krielt|puree/.test(t))return 'Aardappelgerecht';
   if(/brood|naan|pita|baguette/.test(t))return 'Broodgerecht';
