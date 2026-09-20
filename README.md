@@ -1,3 +1,9 @@
+# Huize Chaos V1.4.97
+- Bereiding verwerken gebruikt voortaan Stap 1, Stap 2, Stap 3 zonder extra 1. vooraan.
+- Bestaande stapnummers worden herkend en niet dubbel genummerd.
+- Lege regels tussen losse handelingen worden toegevoegd voor betere leesbaarheid.
+- Hoeveelheden blijven uit de bereiding verwijderd wanneer ze al bij Ingrediënten staan.
+
 # Huize Chaos V1.4.96
 - Recept importeren toegevoegd bij Recepten.
 - Receptlink van o.a. Jumbo en HelloFresh kan worden geplakt.

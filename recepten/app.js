@@ -810,30 +810,52 @@ function parseBulkIngredients(text){
   return out.filter(x=>x.ingredient||x.qty||x.unit);
 }
 function parseBulkDirections(text){
-  const lines=cleanBulkLines(text).filter(x=>!/^bereiding(?:swijze)?$/i.test(x));
-  const steps=[];let current='';
-  const push=()=>{if(current.trim())steps.push(current.trim());current=''};
-  for(let rawLine of lines){
-    let line=String(rawLine||'').trim();
-    const expected=steps.length+(current.trim()?2:1);
-    // OCR zet stapnummers soms vast aan een extra teken: 71 -> 1, 16 -> 6, 18 -> 8.
-    let noisy=line.match(/^(?:[17])([1-9])\s+(.+)$/);
-    if(noisy && Number(noisy[1])===expected){push();current=noisy[2];continue}
-    if(/^\d+[.)]?$/.test(line)){
-      const n=Number(line.replace(/\D/g,''));
-      if(!n || n===expected || n===steps.length+1){push();continue}
+  const rawLines=String(text||'').replace(/\r/g,'').split('\n');
+  const steps=[];
+  let current=[];
+  let sawStepMarker=false;
+  const cleanLine=value=>String(value||'').replace(/\*\*/g,'').replace(/^\s*[-•]\s+/,'').trim();
+  const push=()=>{
+    while(current.length&&!current[0])current.shift();
+    while(current.length&&!current[current.length-1])current.pop();
+    if(current.some(Boolean))steps.push(current.slice());
+    current=[];
+  };
+  for(const rawLine of rawLines){
+    const line=cleanLine(rawLine);
+    if(/^bereiding(?:swijze)?$/i.test(line))continue;
+    if(!line){
+      if(current.length&&current[current.length-1]!=='')current.push('');
+      continue;
     }
-    let numbered=line.match(/^(\d{1,2})[.)]\s+(.+)$/);
-    if(!numbered) numbered=line.match(/^(\d{1,2})\s+(.+)$/);
-    if(numbered){
-      const n=Number(numbered[1]);
-      const likelyStep=n===expected || n===steps.length+1 || (steps.length===0&&n===1);
-      if(likelyStep){push();current=numbered[2];continue}
+    let marker=line.match(/^stap\s*(\d+)[.):]?\s*(.*)$/i);
+    if(!marker)marker=line.match(/^(\d{1,2})[.)]\s*(.*)$/);
+    if(!marker&&/^\d{1,2}$/.test(line))marker=[line,line,''];
+    if(marker){
+      sawStepMarker=true;
+      push();
+      if((marker[2]||'').trim())current.push((marker[2]||'').trim());
+      continue;
     }
-    current+=(current?'\n':'')+line;
+    current.push(line);
   }
   push();
-  return steps.map((x,i)=>`${i+1}. ${x}`).join('\n\n');
+  if(!steps.length)return '';
+  // Houd de bereiding rustig leesbaar: iedere losse handeling krijgt witruimte.
+  return steps.map((lines,i)=>{
+    const blocks=[];
+    let block=[];
+    const flush=()=>{if(block.length){blocks.push(block.join(' '));block=[]}};
+    for(const line of lines){
+      if(!line){flush();continue}
+      // Een geplakte regel of bullet is meestal één aparte handeling.
+      flush();
+      block.push(line);
+      flush();
+    }
+    flush();
+    return `Stap ${i+1}\n\n${blocks.join('\n\n')}`;
+  }).join('\n\n');
 }
 function escapeRegExp(value){return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function stripIngredientAmountsFromDirections(text,ingredients){
@@ -860,7 +882,7 @@ function showManualRecipeForm(){
   detail.innerHTML=`<div class="detail-head"><div><h2>Recept toevoegen</h2><small>Handmatig of door tekst te plakken</small></div><div class="actions"><button class="btn" id="cancelNewRecipe">Terug</button></div></div>
   <div class="panel bulk-recipe-panel">${photoEditor(edited)}<label>Titel<input id="newRecipeTitle" placeholder="Naam van het recept"></label><label>Aantal personen<input id="newRecipeServings" type="number" min="1" inputmode="numeric" placeholder="4"></label><label>Categorie <small class="field-help">Keuken / smaakrichting</small><select id="newRecipeCategory">${RECIPE_CATEGORIES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label><label>Soort <small class="field-help">Vorm van het gerecht</small><select id="newRecipeType">${RECIPE_TYPES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label><label>Hoofdingrediënt<select id="newRecipeMainIngredient">${MAIN_INGREDIENT_OPTIONS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label><label>Tijd thuis<select id="newRecipeHomeTime"><option value="">Niet ingesteld</option>${HOME_TIME_OPTIONS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label><label>Bron<input id="newRecipeSource" placeholder="Bijv. Picnic, Allerhande, eigen recept"></label><label>Bron / URL (optioneel)<input id="newRecipeSourceUrl" type="url" placeholder="https://…"></label>
   <h3>Ingrediënten</h3><p class="bulk-help">Plak een complete ingrediëntenlijst. Huize Chaos zet ieder ingrediënt op een eigen regel. Dit werkt ook met lijsten waarin productnamen dubbel voorkomen.</p><textarea id="bulkIngredients" placeholder="800 g kipdrumsticks\n3 el sojasaus\n2 tenen knoflook"></textarea><button class="btn" id="processBulkIngredients" type="button">Ingrediënten verwerken</button><div id="bulkIngredientPreview"></div>
-  <h3>Bereiding</h3><p class="bulk-help">Plak de volledige bereidingswijze. Losse stapnummers worden automatisch verwerkt. Hoeveelheden die al bij de ingrediënten staan, worden uit de stappen weggelaten.</p><textarea id="bulkDirections" placeholder="Verwarm de oven...\n2\nMeng de ingrediënten..."></textarea><button class="btn" id="processBulkDirections" type="button">Bereiding verwerken</button><div id="bulkDirectionsPreview"></div>
+  <h3>Bereiding</h3><p class="bulk-help">Plak de volledige bereidingswijze. Stapnummers worden automatisch verwerkt als Stap 1, Stap 2 enzovoort. Tussen losse handelingen blijft witruimte staan. Hoeveelheden die al bij de ingrediënten staan, worden uit de stappen weggelaten.</p><textarea id="bulkDirections" placeholder="Verwarm de oven...\n2\nMeng de ingrediënten..."></textarea><button class="btn" id="processBulkDirections" type="button">Bereiding verwerken</button><div id="bulkDirectionsPreview"></div>
   <div class="actions bulk-save-actions"><button class="btn primary" id="saveNewRecipe" type="button">Recept opslaan</button><button class="btn" id="cancelNewRecipe2" type="button">Annuleren</button></div></div>`;
   const refreshManualPhoto=()=>{const wrap=detail.querySelector('.recipe-photo-editor');if(wrap)wrap.outerHTML=photoEditor(edited);bindRecipePhotoControls(refreshManualPhoto)};bindRecipePhotoControls(refreshManualPhoto);
   const renderPreview=()=>{const box=detail.querySelector('#bulkIngredientPreview');box.innerHTML=edited.ingredients.length?`<div class="bulk-preview-title">Controleer de ingrediënten</div>${edited.ingredients.map((x,i)=>`<div class="edit-row ingredient-edit-row ${x.warning?'bulk-warning':''}"><input data-new-f="qty" data-new-i="${i}" value="${esc(x.qty||'')}" placeholder="Aantal"><input data-new-f="unit" data-new-i="${i}" value="${esc(x.unit||'')}" placeholder="Eenheid"><input data-new-f="ingredient" data-new-i="${i}" value="${esc(x.ingredient||'')}" placeholder="Ingrediënt"><button class="remove-ing" data-new-remove="${i}" type="button">×</button>${x.warning?'<small class="bulk-warning-text">Controleer deze regel</small>':''}</div>`).join('')}`:'';box.querySelectorAll('[data-new-f]').forEach(el=>el.oninput=()=>edited.ingredients[+el.dataset.newI][el.dataset.newF]=el.value);box.querySelectorAll('[data-new-remove]').forEach(b=>b.onclick=()=>{edited.ingredients.splice(+b.dataset.newRemove,1);renderPreview()})};
