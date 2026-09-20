@@ -38,7 +38,7 @@ window.sendStockToHutsel = id => {
   const quantity = [product.quantity, product.unit].filter(Boolean).join(' ');
   const note = quantity || product.memo || '';
   const isFreezer = String(product.stockLocation || '').toLowerCase() === 'vriezer';
-  const existing = hutselItems.find(x => Number(x.sourceProductId) === Number(product.id));
+  const existing = hutselItems.find(x => String(x.sourceProductId) === String(product.id));
 
   if (existing) {
     existing.name = product.name || existing.name;
@@ -48,7 +48,7 @@ window.sendStockToHutsel = id => {
   } else {
     hutselItems.push({
       id: Date.now(),
-      sourceProductId: product.id,
+      sourceProductId: String(product.id),
       name: product.name || '',
       note,
       useDate: isFreezer ? '' : localDateKey(),

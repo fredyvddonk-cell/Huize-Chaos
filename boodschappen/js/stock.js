@@ -68,7 +68,7 @@ function stockItemHtml(x){
       <div class="stock-actions stock-actions-compact">
         <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${JSON.stringify(String(x.id))})">${x.status}</button>
         <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${JSON.stringify(String(x.id))}, this.checked)"><span>Kopen</span></label>
-        <button class="to-hutsel stock-hutsel-link" type="button" onclick="sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
+        <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}">→ Hutsel</button>
       </div>
     </div>
   </div>`;
@@ -121,7 +121,9 @@ function bindStockSwipeActions(){
     };
 
     card.addEventListener('pointerdown', e => {
-      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      // Swipen is alleen voor touch/pen. Op desktop moet een gewone muisklik
+      // direct beschikbaar blijven om het voorraadproduct te openen.
+      if (!e.isPrimary || e.pointerType === 'mouse') return;
       if (e.target.closest('button,input,label,select,textarea,a')) return;
       closeOtherSwipes();
       pointerId = e.pointerId;
@@ -186,6 +188,18 @@ function bindStockSwipeActions(){
 
     card.addEventListener('pointerup', finishPointer);
     card.addEventListener('pointercancel', resetPosition);
+
+    const hutselButton = shell.querySelector('[data-stock-hutsel]');
+    if (hutselButton) {
+      hutselButton.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const hutselId = String(hutselButton.dataset.stockHutsel || '');
+        if (!hutselId) return;
+        resetPosition();
+        window.sendStockToHutsel?.(hutselId);
+      });
+    }
 
     const deleteButton = shell.querySelector('.stock-swipe-delete-button');
     if (deleteButton) {
