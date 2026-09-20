@@ -338,6 +338,7 @@ function openModal(x = null, prefillName = '') {
   $('#stockLocation').value = x?.stockLocation || '';
   $('#checkCycle').value = x?.checkCycle || (x?.category === 'Kruiden' || x?.category === 'Bakproducten' ? 'rare' : (x?.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week'));
   $('#stockRole').value = x?.stockRole || (page === 'stock' && typeof stockView !== 'undefined' && stockView === 'meal' ? 'meal' : 'standard');
+  $('#stockStatus').value = x?.status === 'Niet in huis' ? 'Niet in huis' : 'In huis';
   updatePackageSizeFields();
   $('#buyDirectWhenOut').checked = Boolean(x?.buyDirectWhenOut);
   const fixedProductOption = $('#fixedProductOption');
@@ -840,6 +841,7 @@ function initApp() {
       stockLocation: $('#stockLocation').value,
       checkCycle: $('#checkCycle').value,
       stockRole: $('#stockRole').value,
+      status: $('#stockStatus').value,
       memo: $('#memo').value.trim(),
       buyDirectWhenOut: $('#buyDirectWhenOut').checked,
       temporary: page === 'list' && !$('#fixedProduct').checked
@@ -876,7 +878,7 @@ function initApp() {
       products.push({
         id: Date.now(),
         ...data,
-        status: 'In huis',
+        status: data.status || 'In huis',
         shopping: page === 'list',
         done: false,
         buyDirectWhenOut: data.buyDirectWhenOut

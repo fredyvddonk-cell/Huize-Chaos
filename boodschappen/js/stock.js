@@ -66,7 +66,7 @@ function stockItemHtml(x){
         ${memoHtml(x)}
       </div>
       <div class="stock-actions stock-actions-compact">
-        <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${JSON.stringify(String(x.id))})">${x.status}</button>
+        <button type="button" class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" data-stock-status="${esc(String(x.id))}" aria-label="Voorraadstatus van ${esc(x.name)}: ${esc(x.status)}. Tik om te wijzigen.">${x.status}</button>
         <label class="stock-buy-check stock-buy-red"><input type="checkbox" data-stock-buy="${esc(String(x.id))}" ${x.shopping ? 'checked' : ''}><span>Kopen</span></label>
         <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}" onclick="event.preventDefault();event.stopPropagation();window.sendStockToHutsel && window.sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
       </div>
@@ -333,7 +333,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
   });
-  // V1.4.108: Kopen in Voorraad via event-delegatie; actuele module-assets worden via cache-busting geladen.
+  // V1.4.109: voorraadstatus en Kopen via event-delegatie. Zo blijven beide acties
+  // los van elkaar werken, ook op mobiel en na een her-render van de voorraadlijst.
+  document.addEventListener('click', event => {
+    const button=event.target.closest?.('button[data-stock-status]');
+    if(!button)return;
+    event.preventDefault();
+    event.stopPropagation();
+    window.cycleStatus(button.dataset.stockStatus);
+  });
   document.addEventListener('change', event => {
     const input=event.target.closest?.('input[data-stock-buy]');
     if(!input)return;

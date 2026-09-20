@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.108">
+  <link rel="stylesheet" href="style.css?v=1.4.109">
 </head>
 <body>
   <main class="app">
@@ -18,7 +18,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.108</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.109</span></div>
     </div>
 
     <nav class="tabs">
@@ -168,6 +168,15 @@
       <div class="field">
         <label for="store">Winkel</label>
         <select id="store"></select>
+      </div>
+
+      <div class="field" id="stockStatusField">
+        <label for="stockStatus">Aanwezigheid</label>
+        <select id="stockStatus">
+          <option value="In huis">In huis</option>
+          <option value="Niet in huis">Niet in huis</option>
+        </select>
+        <small class="field-help">Dit staat los van ‘Kopen’. Je kunt iets niet in huis hebben zonder het meteen op de boodschappenlijst te zetten.</small>
       </div>
 
       <div class="field">
@@ -339,12 +348,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.108"></script>
-  <script src="js/shopping.js?v=1.4.108"></script>
-  <script src="js/stock.js?v=1.4.108"></script>
-  <script src="js/hutsel.js?v=1.4.108"></script>
-  <script src="js/insight.js?v=1.4.108"></script>
-  <script type="module" src="js/firebase.js?v=1.4.108"></script>
+  <script src="js/app.js?v=1.4.109"></script>
+  <script src="js/shopping.js?v=1.4.109"></script>
+  <script src="js/stock.js?v=1.4.109"></script>
+  <script src="js/hutsel.js?v=1.4.109"></script>
+  <script src="js/insight.js?v=1.4.109"></script>
+  <script type="module" src="js/firebase.js?v=1.4.109"></script>
 
 </body>
 </html>
