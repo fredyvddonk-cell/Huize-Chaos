@@ -1,4 +1,4 @@
-// V1.4.105 - Allerhande-import robuuster gemaakt; receptclassificatie en handmatig wijzigen betrouwbaar opgeslagen.
+// V1.4.106 - PDF-receptimport toegevoegd; Allerhande-importroute uitgebreid; handmatige receptclassificatie behouden.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
@@ -1182,6 +1182,68 @@ function showImportedPhotoRecipeReview(){
 }
 function setupPhotoRecipeImport(){const b=document.querySelector('#addRecipeFromPhotos'),input=document.querySelector('#recipePhotoImportInput');if(!b||!input)return;b.onclick=()=>{input.value='';input.click()};input.onchange=()=>{const files=[...(input.files||[])];if(files.length>2){alert('Kies maximaal 2 foto\'s.');return}importRecipeFromPhotos(files)}}
 setupPhotoRecipeImport();
+
+
+// V1.4.106 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.
+function parseRecipeDocumentText(text,fileName='Recept'){
+  const raw=String(text||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').trim();
+  const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
+  const ingIdx=lines.findIndex(x=>/^(ingrediënten|ingredienten|benodigdheden)(\s|$)/i.test(x));
+  const dirIdx=lines.findIndex(x=>/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(\s|$)/i.test(x));
+  let title=lines.find(x=>x.length>3&&!/^(recept|ingrediënten|ingredienten|bereiding|bereidingswijze|werkwijze|aan de slag)$/i.test(x))||fileName.replace(/\.pdf$/i,'');
+  title=title.replace(/^#+\s*/,'').trim();
+  let ingLines=[];
+  if(ingIdx>=0){const end=dirIdx>ingIdx?dirIdx:lines.length;ingLines=lines.slice(ingIdx+1,end)}
+  if(!ingLines.length)ingLines=lines.filter(x=>looksAmount(x)).slice(0,60);
+  const ingredients=ingLines.map(x=>parseIngredient(x.replace(/^[•\-–]\s*/,''))).filter(x=>x.ingredient);
+  let directions='';
+  if(dirIdx>=0)directions=lines.slice(dirIdx+1).join('\n');
+  const servings=(raw.match(/(?:aantal personen|voor)\s*:?[ ]*(\d+)\s*(?:personen|pers)?/i)||raw.match(/\b(\d+)\s+personen\b/i)||[])[1]||'';
+  return {title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),source:'PDF'};
+}
+async function readRecipePdf(file,status){
+  const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+  const bytes=new Uint8Array(await file.arrayBuffer()),pdf=await pdfjs.getDocument({data:bytes}).promise;
+  const pageTexts=[];
+  for(let n=1;n<=pdf.numPages;n++){
+    if(status)status.textContent=`PDF lezen… pagina ${n} van ${pdf.numPages}`;
+    const page=await pdf.getPage(n),content=await page.getTextContent();
+    pageTexts.push(content.items.map(x=>x.str).join(' '));
+  }
+  let text=pageTexts.join('\n');
+  // Scan-PDF zonder bruikbare tekstlaag: lees maximaal de eerste 4 pagina's met dezelfde OCR als foto-import.
+  if(text.replace(/\s/g,'').length<80 && window.Tesseract){
+    const ocr=[]; const limit=Math.min(pdf.numPages,4);
+    for(let n=1;n<=limit;n++){
+      if(status)status.textContent=`Scan-PDF lezen… pagina ${n} van ${limit}`;
+      const page=await pdf.getPage(n),viewport=page.getViewport({scale:1.8}),canvas=document.createElement('canvas');
+      canvas.width=Math.round(viewport.width);canvas.height=Math.round(viewport.height);
+      await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+      const result=await Tesseract.recognize(canvas,'nld');ocr.push(result?.data?.text||'');
+    }
+    text=ocr.join('\n');
+  }
+  return text;
+}
+async function importRecipeFromPdf(file){
+  hideList();detail.innerHTML='<div class="panel bulk-recipe-panel"><h2>Recept uit PDF halen</h2><p id="pdfImportStatus">PDF openen…</p><p class="field-help">Huize Chaos leest eerst de tekst uit de PDF. Daarna controleer je het recept voordat je het opslaat.</p></div>';
+  const status=detail.querySelector('#pdfImportStatus');
+  try{
+    const text=await readRecipePdf(file,status),parsed=parseRecipeDocumentText(text,file.name),id=crypto.randomUUID();
+    if(!parsed.ingredients.length&&!parsed.directions){throw new Error('Geen recepttekst herkend')}
+    edited=classifyImportedRecipe({id:'custom-'+id,...parsed,photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',sourceUrl:'',imported:true});
+    current='new:'+id;displayServings=String(edited.servings||'');showImportedPdfRecipeReview();
+  }catch(err){console.error(err);detail.innerHTML='<div class="panel bulk-recipe-panel"><h2>PDF-import niet gelukt</h2><p>Huize Chaos kon uit deze PDF geen bruikbaar recept halen.</p><div class="actions"><button class="btn" id="pdfImportBack" type="button">Terug</button></div></div>';detail.querySelector('#pdfImportBack').onclick=backList}
+}
+function showImportedPdfRecipeReview(){
+  detail.innerHTML=`<div class="detail-head"><div><div class="review-label">Uit PDF gehaald</div><h2>Controleer het recept</h2><small>PDF-import</small></div></div>${editForm(edited,false)}`;bindCommonEdit();
+  const actions=detail.querySelector('.review-actions');if(actions)actions.innerHTML='<button class="btn primary" id="savePdfRecipe">Recept opslaan</button><button class="btn" id="cancelPdfRecipe">Annuleren</button>';
+  detail.querySelector('#savePdfRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'');showView('ingredients')};
+  detail.querySelector('#cancelPdfRecipe').onclick=backList;
+}
+function setupPdfRecipeImport(){const b=document.querySelector('#addRecipeFromPdf'),input=document.querySelector('#recipePdfImportInput');if(!b||!input)return;b.onclick=()=>{input.value='';input.click()};input.onchange=()=>{const file=input.files?.[0];if(file)importRecipeFromPdf(file)}}
+setupPdfRecipeImport();
 
 
 // V1.3.116 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.
