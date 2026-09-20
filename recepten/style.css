@@ -200,3 +200,6 @@
 .ingredient-stock-state{grid-column:4;justify-self:end;margin-left:0;text-align:right}
 .memo{grid-column:3}
 @media(max-width:500px){.ing{grid-template-columns:50px 42px minmax(0,1fr) auto}.ingredient-stock-state{grid-column:4}}
+
+/* V1.4.117 - compacte, bruikbare variatiecontrole */
+.week-variation{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .55rem}.week-variation>strong{margin-right:.1rem}.week-variation>span{color:var(--muted,#6f6b73)}.week-variation>span+span{flex-basis:100%;padding-left:0}.week-variation-warning{flex-basis:100%;color:#8b3a4b;font-weight:600;margin-top:.15rem}

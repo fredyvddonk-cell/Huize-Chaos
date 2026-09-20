@@ -692,7 +692,24 @@ function saveRecipeWeekPlans(plans,changedPlan=null){if(changedPlan)changedPlan.
 function weekDateKeys(key){const monday=weekMondayFromKey(key),out=[];for(let i=0;i<7;i++){const d=new Date(monday);d.setUTCDate(monday.getUTCDate()+i);out.push(d.toISOString().slice(0,10))}return out}
 function plannerEntries(){try{const x=JSON.parse(localStorage.getItem('huizeChaosPlannerV130')||'[]');return Array.isArray(x)?x:[]}catch(_){return[]}}
 function lateShiftsForWeek(key){const dates=new Set(weekDateKeys(key));return plannerEntries().filter(x=>x.category==='work'&&dates.has(x.date)&&(/avond/i.test(x.title||'')||Number(String(x.time||'').slice(0,2))>=14)).sort((a,b)=>a.date.localeCompare(b.date))}
-function mealType(title=''){const t=String(title).toLowerCase();if(/friet|patat|pizza|salade|kant.?en.?klaar|snack/.test(t))return 'Snel';if(/wrap|taco|naan|tex.?mex|mexica|tortilla|nacho/.test(t))return 'Tex-Mex';if(/soep|brood/.test(t))return 'Soep/brood';if(/aardappel|stamppot|ovenschotel/.test(t))return 'Aardappel/oven';if(/pasta|spaghetti|macaroni|lasagne|rijst|noedel|mie|bami|nasi/.test(t))return 'Pasta/rijst';return 'Overig'}
+function variationTypeLabel(r){
+  const type=recipeType(r);
+  return ({
+    'Pastagerecht':'Pasta','Rijstgerecht':'Rijst','Noedelgerecht':'Noedels','Aardappelgerecht':'Aardappel',
+    'Bowl':'Bowl','Wrap / tortilla':'Wrap/Tex-Mex','Ovenschotel':'Ovenschotel','Stoofgerecht':'Stoof',
+    'Curry':'Curry','Soep':'Soep/brood','Salade':'Salade','Pizza / plaatgerecht':'Pizza/plaat',
+    'Broodgerecht':'Brood','Stamppot':'Stamppot','Eenpansgerecht':'Eenpans'
+  })[type]||'';
+}
+function variationMainLabel(r){const main=recipeMainIngredient(r);return main==='Anders'?'':main}
+function variationWarning(types,mains){
+  const typeNames={Pasta:'pastamaaltijden',Rijst:'rijstmaaltijden',Noedels:'noedelmaaltijden','Wrap/Tex-Mex':'wraps/Tex-Mex-maaltijden','Soep/brood':'soep-/broodmaaltijden',Aardappel:'aardappelmaaltijden',Ovenschotel:'ovenschotels',Bowl:'bowls',Stoof:'stoofgerechten',Curry:'currymaaltijden',Salade:'salades','Pizza/plaat':'pizza-/plaatgerechten',Brood:'broodmaaltijden',Stamppot:'stamppotten',Eenpans:'eenpansgerechten'};
+  const repeatedType=Object.entries(types).find(([,count])=>count>=3);
+  if(repeatedType)return `Je hebt al ${repeatedType[1]} ${typeNames[repeatedType[0]]||repeatedType[0].toLowerCase()} gekozen.`;
+  const repeatedMain=Object.entries(mains).find(([,count])=>count>=3);
+  if(repeatedMain)return `Je hebt al ${repeatedMain[1]} maaltijden met ${repeatedMain[0].toLowerCase()} gekozen.`;
+  return '';
+}
 function hutselOpenItems(){try{const x=JSON.parse(localStorage.getItem('household-hutsel-v1')||'[]');return Array.isArray(x)?x:[]}catch(_){return[]}}
 function suggestionRecipes(plans,lates){
   const all=allRecipes(),history=recipeWeekPlans(),counts=new Map(),last=new Map();
@@ -712,12 +729,13 @@ function quickAddRecipeToWeek(r){
 }
 function renderWeekContext(plans){
   const box=document.querySelector('#weekMenuContext');if(!box)return;
-  const lates=lateShiftsForWeek(selectedMenuWeek),hutsel=hutselOpenItems(),types={};
-  plans.forEach(p=>{const r=getRecipe(p.recipeId)||p,k=mealType(r.title);types[k]=(types[k]||0)+1});
+  const lates=lateShiftsForWeek(selectedMenuWeek),hutsel=hutselOpenItems(),types={'Snelle maaltijd':1,'Soep/brood':1},mains={};
+  plans.forEach(p=>{const r=getRecipe(p.recipeId)||p,type=variationTypeLabel(r),main=variationMainLabel(r);if(type)types[type]=(types[type]||0)+1;if(main)mains[main]=(mains[main]||0)+1});
   const dayFmt=d=>new Intl.DateTimeFormat('nl-NL',{weekday:'short',day:'numeric',month:'short'}).format(new Date(d+'T12:00:00'));
-  const summary=Object.entries(types).map(([k,v])=>`${k} ${v}`).join(' · ')||'Nog geen vrije maaltijden gekozen',sug=suggestionRecipes(plans,lates);
+  const typeSummary=Object.entries(types).map(([k,v])=>`${k} ${v}`).join(' · '),mainSummary=Object.entries(mains).map(([k,v])=>`${k} ${v}`).join(' · '),warning=variationWarning(types,mains),sug=suggestionRecipes(plans,lates);
+  const summary=`<span>${esc(typeSummary)}</span>${mainSummary?`<span>${esc(mainSummary)}</span>`:''}${warning?`<small class="week-variation-warning">${esc(warning)}</small>`:''}`;
   const group=(title,arr)=>arr.length?`<div class="meal-suggestion-group"><strong>${title}</strong>${arr.map(r=>{const v=variationScore(r,plans);return `<button type="button" data-suggest-recipe="${esc(r.id)}"><span>${esc(r.title)}</span><small>${esc(v.type)} · ${esc(v.mainIngredient)}</small></button>`}).join('')}</div>`:'';
-  box.innerHTML=`<div class="week-fixed-meals"><strong>Vaste maaltijden</strong><span>Woensdag · friet met snacks</span><span>Zaterdag · soep met broodjes</span></div><details class="week-work-info"><summary>${lates.length} late ${lates.length===1?'dienst':'diensten'} deze week</summary>${lates.length?`<span>${lates.map(x=>dayFmt(x.date)).join(' · ')}</span>`:'<span>Geen late diensten in je werkrooster.</span>'}</details><div class="week-variation"><strong>Variatie</strong><span>${esc(summary)}</span></div>${hutsel.length?`<div class="week-hutsel"><strong>Hutsel Frutsel · ${hutsel.length} ${hutsel.length===1?'restje':'restjes'} opmaken</strong><span>Je kunt daardoor eventueel één maaltijd minder plannen.</span></div>`:''}<div class="week-menu-tools"><button class="btn primary week-add-recipe" id="weekAddRecipe" type="button">+ Recept kiezen</button><button class="btn week-print-button" id="weekPrintButton" type="button">Print weekoverzicht</button></div><div class="week-quick-picker hidden" id="weekQuickPicker"><div class="week-quick-title"><strong>Kies je volgende maaltijd</strong><small>De suggesties passen zich na iedere keuze opnieuw aan.</small></div>${group('Past bij deze week',sug.fit)}${group('Al even niet gegeten',sug.old)}${group('Vaak gegeten',sug.frequent)}<div class="week-quick-actions"><button class="btn" id="weekAllRecipes" type="button">Alle recepten bekijken</button></div></div>`;
+  box.innerHTML=`<div class="week-fixed-meals"><strong>Vaste maaltijden</strong><span>Woensdag · friet met snacks</span><span>Zaterdag · soep met broodjes</span></div><details class="week-work-info"><summary>${lates.length} late ${lates.length===1?'dienst':'diensten'} deze week</summary>${lates.length?`<span>${lates.map(x=>dayFmt(x.date)).join(' · ')}</span>`:'<span>Geen late diensten in je werkrooster.</span>'}</details><div class="week-variation"><strong>Variatie</strong>${summary}</div>${hutsel.length?`<div class="week-hutsel"><strong>Hutsel Frutsel · ${hutsel.length} ${hutsel.length===1?'restje':'restjes'} opmaken</strong><span>Je kunt daardoor eventueel één maaltijd minder plannen.</span></div>`:''}<div class="week-menu-tools"><button class="btn primary week-add-recipe" id="weekAddRecipe" type="button">+ Recept kiezen</button><button class="btn week-print-button" id="weekPrintButton" type="button">Print weekoverzicht</button></div><div class="week-quick-picker hidden" id="weekQuickPicker"><div class="week-quick-title"><strong>Kies je volgende maaltijd</strong><small>De suggesties passen zich na iedere keuze opnieuw aan.</small></div>${group('Past bij deze week',sug.fit)}${group('Al even niet gegeten',sug.old)}${group('Vaak gegeten',sug.frequent)}<div class="week-quick-actions"><button class="btn" id="weekAllRecipes" type="button">Alle recepten bekijken</button></div></div>`;
   const picker=box.querySelector('#weekQuickPicker'),toggle=box.querySelector('#weekAddRecipe');
   box.querySelector('#weekPrintButton')?.addEventListener('click',()=>printWeekOverview());
   toggle?.addEventListener('click',()=>{picker?.classList.toggle('hidden');toggle.textContent=picker?.classList.contains('hidden')?'+ Recept kiezen':'Keuze sluiten'});
