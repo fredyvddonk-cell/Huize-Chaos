@@ -21,6 +21,7 @@ const insightRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'shared');
 const occasionsRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'occasions');
 const inventoryRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'products');
 const recipesRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'recipes');
+const hutselRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'hutsel');
 const RECIPE_WEEK_KEY = 'huize-chaos-recipe-weeks-v1';
 const RECIPE_WEEK_DELETED_KEY = 'huize-chaos-recipe-weeks-deleted-v1';
 
@@ -47,6 +48,10 @@ let recipeWeeksCloudReady = false;
 let applyingRecipeWeeksCloud = false;
 let recipeWeeksSyncTimer = 0;
 let stopRecipeWeeks = null;
+let hutselCloudReady = false;
+let applyingHutselCloud = false;
+let hutselSyncTimer = 0;
+let stopHutsel = null;
 
 const gate = document.getElementById('authGate');
 const message = document.getElementById('authMessage');
@@ -482,6 +487,49 @@ async function startInsightSync() {
 
 window.addEventListener('huize-chaos-insight-changed', scheduleInsightSync);
 
+
+
+async function syncHutselNow(){
+  if(!hutselCloudReady || !user || applyingHutselCloud || !window.getHuizeChaosHutselData) return;
+  const data = window.getHuizeChaosHutselData();
+  await setDoc(hutselRef,{...data,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false});
+}
+function scheduleHutselSync(){
+  if(applyingHutselCloud) return;
+  clearTimeout(hutselSyncTimer);
+  hutselSyncTimer=setTimeout(()=>syncHutselNow().catch(error=>{
+    console.error('Hutsel Frutsel synchronisatie mislukt',error);
+    setSyncStatus('Syncfout','error');
+  }),250);
+}
+async function startHutselSync(){
+  if(!user || !window.getHuizeChaosHutselData) return;
+  try{
+    const first=await getDoc(hutselRef);
+    if(first.exists()){
+      const merged=window.mergeHuizeChaosHutselData?.(first.data()) || first.data();
+      applyingHutselCloud=true;
+      window.applyHuizeChaosHutselData?.(merged);
+      applyingHutselCloud=false;
+      hutselCloudReady=true;
+      await syncHutselNow();
+    }else{
+      hutselCloudReady=true;
+      await syncHutselNow();
+    }
+    stopHutsel?.();
+    stopHutsel=onSnapshot(hutselRef,snapshot=>{
+      if(!snapshot.exists() || applyingHutselCloud) return;
+      applyingHutselCloud=true;
+      window.applyHuizeChaosHutselData?.(snapshot.data());
+      applyingHutselCloud=false;
+      setSyncStatus('Gesynchroniseerd','online');
+    },error=>console.error('Hutsel Frutsel live synchronisatie mislukt',error));
+  }catch(error){
+    console.error('Hutsel Frutsel synchronisatie starten mislukt',error);
+  }
+}
+
 window.syncHuizeChaosOccasions=async events=>{
   if(!user||!Array.isArray(events))return;
   try{await setDoc(occasionsRef,{events,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false})}catch(error){console.error('Gelegenheden synchroniseren mislukt',error)}
@@ -505,6 +553,7 @@ window.scheduleCloudSync = scheduleSync;
 window.addEventListener('huize-chaos-products-changed', scheduleSync);
 window.addEventListener('huize-chaos-products-changed', scheduleInventorySync);
 window.addEventListener('huize-chaos-recipe-weeks-changed', scheduleRecipeWeeksSync);
+window.addEventListener('huize-chaos-hutsel-changed', scheduleHutselSync);
 
 async function openFor(currentUser) {
   const memberRef = doc(db, 'households', HOUSEHOLD_ID, 'members', currentUser.uid);
@@ -529,6 +578,7 @@ async function openFor(currentUser) {
   await startOccasionsSync();
   await startInventorySync();
   await startRecipeWeeksSync();
+  await startHutselSync();
   refreshItemsFromServer().catch(error => {
     console.error(error);
     setSyncStatus('Geen verbinding', 'error');

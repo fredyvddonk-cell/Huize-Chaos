@@ -9,9 +9,41 @@ function localDateKey(date = new Date()) {
 function tomorrowKey() {
   const d = new Date(); d.setDate(d.getDate()+1); return localDateKey(d);
 }
-function saveHutsel() {
+function saveHutsel(options = {}) {
   localStorage.setItem('household-hutsel-v1', JSON.stringify(hutselItems));
+  if (!options.fromCloud) window.dispatchEvent(new Event('huize-chaos-hutsel-changed'));
 }
+
+function hutselItemKey(item){
+  return item?.sourceProductId ? `product:${String(item.sourceProductId)}` : `item:${String(item?.id ?? '')}`;
+}
+function mergeHutselItems(remote = [], local = []){
+  const merged = new Map();
+  [...remote, ...local].forEach(item => {
+    if (!item) return;
+    const key = hutselItemKey(item);
+    const current = merged.get(key);
+    if (!current || Number(item.changedAt || item.id || 0) >= Number(current.changedAt || current.id || 0)) merged.set(key, item);
+  });
+  return [...merged.values()];
+}
+window.getHuizeChaosHutselData = () => ({
+  hutselItems: hutselItems.map(x => ({...x})),
+  freezerMeals: freezerMeals.map(x => ({...x}))
+});
+window.applyHuizeChaosHutselData = data => {
+  const remoteHutsel = Array.isArray(data?.hutselItems) ? data.hutselItems : [];
+  const remoteFreezer = Array.isArray(data?.freezerMeals) ? data.freezerMeals : [];
+  hutselItems = remoteHutsel.map(x => ({...x}));
+  freezerMeals = remoteFreezer.map(x => ({...x}));
+  localStorage.setItem('household-hutsel-v1', JSON.stringify(hutselItems));
+  localStorage.setItem('household-freezer-meals-v1', JSON.stringify(freezerMeals));
+  if (typeof render === 'function' && page === 'hutsel') render();
+};
+window.mergeHuizeChaosHutselData = data => ({
+  hutselItems: mergeHutselItems(Array.isArray(data?.hutselItems) ? data.hutselItems : [], hutselItems),
+  freezerMeals: mergeHutselItems(Array.isArray(data?.freezerMeals) ? data.freezerMeals : [], freezerMeals)
+});
 function normalizeHutselDates() {
   const today = localDateKey();
   let changed = false;
@@ -44,6 +76,7 @@ window.sendStockToHutsel = id => {
     existing.name = product.name || existing.name;
     existing.note = note;
     existing.freezer = isFreezer;
+    existing.changedAt = Date.now();
     if (!isFreezer && !existing.useDate) existing.useDate = localDateKey();
   } else {
     hutselItems.push({
@@ -52,7 +85,8 @@ window.sendStockToHutsel = id => {
       name: product.name || '',
       note,
       useDate: isFreezer ? '' : localDateKey(),
-      freezer: isFreezer
+      freezer: isFreezer,
+      changedAt: Date.now()
     });
   }
 
@@ -97,7 +131,7 @@ function bindHutselEvents(){
     if(!name)return;
     const id=Number($('#hutselEditId').value);
     const day=document.querySelector('input[name="hutselDay"]:checked').value;
-    const data={name,note:$('#hutselNote').value.trim(),useDate:day==='tomorrow'?tomorrowKey():localDateKey()};
+    const data={name,note:$('#hutselNote').value.trim(),useDate:day==='tomorrow'?tomorrowKey():localDateKey(),changedAt:Date.now()};
     if(id) Object.assign(hutselItems.find(x=>x.id===id),data);
     else hutselItems.push({id:Date.now(),...data});
     saveHutsel(); closeHutselModal(); render();
@@ -108,7 +142,7 @@ function bindHutselEvents(){
 
 
 let freezerMeals = JSON.parse(localStorage.getItem('household-freezer-meals-v1') || '[]');
-function saveFreezerMeals(){localStorage.setItem('household-freezer-meals-v1',JSON.stringify(freezerMeals));}
+function saveFreezerMeals(options={}){localStorage.setItem('household-freezer-meals-v1',JSON.stringify(freezerMeals));if(!options.fromCloud)window.dispatchEvent(new Event('huize-chaos-hutsel-changed'));}
 function openFreezerModal(item=null){
   $('#freezerModalTitle').textContent=item?'Diepvriesmaaltijd wijzigen':'Diepvriesmaaltijd toevoegen';
   $('#freezerEditId').value=item?.id||'';
@@ -153,7 +187,7 @@ window.takeFreezerMeal=id=>{
   if(choice===null)return;
   const v=choice.trim().toLowerCase();
   if(v!=='vandaag'&&v!=='morgen'){alert('Kies Vandaag of Morgen.');return;}
-  hutselItems.push({id:Date.now(),name:x.name,note:'1 portie uit diepvries',useDate:v==='morgen'?tomorrowKey():localDateKey()});
+  hutselItems.push({id:Date.now(),name:x.name,note:'1 portie uit diepvries',useDate:v==='morgen'?tomorrowKey():localDateKey(),changedAt:Date.now()});
   x.portions=Number(x.portions||1)-1;
   if(x.portions<=0) freezerMeals=freezerMeals.filter(m=>m.id!==id);
   saveFreezerMeals();saveHutsel();render();
@@ -162,7 +196,7 @@ function bindFreezerEvents(){
   $('#freezerForm').onsubmit=e=>{
     e.preventDefault(); const name=$('#freezerName').value.trim();if(!name)return;
     const id=Number($('#freezerEditId').value);
-    const data={name,portions:Math.max(1,Number($('#freezerPortions').value)||1),frozenDate:$('#freezerDate').value,note:$('#freezerNote').value.trim()};
+    const data={name,portions:Math.max(1,Number($('#freezerPortions').value)||1),frozenDate:$('#freezerDate').value,note:$('#freezerNote').value.trim(),changedAt:Date.now()};
     if(id)Object.assign(freezerMeals.find(x=>x.id===id),data);else freezerMeals.push({id:Date.now(),...data});
     saveFreezerMeals();closeFreezerModal();render();
   };
