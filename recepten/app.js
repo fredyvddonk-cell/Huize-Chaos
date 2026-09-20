@@ -1,4 +1,4 @@
-// V1.4.106 - PDF-receptimport toegevoegd; Allerhande-importroute uitgebreid; handmatige receptclassificatie behouden.
+// V1.4.107 - PDF-receptimport verbeterd; voorraad Kopen-selectie hersteld; eerdere importfuncties behouden.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
@@ -1184,22 +1184,50 @@ function setupPhotoRecipeImport(){const b=document.querySelector('#addRecipeFrom
 setupPhotoRecipeImport();
 
 
-// V1.4.106 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.
+// V1.4.107 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.
 function parseRecipeDocumentText(text,fileName='Recept'){
   const raw=String(text||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').trim();
   const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
-  const ingIdx=lines.findIndex(x=>/^(ingrediënten|ingredienten|benodigdheden)(\s|$)/i.test(x));
-  const dirIdx=lines.findIndex(x=>/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(\s|$)/i.test(x));
-  let title=lines.find(x=>x.length>3&&!/^(recept|ingrediënten|ingredienten|bereiding|bereidingswijze|werkwijze|aan de slag)$/i.test(x))||fileName.replace(/\.pdf$/i,'');
-  title=title.replace(/^#+\s*/,'').trim();
+  const sectionIndex=(rx)=>lines.findIndex(x=>rx.test(x));
+  const ingIdx=sectionIndex(/^(ingrediënten|ingredienten|benodigdheden)(?:\s|$|:)/i);
+  const dirIdx=sectionIndex(/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(?:\s|$|:)/i);
+  const metaRx=/^(recept|hoofdgerecht|bijgerecht|nagerecht|lunch|ontbijt|\d+\s*(?:personen|pers\.?|minuten|min\.?|uur)|bereidingstijd|oventijd|wachten|allergie|voedingswaarden)/i;
+  let title='';
+  const titleEnd=[ingIdx,dirIdx].filter(i=>i>=0).sort((a,b)=>a-b)[0] ?? Math.min(lines.length,12);
+  for(const line of lines.slice(0,titleEnd)){
+    const clean=line.replace(/^#+\s*/,'').trim();
+    if(clean.length<4||clean.length>110||metaRx.test(clean)||looksAmount(clean))continue;
+    title=clean;break;
+  }
+  if(!title) title=fileName.replace(/\.pdf$/i,'').replace(/[-_]+/g,' ').trim();
+  // Sommige recept-PDF's zetten de intro op dezelfde regel als de titel. Knip bij een duidelijke tweede zin.
+  title=title.replace(/\s+(?=(?:Poffen|Bak|Kook|Snijd|Verwarm|Serveer|Deze|Dit|Een)\b.*[.!?])/i,'\n').split('\n')[0].trim();
   let ingLines=[];
   if(ingIdx>=0){const end=dirIdx>ingIdx?dirIdx:lines.length;ingLines=lines.slice(ingIdx+1,end)}
-  if(!ingLines.length)ingLines=lines.filter(x=>looksAmount(x)).slice(0,60);
-  const ingredients=ingLines.map(x=>parseIngredient(x.replace(/^[•\-–]\s*/,''))).filter(x=>x.ingredient);
+  if(!ingLines.length){
+    const beforeDir=dirIdx>=0?lines.slice(0,dirIdx):lines;
+    ingLines=beforeDir.filter(x=>looksAmount(x)&&!/\b(?:personen|minuten|min\.?|uur|°c|kcal)\b/i.test(x)).slice(0,60);
+  }
+  const ingredients=ingLines.map(x=>x.replace(/^[•·▪◦\-–—]\s*/,''))
+    .filter(x=>x.length<180&&!/^(bereiding|bereidingswijze|werkwijze|aan de slag)$/i.test(x))
+    .map(parseIngredient).filter(x=>x.ingredient&&x.ingredient.length<140);
   let directions='';
-  if(dirIdx>=0)directions=lines.slice(dirIdx+1).join('\n');
-  const servings=(raw.match(/(?:aantal personen|voor)\s*:?[ ]*(\d+)\s*(?:personen|pers)?/i)||raw.match(/\b(\d+)\s+personen\b/i)||[])[1]||'';
-  return {title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),source:'PDF'};
+  if(dirIdx>=0) directions=lines.slice(dirIdx+1).filter(x=>!/^voedingswaarden/i.test(x)).join('\n');
+  const servings=(raw.match(/(?:aantal personen|voor)\s*:?[ ]*(\d+)\s*(?:personen|pers)?/i)||raw.match(/\b(\d+)\s+(?:personen|pers\.)\b/i)||[])[1]||'';
+  const time=(raw.match(/(?:bereidingstijd|bereiden)\s*:?[ ]*(\d+)\s*(?:minuten|min\.?)/i)||raw.match(/\b(\d+)\s*minuten\b/i)||[])[1]||'';
+  const homeTime=time?(Number(time)<=30?'short':Number(time)<=60?'medium':'long'):'';
+  return {title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),homeTime,source:'PDF'};
+}
+function pdfItemsToRecipeLines(items){
+  const rows=[];
+  for(const item of items||[]){
+    const str=String(item.str||'').trim(); if(!str)continue;
+    const x=Number(item.transform?.[4]||0),y=Number(item.transform?.[5]||0);
+    let row=rows.find(r=>Math.abs(r.y-y)<=3);
+    if(!row){row={y,items:[]};rows.push(row)}
+    row.items.push({x,str});
+  }
+  return rows.sort((a,b)=>b.y-a.y).map(r=>r.items.sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean);
 }
 async function readRecipePdf(file,status){
   const pdfjs=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs');
@@ -1209,10 +1237,9 @@ async function readRecipePdf(file,status){
   for(let n=1;n<=pdf.numPages;n++){
     if(status)status.textContent=`PDF lezen… pagina ${n} van ${pdf.numPages}`;
     const page=await pdf.getPage(n),content=await page.getTextContent();
-    pageTexts.push(content.items.map(x=>x.str).join(' '));
+    pageTexts.push(pdfItemsToRecipeLines(content.items).join('\n'));
   }
   let text=pageTexts.join('\n');
-  // Scan-PDF zonder bruikbare tekstlaag: lees maximaal de eerste 4 pagina's met dezelfde OCR als foto-import.
   if(text.replace(/\s/g,'').length<80 && window.Tesseract){
     const ocr=[]; const limit=Math.min(pdf.numPages,4);
     for(let n=1;n<=limit;n++){
@@ -1232,7 +1259,7 @@ async function importRecipeFromPdf(file){
   try{
     const text=await readRecipePdf(file,status),parsed=parseRecipeDocumentText(text,file.name),id=crypto.randomUUID();
     if(!parsed.ingredients.length&&!parsed.directions){throw new Error('Geen recepttekst herkend')}
-    edited=classifyImportedRecipe({id:'custom-'+id,...parsed,photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',sourceUrl:'',imported:true});
+    edited=classifyImportedRecipe({id:'custom-'+id,...parsed,photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:parsed.homeTime||'',sourceUrl:'',imported:true});
     current='new:'+id;displayServings=String(edited.servings||'');showImportedPdfRecipeReview();
   }catch(err){console.error(err);detail.innerHTML='<div class="panel bulk-recipe-panel"><h2>PDF-import niet gelukt</h2><p>Huize Chaos kon uit deze PDF geen bruikbaar recept halen.</p><div class="actions"><button class="btn" id="pdfImportBack" type="button">Terug</button></div></div>';detail.querySelector('#pdfImportBack').onclick=backList}
 }

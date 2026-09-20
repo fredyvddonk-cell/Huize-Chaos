@@ -1,4 +1,13 @@
-# Huize Chaos V1.4.106
+# Huize Chaos V1.4.107
+## V1.4.107
+- Kopen selecteren in Voorraad hersteld met event-delegatie, ook na opnieuw renderen.
+- PDF-receptimport behoudt nu de regels uit de PDF in plaats van een hele pagina samen te voegen.
+- Titelherkenning bij PDF-recepten aangescherpt zodat inleidende tekst minder snel in de titel terechtkomt.
+- Ingrediënten en bereidingsstappen worden beter van elkaar gescheiden.
+- Bereidingstijd uit PDF wordt waar mogelijk vertaald naar Tijd thuis.
+- Voorzichtiger classificatie blijft controleerbaar en handmatig wijzigbaar.
+- Bestaande Jumbo-, HelloFresh-, Allerhande- en overige receptimports behouden.
+
 - Bereiding verwerken gebruikt voortaan Stap 1, Stap 2, Stap 3 zonder extra 1. vooraan.
 - Bestaande stapnummers worden herkend en niet dubbel genummerd.
 - Lege regels tussen losse handelingen worden toegevoegd voor betere leesbaarheid.

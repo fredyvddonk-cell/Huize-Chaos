@@ -67,7 +67,7 @@ function stockItemHtml(x){
       </div>
       <div class="stock-actions stock-actions-compact">
         <button class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" onclick="cycleStatus(${JSON.stringify(String(x.id))})">${x.status}</button>
-        <label class="stock-buy-check stock-buy-red"><input type="checkbox" ${x.shopping ? 'checked' : ''} onchange="toggleStockBuy(${JSON.stringify(String(x.id))}, this.checked)"><span>Kopen</span></label>
+        <label class="stock-buy-check stock-buy-red"><input type="checkbox" data-stock-buy="${esc(String(x.id))}" ${x.shopping ? 'checked' : ''}><span>Kopen</span></label>
         <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}" onclick="event.preventDefault();event.stopPropagation();window.sendStockToHutsel && window.sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
       </div>
     </div>
@@ -332,6 +332,13 @@ window.toggleStockBuy = (id, checked) => {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
+  });
+  // V1.4.107: Kopen in Voorraad via event-delegatie. Dit blijft werken na elke render.
+  document.addEventListener('change', event => {
+    const input=event.target.closest?.('input[data-stock-buy]');
+    if(!input)return;
+    event.stopPropagation();
+    window.toggleStockBuy(input.dataset.stockBuy,input.checked);
   });
   updateStockViewControls();
 });
