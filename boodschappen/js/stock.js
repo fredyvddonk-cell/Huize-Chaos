@@ -240,10 +240,24 @@ function renderStock(arr) {
 
   let rows='';
   if(stockView==='standard'){
-    const byName=new Map(visible.map(p=>[normalizeStockName(p.name),p]));
-    rows=STANDARD_STOCK_LAYOUT.map(([category,names])=>{
-      const items=names.map(name=>byName.get(normalizeStockName(name))).filter(Boolean);
-      if(!items.length)return '';
+    // V1.4.103: de actuele productcategorie is leidend. De oude PTE-indeling
+    // bepaalt alleen welke producten standaardvoorraad zijn, niet waar een
+    // handmatig verplaatst product wordt weergegeven.
+    const preferredOrder=[...STANDARD_STOCK_LAYOUT.map(([category])=>category),...(categories||[])];
+    const order=[...new Set(preferredOrder)];
+    const grouped=new Map();
+    visible.forEach(product=>{
+      const category=String(product.category||'Overig').trim()||'Overig';
+      if(!grouped.has(category)) grouped.set(category,[]);
+      grouped.get(category).push(product);
+    });
+    const categoryNames=[...grouped.keys()].sort((a,b)=>{
+      const ai=order.indexOf(a),bi=order.indexOf(b);
+      if(ai<0&&bi<0)return a.localeCompare(b,'nl',{sensitivity:'base'});
+      if(ai<0)return 1;if(bi<0)return -1;return ai-bi;
+    });
+    rows=categoryNames.map(category=>{
+      const items=grouped.get(category).sort(sortProducts);
       const collapsed=!expandedStockCategories.has(category);
       return `<section class="stock-category ${collapsed?'collapsed':''}">
         <div class="shopping-group-head stock-category-head">

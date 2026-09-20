@@ -237,7 +237,40 @@ function recipeFromHtml(html,url,draft={}){
   if(/(^|\.)ah\.nl$/i.test((()=>{try{return new URL(url).hostname}catch(_){return ''}})())){const ah=recipeFromAhHtml(docu,url,draft);if(ah)return ah}
   throw new Error('Geen receptgegevens gevonden op deze pagina');
 }
-async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{const html=await fetchRecipeHtml(draft.sourceUrl);return recipeFromHtml(html,draft.sourceUrl,draft)}catch(err){console.info('Receptlink kon niet worden uitgelezen; bron blijft bij concept.',err);return draft}}
+
+function isAllerhandeUrl(url){try{return /(^|\.)ah\.nl$/i.test(new URL(url).hostname)&&/\/allerhande\/recept\/R-R\d+/i.test(new URL(url).pathname)}catch(_){return false}}
+function ahRecipeIdFromUrl(url){const m=String(url||'').match(/\/R-R(\d+)/i);return m?Number(m[1]):0}
+async function fetchAhRecipeApi(url){
+  const id=ahRecipeIdFromUrl(url);if(!id)throw new Error('Geen Allerhande receptnummer gevonden');
+  const common={'Accept':'application/json','Content-Type':'application/json','x-client-name':'appie-ios','x-client-version':'9.28','x-application':'AHWEBSHOP'};
+  const tokenRes=await fetch('https://api.ah.nl/mobile-auth/v1/auth/token/anonymous',{method:'POST',headers:common,body:JSON.stringify({clientId:'appie-ios'}),credentials:'omit'});
+  if(!tokenRes.ok)throw new Error('AH anonieme toegang niet beschikbaar ('+tokenRes.status+')');
+  const tokenData=await tokenRes.json(),token=tokenData.accessToken||tokenData.access_token;if(!token)throw new Error('AH gaf geen toegangstoken terug');
+  const query=`{ recipe(id: ${id}) { id title slug description cookTime prepTime servings ingredients { text quantity name { singular plural } unit { singular plural } } steps { text index } images { rendition { url } } } }`;
+  const gqlRes=await fetch('https://api.ah.nl/graphql',{method:'POST',headers:{...common,'Authorization':'Bearer '+token},body:JSON.stringify({query}),credentials:'omit'});
+  if(!gqlRes.ok)throw new Error('AH receptservice niet beschikbaar ('+gqlRes.status+')');
+  const data=await gqlRes.json();if(data.errors?.length)throw new Error(data.errors[0]?.message||'AH receptservice gaf een fout');
+  const r=data.data?.recipe;if(!r)throw new Error('Allerhande recept niet gevonden');return r;
+}
+function recipeFromAhApi(r,url,draft={}){
+  const ingredients=(r.ingredients||[]).map(x=>parseIngredient(x.text||[x.quantity,x.unit?.singular||x.unit?.plural,x.name?.singular||x.name?.plural].filter(Boolean).join(' '))).filter(x=>x.ingredient);
+  const directions=(r.steps||[]).slice().sort((a,b)=>Number(a.index||0)-Number(b.index||0)).map(x=>String(x.text||'').trim()).filter(Boolean).join('\n');
+  const photo=r.images?.[0]?.rendition?.url||draft.photo||'';
+  if(!ingredients.length||!directions)throw new Error('Onvolledige Allerhande receptgegevens');
+  return {...draft,title:r.title||draft.title||'Geïmporteerd recept',servings:String(r.servings||draft.servings||''),ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),photo,sourceUrl:url,source:'Allerhande',category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
+}
+async function importRecipeFromUrl(url,base){
+  // Allerhande heeft een eigen route. Dit verandert de bestaande Jumbo/HelloFresh/algemene import niet.
+  if(isAllerhandeUrl(url)){
+    try{return recipeFromAhApi(await fetchAhRecipeApi(url),url,base)}catch(apiErr){
+      console.info('Allerhande API-route niet beschikbaar; bestaande HTML-route wordt geprobeerd.',apiErr);
+      return recipeFromHtml(await fetchRecipeHtml(url),url,base);
+    }
+  }
+  return recipeFromHtml(await fetchRecipeHtml(url),url,base);
+}
+
+async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{return await importRecipeFromUrl(draft.sourceUrl,draft)}catch(err){console.info('Receptlink kon niet worden uitgelezen; bron blijft bij concept.',err);return draft}}
 function showRecipeUrlImport(){
   pushRecipeHistory({hcRecipeKind:'new',hcRecipeId:'import-url',hcRecipeReturn:recipeModuleView});
   hideList();
@@ -251,7 +284,7 @@ function showRecipeUrlImport(){
     try{
       const id=crypto.randomUUID();
       const base={id,title:'Geïmporteerd recept',servings:'',ingredients:[],directions:'',sourceUrl:url,source:sourceFromUrl(url),photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',status:'pending',sharedAt:new Date().toISOString()};
-      const draft=recipeFromHtml(await fetchRecipeHtml(url),url,base);
+      const draft=await importRecipeFromUrl(url,base);
       savePending([...pending(),draft]);
       current='pending:'+id;edited=JSON.parse(JSON.stringify(draft));displayServings=String(draft.servings||'');
       showReview();
