@@ -776,36 +776,52 @@ if(directRecipe){const r=getRecipe(directRecipe);if(r){weekMenuPanel?.classList.
 
 // V1.3.116 - handmatig recept toevoegen met slimme algemene bulkinvoer
 function normalizeBulkUnit(unit){
-  const u=String(unit||'').trim().toLowerCase();
-  const map={'eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','teentje':'teentje','teentjes':'teentjes'};
+  const u=String(unit||'').trim().toLowerCase().replace(/^stuk\(s\)$/,'stuk');
+  const map={'g':'gram','gr':'gram','gram':'gram','eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','stuks':'stuk','teentje':'teentje','teentjes':'teentjes'};
   return map[u]||u;
+}
+function bulkFractionNumber(value){
+  const s=String(value||'').trim();
+  const map={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875};
+  if(map[s]!=null)return String(map[s]).replace('.',',');
+  const mixed=s.match(/^(\d+)\s*([¼½¾⅓⅔⅛⅜⅝⅞])$/);if(mixed&&map[mixed[2]]!=null)return String(Number(mixed[1])+map[mixed[2]]).replace('.',',');
+  const frac=s.match(/^(\d+)\/(\d+)$/);if(frac&&Number(frac[2]))return String(Number(frac[1])/Number(frac[2])).replace('.',',');
+  return s.replace('.',',');
 }
 function looksLikeAmountLine(line){
   const s=String(line||'').trim();
-  return /^(?:\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞]|\d+\/\d+)(?:\s+(?:g|gr|gram|kg|ml|cl|dl|l|el|tl|stuks?|stuk|blik(?:je)?s?|zak(?:je)?s?|teen|tenen|teentje|teentjes|snuf(?:je)?))?$/i.test(s)||/^naar smaak$/i.test(s);
+  return /^(?:\d+(?:[.,]\d+)?|\d+\s*[¼½¾⅓⅔⅛⅜⅝⅞]|[¼½¾⅓⅔⅛⅜⅝⅞]|\d+\/\d+)(?:\s+(?:g|gr|gram|kg|ml|cl|dl|l|el|tl|eetlepel(?:s)?|theelepel(?:s)?|stuks?|stuk(?:\(s\))?|blik(?:je)?s?|zak(?:je)?s?|teen|tenen|teentje|teentjes|snuf(?:je)?))?$/i.test(s)||/^naar smaak$/i.test(s);
 }
 function parseBulkAmount(line){
   const s=String(line||'').trim();
   if(/^naar smaak$/i.test(s))return {qty:'naar smaak',unit:''};
-  const m=s.match(/^((?:\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞]|\d+\/\d+))\s*(.*)$/);
+  const m=s.match(/^((?:\d+(?:[.,]\d+)?|\d+\s*[¼½¾⅓⅔⅛⅜⅝⅞]|[¼½¾⅓⅔⅛⅜⅝⅞]|\d+\/\d+))\s*(.*)$/);
   if(!m)return {qty:'',unit:'',warning:'Hoeveelheid niet herkend'};
-  return {qty:m[1].replace('.',','),unit:normalizeBulkUnit(m[2])};
+  return {qty:bulkFractionNumber(m[1]),unit:normalizeBulkUnit(m[2])};
 }
-function cleanBulkLines(text){return String(text||'').replace(/\r/g,'').split('\n').map(x=>x.replace(/\*\*/g,'').trim()).filter(Boolean)}
+function cleanBulkLines(text){
+  return String(text||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).map(x=>{
+    const md=x.match(/^\[([^\]]+)\]\(https?:\/\/[^)]+\)$/i);if(md)return md[1];
+    return x.replace(/\*\*/g,'').replace(/^#{1,6}\s*/,'').trim();
+  }).filter(Boolean).filter(x=>!/^\(?bevat\s*:/i.test(x)&&!/^niet inbegrepen in (?:jouw|je) bezorging$/i.test(x));
+}
 function parseBulkIngredients(text){
   let lines=cleanBulkLines(text).filter(x=>!/^ingrediënten?$/i.test(x)&&!/^bereiding(?:swijze)?$/i.test(x)&&!/^waarschijnlijk al in huis$/i.test(x));
   const out=[];
   for(let i=0;i<lines.length;){
-    let name=lines[i];
-    if(looksLikeAmountLine(name)){out.push({...parseBulkAmount(name),ingredient:'',memo:'Controleer deze regel',warning:true});i++;continue}
-    if(i+1<lines.length&&lines[i+1].toLocaleLowerCase('nl')===name.toLocaleLowerCase('nl'))i++;
-    const next=lines[i+1];
-    if(next&&looksLikeAmountLine(next)){
-      const a=parseBulkAmount(next);out.push({qty:a.qty,unit:a.unit,ingredient:name,memo:'',warning:false});i+=2;
-    }else{
-      // Gewone één-regel ingrediëntenlijsten blijven ook ondersteund.
-      const parsed=parseIngredient(name);out.push({...parsed,warning:!parsed.ingredient});i++;
+    const line=lines[i],next=lines[i+1],after=lines[i+2];
+    // HelloFresh-kopie: hoeveelheid en productnaam kunnen in beide volgordes staan.
+    if(looksLikeAmountLine(line)&&next&&!looksLikeAmountLine(next)){
+      const a=parseBulkAmount(line);out.push({qty:a.qty,unit:a.unit,ingredient:next,memo:'',warning:false});i+=2;continue;
     }
+    if(!looksLikeAmountLine(line)&&next&&looksLikeAmountLine(next)){
+      const a=parseBulkAmount(next);
+      // Bij gekopieerde sites staat de productnaam soms nogmaals na de hoeveelheid.
+      if(after&&after.toLocaleLowerCase('nl')===line.toLocaleLowerCase('nl'))i++;
+      out.push({qty:a.qty,unit:a.unit,ingredient:line,memo:'',warning:false});i+=2;continue;
+    }
+    if(i+1<lines.length&&lines[i+1].toLocaleLowerCase('nl')===line.toLocaleLowerCase('nl')){i++;continue}
+    const parsed=parseIngredient(line);out.push({...parsed,warning:!parsed.ingredient});i++;
   }
   return out.filter(x=>x.ingredient||x.qty||x.unit);
 }
