@@ -1,4 +1,5 @@
-// V1.4.111 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
+// V1.4.112 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
+// V1.4.112 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
 // V1.4.47 - receptkeuze tekstueel opgebouwd: categorie = keuken, soort = gerechtvorm, plus hoofdingrediënt en tijd thuis.
 // V1.4.47 - weekmenuvariatie houdt rekening met keuken, gerechtvorm en hoofdingrediënt.
@@ -73,7 +74,16 @@ function scaledQty(qty,factor,unit,ingredient){const n=parseQtyNumber(qty);retur
 function scaledIngredient(x,factor){const n=parseQtyNumber(x.qty);if(n==null)return {...x};const exact=n*factor;if(isPieceIngredient(x.unit,x.ingredient)&&Math.abs(exact-Math.round(exact))>1e-8){return {...x,qty:String(Math.ceil(exact)),exactQty:formatScaledNumber(exact,x.unit,x.ingredient)}}return {...x,qty:formatScaledNumber(exact,x.unit,x.ingredient),exactQty:''}}
 function scaledRecipe(r,servings=displayServings){const base=Number(r?.servings)||0,target=Number(servings)||base;if(!base||!target||base===target)return JSON.parse(JSON.stringify(r));const factor=target/base;const copy=JSON.parse(JSON.stringify(r));copy.servings=String(target);copy.ingredients=(copy.ingredients||[]).map(x=>scaledIngredient(x,factor));return copy}
 function linkedRecipeForIngredient(x){return x?.linkedRecipeId?getRecipe(x.linkedRecipeId):null}
-function ingredients(r){const shown=scaledRecipe(r);return `<div class="panel">${(shown.ingredients||[]).length?shown.ingredients.map(x=>{const linked=linkedRecipeForIngredient(x),exact=x.exactQty?`<small class="piece-exact">Berekend nodig: ${esc(x.exactQty)} ${esc(x.unit||'stuk')}</small>`:'';return `<div class="ing"><span class="qty">${esc(x.qty)}</span><span class="unit">${esc(x.unit)}</span><span>${esc(x.ingredient)}${linked?` <button type="button" class="subrecipe-link" data-subrecipe="${esc(linked.id)}">Recept</button>`:''}${exact}</span>${x.memo?`<span class="memo">${esc(x.memo)}</span>`:''}</div>`}).join(''):'<div class="empty">Nog geen ingrediënten.</div>'}</div>`}
+function ingredientStockState(x){
+  const coverage=stockCoverage(x,x.stockProductId||'',explicitGlutenFree(x.ingredient)?'gf':'');
+  if(coverage.matched)return coverage.alternative?{symbol:'≈',text:'Alternatief mogelijk',kind:'alternative',title:coverage.label||'Alternatief in huis'}:{symbol:'✓',text:'In huis',kind:'in',title:coverage.label||'In huis'};
+  const inHouse=stockProducts().filter(p=>p.stockRole!=='hidden'&&p.status==='In huis'&&isFoodProduct(p));
+  const breadKey=sensitiveBreadKey(x.ingredient);
+  if(breadKey&&inHouse.some(p=>sensitiveBreadKey(p.name)===breadKey))return {symbol:'≈',text:'Alternatief mogelijk',kind:'alternative',title:'Andere variant in huis'};
+  if(isPastaIngredient(x.ingredient)&&pastaStockOptionsForIngredient(x.ingredient,false).length)return {symbol:'≈',text:'Alternatief mogelijk',kind:'alternative',title:'Andere variant in huis'};
+  return {symbol:'✕',text:'Niet in huis',kind:'out',title:'Niet in huis'};
+}
+function ingredients(r){const shown=scaledRecipe(r);return `<div class="panel">${(shown.ingredients||[]).length?shown.ingredients.map(x=>{const linked=linkedRecipeForIngredient(x),exact=x.exactQty?`<small class="piece-exact">Berekend nodig: ${esc(x.exactQty)} ${esc(x.unit||'stuk')}</small>`:'',state=ingredientStockState(x);return `<div class="ing"><span class="qty">${esc(x.qty)}</span><span class="unit">${esc(x.unit)}</span><span>${esc(x.ingredient)}${linked?` <button type="button" class="subrecipe-link" data-subrecipe="${esc(linked.id)}">Recept</button>`:''}${exact}</span>${x.memo?`<span class="memo">${esc(x.memo)}</span>`:''}<span class="ingredient-stock-state ${state.kind}" title="${esc(state.title)}" aria-label="${esc(state.text)}"><b>${state.symbol}</b><small>${state.text}</small></span></div>`}).join(''):'<div class="empty">Nog geen ingrediënten.</div>'}</div>`}
 function bindSubrecipeLinks(){detail.querySelectorAll('[data-subrecipe]').forEach(btn=>btn.onclick=()=>{const target=getRecipe(btn.dataset.subrecipe);if(!target)return;const parent=current;current=String(target.id);edited=JSON.parse(JSON.stringify(target));displayServings=String(target.servings||'');showView('ingredients');const back=detail.querySelector('#backList');if(back){back.textContent='← Terug naar hoofdrecept';back.onclick=()=>{const r=getRecipe(parent);if(!r)return;current=String(r.id);edited=JSON.parse(JSON.stringify(r));displayServings=String(r.servings||'');showView('ingredients')}}})}
 
 function showView(view){

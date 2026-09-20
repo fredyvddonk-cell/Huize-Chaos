@@ -176,7 +176,7 @@
 .recipe-url-import{display:grid;gap:10px;max-width:760px}.recipe-url-import label{display:grid;gap:6px;font-weight:700}.recipe-url-import input{width:100%;box-sizing:border-box}.recipe-url-import-status{min-height:20px;color:#756d7a;font-size:13px;line-height:1.4}.recipe-url-import .actions{margin-top:0}
 
 
-/* V1.4.111 - laptop: alle receptfilters zichtbaar, zonder horizontaal afsnijden */
+/* V1.4.112 - laptop: alle receptfilters zichtbaar, zonder horizontaal afsnijden */
 @media(min-width:701px){
   .smart-filter-block .smart-categories,
   .smart-filter-block .smart-times,
@@ -186,3 +186,11 @@
     row-gap:7px;
   }
 }
+
+
+/* V1.4.112 - voorraadstatus direct naast ieder receptingrediënt */
+.ingredient-stock-state{display:inline-flex;align-items:center;gap:5px;margin-left:auto;padding-left:10px;white-space:nowrap;font-size:13px;font-weight:700}
+.ingredient-stock-state b{font-size:17px;line-height:1}
+.ingredient-stock-state small{font-size:12px;font-weight:600;color:#6f6675}
+.ingredient-stock-state.in b{color:#39734d}.ingredient-stock-state.out b{color:#a53f4c}.ingredient-stock-state.alternative b{color:#8a6a20}
+@media(max-width:600px){.ingredient-stock-state small{display:none}.ingredient-stock-state{padding-left:6px}}
