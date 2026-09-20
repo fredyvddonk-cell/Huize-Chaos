@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
   });
-  // V1.4.107: Kopen in Voorraad via event-delegatie. Dit blijft werken na elke render.
+  // V1.4.108: Kopen in Voorraad via event-delegatie; actuele module-assets worden via cache-busting geladen.
   document.addEventListener('change', event => {
     const input=event.target.closest?.('input[data-stock-buy]');
     if(!input)return;
