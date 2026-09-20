@@ -165,8 +165,12 @@
 .recipe-library-actions{display:flex;gap:8px;flex-wrap:wrap}.recipe-import-progress{height:8px;background:#eee;border-radius:999px;overflow:hidden;margin:12px 0}.recipe-import-progress span{display:block;height:100%;width:0;background:currentColor;transition:width .2s}
 
 
-/* V1.4.95 - ontbrekende receptingrediënten makkelijk bij Picnic bestellen */
+/* V1.4.96 - ontbrekende receptingrediënten makkelijk bij Picnic bestellen */
 .picnic-order-panel{display:grid;gap:10px;margin-top:12px}
 .picnic-order-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.picnic-order-head h3{margin:0 0 3px;color:#563773}.picnic-order-head p{margin:0;color:#756d7a;font-size:13px;line-height:1.35}.picnic-order-close{border:0;background:transparent;font:inherit;font-size:24px;line-height:1;color:#6f6480;cursor:pointer;padding:0 2px}
 .picnic-order-list{display:grid;gap:6px}.picnic-order-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border-top:1px solid #ece6f0;padding-top:7px}.picnic-order-row:first-child{border-top:0;padding-top:0}.picnic-order-row span{display:grid;gap:2px;min-width:0}.picnic-order-row strong{font-size:14px}.picnic-order-row small{font-size:12px;color:#81758f}.picnic-copy-one{padding:7px 10px}.picnic-order-actions{margin-top:2px}.picnic-open{text-decoration:none;display:inline-flex;align-items:center}.picnic-order-note{color:#81758f;line-height:1.35}
 @media(max-width:600px){.picnic-order-row{grid-template-columns:minmax(0,1fr) auto}.picnic-order-actions{display:grid;grid-template-columns:1fr 1fr}.picnic-order-actions .btn{justify-content:center;width:100%}}
+
+
+/* V1.4.96 - recept importeren via link */
+.recipe-url-import{display:grid;gap:10px;max-width:760px}.recipe-url-import label{display:grid;gap:6px;font-weight:700}.recipe-url-import input{width:100%;box-sizing:border-box}.recipe-url-import-status{min-height:20px;color:#756d7a;font-size:13px;line-height:1.4}.recipe-url-import .actions{margin-top:0}

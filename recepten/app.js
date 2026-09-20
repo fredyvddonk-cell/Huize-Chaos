@@ -141,7 +141,58 @@ function sourceFromUrl(url){try{const h=new URL(url).hostname.toLowerCase();if(h
 function findRecipeJson(value){if(!value)return null;if(Array.isArray(value)){for(const x of value){const f=findRecipeJson(x);if(f)return f}}else if(typeof value==='object'){const t=value['@type'];if(t==='Recipe'||(Array.isArray(t)&&t.includes('Recipe')))return value;if(value['@graph'])return findRecipeJson(value['@graph'])}return null}
 function instructionText(v){if(Array.isArray(v))return v.map(x=>typeof x==='string'?x:(x?.text||x?.name||instructionText(x?.itemListElement))).filter(Boolean).join('\n');if(typeof v==='string')return v;return v?.text||''}
 function parseYield(y){const s=Array.isArray(y)?y[0]:y;return String(s||'').match(/\d+/)?.[0]||''}
-async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{const res=await fetch(draft.sourceUrl,{credentials:'omit'});if(!res.ok)throw new Error('HTTP '+res.status);const html=await res.text(),docu=new DOMParser().parseFromString(html,'text/html');for(const el of docu.querySelectorAll('script[type="application/ld+json"]')){try{const recipe=findRecipeJson(JSON.parse(el.textContent));if(!recipe)continue;return{...draft,title:recipe.name||draft.title,servings:parseYield(recipe.recipeYield)||draft.servings,ingredients:(recipe.recipeIngredient||[]).map(parseIngredient),directions:instructionText(recipe.recipeInstructions)||draft.directions,source:sourceFromUrl(draft.sourceUrl)}}catch(_){}}}catch(err){console.info('Receptlink kon niet rechtstreeks worden uitgelezen; bron blijft bij concept.',err)}return draft}
+function recipeImageUrl(image){if(Array.isArray(image))image=image[0];if(typeof image==='string')return image;if(image&&typeof image==='object')return image.url||image.contentUrl||'';return ''}
+async function fetchRecipeHtml(url){
+  const attempts=[
+    ()=>fetch(url,{credentials:'omit'}),
+    ()=>fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url)),
+    ()=>fetch('https://corsproxy.io/?url='+encodeURIComponent(url))
+  ];
+  let lastErr=null;
+  for(const attempt of attempts){
+    try{const res=await attempt();if(res.ok){const html=await res.text();if(html&&html.length>200)return html}lastErr=new Error('HTTP '+res.status)}catch(err){lastErr=err}
+  }
+  throw lastErr||new Error('Receptpagina kon niet worden opgehaald');
+}
+function recipeFromHtml(html,url,draft={}){
+  const docu=new DOMParser().parseFromString(html,'text/html');
+  for(const el of docu.querySelectorAll('script[type="application/ld+json"]')){
+    try{
+      const recipe=findRecipeJson(JSON.parse(el.textContent));if(!recipe)continue;
+      const rawDirections=instructionText(recipe.recipeInstructions)||draft.directions||'';
+      const ingredients=(recipe.recipeIngredient||[]).map(parseIngredient).filter(x=>x.ingredient);
+      const directions=stripIngredientAmountsFromDirections(parseBulkDirections(rawDirections),ingredients);
+      return {...draft,title:recipe.name||draft.title||'Geïmporteerd recept',servings:parseYield(recipe.recipeYield)||draft.servings||'',ingredients,directions,photo:recipeImageUrl(recipe.image)||draft.photo||'',sourceUrl:url,source:sourceFromUrl(url),category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
+    }catch(_){ }
+  }
+  throw new Error('Geen receptgegevens gevonden op deze pagina');
+}
+async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{const html=await fetchRecipeHtml(draft.sourceUrl);return recipeFromHtml(html,draft.sourceUrl,draft)}catch(err){console.info('Receptlink kon niet worden uitgelezen; bron blijft bij concept.',err);return draft}}
+function showRecipeUrlImport(){
+  pushRecipeHistory({hcRecipeKind:'new',hcRecipeId:'import-url',hcRecipeReturn:recipeModuleView});
+  hideList();
+  detail.innerHTML=`<div class="detail-head"><div><h2>Recept importeren</h2><small>Plak een link van bijvoorbeeld Jumbo, HelloFresh of een andere receptsite</small></div><div class="actions"><button class="btn" id="cancelRecipeUrlImport" type="button">Terug</button></div></div><div class="panel recipe-url-import"><label>Receptlink<input id="recipeUrlImportInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…"></label><p class="bulk-help">Huize Chaos probeert naam, foto, personen, ingrediënten en bereidingsstappen automatisch over te nemen. Je controleert alles voordat het wordt opgeslagen.</p><div class="actions"><button class="btn primary" id="fetchRecipeUrl" type="button">Recept ophalen</button></div><div id="recipeUrlImportStatus" class="recipe-url-import-status" aria-live="polite"></div></div>`;
+  const input=detail.querySelector('#recipeUrlImportInput'),status=detail.querySelector('#recipeUrlImportStatus'),button=detail.querySelector('#fetchRecipeUrl');
+  const cancel=()=>backList();detail.querySelector('#cancelRecipeUrlImport').onclick=cancel;
+  const run=async()=>{
+    const url=String(input.value||'').trim();
+    if(!/^https?:\/\//i.test(url)){status.textContent='Plak eerst een geldige receptlink.';input.focus();return}
+    button.disabled=true;button.textContent='Ophalen…';status.textContent='Receptgegevens worden opgehaald.';
+    try{
+      const id=crypto.randomUUID();
+      const base={id,title:'Geïmporteerd recept',servings:'',ingredients:[],directions:'',sourceUrl:url,source:sourceFromUrl(url),photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:'',status:'pending',sharedAt:new Date().toISOString()};
+      const draft=recipeFromHtml(await fetchRecipeHtml(url),url,base);
+      savePending([...pending(),draft]);
+      current='pending:'+id;edited=JSON.parse(JSON.stringify(draft));displayServings=String(draft.servings||'');
+      showReview();
+    }catch(err){
+      console.warn(err);status.innerHTML='Automatisch uitlezen lukte niet. Je kunt het recept nog steeds via <strong>+ Recept toevoegen</strong> plakken.';
+      button.disabled=false;button.textContent='Opnieuw proberen';
+    }
+  };
+  button.onclick=run;input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run()}});setTimeout(()=>input.focus(),0);
+}
+document.querySelector('#importRecipeUrl')?.addEventListener('click',showRecipeUrlImport);
 async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searchParams.has('share-target')||!('caches'in window))return null;try{const cache=await caches.open('huize-chaos-shared-content-v1'),key=new URL('__shared-recipe__',url).href,res=await cache.match(key);if(!res)return null;await cache.delete(key);return await res.json()}catch(err){console.warn(err);return null}}
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({...history.state,hcRecipeScreen:'module',hcRecipeModule:recipeModuleView},'',location.pathname+location.hash);openPending(draft.id)}
 search.oninput=()=>{renderList();renderSmartRecipePicker()};renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();

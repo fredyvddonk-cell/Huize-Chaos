@@ -1,4 +1,9 @@
-# Huize Chaos V1.4.95
+# Huize Chaos V1.4.96
+- Recept importeren toegevoegd bij Recepten.
+- Receptlink van o.a. Jumbo en HelloFresh kan worden geplakt.
+- Huize Chaos probeert titel, foto, personen, ingrediënten en stappen automatisch op te halen.
+- Geïmporteerd recept wordt eerst als controleversie geopend.
+
 
 - Bij een recept staat nu de knop `Bestellen bij Picnic`.
 - Huize Chaos toont alleen ingrediënten die volgens de voorraad nog nodig zijn.
