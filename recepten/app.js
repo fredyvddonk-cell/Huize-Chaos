@@ -146,7 +146,9 @@ async function fetchRecipeHtml(url){
   const attempts=[
     ()=>fetch(url,{credentials:'omit'}),
     ()=>fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url)),
-    ()=>fetch('https://corsproxy.io/?url='+encodeURIComponent(url))
+    ()=>fetch('https://corsproxy.io/?url='+encodeURIComponent(url)),
+    // Publieke leesweergave als receptsites directe browsertoegang blokkeren (CORS).
+    ()=>fetch('https://r.jina.ai/'+url,{headers:{'Accept':'text/plain'}})
   ];
   let lastErr=null;
   for(const attempt of attempts){
@@ -155,6 +157,38 @@ async function fetchRecipeHtml(url){
   throw lastErr||new Error('Receptpagina kon niet worden opgehaald');
 }
 function cleanAhText(s){return String(s||'').replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').trim()}
+function recipeFromAhReadableText(text,url,draft={}){
+  const raw=String(text||'').replace(/\r/g,'');
+  if(!/Ingrediënten/i.test(raw)||!/Aan de slag/i.test(raw))return null;
+  const lines=raw.split('\n').map(x=>cleanAhText(x.replace(/^\s*[-*]+\s*/,''))).filter(Boolean);
+  let title=draft.title||'';
+  const titleIdx=lines.findIndex(x=>/^#{1,2}\s+/.test(x));
+  if(titleIdx>=0)title=lines[titleIdx].replace(/^#{1,2}\s+/,'').trim();
+  if(!title||title==='Geïmporteerd recept'){
+    const candidate=lines.find(x=>x&&!/^Title:|^URL Source:|^Markdown Content:/i.test(x)&&!/^(Ingrediënten|Aan de slag)$/i.test(x));
+    if(candidate)title=candidate.replace(/^#+\s*/,'').trim();
+  }
+  const servings=(raw.match(/Aantal personen\s*:?\s*(\d+)/i)||raw.match(/\(Op basis van\s+(\d+)\s+personen\)/i)||raw.match(/\b(\d+)\s+personen\b/i)||[])[1]||draft.servings||'';
+  const ingMatches=[...raw.matchAll(/(?:^|\n)#{1,3}\s*Ingrediënten\s*\n([\s\S]*?)(?=\n#{1,3}\s*(?:Dit heb je nodig|Aan de slag|Voedingswaarden)|$)/gi)];
+  const ingBlock=ingMatches.length?ingMatches[ingMatches.length-1][1]:'';
+  const ingredients=[];
+  if(ingBlock){
+    ingBlock.split('\n').map(x=>cleanAhText(x.replace(/^\s*[-*]+\s*/,''))).filter(Boolean).forEach(line=>{
+      if(/^\(Op basis van|^Aantal personen|^\[?Input\]?$/i.test(line))return;
+      const cleaned=line.replace(/^(?:\[Input\]\s*)+/i,'').replace(/\s+\d+(?:[.,]\d+)?\s*(?:g|gram|ml|cl|dl|l|el|eetlepel|tl|theelepel|stuks?)\s+.*$/i,'').trim();
+      const x=parseIngredient(cleaned);if(x.ingredient)ingredients.push(x);
+    });
+  }
+  const dirMatches=[...raw.matchAll(/(?:^|\n)#{1,3}\s*Aan de slag\s*\n([\s\S]*?)(?=\n#{1,3}\s*(?:Ingrediënten|Voedingswaarden)|$)/gi)];
+  let directions='';
+  if(dirMatches.length){
+    const block=dirMatches[dirMatches.length-1][1];
+    const steps=block.split('\n').map(x=>cleanAhText(x.replace(/^\s*[-*]+\s*/,''))).filter(Boolean).filter(x=>!/^\d+\.?$/.test(x)&&!/^variatietip|^combinatietip|^vegantip/i.test(x));
+    directions=steps.join('\n');
+  }
+  if(!ingredients.length||!directions)return null;
+  return {...draft,title:title||'Geïmporteerd recept',servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),sourceUrl:url,source:'Allerhande',category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
+}
 function recipeFromAhHtml(docu,url,draft={}){
   let title=cleanAhText(docu.querySelector('h1')?.textContent)||draft.title||'Geïmporteerd recept';
   const body=docu.body?.innerText||'';
@@ -186,7 +220,7 @@ function recipeFromAhHtml(docu,url,draft={}){
     }
     directions=steps.filter((v,i,a)=>v&&a.indexOf(v)===i).join('\n');
   }
-  if(!ingredients.length||!directions)return null;
+  if(!ingredients.length||!directions){const readable=recipeFromAhReadableText(docu.body?.innerText||docu.documentElement?.textContent||'',url,draft);if(readable)return readable;return null}
   return {...draft,title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),sourceUrl:url,source:'Allerhande',category:draft.category||'Overig',type:draft.type||'Anders',mainIngredient:draft.mainIngredient||'Anders',homeTime:draft.homeTime||'',status:'pending',sharedAt:new Date().toISOString()};
 }
 function recipeFromHtml(html,url,draft={}){
