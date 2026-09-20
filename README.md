@@ -1,11 +1,17 @@
+# Huize Chaos V1.4.89
 
-## V1.4.88
+- Picnic PDF-bonnen herkennen productregels weer over alle pagina’s.
+- Picnic-prijzen worden ook herkend wanneer euro’s en centen als losse PDF-elementen staan.
+- Het Picnic totaalbedrag wordt herkend als “Totaal” en “Al betaald via iDeal” op aparte regels staan.
+
+
+## V1.4.89
 - Foto-import voor Picnic-recepten verbeterd: brede screenshots worden voor tekstherkenning automatisch op het tekstgedeelte bijgesneden.
 - Screenshots worden voor OCR vergroot, grijs gemaakt en krijgen extra contrast.
 - Stapnummers zonder punt worden beter herkend.
 - Veelvoorkomende OCR-fouten in Picnic-bereidingsstappen worden voorzichtig opgeschoond.
-# Huize Chaos V1.4.88
-## Wijzigingen V1.4.88
+# Huize Chaos V1.4.89
+## Wijzigingen V1.4.89
 
 - Receptsuggesties vanuit voorraad corrigeren voor specifieke pastasoorten.
 - Orzo koppelt niet meer aan spaghetti, penne of andere specifieke pastasoorten.

@@ -347,7 +347,7 @@ async function parseReceiptImage(file){
 function pdfItemsToLines(items){const rows=[];for(const item of items){const y=Math.round(item.transform?.[5]||0);let row=rows.find(r=>Math.abs(r.y-y)<=2);if(!row){row={y,items:[]};rows.push(row)}row.items.push({x:item.transform?.[4]||0,text:item.str||''})}return rows.sort((a,b)=>b.y-a.y).map(r=>r.items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n')}
 function groupPdfItems(items,tolerance=3){const rows=[];for(const item of items){const text=String(item.str||'').trim();if(!text)continue;const x=Number(item.transform?.[4]||0),y=Number(item.transform?.[5]||0);let row=rows.find(r=>Math.abs(r.y-y)<=tolerance);if(!row){row={y,items:[]};rows.push(row)}row.items.push({x,y,text})}return rows.sort((a,b)=>b.y-a.y).map(r=>({...r,items:r.items.sort((a,b)=>a.x-b.x),text:r.items.sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim()}))}
 function picnicPriceFromRow(row){
-  const items=(row?.items||[]).filter(i=>i.x>=400);
+  const items=(row?.items||[]).filter(i=>i.x>=360);
   return picnicMoneyCandidates(items).map(x=>x.value)[0]??null
 }
 function picnicMoneyCandidates(items){
@@ -367,53 +367,66 @@ function picnicMoneyCandidates(items){
   return [...direct,...paired].filter(x=>Number.isFinite(x.value)).sort((a,b)=>b.y-a.y)
 }
 function picnicPricesInRegion(items,highY,lowY){
-  const region=(items||[]).map(i=>({x:Number(i.transform?.[4]??i.x??0),y:Number(i.transform?.[5]??i.y??0),text:String(i.str??i.text??'')})).filter(i=>i.x>=400&&i.y<=highY&&i.y>=lowY);
+  const region=(items||[]).map(i=>({x:Number(i.transform?.[4]??i.x??0),y:Number(i.transform?.[5]??i.y??0),text:String(i.str??i.text??'')})).filter(i=>i.x>=360&&i.y<=highY&&i.y>=lowY);
   return picnicMoneyCandidates(region)
 }
-function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<400).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/(?:^|\s)(?:30%\s*korting|bundelbonus|korting|gratis)(?:\s|$)/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)(?:\s*[•·-]\s*\d+\s*x\s*\d+(?:[,.]\d+)?\s*(?:gram|g|kg|ml|cl|l|stuk|stuks)?)?$/i.test(text))return'';return text}
+function picnicProductName(row){if(!row)return'';const text=row.items.filter(i=>i.x>=195&&i.x<380).map(i=>i.text).join(' ').replace(/\s+/g,' ').trim();if(!text||!/\p{L}/u.test(text))return'';if(/^(?:gratis|bundelbonus|statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|totaal|btw|voordeel|picnic-tegoed|toegevoegd op|order|je bonnetje|beste |hier is het bonnetje|bezorgadres|fijne dag|vragen\?|klantenservice|mijn profiel)/i.test(text))return'';if(/(?:^|\s)(?:30%\s*korting|bundelbonus|korting|gratis)(?:\s|$)/i.test(text)||/^family$/i.test(text)||/^\d+\s+voor\s+€?\d+/i.test(text))return'';if(/^\d+(?:[,.]\d+)?\s*(?:gram|g|kg|kilo|ml|cl|l|liter|stuk|stuks|krop|pakken?|fles(?:sen)?|blik(?:jes)?)(?:\s*[•·-]\s*\d+\s*x\s*\d+(?:[,.]\d+)?\s*(?:gram|g|kg|ml|cl|l|stuk|stuks)?)?$/i.test(text))return'';return text}
 function isPicnicPdfText(text){return /\bpicnic\b/i.test(text)&&(/je\s*bonnetje/i.test(text)||/service\.picnic\.nl/i.test(text)||/picnic-tegoed/i.test(text))}
 function parsePicnicPdfPages(pageItems,rawText){
-  const productRows=[],pageStops={};
+  const parsed=[];
   for(let p=0;p<pageItems.length;p++){
-    const rows=groupPdfItems(pageItems[p],5);
-    const hasItemBadges=pageItems[p].some(i=>(i.transform?.[4]||0)<180&&/^\d{1,2}$/.test(String(i.str||'').trim()));
-    if(!hasItemBadges)continue;
+    const items=pageItems[p],rows=groupPdfItems(items,5);
     let startY=Infinity,stopY=-Infinity;
     if(p===0){const order=rows.find(r=>/\border\b/i.test(r.text));if(order)startY=order.y-1}
     const stop=rows.find(r=>/^(?:statiegeld|subtotaal|totaal)\b/i.test(r.text));if(stop)stopY=stop.y+1;
-    pageStops[p]=stopY;
-    for(const row of rows){if(row.y>=startY||row.y<=stopY)continue;const name=picnicProductName(row);if(name)productRows.push({page:p,y:row.y,name})}
-  }
-  const parsed=[];
-  for(let i=0;i<productRows.length;i++){
-    const cur=productRows[i],next=productRows.slice(i+1).find(x=>x.page===cur.page);
-    const lower=Math.max(next?next.y+4:-Infinity,pageStops[cur.page]??-Infinity);
-    const candidates=picnicPricesInRegion(pageItems[cur.page],cur.y+8,lower);
-    if(!candidates.length)continue;
-    // Bij BundelBonus/Gratis staat de werkelijk betaalde prijs lager in het blok.
-    // Omdat PDF-coordinaten naar boven oplopen, is dat de kandidaat met de laagste y.
-    const price=[...candidates].sort((a,b)=>a.y-b.y)[0].value;
-    if(price>=0&&price<500)parsed.push({name:cur.name,price:+price.toFixed(2),category:catFor(cur.name)})
+    const badges=items.map(i=>({x:Number(i.transform?.[4]||0),y:Number(i.transform?.[5]||0),text:String(i.str||'').trim()}))
+      .filter(i=>i.x>=165&&i.x<205&&/^\d{1,2}$/.test(i.text)&&i.y<startY&&i.y>stopY)
+      .sort((a,b)=>b.y-a.y);
+    if(!badges.length)continue;
+
+    // Als een kortingsblok precies over een PDF-pagina heen loopt (zoals Family),
+    // staat de uiteindelijke actieprijs soms boven het eerste product van de nieuwe pagina.
+    if(p>0&&parsed.length){
+      const first=badges[0],topRows=rows.filter(r=>r.y>first.y+42&&r.y<startY);
+      if(topRows.some(r=>/^family\b|bundelbonus|gratis|korting|\d+\s+voor\s+€/i.test(r.text))){
+        const carry=picnicPricesInRegion(items,Infinity,first.y+42);
+        if(carry.length){const final=[...carry].sort((a,b)=>a.y-b.y)[0].value;if(final>=0&&final<500)parsed[parsed.length-1].price=+final.toFixed(2)}
+      }
+    }
+
+    for(let b=0;b<badges.length;b++){
+      const badge=badges[b],next=badges[b+1];
+      const high=Math.min(startY,badge.y+45);
+      const low=Math.max(stopY,next?next.y+38:-Infinity);
+      const blockRows=rows.filter(r=>r.y<=high&&r.y>=low);
+      const nameParts=[];
+      for(const row of blockRows){const part=picnicProductName(row);if(part&&!nameParts.includes(part))nameParts.push(part)}
+      let name=nameParts.join(' ').replace(/\s+/g,' ').trim();
+      if(!name)continue;
+      const candidates=picnicPricesInRegion(items,high,low);
+      // Bij actieprijzen staat de betaalde prijs onder de doorgestreepte/oude prijs.
+      // Zonder zichtbaar bedrag is het artikel onderdeel van een gecombineerde actie;
+      // het artikel blijft dan wel als bonregel zichtbaar met €0,00.
+      const price=candidates.length?[...candidates].sort((a,b)=>a.y-b.y)[0].value:0;
+      if(price>=0&&price<500)parsed.push({name:name.slice(0,100),price:+price.toFixed(2),category:catFor(name)})
+    }
   }
   let total=null;
   for(const items of pageItems){
     const rows=groupPdfItems(items,5);
-    const totalRow=rows.find(r=>/^totaal\b/i.test(r.text)&&/betaald|ideal/i.test(r.text));
+    // Picnic zet 'Totaal' en 'Al betaald via iDeal' soms op twee tekstregels.
+    const totalRow=rows.find(r=>/^totaal\b/i.test(r.text));
     if(!totalRow)continue;
-    const candidates=picnicPricesInRegion(items,totalRow.y+10,totalRow.y-12);
+    const candidates=picnicPricesInRegion(items,totalRow.y+14,totalRow.y-14);
     if(candidates.length){const nearest=[...candidates].sort((a,b)=>Math.abs(a.y-totalRow.y)-Math.abs(b.y-totalRow.y))[0];total=nearest.value;break}
   }
   const oneLine=rawText.replace(/\s+/g,' ');
   const delivery=oneLine.match(/bezorging\s+van\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
   let date='';
   if(delivery){const months={januari:1,februari:2,maart:3,april:4,mei:5,juni:6,juli:7,augustus:8,september:9,oktober:10,november:11,december:12},d=+delivery[1],mo=months[delivery[2].toLowerCase()],y=+delivery[3];date=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`}else date=detectDate(oneLine);
-  return{__parsedReceipt:true,store:'Picnic',date,total,originalTotal:total,koopzegels:0,lines:parsed,raw:rawText}
+  const excluded=parsed.filter(l=>NON_GROCERY_CATS.has(l.category)).reduce((a,l)=>a+l.price,0);
+  return{__parsedReceipt:true,store:'Picnic',date,total,baseTotal:total,originalTotal:total,koopzegels:0,statiegeld:0,excludedPurchases:+excluded.toFixed(2),lines:parsed,raw:rawText}
 }
-function isAlbertHeijnReceipt(text){return /\balbert\s+heijn\b|\bbonuskaart\b/i.test(text)&&/\bsubtotaal\b/i.test(text)}
-function parseAlbertHeijnReceipt(rawText){const cleaned=cleanText(rawText),lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean);let start=lines.findIndex(l=>/aantal\s+omschrijving\s+prijs\s+bedrag/i.test(l));if(start<0)start=lines.findIndex(l=>/bonuskaart/i.test(l));let end=lines.findIndex((l,i)=>i>start&&/^\d+\s+SUBTOTAAL\b|^SUBTOTAAL\b/i.test(l));if(end<0)end=lines.length;const section=lines.slice(Math.max(0,start+1),end);const parsed=[];let statiegeld=0,skipKoopzegelDetail=false;for(const line of section){if(/koopzegels?\s+premium|^koopzegels?\b/i.test(line)){skipKoopzegelDetail=true;continue}if(skipKoopzegelDetail){if(isQuantityLine(line)){continue}skipKoopzegelDetail=false}if(/bonuskaart|airmiles/i.test(line))continue;if(/^\+?statiegeld\b/i.test(line)){const vals=lineMoney(line);if(vals.length)statiegeld+=vals[vals.length-1];continue}let p=splitProductAndPrice(line);if(!p)continue;let name=p.name.replace(/^\s*(\d+)\s+/,'$1 ').trim(),qty=1,unitPrice=null;const qtyMatch=name.match(/^(\d+(?:[,.]\d+)?)\s+/);if(qtyMatch){qty=parseReceiptNumber(qtyMatch[1])||1}const twoPrices=name.match(/^(\d+(?:[,.]\d+)?)\s+(.+?)\s+(\d+[,.]\d{2})$/);if(twoPrices){qty=parseReceiptNumber(twoPrices[1])||qty;unitPrice=parseReceiptNumber(twoPrices[3]);name=`${twoPrices[1]} ${twoPrices[2]}`}if(unitPrice===null&&qty>0)unitPrice=p.price/qty;if(/subtotaal|uw voordeel|koopzegel|merchant|\b9%\b|\b21%\b|bonus\b|betaald|pinnen/i.test(name))continue;parsed.push({name:name.slice(0,100),price:+p.price.toFixed(2),originalPrice:+p.price.toFixed(2),qty:+qty,unitPrice:+unitPrice.toFixed(2),category:catFor(name)})}
-let originalTotal=null;for(const line of lines){if(!/^TOTAAL\b/i.test(line)||/korting|btw/i.test(line))continue;const vals=lineMoney(line);if(vals.length===1&&vals[0]>0){originalTotal=vals[0];break}}if(originalTotal===null){const pin=lines.find(l=>/^PINNEN\b/i.test(l));const vals=pin?lineMoney(pin):[];if(vals.length)originalTotal=vals[vals.length-1]}
-let koopzegels=0;for(const line of lines){if(!/koopzegels?\s+premium/i.test(line))continue;const vals=lineMoney(line);if(vals.length){koopzegels=vals[vals.length-1];break}}
-const baseTotal=originalTotal!==null?+Math.max(0,originalTotal-koopzegels-statiegeld).toFixed(2):null;const excluded=parsed.filter(l=>NON_GROCERY_CATS.has(l.category)).reduce((a,l)=>a+l.price,0);const total=originalTotal;return{__parsedReceipt:true,store:'Albert Heijn',date:detectDate(cleaned),total,baseTotal,originalTotal,koopzegels:+koopzegels.toFixed(2),statiegeld:+statiegeld.toFixed(2),excludedPurchases:+excluded.toFixed(2),lines:parsed,raw:cleaned}}
 async function pdfText(file){if(!window.pdfjsLib)throw new Error('PDF-module kon niet worden geladen. Controleer je internetverbinding.');window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const data=await file.arrayBuffer();const pdf=await window.pdfjsLib.getDocument({data}).promise;let text='';const pageItems=[];const max=Math.min(pdf.numPages,5);for(let p=1;p<=max;p++){const page=await pdf.getPage(p);const content=await page.getTextContent();pageItems.push(content.items);text+=pdfItemsToLines(content.items)+'\n';}if(isPicnicPdfText(text)){const picnic=parsePicnicPdfPages(pageItems,text);if(picnic.lines.length||picnic.total!==null)return picnic}if(isAlbertHeijnReceipt(text))return parseAlbertHeijnReceipt(text);if(cleanText(text).length>=80)return text;let ocr='';for(let p=1;p<=Math.min(pdf.numPages,3);p++){setReadStatus(`PDF-pagina ${p} wordt uitgelezen…`,'busy');const page=await pdf.getPage(p),viewport=page.getViewport({scale:2});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;ocr+=await ocrImage(canvas,pc=>setReadStatus(`PDF-pagina ${p} wordt uitgelezen… ${pc}%`,'busy'))+'\n';}return ocr}
 async function extractReceipt(file){if(!file)throw new Error('Geen bestand gekozen.');if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))return pdfText(file);if(file.type.startsWith('image/')||/\.(png|jpe?g|webp|bmp)$/i.test(file.name))return parseReceiptImage(file);throw new Error('Dit bestandstype kan nog niet worden uitgelezen. Kies een PDF of afbeelding.')}
 function receiptDebugReason(line){
