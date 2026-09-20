@@ -920,7 +920,7 @@ function initApp() {
   };
   $('#cancel').onclick = closeModal;
   $('#deleteFromProduct').onclick = () => {
-    const id = Number($('#deleteFromProduct').dataset.productId);
+    const id = $('#deleteFromProduct').dataset.productId;
     if (id) requestProductDelete(id, 'product');
   };
   $('#modal').onclick = event => {
@@ -933,13 +933,13 @@ function initApp() {
   $('#confirmDelete').onclick = () => {
     if (!pendingProductDelete) return;
     const { id, mode } = pendingProductDelete;
-    const product = products.find(x => x.id === id);
+    const product = products.find(x => String(x.id) === String(id));
     if (!product) return closeProductDelete();
     if (mode === 'shopping' && !product.temporary) {
       product.shopping = false;
       product.done = false;
     } else {
-      products = products.filter(x => x.id !== id);
+      products = products.filter(x => String(x.id) !== String(id));
       if (String($('#editId').value) === String(id)) {
         closeHuizeChaosOverlayDirect('product-edit', $('#modal'));
       }

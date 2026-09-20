@@ -225,7 +225,7 @@ function bindStockSwipeActions(){
 function stockProductsForView(arr){
   const all=(arr||[]);
   if(stockView==='standard') return all.filter(p=>p.stockRole==='standard');
-  if(stockView==='meal') return all.filter(p=>p.stockRole==='meal'&&p.status==='In huis');
+  if(stockView==='meal') return all.filter(p=>p.stockRole==='meal');
   if(stockView==='hidden') return all.filter(p=>p.stockRole==='hidden');
   return all.filter(p=>p.stockRole!=='hidden');
 }
@@ -234,7 +234,7 @@ function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
-    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen houdbare maaltijdproducten op In huis.':stockView==='hidden'?'Geen producten bij Niet in voorraad.':'Geen producten gevonden.'}</div>`;
+    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen producten in Maaltijdvoorraad.':stockView==='hidden'?'Geen producten bij Niet in voorraad.':'Geen producten gevonden.'}</div>`;
     return;
   }
 
@@ -279,7 +279,7 @@ function renderStock(arr) {
       </section>`;
     }).join('');
   }
-  const intro=stockView==='meal'?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Alles hieronder staat als houdbare maaltijdvoorraad op <b>In huis</b>. Bij recepten telt aanwezigheid mee; jij controleert zelf of er genoeg is.</span></div>`:'';
+  const intro=stockView==='meal'?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Hier blijft je volledige houdbare maaltijdvoorraad zichtbaar. <b>In huis</b> telt mee bij recepten; <b>Niet in huis</b> blijft hier staan zodat je het later eenvoudig weer op In huis kunt zetten.</span></div>`:'';
   content.innerHTML = `${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
   bindStockSwipeActions();
 }
