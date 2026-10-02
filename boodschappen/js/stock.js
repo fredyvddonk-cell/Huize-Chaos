@@ -350,4 +350,22 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleStockBuy(input.dataset.stockBuy,input.checked);
   });
   updateStockViewControls();
+
+  // V1.4.126: een product uit Zoeken opent precies dat product.
+  const requestedProductId = new URLSearchParams(location.search).get('product');
+  if (requestedProductId) {
+    const product = products.find(item => String(item.id) === String(requestedProductId));
+    if (product) {
+      const role = ['standard','meal','hidden'].includes(product.stockRole) ? product.stockRole : 'standard';
+      stockView = role;
+      localStorage.setItem('household-stock-view', stockView);
+      expandedStockCategories.clear();
+      const groupName = String(product.category || 'Overig').trim() || 'Overig';
+      expandedStockCategories.add(groupName);
+      saveStockExpansion();
+      if (typeof search !== 'undefined' && search) search.value = product.name || '';
+      render();
+      setTimeout(() => window.editProduct?.(requestedProductId), 0);
+    }
+  }
 });

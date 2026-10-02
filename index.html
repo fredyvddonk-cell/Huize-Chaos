@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.123">
+  <link rel="stylesheet" href="style.css?v=1.4.126">
 </head>
 <body>
   <main class="home">
@@ -48,7 +48,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.123</footer>
+    <footer>Huize Chaos · V1.4.126</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -69,12 +69,12 @@
   <div class="hc-search-overlay" id="globalSearchOverlay" hidden aria-hidden="true">
     <section class="hc-search-card" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
       <div class="hc-search-head"><div><span>Huize Chaos</span><h2 id="globalSearchTitle">Zoeken</h2></div><button type="button" id="closeGlobalSearch" aria-label="Zoeken sluiten">×</button></div>
-      <label class="hc-search-field"><span aria-hidden="true">⌕</span><input id="globalSearchInput" type="search" autocomplete="off" placeholder="Zoek in heel Huize Chaos"></label>
+      <label class="hc-search-field"><button type="button" id="executeGlobalSearch" class="hc-search-submit" aria-label="Zoeken">⌕</button><input id="globalSearchInput" type="search" autocomplete="off" placeholder="Zoek in heel Huize Chaos"></label>
       <div id="globalSearchResults" class="hc-search-results"><div class="hc-search-help">Zoek bijvoorbeeld op een product, recept, afspraak, taak of tankbeurt.</div></div>
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.123"></script>
+<script src="recepten/recipes-data.js?v=1.4.126"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -103,9 +103,15 @@
       if(item.type!=='task'||item.category==='household'||taskDone(item))return false;
       if(item.deadline===today)return true;if(item.urgent&&item.date<=today)return true;if(item.date===today)return true;if(item.date<today&&(!item.repeat||item.repeat==='none'))return true;if(item.repeat&&item.repeat!=='none'&&item.date<=today)return true;return false;
     }).sort((a,b)=>Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||(a.createdAt||0)-(b.createdAt||0));
-    const rows=[...appointments.map(item=>({title:item.title||'Afspraak',meta:item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:'Afspraak'})),...tasks.map(item=>({title:item.title||'Taak',meta:item.deadline===today?'Vandaag':item.urgent?'Urgent':'Taak'}))];
+    const rows=[
+      ...appointments.map(item=>({type:'appointment',title:item.title||'Afspraak',time:item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:''})),
+      ...tasks.map(item=>({type:'task',title:item.title||'Taak'}))
+    ];
     if(!rows.length){box.innerHTML='<div class="home-empty">Geen afspraken of open taken voor vandaag.</div>';return}
-    box.innerHTML=rows.map(row=>`<a class="home-row" href="gezinsplanner/?hcnav=home"><span class="home-row-meta">${esc(row.meta)}</span><strong>${esc(row.title)}</strong><span class="home-row-go">›</span></a>`).join('');
+    box.innerHTML=rows.map(row=>row.type==='task'
+      ? `<a class="home-row home-row-task" href="gezinsplanner/?hcnav=home"><span class="home-task-mark" aria-hidden="true">✓</span><strong>${esc(row.title)}</strong><span class="home-row-go">›</span></a>`
+      : `<a class="home-row home-row-appointment" href="gezinsplanner/?hcnav=home"><span class="home-appointment-mark" aria-hidden="true">◷</span><strong>${esc(row.title)}</strong>${row.time?`<span class="home-row-time">${esc(row.time)}</span>`:''}<span class="home-row-go">›</span></a>`
+    ).join('');
   }
   function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
   function renderWeekMenu(){
@@ -131,13 +137,13 @@
   document.getElementById('openModuleMenu').onclick=()=>setMenu(true);document.getElementById('closeModuleMenu').onclick=()=>setMenu(false);moduleBackdrop.onclick=()=>setMenu(false);
 
   const searchOverlay=document.getElementById('globalSearchOverlay'),searchInput=document.getElementById('globalSearchInput'),searchResults=document.getElementById('globalSearchResults');
-  function closeSearch(){searchOverlay.hidden=true;searchOverlay.setAttribute('aria-hidden','true');document.body.classList.remove('hc-no-scroll');searchInput.value='';searchResults.innerHTML='<div class="hc-search-help">Zoek bijvoorbeeld op een product, recept, afspraak, taak of tankbeurt.</div>'}
+  function closeSearch(){searchInput.blur();if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();searchOverlay.hidden=true;searchOverlay.setAttribute('aria-hidden','true');document.body.classList.remove('hc-no-scroll');searchInput.value='';searchResults.innerHTML='<div class="hc-search-help">Zoek bijvoorbeeld op een product, recept, afspraak, taak of tankbeurt.</div>'}
   function openSearch(){searchOverlay.hidden=false;searchOverlay.setAttribute('aria-hidden','false');document.body.classList.add('hc-no-scroll');setTimeout(()=>searchInput.focus(),20)}
-  document.getElementById('openGlobalSearch').onclick=openSearch;document.getElementById('closeGlobalSearch').onclick=closeSearch;searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch()});
+  document.getElementById('openGlobalSearch').onclick=openSearch;document.getElementById('closeGlobalSearch').onclick=closeSearch;document.getElementById('executeGlobalSearch').onclick=()=>{renderSearch();searchInput.blur();if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur()};searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch()});
   function searchData(q){
     const n=q.trim().toLocaleLowerCase('nl-NL');if(n.length<2)return[];const out=[];const add=(section,title,meta,href)=>{const hay=`${title} ${meta}`.toLocaleLowerCase('nl-NL');if(hay.includes(n))out.push({section,title,meta,href})};
     const modules=[['Voorraad & Boodschappen','Boodschappen en voorraad','boodschappen/?hcnav=home'],['Gezinsplanner','Afspraken en taken','gezinsplanner/?hcnav=home'],['Weekmenu & Recepten','Recepten en weekmenu','recepten/?hcnav=home'],['Auto','Kilometers en tankbeurten','auto/?hcnav=home'],['Aankopen','Bonnen en garantie','aankopen/?hcnav=home'],['Mijn notities','Persoonlijke notities','notities/?hcnav=home'],['Feestdagen & gelegenheden','Gasten, aankopen en kosten','gelegenheden/?hcnav=home']];modules.forEach(x=>add('Onderdelen',x[0],x[1],x[2]));
-    const products=readJson('household-products-v2',[]);if(Array.isArray(products))products.forEach(p=>add('Voorraad',p.name||'Product',[p.category,p.store,p.stockLocation].filter(Boolean).join(' · '),'boodschappen/?hcnav=home&page=stock'));
+    const products=readJson('household-products-v2',[]);if(Array.isArray(products))products.forEach(p=>add('Voorraad',p.name||'Product',[p.category,p.store,p.stockLocation].filter(Boolean).join(' · '),`boodschappen/?hcnav=home&page=stock&product=${encodeURIComponent(String(p.id||''))}`));
     plannerItems().forEach(p=>add(p.type==='appointment'?'Afspraken':'Taken',p.title||'Planneritem',[p.date,p.time,p.note].filter(Boolean).join(' · '),'gezinsplanner/?hcnav=home'));
     const custom=readJson('hc-recipe-custom-v1',[]),base=Array.isArray(window.HUIZE_CHAOS_RECIPES)?window.HUIZE_CHAOS_RECIPES:[],deleted=new Set((readJson('hc-recipe-deleted-v1',[])||[]).map(String));[...base,...(Array.isArray(custom)?custom:[])].forEach(r=>{if(!r||deleted.has(String(r.id)))return;add('Recepten',r.title||'Recept',[r.category,r.type].filter(Boolean).join(' · '),`recepten/?hcnav=home&recipe=${encodeURIComponent(String(r.id||''))}`)});
     const auto=readJson('huizeChaosAutoV1',{});(auto?.fuel||[]).forEach(f=>add('Tankbeurten',`${f.date||''} · ${Number(f.odo||0).toLocaleString('nl-NL')} km`,`${Number(f.liters||0).toFixed(2)} liter · € ${Number(f.amount||0).toFixed(2).replace('.',',')}`,'auto/?hcnav=home&tab=fuel'));(auto?.kilometers||[]).forEach(k=>add('Ritten',k.note||k.route||'Rit',`${k.date||''} · ${k.km||0} km`,'auto/?hcnav=home'));
@@ -145,13 +151,15 @@
   }
   function renderSearch(){const q=searchInput.value,items=searchData(q);if(q.trim().length<2){searchResults.innerHTML='<div class="hc-search-help">Typ minimaal 2 letters.</div>';return}if(!items.length){searchResults.innerHTML=`<div class="hc-search-empty">Geen resultaten voor <strong>${esc(q)}</strong>.</div>`;return}const grouped=new Map();items.forEach(i=>{if(!grouped.has(i.section))grouped.set(i.section,[]);grouped.get(i.section).push(i)});searchResults.innerHTML=[...grouped].map(([section,rows])=>`<section class="hc-search-group"><h3>${esc(section)}</h3>${rows.map(r=>`<a href="${r.href}"><span><strong>${esc(r.title)}</strong>${r.meta?`<small>${esc(r.meta)}</small>`:''}</span><b>›</b></a>`).join('')}</section>`).join('')}
   searchInput.addEventListener('input',renderSearch);
+  searchResults.addEventListener('pointerdown',event=>{if(event.target.closest('a'))searchInput.blur()});
+  searchResults.addEventListener('click',event=>{if(event.target.closest('a')){searchInput.blur();document.body.classList.remove('hc-no-scroll')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!searchOverlay.hidden)closeSearch();else if(moduleMenu.classList.contains('open'))setMenu(false)}});
 
   renderToday();renderWeekMenu();
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.123'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.126'))}
 </script>
 </body>
 </html>
