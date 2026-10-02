@@ -14,6 +14,17 @@
     .hc-global-nav-head strong{font-size:20px;color:#7353a5}.hc-global-nav-head button{border:0;background:#e9ddf3;color:#7353a5;width:38px;height:38px;border-radius:11px;font-size:24px}
     .hc-global-nav-list{display:grid;gap:6px}.hc-global-nav-list a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:12px;background:#fff;border:1px solid #e4d9ec;color:#2d2d37;text-decoration:none;font-weight:700}.hc-global-nav-list a.active{background:#eadff4;color:#654099;border-color:#cdb8df}.hc-global-nav-list a span:last-child{color:#957ac1;font-size:20px}
     @media(max-width:430px){.hc-global-nav-btn{width:39px;height:39px;right:10px;top:calc(env(safe-area-inset-top) + 8px)}}
+    /* V1.4.128: één vaste Huize Chaos-lijn op alle modules */
+    body{background:#f5f0f9!important}
+    .hc-module-top,.module-topbar,.topbar{background:transparent!important;border-bottom:1px solid #ded3e8!important;box-shadow:none!important}
+    .hc-module-top,.module-topbar,.topbar{min-height:62px!important;padding-right:64px!important}
+    .hc-module-top img:first-child,.module-app-icon,.hc-app-icon{border-radius:12px!important}
+    .hc-module-top .hc-brand img:last-child,.module-wordmark,.topbar .brand img:last-child{max-height:29px!important;width:auto!important}
+    .hc-version,.module-version,.version{color:#8a7c94!important;font-weight:650!important}
+    .title-icon{display:none!important}
+    button,.button{font-family:inherit}
+    .hc-global-nav-list a{min-height:47px}
+
   `;
   document.head.appendChild(style);
   const button=document.createElement('button');button.id='hcGlobalNavButton';button.className='hc-global-nav-btn';button.type='button';button.setAttribute('aria-label','Huize Chaos menu openen');button.innerHTML='<span></span><span></span><span></span>';document.body.appendChild(button);

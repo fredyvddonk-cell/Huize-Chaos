@@ -5,7 +5,7 @@
 @media(max-width:430px){.home{padding:13px 10px 22px}.home-brand-icon{width:46px;height:46px;border-radius:12px}.home-brand-wordmark{height:25px;max-width:162px}.home-brand-copy small{font-size:9.5px}.home-icon-button{width:36px;height:36px}.home-panel{padding:9px 10px;border-radius:14px}.home-panel-head h2{font-size:15.5px}.home-heading-detail{font-size:11px}.home-row{grid-template-columns:58px 1fr auto;gap:6px}.home-row,.home-menu-row{min-height:36px}.home-menu-check{height:36px}.home-menu-link{min-height:36px}.home-quick{padding:6px 7px;grid-template-columns:26px 1fr auto}.home-quick-icon{width:26px;height:26px}.home-quick strong{font-size:12.5px}.home-quick small{font-size:9px}}
 
 
-/* V1.4.127 - rustiger startscherm in Huize Chaos-stijl */
+/* V1.4.128 - rustiger startscherm in Huize Chaos-stijl */
 .home{padding-top:13px}
 .home-dashboard{gap:7px}
 .home-panel{background:rgba(250,247,253,.9);border:1px solid #e7dced;border-radius:13px;padding:8px 11px;box-shadow:none}
@@ -43,9 +43,10 @@ footer{margin-top:11px}
   .home-row-time{font-size:10.8px}
 }
 
-/* V1.4.127 - rustiger dagoverzicht en navigatie */
+/* V1.4.128 - rustiger dagoverzicht en navigatie */
 html,body{min-height:100%;min-height:100dvh;background:linear-gradient(180deg,#f2ebf8 0,#faf7fc 55%,#f7f1fb 100%)}
 body{min-height:100dvh}.home{min-height:100dvh;display:flex;flex-direction:column}.home-dashboard{flex:0 0 auto}footer{margin-top:auto;padding-top:14px}
 .home-row-task{grid-template-columns:18px minmax(0,1fr) auto}.home-task-mark{width:auto;height:auto;border-radius:0;background:transparent;color:var(--purple-dark);font-size:16px;line-height:1;font-weight:900}
 .home-row-appointment{grid-template-columns:minmax(0,1fr) auto}.home-row-appointment strong{display:block}.home-inline-time{font-weight:520;color:#776b7f;font-size:.92em;white-space:nowrap}.home-appointment-mark,.home-row-time{display:none!important}
 .hc-module-list-text a{grid-template-columns:1fr auto}.hc-module-list-text img,.hc-module-list-text .hc-module-icon{display:none}
+\n/* V1.4.128 - rustige, consistente HC-lijn */\nhtml,body{min-height:100%;min-height:100dvh}\nbody{min-height:100dvh;background:#f5f0f9}\n.home{min-height:100dvh;display:flex;flex-direction:column;width:100%}\n.home-dashboard{width:100%}\n.home-hutsel-signal{width:100%}\n.home footer{margin-top:auto;padding-top:14px;padding-bottom:max(6px,env(safe-area-inset-bottom))}\n.hc-search-field{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;overflow:hidden}\n.hc-focus-sink{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;border:0!important;padding:0!important}\n.hc-module-list-text a{grid-template-columns:minmax(0,1fr) auto}\n

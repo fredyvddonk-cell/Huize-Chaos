@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.127">
+  <link rel="stylesheet" href="style.css?v=1.4.128">
 </head>
 <body>
   <main class="home">
@@ -48,7 +48,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.127</footer>
+    <footer>Huize Chaos · V1.4.128</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -70,12 +70,12 @@
   <div class="hc-search-overlay" id="globalSearchOverlay" hidden aria-hidden="true">
     <section class="hc-search-card" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
       <div class="hc-search-head"><div><span>Huize Chaos</span><h2 id="globalSearchTitle">Zoeken</h2></div><button type="button" id="closeGlobalSearch" aria-label="Zoeken sluiten">×</button></div>
-      <label class="hc-search-field"><button type="button" id="executeGlobalSearch" class="hc-search-submit" aria-label="Zoeken">⌕</button><input id="globalSearchInput" type="search" autocomplete="off" placeholder="Zoek in heel Huize Chaos"></label>
+      <div class="hc-search-field"><button type="button" id="executeGlobalSearch" class="hc-search-submit" aria-label="Zoeken">⌕</button><input id="globalSearchInput" type="search" autocomplete="off" enterkeyhint="search" placeholder="Zoek in heel Huize Chaos"><button id="searchFocusSink" type="button" class="hc-focus-sink" tabindex="-1" aria-hidden="true"></button></div>
       <div id="globalSearchResults" class="hc-search-results"><div class="hc-search-help">Zoek bijvoorbeeld op een product, recept, afspraak, taak of tankbeurt.</div></div>
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.127"></script>
+<script src="recepten/recipes-data.js?v=1.4.128"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -140,7 +140,20 @@
   const searchOverlay=document.getElementById('globalSearchOverlay'),searchInput=document.getElementById('globalSearchInput'),searchResults=document.getElementById('globalSearchResults');
   function closeSearch(){searchInput.blur();if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();searchOverlay.hidden=true;searchOverlay.setAttribute('aria-hidden','true');document.body.classList.remove('hc-no-scroll');searchInput.value='';searchResults.innerHTML='<div class="hc-search-help">Zoek bijvoorbeeld op een product, recept, afspraak, taak of tankbeurt.</div>'}
   function openSearch(){searchOverlay.hidden=false;searchOverlay.setAttribute('aria-hidden','false');document.body.classList.add('hc-no-scroll');setTimeout(()=>searchInput.focus(),20)}
-  document.getElementById('openGlobalSearch').onclick=openSearch;document.getElementById('closeGlobalSearch').onclick=closeSearch;document.getElementById('executeGlobalSearch').onclick=()=>{renderSearch();searchInput.blur();if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur()};searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch()});
+  document.getElementById('openGlobalSearch').onclick=openSearch;document.getElementById('closeGlobalSearch').onclick=closeSearch;
+  const searchButton=document.getElementById('executeGlobalSearch'),searchFocusSink=document.getElementById('searchFocusSink');
+  function dismissSearchKeyboard(){
+    try{searchInput.blur()}catch(_){}
+    try{searchButton.focus({preventScroll:true})}catch(_){try{searchButton.focus()}catch(__){}}
+    try{searchFocusSink&&searchFocusSink.focus({preventScroll:true})}catch(_){}
+    setTimeout(()=>{try{searchInput.blur()}catch(_){}},0);
+    setTimeout(()=>{try{searchInput.blur()}catch(_){}},80);
+  }
+  searchButton.addEventListener('pointerdown',()=>{try{searchInput.blur()}catch(_){}},{passive:true});
+  searchButton.onclick=()=>{renderSearch();dismissSearchKeyboard()};
+  searchInput.addEventListener('search',()=>{renderSearch();dismissSearchKeyboard()});
+  searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();renderSearch();dismissSearchKeyboard()}});
+  searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch()});
   function searchData(q){
     const n=q.trim().toLocaleLowerCase('nl-NL');if(n.length<2)return[];const out=[];const add=(section,title,meta,href)=>{const hay=`${title} ${meta}`.toLocaleLowerCase('nl-NL');if(hay.includes(n))out.push({section,title,meta,href})};
     const modules=[['Voorraad & Boodschappen','Boodschappen en voorraad','boodschappen/?hcnav=home'],['Gezinsplanner','Afspraken en taken','gezinsplanner/?hcnav=home'],['Weekmenu & Recepten','Recepten en weekmenu','recepten/?hcnav=home'],['Auto','Kilometers en tankbeurten','auto/?hcnav=home'],['Aankopen','Bonnen en garantie','aankopen/?hcnav=home'],['Mijn notities','Persoonlijke notities','notities/?hcnav=home'],['Feestdagen & gelegenheden','Gasten, aankopen en kosten','gelegenheden/?hcnav=home']];modules.forEach(x=>add('Onderdelen',x[0],x[1],x[2]));
@@ -160,7 +173,7 @@
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.127'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.128'))}
 </script>
 </body>
 </html>
