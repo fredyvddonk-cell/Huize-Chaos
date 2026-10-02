@@ -167,6 +167,14 @@ els.date.textContent=new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeri
 renderWasteReminder();
 render();
 initializePlannerHistory();
+try{
+  const requestedItem=new URLSearchParams(location.search).get('item');
+  if(requestedItem){
+    const target=entries.find(entry=>String(entry.id)===String(requestedItem));
+    if(target){setTimeout(()=>openModal(target.type,target),0)}
+  }
+}catch(_){ }
+
 
 document.querySelectorAll('[data-add]').forEach(button=>button.addEventListener('click',()=>openModal(button.dataset.add)));
 document.querySelectorAll('[data-type]').forEach(button=>button.addEventListener('click',()=>setType(button.dataset.type)));

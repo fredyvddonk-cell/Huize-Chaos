@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.126">
+  <link rel="stylesheet" href="style.css?v=1.4.127">
 </head>
 <body>
   <main class="home">
@@ -48,21 +48,22 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.126</footer>
+    <footer>Huize Chaos · V1.4.127</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
   <aside class="hc-side-menu" id="moduleMenu" aria-hidden="true" aria-label="Huize Chaos modules">
     <div class="hc-side-head"><strong>Menu</strong><button type="button" id="closeModuleMenu" aria-label="Menu sluiten">×</button></div>
-    <nav class="hc-module-list">
-      <a href="boodschappen/?hcnav=home"><img src="boodschappen/assets/shopping-icon.png" alt=""><span><strong>Voorraad &amp; Boodschappen</strong><small>Boodschappen, voorraad en Hutsel Frutsel</small></span><b>›</b></a>
-      <a href="gezinsplanner/?hcnav=home"><span class="hc-module-icon planner-icon">📅</span><span><strong>Gezinsplanner</strong><small>Afspraken en taken</small></span><b>›</b></a>
-      <a href="recepten/?hcnav=home"><span class="hc-module-icon">📖</span><span><strong>Weekmenu &amp; Recepten</strong><small>Weekmenu en recepten</small></span><b>›</b></a>
-      <a href="auto/?hcnav=home"><span class="hc-module-icon">🚗</span><span><strong>Auto</strong><small>Kilometers en tankbeurten</small></span><b>›</b></a>
-      <a href="aankopen/?hcnav=home"><span class="hc-module-icon">🧾</span><span><strong>Aankopen</strong><small>Bonnen en garantie</small></span><b>›</b></a>
-      <a href="notities/?hcnav=home"><span class="hc-module-icon">🔒</span><span><strong>Mijn notities</strong><small>Persoonlijke notities</small></span><b>›</b></a>
-      <a href="gelegenheden/?hcnav=home"><span class="hc-module-icon">🎉</span><span><strong>Feestdagen &amp; gelegenheden</strong><small>Gasten, aankopen en kosten</small></span><b>›</b></a>
-      <a href="boodschappen/?hcnav=home&page=manage"><span class="hc-module-icon">⚙</span><span><strong>Beheer &amp; instellingen</strong><small>Huize Chaos beheren</small></span><b>›</b></a>
+    <nav class="hc-module-list hc-module-list-text">
+      <a href="./"><span><strong>Home</strong><small>Startscherm van Huize Chaos</small></span><b>›</b></a>
+      <a href="gezinsplanner/?hcnav=home"><span><strong>Gezinsplanner</strong><small>Afspraken en taken</small></span><b>›</b></a>
+      <a href="boodschappen/?hcnav=home"><span><strong>Voorraad &amp; Boodschappen</strong><small>Lijst, voorraad en beheer</small></span><b>›</b></a>
+      <a href="recepten/?hcnav=home"><span><strong>Weekmenu &amp; Recepten</strong><small>Weekmenu en recepten</small></span><b>›</b></a>
+      <a href="auto/?hcnav=home"><span><strong>Auto</strong><small>Kilometers en tankbeurten</small></span><b>›</b></a>
+      <a href="aankopen/?hcnav=home"><span><strong>Aankopen</strong><small>Bonnen en garantie</small></span><b>›</b></a>
+      <a href="notities/?hcnav=home"><span><strong>Mijn notities</strong><small>Persoonlijke notities</small></span><b>›</b></a>
+      <a href="gelegenheden/?hcnav=home"><span><strong>Feestdagen &amp; gelegenheden</strong><small>Gasten, aankopen en kosten</small></span><b>›</b></a>
+      <a href="boodschappen/?hcnav=home&page=manage"><span><strong>Beheer &amp; instellingen</strong><small>Huize Chaos beheren</small></span><b>›</b></a>
     </nav>
   </aside>
 
@@ -74,7 +75,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.126"></script>
+<script src="recepten/recipes-data.js?v=1.4.127"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -104,13 +105,13 @@
       if(item.deadline===today)return true;if(item.urgent&&item.date<=today)return true;if(item.date===today)return true;if(item.date<today&&(!item.repeat||item.repeat==='none'))return true;if(item.repeat&&item.repeat!=='none'&&item.date<=today)return true;return false;
     }).sort((a,b)=>Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||(a.createdAt||0)-(b.createdAt||0));
     const rows=[
-      ...appointments.map(item=>({type:'appointment',title:item.title||'Afspraak',time:item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:''})),
-      ...tasks.map(item=>({type:'task',title:item.title||'Taak'}))
+      ...appointments.map(item=>({id:item.id,type:'appointment',title:item.title||'Afspraak',time:item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:''})),
+      ...tasks.map(item=>({id:item.id,type:'task',title:item.title||'Taak'}))
     ];
     if(!rows.length){box.innerHTML='<div class="home-empty">Geen afspraken of open taken voor vandaag.</div>';return}
     box.innerHTML=rows.map(row=>row.type==='task'
-      ? `<a class="home-row home-row-task" href="gezinsplanner/?hcnav=home"><span class="home-task-mark" aria-hidden="true">✓</span><strong>${esc(row.title)}</strong><span class="home-row-go">›</span></a>`
-      : `<a class="home-row home-row-appointment" href="gezinsplanner/?hcnav=home"><span class="home-appointment-mark" aria-hidden="true">◷</span><strong>${esc(row.title)}</strong>${row.time?`<span class="home-row-time">${esc(row.time)}</span>`:''}<span class="home-row-go">›</span></a>`
+      ? `<a class="home-row home-row-task" href="gezinsplanner/?hcnav=home&item=${encodeURIComponent(String(row.id||''))}"><span class="home-task-mark" aria-hidden="true">✓</span><strong>${esc(row.title)}</strong><span class="home-row-go">›</span></a>`
+      : `<a class="home-row home-row-appointment" href="gezinsplanner/?hcnav=home&item=${encodeURIComponent(String(row.id||''))}"><strong>${esc(row.title)}${row.time?` <span class="home-inline-time">${esc(row.time)}</span>`:''}</strong><span class="home-row-go">›</span></a>`
     ).join('');
   }
   function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
@@ -159,7 +160,7 @@
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.126'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.127'))}
 </script>
 </body>
 </html>

@@ -47,7 +47,18 @@ function updateStockViewControls(){
   document.querySelectorAll('[data-stock-view]').forEach(button => button.classList.toggle('active', button.dataset.stockView === stockView));
   const help = document.querySelector('#stockViewHelp');
   if (help) help.textContent = STOCK_VIEW_HELP[stockView] || '';
+  const label=document.querySelector('#stockFilterLabel');
+  const labels={standard:'Standaard voorraad',meal:'Maaltijdvoorraad',hidden:'Niet in voorraad',location:'Per vaste plek'};
+  if(label) label.textContent=labels[stockView]||'Voorraad';
 }
+
+(function bindStockFilterMenu(){
+  const button=document.getElementById('stockFilterButton'),menu=document.getElementById('stockFilterMenu');
+  if(!button||!menu)return;
+  button.addEventListener('click',()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open))});
+  menu.addEventListener('click',event=>{const choice=event.target.closest('[data-stock-view]');if(!choice)return;menu.hidden=true;button.setAttribute('aria-expanded','false')});
+  document.addEventListener('click',event=>{if(menu.hidden||event.target===button||menu.contains(event.target))return;menu.hidden=true;button.setAttribute('aria-expanded','false')});
+})();
 
 function stockBadges(product){ return ''; }
 
@@ -351,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateStockViewControls();
 
-  // V1.4.126: een product uit Zoeken opent precies dat product.
+  // V1.4.127: een product uit Zoeken opent precies dat product.
   const requestedProductId = new URLSearchParams(location.search).get('product');
   if (requestedProductId) {
     const product = products.find(item => String(item.id) === String(requestedProductId));
