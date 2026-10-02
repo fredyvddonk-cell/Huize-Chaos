@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.136 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.137 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,

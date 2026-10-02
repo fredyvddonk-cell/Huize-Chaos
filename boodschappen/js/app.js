@@ -722,7 +722,11 @@ function render() {
   document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
   document.body.classList.toggle('insight-page', page === 'insight');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
-  $('#add').textContent = page === 'insight' ? '+ Bon toevoegen' : '+ Toevoegen';
+  const addBtn = $('#add');
+  addBtn.textContent = '+';
+  const addLabel = page === 'insight' ? 'Bon toevoegen' : page === 'hutsel' ? 'Restje toevoegen' : 'Product toevoegen';
+  addBtn.setAttribute('aria-label', addLabel);
+  addBtn.setAttribute('title', addLabel);
 
   const query = page === 'list' || page === 'stock' || page === 'manage' ? search.value.trim().toLowerCase() : '';
   const arr = products.filter(x =>
