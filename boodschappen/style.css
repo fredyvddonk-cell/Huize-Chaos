@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.137 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.138 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,
@@ -889,4 +889,92 @@ body.receipt-reordering #receiptModal{touch-action:none}
     font-size:13px!important;
     padding:7px 11px!important;
   }
+}
+
+/* V1.4.138 - producten als compacte lijsten, geen losse grote kaarten */
+.shopping-page .shopping-group-body,
+.stock-category .shopping-group-body{
+  background:#fff!important;
+}
+.shopping-page .shopping-item{
+  min-height:42px!important;
+  padding:5px 8px!important;
+  gap:8px!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.shopping-page .shopping-item .check{
+  width:20px!important;
+  height:20px!important;
+}
+.shopping-page .shopping-item .name{
+  font-size:14px!important;
+  line-height:1.15!important;
+}
+.shopping-page .shopping-item .meta,
+.shopping-page .shopping-item .memo,
+.shopping-page .shopping-item .added-by{
+  font-size:11px!important;
+  line-height:1.15!important;
+}
+
+.stock-swipe-shell{
+  border-radius:0!important;
+  background:#fff!important;
+}
+.stock-swipe-shell+.stock-swipe-shell{
+  border-top:1px solid #eee8f1!important;
+}
+.stock-swipe-shell .stock-item{
+  min-height:50px!important;
+  padding:6px 8px!important;
+  gap:8px!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  align-items:center!important;
+}
+.stock-item .main{
+  padding:0!important;
+}
+.stock-item .name{
+  font-size:14px!important;
+  line-height:1.15!important;
+}
+.stock-item .meta,.stock-item .memo{
+  margin-top:1px!important;
+  font-size:11px!important;
+  line-height:1.15!important;
+}
+.stock-actions-compact{
+  gap:5px!important;
+  flex-wrap:nowrap!important;
+}
+.stock-actions-compact .stock-status-toggle,
+.stock-actions-compact .stock-buy-red,
+.stock-actions-compact .stock-hutsel-link{
+  font-size:11px!important;
+  line-height:1!important;
+}
+.stock-actions-compact .stock-status-toggle{
+  padding:4px 6px!important;
+  border-radius:7px!important;
+}
+.stock-buy-check.stock-buy-red{
+  padding:3px 4px!important;
+  gap:4px!important;
+}
+.stock-buy-check.stock-buy-red input{
+  width:15px!important;
+  height:15px!important;
+}
+.stock-actions-compact .stock-hutsel-link{
+  padding:3px 2px!important;
+}
+@media(max-width:430px){
+  .stock-swipe-shell .stock-item{min-height:48px!important;padding:5px 6px!important;gap:6px!important}
+  .stock-item .name{font-size:13.5px!important}
+  .stock-actions-compact{gap:3px!important}
+  .stock-actions-compact .stock-status-toggle,
+  .stock-actions-compact .stock-buy-red,
+  .stock-actions-compact .stock-hutsel-link{font-size:10.5px!important}
 }

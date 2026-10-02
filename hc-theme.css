@@ -652,7 +652,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 /* ============================================================
-   V1.4.137 — rustigere, compactere bovenkant op alle modules
+   V1.4.138 — rustigere, compactere bovenkant op alle modules
    De inhoud komt eerder in beeld; dubbele schermtitels verdwijnen.
    ============================================================ */
 .module-topbar,.hc-module-top,.topbar,.fixed-head .top{
@@ -743,7 +743,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 
-/* V1.4.137 - rustige, compacte toevoegknoppen */
+/* V1.4.138 - rustige, compacte toevoegknoppen */
 .hc-icon-add{
   width:46px!important;
   min-width:46px!important;
