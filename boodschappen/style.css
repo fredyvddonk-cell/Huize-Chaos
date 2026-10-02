@@ -832,24 +832,3 @@ body.receipt-reordering #receiptModal{touch-action:none}
 /* V1.4.113 - In huis / Niet in huis weer duidelijk en betrouwbaar bedienbaar */
 .stock-status-toggle{cursor:pointer;touch-action:manipulation;min-height:28px}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
-
-/* V1.4.129 - Huize Chaos bevestiging na verwijderen */
-.hc-toast{position:fixed;z-index:1400;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,18px);width:min(92vw,460px);padding:12px 15px;border:1px solid #d8cce6;border-radius:14px;background:#f6f1fa;color:#4f3a62;font-size:14px;font-weight:750;text-align:center;box-shadow:0 10px 28px rgba(59,43,72,.18);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}.hc-toast.show{opacity:1;transform:translate(-50%,0)}
-
-/* V1.4.129 - verwijderbevestiging altijd boven het productscherm */
-#deleteModal.modal{z-index:4000}
-
-/* V1.4.129 - eenvoudiger Voorraad-scherm */
-.tabs.tabs-simple{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible}.tabs.tabs-simple .tab{min-width:0}
-.stock-filter-compact{position:relative;display:flex;align-items:center;gap:9px;margin:2px 0 10px}.stock-filter-button{border:1px solid #cab9dc;background:#f2eafa;color:#68459a;border-radius:10px;padding:8px 12px;font-weight:800}.stock-filter-label{font-size:.9rem;color:#6d6873;font-weight:650}.stock-filter-menu{position:absolute;z-index:70;left:0;top:calc(100% + 6px);width:min(320px,calc(100vw - 32px));background:#fff;border:1px solid #ded1e8;border-radius:14px;box-shadow:0 12px 30px rgba(58,42,72,.16);padding:7px}.stock-filter-menu[hidden]{display:none}.stock-filter-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#403548;border-radius:9px;padding:10px 11px;font:inherit;font-weight:700}.stock-filter-menu button.active{background:#eadff4;color:#654099}.stock-filter-menu .stock-view-help{padding:7px 9px 4px;margin:0;font-size:.78rem;border-top:1px solid #eee7f3}.hc-household-menu-button{width:40px;height:40px;border:1px solid #dfd4e8;background:#fff;border-radius:11px;padding:8px;display:grid;place-items:center}.hc-household-menu-button span{display:block;width:19px;height:2px;border-radius:2px;background:#7042b3;margin:2px auto}.hc-household-menu-backdrop{position:fixed;inset:0;background:rgba(36,28,43,.35);z-index:840}.hc-household-menu-backdrop[hidden]{display:none}.hc-household-menu{position:fixed;z-index:850;top:0;right:0;height:100dvh;width:min(360px,88vw);background:#f7f1fb;box-shadow:-12px 0 38px rgba(46,35,56,.2);transform:translateX(105%);transition:transform .2s ease;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);overflow:auto}.hc-household-menu.open{transform:translateX(0)}.hc-household-menu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.hc-household-menu-head strong{color:#7353a5;font-size:18px}.hc-household-menu-head button{border:0;background:#e9ddf3;color:#7353a5;width:38px;height:38px;border-radius:11px;font-size:24px}.hc-household-menu nav{display:grid;gap:6px}.hc-household-menu nav a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:11px;background:#fff;border:1px solid #e4d9ec;text-decoration:none;color:#2d2d37;font-weight:700}.hc-household-menu nav a b{color:#957ac1;font-size:20px}.hc-household-menu nav hr{width:100%;border:0;border-top:1px solid #e0d4e8;margin:5px 0}
-@media(max-width:430px){.fixed-head .tabs.tabs-simple{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible}.fixed-head .tabs.tabs-simple .tab{min-width:0;font-size:12px}.hc-household-menu-button{width:38px;height:38px}}
-
-
-/* V1.4.129 - Voorraad in dezelfde HC-lijn */
-body{background:#f5f0f9}
-.fixed-head{background:#f5f0f9!important;border-bottom:1px solid #e5daec;box-shadow:none!important}
-.fixed-head .top{padding-right:52px}
-.tabs.tabs-simple{background:#eee6f5;border-color:#ddd0e8}
-.tabs.tabs-simple .tab{background:transparent;border-radius:0}
-.tabs.tabs-simple .tab.active{background:#957ac1;color:#fff}
-.toolbar,.stock-check-controls,#listControls,#content{background:transparent}

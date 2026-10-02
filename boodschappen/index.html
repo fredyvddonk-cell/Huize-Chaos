@@ -7,7 +7,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.129">
+  <link rel="stylesheet" href="style.css?v=1.4.117">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.130">
 </head>
 <body>
   <main class="app">
@@ -18,12 +19,14 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.129</span><button id="openHouseholdMenu" class="hc-household-menu-button" type="button" aria-label="Menu openen"><span></span><span></span><span></span></button></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.130</span></div>
     </div>
 
-    <nav class="tabs tabs-simple">
+    <nav class="tabs">
       <button class="tab active" data-page="list">Lijst</button>
       <button class="tab" data-page="stock">Voorraad</button>
+      <button class="tab" data-page="hutsel">Hutsel Frutsel</button>
+      <button class="tab" data-page="insight">Inzicht</button>
       <button class="tab" data-page="manage">Beheer</button>
     </nav>
     </header>
@@ -36,16 +39,14 @@
       <button id="add" class="plus add-labelled" aria-label="Product toevoegen">+ Toevoegen</button>
     </div>
 
-    <div id="stockControls" class="stock-check-controls stock-filter-compact" hidden>
-      <button id="stockFilterButton" class="stock-filter-button" type="button" aria-expanded="false">Filter</button>
-      <span id="stockFilterLabel" class="stock-filter-label">Standaard voorraad</span>
-      <div id="stockFilterMenu" class="stock-filter-menu" hidden role="menu" aria-label="Voorraadfilter">
+    <div id="stockControls" class="stock-check-controls" hidden>
+      <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
         <button type="button" data-stock-view="standard" class="active">Standaard voorraad</button>
         <button type="button" data-stock-view="meal">Maaltijdvoorraad</button>
         <button type="button" data-stock-view="hidden">Niet in voorraad</button>
         <button type="button" data-stock-view="location">Per vaste plek</button>
-        <p id="stockViewHelp" class="stock-view-help">Je vaste controlelijst volgens je oude Plan to Eat-indeling.</p>
       </div>
+      <p id="stockViewHelp" class="stock-view-help">Je vaste controlelijst volgens je oude Plan to Eat-indeling.</p>
     </div>
 
     <div id="listControls">
@@ -68,23 +69,6 @@
       <button id="clearDone" class="process-done-btn" type="button">✓ Boodschappen verwerken</button>
     </div>
   </main>
-
-  <div id="householdMenuBackdrop" class="hc-household-menu-backdrop" hidden></div>
-  <aside id="householdMenu" class="hc-household-menu" aria-hidden="true">
-    <div class="hc-household-menu-head"><strong>Voorraad &amp; Boodschappen</strong><button id="closeHouseholdMenu" type="button" aria-label="Menu sluiten">×</button></div>
-    <nav>
-      <a href="../"><span>Home</span><b>›</b></a>
-      <a href="?hcnav=menu&page=list"><span>Lijst</span><b>›</b></a>
-      <a href="?hcnav=menu&page=stock"><span>Voorraad</span><b>›</b></a>
-      <a href="?hcnav=menu&page=hutsel"><span>Hutsel Frutsel</span><b>›</b></a>
-      <a href="?hcnav=menu&page=insight"><span>Inzicht</span><b>›</b></a>
-      <a href="?hcnav=menu&page=manage"><span>Beheer</span><b>›</b></a>
-      <hr>
-      <a href="../gezinsplanner/?hcnav=menu"><span>Gezinsplanner</span><b>›</b></a>
-      <a href="../recepten/?hcnav=menu"><span>Weekmenu &amp; Recepten</span><b>›</b></a>
-      <a href="../auto/?hcnav=menu"><span>Auto</span><b>›</b></a>
-    </nav>
-  </aside>
 
   <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="auth-card">
@@ -363,21 +347,14 @@
     </div>
   </div>
 
-  <script>
-  (function(){
-    const menu=document.getElementById('householdMenu'),backdrop=document.getElementById('householdMenuBackdrop'),open=document.getElementById('openHouseholdMenu'),close=document.getElementById('closeHouseholdMenu');
-    function setOpen(value){menu?.classList.toggle('open',value);menu?.setAttribute('aria-hidden',String(!value));if(backdrop)backdrop.hidden=!value;document.body.style.overflow=value?'hidden':''}
-    open?.addEventListener('click',()=>setOpen(true));close?.addEventListener('click',()=>setOpen(false));backdrop?.addEventListener('click',()=>setOpen(false));document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
-  })();
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.129"></script>
-  <script src="js/shopping.js?v=1.4.129"></script>
-  <script src="js/stock.js?v=1.4.129"></script>
-  <script src="js/hutsel.js?v=1.4.129"></script>
-  <script src="js/insight.js?v=1.4.129"></script>
-  <script type="module" src="js/firebase.js?v=1.4.129"></script>
+  <script src="js/app.js?v=1.4.117"></script>
+  <script src="js/shopping.js?v=1.4.117"></script>
+  <script src="js/stock.js?v=1.4.117"></script>
+  <script src="js/hutsel.js?v=1.4.117"></script>
+  <script src="js/insight.js?v=1.4.117"></script>
+  <script type="module" src="js/firebase.js?v=1.4.117"></script>
 
 </body>
 </html>

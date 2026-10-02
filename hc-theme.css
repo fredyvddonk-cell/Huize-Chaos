@@ -1,0 +1,139 @@
+/* Huize Chaos gedeelde huisstijl - V1.4.130
+   Alleen visuele gelijkstelling; geen navigatie of functionaliteit aangepast. */
+:root{
+  --hc-purple:#957AC1;
+  --hc-purple-dark:#7353A5;
+  --hc-lav:#E9E2F4;
+  --hc-pale:#F7F3FB;
+  --hc-pale-2:#FBF9FD;
+  --hc-teal:#3FA7A3;
+  --hc-text:#2D2D37;
+  --hc-muted:#74707A;
+  --hc-line:#E4DEE9;
+  --hc-danger:#B84F62;
+  --hc-radius:16px;
+  --hc-radius-small:11px;
+  --hc-shadow:0 4px 14px rgba(72,54,85,.055);
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--hc-text);
+  background:linear-gradient(180deg,#F7F3FB 0,#FFFFFF 380px);
+  font-size:16px;
+  line-height:1.4;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+/* Gelijke pagina-breedte en zijmarges */
+.app,.planner-app,.home,main.app{
+  max-width:720px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Vaste kopgroottes door heel HC */
+h1,.top h1,.day-heading h1,.module-heading h1,.hc-heading h1,.title h1,main.app>h1{
+  font-size:27px!important;
+  line-height:1.12!important;
+  font-weight:800!important;
+  letter-spacing:-.25px;
+  color:var(--hc-text);
+}
+h2,.panel h2,.card h2,.modal-card h2{
+  font-size:20px;
+  line-height:1.2;
+  font-weight:800;
+}
+h3{font-size:17px;line-height:1.25}
+small,.meta,.version,.module-version,.hc-version{color:var(--hc-muted)}
+
+/* Dezelfde Huize Chaos-kleur voor subtitels en modulelabels */
+.module-heading>p,.day-heading>p,.hc-heading>p,.title>div>p:first-of-type{
+  color:var(--hc-purple-dark)!important;
+}
+
+/* Kaarten / panelen */
+.panel,.card,.modal-card,.event,.module-card,.wishlist-intro,.central-wish-person,.central-wish-add,
+.accordion,.occasion-card,.purchase-card,.note-card{
+  border-color:var(--hc-line)!important;
+  border-radius:var(--hc-radius)!important;
+  box-shadow:var(--hc-shadow)!important;
+}
+
+/* Formuliervelden */
+input[type="text"],input[type="search"],input[type="date"],input[type="time"],input[type="number"],
+input[type="url"],input[type="email"],select,textarea,.search{
+  border:1px solid var(--hc-line)!important;
+  border-radius:12px!important;
+  background:#fff;
+  color:var(--hc-text);
+}
+input:focus,select:focus,textarea:focus,.search:focus{
+  outline:3px solid rgba(149,122,193,.16)!important;
+  border-color:var(--hc-purple)!important;
+}
+
+/* Hoofdknoppen */
+.primary,.add-button,.plus,.tab.active,.group button.active,
+button.primary,.btn.primary{
+  background:var(--hc-purple)!important;
+  color:#fff!important;
+  border-color:var(--hc-purple)!important;
+}
+.secondary,.tab,.group button,.small,.clear,.print-btn,.btn.secondary{
+  border-radius:var(--hc-radius-small)!important;
+}
+button,.btn,.tab,.group button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Tabs en segmentknoppen */
+.tabs,.type-switch,.occasion-tabs{
+  background:var(--hc-pale);
+  border-radius:14px;
+}
+.tab,.type-switch button,.occasion-tabs button{
+  min-height:42px;
+  font-size:14px;
+  font-weight:750;
+}
+
+/* Lijsten overal hetzelfde rustige ritme */
+.item,.planner-item,.manage-row,.shopping-item,.checklist-library-item,.early-buy-row{
+  border-color:#EEEAF1!important;
+}
+.name,.item-copy strong{font-size:15px}
+.meta,.item-copy small{font-size:13px;color:var(--hc-muted)}
+
+/* Modals en dialogs */
+.modal,.wish-image-overlay{backdrop-filter:saturate(.9)}
+dialog{border:0;border-radius:20px;box-shadow:0 18px 60px rgba(36,29,42,.24)}
+
+/* Huize Chaos kop/logo: overal rustig en gelijk */
+.module-topbar,.topbar,.hc-module-top,.top{
+  min-height:48px;
+}
+.module-brand img,.brand img,.hc-brand img{
+  object-fit:contain;
+}
+.module-wordmark,.hc-wordmark{
+  max-height:31px;
+}
+
+/* Mobiel: exact dezelfde schaal op alle vervolgschermen */
+@media(max-width:430px){
+  html,body{font-size:16px}
+  .app,.planner-app,main.app{padding-left:12px!important;padding-right:12px!important}
+  h1,.top h1,.day-heading h1,.module-heading h1,.hc-heading h1,.title h1,main.app>h1{
+    font-size:25px!important;
+    line-height:1.12!important;
+    white-space:normal!important;
+    letter-spacing:-.2px!important;
+  }
+  h2,.panel h2,.card h2,.modal-card h2{font-size:19px}
+  .module-topbar,.topbar,.hc-module-top,.top{min-height:46px}
+}

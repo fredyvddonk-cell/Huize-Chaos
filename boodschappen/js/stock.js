@@ -6,7 +6,7 @@ const STOCK_VIEW_HELP = {
   standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
   meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
   hidden: 'Producten die je niet als gewone voorraad bijhoudt. Ze blijven wel beschikbaar in Beheer en voor recepten.',
-  location: 'Alle artikelen met een ingestelde vaste plek, gegroepeerd op vaste plek.'
+  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 
@@ -47,18 +47,7 @@ function updateStockViewControls(){
   document.querySelectorAll('[data-stock-view]').forEach(button => button.classList.toggle('active', button.dataset.stockView === stockView));
   const help = document.querySelector('#stockViewHelp');
   if (help) help.textContent = STOCK_VIEW_HELP[stockView] || '';
-  const label=document.querySelector('#stockFilterLabel');
-  const labels={standard:'Standaard voorraad',meal:'Maaltijdvoorraad',hidden:'Niet in voorraad',location:'Per vaste plek'};
-  if(label) label.textContent=labels[stockView]||'Voorraad';
 }
-
-(function bindStockFilterMenu(){
-  const button=document.getElementById('stockFilterButton'),menu=document.getElementById('stockFilterMenu');
-  if(!button||!menu)return;
-  button.addEventListener('click',()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open))});
-  menu.addEventListener('click',event=>{const choice=event.target.closest('[data-stock-view]');if(!choice)return;menu.hidden=true;button.setAttribute('aria-expanded','false')});
-  document.addEventListener('click',event=>{if(menu.hidden||event.target===button||menu.contains(event.target))return;menu.hidden=true;button.setAttribute('aria-expanded','false')});
-})();
 
 function stockBadges(product){ return ''; }
 
@@ -238,8 +227,7 @@ function stockProductsForView(arr){
   if(stockView==='standard') return all.filter(p=>p.stockRole==='standard');
   if(stockView==='meal') return all.filter(p=>p.stockRole==='meal');
   if(stockView==='hidden') return all.filter(p=>p.stockRole==='hidden');
-  if(stockView==='location') return all.filter(p=>String(p.stockLocation||'').trim());
-  return all;
+  return all.filter(p=>p.stockRole!=='hidden');
 }
 
 function renderStock(arr) {
@@ -361,22 +349,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleStockBuy(input.dataset.stockBuy,input.checked);
   });
   updateStockViewControls();
-
-  // V1.4.129: een product uit Zoeken opent precies dat product.
-  const requestedProductId = new URLSearchParams(location.search).get('product');
-  if (requestedProductId) {
-    const product = products.find(item => String(item.id) === String(requestedProductId));
-    if (product) {
-      const role = ['standard','meal','hidden'].includes(product.stockRole) ? product.stockRole : 'standard';
-      stockView = role;
-      localStorage.setItem('household-stock-view', stockView);
-      expandedStockCategories.clear();
-      const groupName = String(product.category || 'Overig').trim() || 'Overig';
-      expandedStockCategories.add(groupName);
-      saveStockExpansion();
-      if (typeof search !== 'undefined' && search) search.value = product.name || '';
-      render();
-      setTimeout(() => window.editProduct?.(requestedProductId), 0);
-    }
-  }
 });
