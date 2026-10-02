@@ -1,9 +1,11 @@
-# Huize Chaos V1.4.134
+# Huize Chaos V1.4.135
 
-## V1.4.134
-- Submenu's binnen Voorraad & Boodschappen gebruiken nu één vaste stijl.
-- Hoofd- en tweede keuzeregels hebben dezelfde hoogte, afronding, lettergrootte en actieve paarse weergave.
-- De dubbele kop “Mijn boodschappenlijst” boven het weeknummer is verwijderd.
+## V1.4.135
+- Dubbele kop “Verlanglijstjes” verwijderd; in het tabblad staat nu direct de knop + Wens toevoegen.
+- Auto opent standaard op Tankbeurten.
+- Auto toont bovenaan alleen Tankbeurten en Kilometers.
+- Reserveren is voorlopig uit de zichtbare Auto-interface gehaald, zodat deze functie later eventueel terug kan komen.
+- Omschrijving van de Auto-module op het startscherm aangepast.
 
 # Huize Chaos V1.4.133
 

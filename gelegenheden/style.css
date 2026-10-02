@@ -42,3 +42,5 @@
 
 /* V1.4.43 verlanglijst: compact overzicht, details na aantikken */
 .central-wish-row{display:block;cursor:pointer;padding:0}.wish-row-summary{display:grid;grid-template-columns:42px minmax(0,1fr) 24px;gap:9px;align-items:center;padding:9px 12px}.wish-chevron{color:#81758f;text-align:center;font-weight:800}.wish-extra{padding:0 12px 11px 63px;display:grid;gap:8px;color:#665b70;font-size:13px}.wish-extra a{color:#6f3fba;font-weight:700}.wish-no-extra{color:#91869b}.central-wish-actions{justify-content:flex-start;margin-top:2px}.central-wish-row.open{background:#fcfaff}@media(max-width:430px){.wish-row-summary{grid-template-columns:38px minmax(0,1fr) 22px;padding:8px 10px}.wish-extra{padding:0 10px 10px 57px}}
+
+.wishlist-head-actions{justify-content:flex-end;background:transparent;border:0;padding:0 0 12px}.wishlist-head-actions .compact-wish-add{margin-left:auto}
