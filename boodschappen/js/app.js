@@ -162,6 +162,23 @@ const $ = selector => document.querySelector(selector);
 let content;
 let search;
 let pendingProductDelete = null;
+let hcToastTimer = 0;
+function showHuizeChaosToast(message) {
+  let toast = document.getElementById('hcToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'hcToast';
+    toast.className = 'hc-toast';
+    toast.setAttribute('role','status');
+    toast.setAttribute('aria-live','polite');
+    document.body.appendChild(toast);
+  }
+  clearTimeout(hcToastTimer);
+  toast.textContent = message;
+  toast.classList.add('show');
+  hcToastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+window.showHuizeChaosToast = showHuizeChaosToast;
 
 function inventoryComparable(product = {}) {
   const copy = { ...product };
@@ -940,7 +957,9 @@ function initApp() {
       closeHuizeChaosOverlayDirect('product-delete', $('#deleteModal'));
       return;
     }
-    if (mode === 'shopping' && !product.temporary) {
+    const removedName = product.name || 'Product';
+    const onlyFromShopping = mode === 'shopping' && !product.temporary;
+    if (onlyFromShopping) {
       product.shopping = false;
       product.done = false;
     } else {
@@ -960,6 +979,7 @@ function initApp() {
     save();
     refreshCats();
     render();
+    showHuizeChaosToast(onlyFromShopping ? `${removedName} is van de boodschappenlijst verwijderd.` : `${removedName} is verwijderd.`);
 
     // Ruim ook de geschiedenislagen van de gesloten vensters op, zodat de
     // Android-terugknop daarna niet op een onzichtbare modal blijft hangen.

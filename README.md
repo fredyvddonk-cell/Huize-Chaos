@@ -1,13 +1,16 @@
-# Huize Chaos V1.4.121
+# Huize Chaos V1.4.122
 
-## V1.4.121
-- Startscherm toont nu de belangrijke afspraken en open taken van vandaag.
-- Startscherm toont het weekmenu van de huidige week met alleen de aanklikbare gerechtnaam.
-- Eén duidelijke knop Menu opent het volledige weekmenu.
-- Snelle knop Tankbeurt opent direct het tankbeurtenformulier.
-- Bestaande modules blijven onder het dagoverzicht beschikbaar.
-- De verbeterde productverwijdering uit V1.4.120 blijft behouden.
-- Cacheversie bijgewerkt naar V1.4.121.
+## V1.4.122
+- Startscherm compacter en rustiger gemaakt in de Huize Chaos-stijl.
+- Vandaag en Deze week blijven direct zichtbaar bij het openen.
+- Weekmenu toont compacte, aanklikbare gerechtregels; lange namen blijven maximaal twee regels hoog.
+- Menu en Tankbeurt staan als compacte snelknoppen naast elkaar.
+- De losse moduletegels zijn van het startscherm gehaald.
+- Nieuw modulemenu via de drie streepjes rechtsboven.
+- Nieuw centraal zoeken via het zoekicoon: zoekt in modules, voorraad, planner, recepten, ritten en tankbeurten.
+- Product verwijderen gebruikt het Huize Chaos-bevestigingsvenster en geeft na verwijderen een Huize Chaos-melding in plaats van losse browserinformatie.
+- Verbeterde verwijderlogica uit V1.4.120 blijft behouden.
+- Cacheversie bijgewerkt naar V1.4.122.
 
 ## V1.4.119
 - Per vaste plek toont nu alle artikelen waaraan een vaste plek is gekoppeld, ook als ze onder Niet in voorraad vallen.
