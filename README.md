@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.130
+# Huize Chaos V1.4.131
 
-## V1.4.130
+## V1.4.131
 - Gebaseerd op de schone V1.4.117-basis.
 - Alleen de visuele huisstijl gelijkgetrokken; functionaliteit en navigatie zijn bewust niet aangepast.
 - Gelijke lettergroottes, koppen, knoppen, formulieren, kaarten, marges en HC paars/lavendel-kleuren op alle modules.
