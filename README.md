@@ -1,3 +1,10 @@
+# Huize Chaos V1.4.134
+
+## V1.4.134
+- Submenu's binnen Voorraad & Boodschappen gebruiken nu één vaste stijl.
+- Hoofd- en tweede keuzeregels hebben dezelfde hoogte, afronding, lettergrootte en actieve paarse weergave.
+- De dubbele kop “Mijn boodschappenlijst” boven het weeknummer is verwijderd.
+
 # Huize Chaos V1.4.133
 
 ## V1.4.133

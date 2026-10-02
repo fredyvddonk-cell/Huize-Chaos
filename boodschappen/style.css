@@ -832,3 +832,61 @@ body.receipt-reordering #receiptModal{touch-action:none}
 /* V1.4.113 - In huis / Niet in huis weer duidelijk en betrouwbaar bedienbaar */
 .stock-status-toggle{cursor:pointer;touch-action:manipulation;min-height:28px}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
+
+
+/* V1.4.134 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+.tabs,
+.stock-check-mode,
+.period-switch,
+.group {
+  background:#eee7f6!important;
+  border:1px solid #e2d8ec!important;
+  border-radius:16px!important;
+  padding:4px!important;
+  gap:4px!important;
+  box-shadow:none!important;
+}
+.tabs{overflow-x:auto!important;scrollbar-width:none!important}
+.tabs::-webkit-scrollbar,.stock-check-mode::-webkit-scrollbar{display:none!important}
+.tab,
+.stock-check-mode button,
+.period-switch button,
+.group button {
+  min-height:42px!important;
+  border:0!important;
+  border-radius:12px!important;
+  padding:8px 14px!important;
+  background:transparent!important;
+  color:#604a72!important;
+  font-size:14px!important;
+  line-height:1.15!important;
+  font-weight:750!important;
+  box-shadow:none!important;
+  white-space:nowrap!important;
+}
+.tab.active,
+.stock-check-mode button.active,
+.period-switch button.active,
+.group button.active {
+  background:#957ac1!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+.stock-check-controls{margin:0 0 12px!important}
+.stock-check-mode{display:flex!important;overflow-x:auto!important}
+.stock-check-mode button{flex:0 0 auto!important}
+.period-switch{display:grid!important;grid-template-columns:1fr 1fr!important}
+.group{display:inline-flex!important;margin-bottom:0!important}
+.list-options{align-items:center!important}
+/* De pagina heet bovenin al Voorraad & Boodschappen / Lijst; geen dubbele lijsttitel. */
+.shopping-title-row{display:none!important}
+#listControls{margin-top:2px!important}
+.shopping-weekbar{margin-top:4px!important}
+
+@media(max-width:430px){
+  .tab,.stock-check-mode button,.period-switch button,.group button{
+    min-height:40px!important;
+    font-size:13px!important;
+    padding:7px 11px!important;
+  }
+}
