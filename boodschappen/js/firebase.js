@@ -332,6 +332,12 @@ function applySnapshot(snapshot) {
   let counter = 0;
 
   nextRemote.forEach((data, cloudId) => {
+    // Een voorraadproduct dat lokaal definitief is verwijderd, mag niet via
+    // een nog niet verwijderde boodschappen-cloudregel opnieuw worden aangemaakt.
+    // De voorraad-tombstone gebruikt het oorspronkelijke lokale product-id.
+    if (data?.source === 'stock' && data?.localId && inventoryDeleted()[String(data.localId)]) {
+      return;
+    }
     let product = products.find(x => x.cloudId === cloudId);
     // Alleen eigen voorraadregels mogen via een lokaal nummer worden gekoppeld.
     // Gezinsleden gebruiken op ieder toestel andere lokale nummers; koppelen daarop
@@ -362,6 +368,12 @@ function applySnapshot(snapshot) {
   });
 
   products = products.filter(product => {
+    // Verwijder ook een eventueel al teruggekomen cloudexemplaar van een
+    // definitief verwijderd voorraadproduct.
+    if (product.cloudId) {
+      const remote = nextRemote.get(product.cloudId);
+      if (remote?.source === 'stock' && remote?.localId && inventoryDeleted()[String(remote.localId)]) return false;
+    }
     if (!product.cloudId || nextRemote.has(product.cloudId)) return true;
     if (product.cloudPending) return true;
     if (product.cloudSource === 'stock') {

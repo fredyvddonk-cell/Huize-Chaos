@@ -6,7 +6,7 @@ const STOCK_VIEW_HELP = {
   standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
   meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
   hidden: 'Producten die je niet als gewone voorraad bijhoudt. Ze blijven wel beschikbaar in Beheer en voor recepten.',
-  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.'
+  location: 'Alle artikelen met een ingestelde vaste plek, gegroepeerd op vaste plek.'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 
@@ -227,7 +227,8 @@ function stockProductsForView(arr){
   if(stockView==='standard') return all.filter(p=>p.stockRole==='standard');
   if(stockView==='meal') return all.filter(p=>p.stockRole==='meal');
   if(stockView==='hidden') return all.filter(p=>p.stockRole==='hidden');
-  return all.filter(p=>p.stockRole!=='hidden');
+  if(stockView==='location') return all.filter(p=>String(p.stockLocation||'').trim());
+  return all;
 }
 
 function renderStock(arr) {

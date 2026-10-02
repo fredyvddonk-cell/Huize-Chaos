@@ -1,4 +1,10 @@
-# Huize Chaos V1.4.117
+# Huize Chaos V1.4.119
+
+## V1.4.119
+- Per vaste plek toont nu alle artikelen waaraan een vaste plek is gekoppeld, ook als ze onder Niet in voorraad vallen.
+- Artikelen zonder vaste plek worden niet meer in deze weergave getoond.
+- De uitleg bij Per vaste plek is aangepast aan deze werking.
+
 
 ## V1.4.117
 - Variatie in het weekmenu toont pasta, rijst, noedels en andere maaltijdsoorten voortaan apart.
