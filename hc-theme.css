@@ -1,4 +1,4 @@
-/* Huize Chaos gedeelde huisstijl - V1.4.131
+/* Huize Chaos gedeelde huisstijl - V1.4.132
    Alleen visuele gelijkstelling; geen navigatie of functionaliteit aangepast. */
 :root{
   --hc-purple:#957AC1;
@@ -139,7 +139,7 @@ dialog{border:0;border-radius:20px;box-shadow:0 18px 60px rgba(36,29,42,.24)}
 }
 
 /* ============================================================
-   Huize Chaos vaste huisstijl - V1.4.131
+   Huize Chaos vaste huisstijl - V1.4.132
    Eén visuele lijn voor alle modules. Functionaliteit blijft gelijk.
    ============================================================ */
 :root{
@@ -420,4 +420,199 @@ main.app>h1::first-letter{font-size:0!important}
   .shopping-title-row h1{font-size:23px!important}
   .tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{font-size:14px!important;padding:0 13px!important}
   .panel,.card,.purchase-card,.note-card,.occasion-card{padding:14px!important}
+}
+
+/* ============================================================
+   V1.4.132 — vaste Huize Chaos paginalijn
+   Deze laag is bewust leidend: iedere vervolgpagina gebruikt
+   dezelfde header, titelhiërarchie, tabs, knoppen en kaartstijl.
+   ============================================================ */
+:root{
+  --hc132-purple:#8f73bf;
+  --hc132-purple-dark:#7453a4;
+  --hc132-lav:#eee7f7;
+  --hc132-bg:#f7f3fb;
+  --hc132-card:#ffffff;
+  --hc132-text:#303039;
+  --hc132-muted:#77727d;
+  --hc132-line:#e3dce9;
+  --hc132-radius:18px;
+  --hc132-control-radius:14px;
+  --hc132-page-pad:16px;
+  --hc132-gap:18px;
+  --hc132-shadow:0 3px 12px rgba(75,54,92,.055);
+}
+html,body{
+  background:var(--hc132-bg)!important;
+  color:var(--hc132-text)!important;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important;
+  font-size:16px!important;
+  line-height:1.4!important;
+}
+body{min-height:100dvh!important}
+
+/* Exact dezelfde paginabreedte */
+.app,.planner-app,.recipes,#app,
+body>.hc-module-top,body>.hc-heading,body>.gate{
+  width:100%!important;
+  max-width:720px!important;
+  box-sizing:border-box!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.app,.planner-app,.recipes,#app,
+body>.hc-module-top,body>.hc-heading,body>.gate{
+  padding-left:var(--hc132-page-pad)!important;
+  padding-right:var(--hc132-page-pad)!important;
+}
+
+/* Één header op alle pagina's */
+.module-topbar,.hc-module-top,.topbar,.fixed-head .top{
+  height:78px!important;
+  min-height:78px!important;
+  margin:0!important;
+  padding:10px 0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.module-brand,.hc-brand,.brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-width:0!important;
+  text-decoration:none!important;
+}
+.module-app-icon,.hc-app-icon,.module-brand>img:first-child,.hc-brand>img:first-child,.brand>img:first-child{
+  width:50px!important;height:50px!important;max-width:50px!important;max-height:50px!important;
+  flex:0 0 50px!important;object-fit:contain!important;border-radius:12px!important;
+}
+.module-wordmark,.hc-wordmark,.module-brand>img:nth-child(2),.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{
+  width:auto!important;height:35px!important;max-height:35px!important;max-width:210px!important;object-fit:contain!important;
+}
+.version,.module-version,.hc-version,.hc-module-top>span:not(.hc-sync){
+  font-size:14px!important;font-weight:650!important;color:#8a858e!important;white-space:nowrap!important;
+}
+.module-sync,.sync-status,.hc-sync{font-size:12px!important;color:var(--hc132-muted)!important}
+
+/* Eén titelblok: eyebrow -> paginatitel -> optionele intro */
+.hc-page-heading,.module-heading,.hc-heading,.day-heading,.title{
+  margin:10px 0 18px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
+  margin:0 0 4px!important;
+  color:var(--hc132-purple-dark)!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+}
+.hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,
+.shopping-module-heading h1{
+  margin:0!important;
+  color:var(--hc132-text)!important;
+  font-size:28px!important;
+  line-height:1.12!important;
+  letter-spacing:-.35px!important;
+  font-weight:800!important;
+}
+.hc-page-heading .intro,.module-heading .intro,.hc-heading .intro,.title .intro{
+  margin:10px 0 0!important;color:var(--hc132-muted)!important;font-size:16px!important;line-height:1.45!important;
+}
+/* Planner subniveau onder de vaste titel */
+.day-heading-row{margin-top:12px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+.planner-view-title{margin:0!important;font-size:20px!important;line-height:1.2!important;font-weight:800!important;color:var(--hc132-text)!important}
+.today-date{font-size:15px!important;color:var(--hc132-muted)!important}
+
+/* Één tabsysteem */
+.tabs,.planner-tabs,.module-tabs,.occasion-tabs,.type-switch{
+  width:100%!important;box-sizing:border-box!important;display:flex!important;gap:4px!important;
+  padding:4px!important;margin:0 0 var(--hc132-gap)!important;
+  background:var(--hc132-lav)!important;border:1px solid #e8e1ee!important;border-radius:16px!important;
+  box-shadow:none!important;overflow-x:auto!important;scrollbar-width:none!important;
+}
+.tabs::-webkit-scrollbar,.planner-tabs::-webkit-scrollbar,.module-tabs::-webkit-scrollbar,.occasion-tabs::-webkit-scrollbar{display:none}
+.tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{
+  min-height:44px!important;height:44px!important;padding:0 15px!important;flex:1 0 auto!important;
+  border:0!important;border-radius:12px!important;background:transparent!important;color:#5b4b6e!important;
+  font-size:15px!important;line-height:1!important;font-weight:750!important;box-shadow:none!important;white-space:nowrap!important;
+}
+.tabs button.active,.planner-tabs button.active,.module-tabs button.active,.occasion-tabs button.active,.type-switch button.active,.tab.active,.module-tab.active{
+  background:var(--hc132-purple)!important;color:white!important;box-shadow:none!important;
+}
+
+/* Exact dezelfde bediening */
+button,.btn,input,select,textarea{font-family:inherit!important}
+.primary,.add-button,.plus,.btn.primary,.tools button.primary,.form>button,.fuel-form-actions>button:first-child,#newNote,#newPurchase{
+  min-height:48px!important;border:0!important;border-radius:var(--hc132-control-radius)!important;
+  background:var(--hc132-purple)!important;color:#fff!important;font-size:16px!important;font-weight:750!important;box-shadow:none!important;
+}
+.secondary,.btn.secondary,.print-btn,.clear,.back,.text-button{
+  min-height:44px!important;border:1px solid var(--hc132-line)!important;border-radius:var(--hc132-control-radius)!important;
+  background:#fff!important;color:var(--hc132-purple-dark)!important;font-size:15px!important;font-weight:700!important;box-shadow:none!important;
+}
+input[type=text],input[type=search],input[type=date],input[type=time],input[type=number],input[type=url],input[type=email],select,textarea,.search{
+  box-sizing:border-box!important;min-height:48px!important;padding:11px 14px!important;
+  border:1px solid var(--hc132-line)!important;border-radius:var(--hc132-control-radius)!important;
+  background:#fff!important;color:var(--hc132-text)!important;font-size:16px!important;box-shadow:none!important;
+}
+input:focus,select:focus,textarea:focus{outline:3px solid rgba(143,115,191,.15)!important;border-color:var(--hc132-purple)!important}
+
+/* Eén kaarten- en lijstenstijl */
+.panel,.card,.purchase-card,.note-card,.occasion-card,.accordion,.event,.wishlist-intro,.central-wish-person,.central-wish-add,
+.week-menu-head,.week-menu-context,.week-menu-list,.recipe-card,.gate,.summary{
+  border:1px solid var(--hc132-line)!important;border-radius:var(--hc132-radius)!important;
+  background:var(--hc132-card)!important;box-shadow:var(--hc132-shadow)!important;
+}
+.panel,.card,.purchase-card,.note-card,.occasion-card{padding:16px!important}
+.panel h2,.card h2,.purchase-card h2,.note-card h2,.page>h2{
+  margin:0 0 12px!important;font-size:20px!important;line-height:1.2!important;font-weight:800!important;color:var(--hc132-text)!important;
+}
+.item,.planner-item,.shopping-item,.manage-row,.early-buy-row,.checklist-library-item{
+  min-height:58px!important;border-color:#eee9f1!important;font-size:16px!important;
+}
+
+/* Gelijke zoek/actiebalken */
+.toolbar,.tools,.filter-row,.recipe-library-actions,.occasion-main-actions{gap:10px!important}
+.tools{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;margin:0 0 18px!important}
+.tools input{width:100%!important}
+
+/* Boodschappen: header/titel/tabs horen bij hetzelfde ritme */
+.fixed-head{position:static!important;background:transparent!important;box-shadow:none!important}
+.shopping-module-heading{margin-top:10px!important}
+.fixed-head .tabs{margin-top:0!important}
+.toolbar{margin-top:0!important}
+.shopping-title-row{margin:20px 0 10px!important}
+.shopping-title-row h1{font-size:22px!important;line-height:1.2!important;font-weight:800!important}
+
+/* Gelegenheden: tabs niet in het titelblok laten zweven */
+.module-heading .occasion-main-actions{margin-top:18px!important}
+.occasion-main-actions{align-items:center!important}
+.occasion-tabs{flex:1 1 auto!important;margin:0!important}
+
+/* Notities: oude eerste-letter-hack definitief uitschakelen */
+main.app>h1::first-letter{font-size:inherit!important}
+
+/* Versie-overrides van oude modules neutraliseren */
+.title{display:block!important}
+.title .title-icon{display:none!important}
+.intro{color:var(--hc132-muted)!important}
+
+@media(max-width:430px){
+  :root{--hc132-page-pad:14px}
+  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:74px!important;min-height:74px!important}
+  .module-app-icon,.hc-app-icon,.module-brand>img:first-child,.hc-brand>img:first-child,.brand>img:first-child{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;flex-basis:48px!important}
+  .module-wordmark,.hc-wordmark,.module-brand>img:nth-child(2),.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{height:33px!important;max-height:33px!important;max-width:190px!important}
+  .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.shopping-module-heading h1{font-size:27px!important}
+  .tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{font-size:14px!important;padding:0 12px!important}
+  .panel,.card,.purchase-card,.note-card,.occasion-card{padding:14px!important}
+  .tools{grid-template-columns:1fr!important}
+  .tools button{width:100%!important}
 }
