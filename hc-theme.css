@@ -1,4 +1,4 @@
-/* Huize Chaos gedeelde huisstijl - V1.4.132
+/* Huize Chaos gedeelde huisstijl - V1.4.133
    Alleen visuele gelijkstelling; geen navigatie of functionaliteit aangepast. */
 :root{
   --hc-purple:#957AC1;
@@ -139,7 +139,7 @@ dialog{border:0;border-radius:20px;box-shadow:0 18px 60px rgba(36,29,42,.24)}
 }
 
 /* ============================================================
-   Huize Chaos vaste huisstijl - V1.4.132
+   Huize Chaos vaste huisstijl - V1.4.133
    Eén visuele lijn voor alle modules. Functionaliteit blijft gelijk.
    ============================================================ */
 :root{
@@ -423,7 +423,7 @@ main.app>h1::first-letter{font-size:0!important}
 }
 
 /* ============================================================
-   V1.4.132 — vaste Huize Chaos paginalijn
+   V1.4.133 — vaste Huize Chaos paginalijn
    Deze laag is bewust leidend: iedere vervolgpagina gebruikt
    dezelfde header, titelhiërarchie, tabs, knoppen en kaartstijl.
    ============================================================ */
@@ -615,4 +615,38 @@ main.app>h1::first-letter{font-size:inherit!important}
   .panel,.card,.purchase-card,.note-card,.occasion-card{padding:14px!important}
   .tools{grid-template-columns:1fr!important}
   .tools button{width:100%!important}
+}
+
+
+/* V1.4.133 - compactere modulekoppen en minder loze verticale ruimte */
+.hc-page-heading,.module-heading,.hc-heading,.day-heading,.title{
+  margin:6px 0 10px!important;
+}
+.hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
+  margin:0 0 3px!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:750!important;
+}
+.hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1{
+  font-size:22px!important;
+  line-height:1.15!important;
+  letter-spacing:-.15px!important;
+  font-weight:750!important;
+}
+.hc-page-heading .intro,.module-heading .intro,.hc-heading .intro,.title .intro{
+  margin:6px 0 0!important;
+  font-size:15px!important;
+  line-height:1.4!important;
+}
+.day-heading-row{margin-top:8px!important}
+.planner-view-title{font-size:19px!important}
+.shopping-module-heading{margin-top:6px!important}
+.fixed-head .tabs{margin-top:0!important;margin-bottom:10px!important}
+.toolbar{margin-top:0!important}
+.shopping-title-row{margin:14px 0 8px!important}
+.shopping-title-row h1{font-size:20px!important;font-weight:750!important}
+.module-heading .occasion-main-actions{margin-top:10px!important}
+@media(max-width:430px){
+  .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.shopping-module-heading h1{font-size:22px!important}
 }
