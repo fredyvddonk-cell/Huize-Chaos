@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.122">
+  <link rel="stylesheet" href="style.css?v=1.4.123">
 </head>
 <body>
   <main class="home">
@@ -29,7 +29,7 @@
     <section class="home-dashboard" aria-label="Dagoverzicht">
       <section class="home-panel today-panel">
         <div class="home-panel-head">
-          <div><span class="home-eyebrow" id="homeTodayDate"></span><h2>Vandaag</h2></div>
+          <div><h2>Vandaag <span class="home-heading-detail">• <span id="homeTodayDate"></span></span></h2></div>
           <a href="gezinsplanner/?hcnav=home" class="home-panel-link">Planner ›</a>
         </div>
         <div id="homeTodayList" class="home-list"><div class="home-empty">Vandaag laden…</div></div>
@@ -37,7 +37,7 @@
 
       <section class="home-panel week-panel">
         <div class="home-panel-head">
-          <div><span class="home-eyebrow" id="homeWeekLabel"></span><h2>Deze week</h2></div>
+          <div><h2>Deze week <span class="home-heading-detail">• <span id="homeWeekLabel"></span></span></h2></div>
         </div>
         <div id="homeWeekMenu" class="home-menu-list"><div class="home-empty">Weekmenu laden…</div></div>
         <div class="home-quick-actions">
@@ -48,7 +48,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.122</footer>
+    <footer>Huize Chaos · V1.4.123</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -74,7 +74,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.122"></script>
+<script src="recepten/recipes-data.js?v=1.4.123"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -82,7 +82,7 @@
   const localDateKey=(date=new Date())=>{const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`};
   const today=localDateKey();
   const todayDate=document.getElementById('homeTodayDate');
-  if(todayDate)todayDate.textContent=new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeric',month:'long'}).format(new Date()).replace(/^./,c=>c.toUpperCase());
+  if(todayDate)todayDate.textContent=new Intl.DateTimeFormat('nl-NL',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 
   function periodKey(repeat,date=new Date()){
     if(repeat==='biweekly'){const week=periodKey('weekly',date);const number=Number(week.slice(-2));return `${week.slice(0,4)}-B${Math.ceil(number/2)}`}
@@ -110,10 +110,20 @@
   function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
   function renderWeekMenu(){
     const key=isoWeekKey(new Date()),label=document.getElementById('homeWeekLabel'),box=document.getElementById('homeWeekMenu');if(!box)return;
-    const match=key.match(/W(\d{2})$/);if(label)label.textContent=match?`Week ${Number(match[1])}`:'Huidige week';
-    let plans=readJson('huize-chaos-recipe-weeks-v1',[]);if(Array.isArray(plans))plans=plans.filter(p=>p.week===key);else plans=[];
+    const match=key.match(/W(\d{2})$/);if(label)label.textContent=match?`week ${Number(match[1])}`:'huidige week';
+    let allPlans=readJson('huize-chaos-recipe-weeks-v1',[]);const plans=Array.isArray(allPlans)?allPlans.filter(p=>p.week===key):[];
     if(!plans.length){box.innerHTML='<div class="home-empty">Nog geen gerechten gepland voor deze week.</div>';return}
-    box.innerHTML=plans.map(plan=>`<a class="home-menu-row" href="recepten/?hcnav=home&recipe=${encodeURIComponent(String(plan.recipeId||''))}"><strong>${esc(plan.title||'Recept')}</strong><span>›</span></a>`).join('');
+    box.innerHTML=plans.map(plan=>`<div class="home-menu-row"><label class="home-menu-check" title="${plan.cooked?'Gekookt':'Nog niet gekookt'}"><input type="checkbox" data-week-cooked="${esc(plan.id)}" ${plan.cooked?'checked':''} aria-label="${plan.cooked?'Gekookt':'Markeer als gekookt'}: ${esc(plan.title||'Recept')}"><span aria-hidden="true"></span></label><a class="home-menu-link" href="recepten/?hcnav=home&recipe=${encodeURIComponent(String(plan.recipeId||''))}"><strong>${esc(plan.title||'Recept')}</strong><span>›</span></a></div>`).join('');
+    box.querySelectorAll('[data-week-cooked]').forEach(input=>input.addEventListener('change',()=>{
+      const id=String(input.dataset.weekCooked||'');
+      const current=readJson('huize-chaos-recipe-weeks-v1',[]);
+      if(!Array.isArray(current))return;
+      const plan=current.find(p=>String(p.id)===id);if(!plan)return;
+      plan.cooked=Boolean(input.checked);plan.changedAt=Date.now();
+      localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(current));
+      window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
+      input.closest('.home-menu-check')?.setAttribute('title',input.checked?'Gekookt':'Nog niet gekookt');
+    }));
   }
 
   const moduleMenu=document.getElementById('moduleMenu'),moduleBackdrop=document.getElementById('moduleMenuBackdrop');
@@ -141,7 +151,7 @@
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.122'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.123'))}
 </script>
 </body>
 </html>

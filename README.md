@@ -1,59 +1,14 @@
-# Huize Chaos V1.4.122
+# Huize Chaos V1.4.123
 
-## V1.4.122
-- Startscherm compacter en rustiger gemaakt in de Huize Chaos-stijl.
-- Vandaag en Deze week blijven direct zichtbaar bij het openen.
-- Weekmenu toont compacte, aanklikbare gerechtregels; lange namen blijven maximaal twee regels hoog.
-- Menu en Tankbeurt staan als compacte snelknoppen naast elkaar.
-- De losse moduletegels zijn van het startscherm gehaald.
-- Nieuw modulemenu via de drie streepjes rechtsboven.
-- Nieuw centraal zoeken via het zoekicoon: zoekt in modules, voorraad, planner, recepten, ritten en tankbeurten.
-- Product verwijderen gebruikt het Huize Chaos-bevestigingsvenster en geeft na verwijderen een Huize Chaos-melding in plaats van losse browserinformatie.
-- Verbeterde verwijderlogica uit V1.4.120 blijft behouden.
-- Cacheversie bijgewerkt naar V1.4.122.
+## V1.4.123
 
-## V1.4.119
-- Per vaste plek toont nu alle artikelen waaraan een vaste plek is gekoppeld, ook als ze onder Niet in voorraad vallen.
-- Artikelen zonder vaste plek worden niet meer in deze weergave getoond.
-- De uitleg bij Per vaste plek is aangepast aan deze werking.
-
-
-## V1.4.117
-- Variatie in het weekmenu toont pasta, rijst, noedels en andere maaltijdsoorten voortaan apart.
-- Hoofdingrediënten worden apart meegeteld, zoals kip, rund, vis en vegetarisch.
-- De algemene categorie Overig verdwijnt uit het variatieoverzicht.
-- Woensdag friet met snacks en zaterdag soep met broodjes tellen mee als vaste maaltijdsoorten.
-- Bij 3 of meer gelijke maaltijdsoorten of hoofdingrediënten verschijnt een korte waarschuwing.
-
-## V1.4.117
-- Productverwijdering is nu synchronisatiebestendig: verwijderde voorraadproducten krijgen een tombstone en kunnen niet door een oudere laptop/telefoonkopie teruggezet worden.
-- Verwijderingen worden via Firebase tussen apparaten gedeeld.
-
-## V1.4.117
-- Maaltijdvoorraad blijft zichtbaar wanneer een product op Niet in huis wordt gezet.
-- In huis/Niet in huis verandert alleen de voorraadstatus, niet de indeling Maaltijdvoorraad.
-- Producten op Niet in huis kunnen vanuit Maaltijdvoorraad eenvoudig weer op In huis worden gezet.
-
-
-## V1.4.117
-- Bij een geopend recept staat nu per ingrediënt direct ✓ In huis, ✕ Niet in huis of ≈ Alternatief mogelijk.
-- De status gebruikt dezelfde voorraadkoppeling en matching als de bestaande recept-voorraadcontrole.
-- Op mobiel blijft de status compact: het symbool blijft zichtbaar zonder onnodig brede regels.
-- De knop Toevoegen aan weekmenu blijft direct bij het geopende recept beschikbaar.
-- Alle wijzigingen uit V1.4.111 blijven behouden.
-
-## V1.4.117
-- Laptopfilters bij Recept kiezen lopen nu automatisch door op meerdere regels; keuzes worden niet meer rechts afgesneden.
-- Past bij voorraad gebruikt geen harde 45%-grens meer: recepten met minimaal één passend voorraadingrediënt worden getoond en op beste match gesorteerd.
-- Voorraadmatch wordt bij openen opnieuw berekend, zodat een oude cache na synchronisatie geen lege lijst veroorzaakt.
-
-
-## V1.4.117
-
-- In huis / Niet in huis weer direct wijzigbaar in Voorraad.
-- Voorraadstatus ook toegevoegd aan Product wijzigen.
-- Voorraadstatus blijft los van Kopen.
-- Koppeling Voorraad → Lijst bij Kopen hersteld door de boodschappenmodule weer de actuele JavaScript-bestanden te laten laden.
-- Verouderde V1.4.94 cache-verwijzingen in Voorraad & Boodschappen vervangen door V1.4.117.
-- Service-worker cache vernieuwd zodat telefoon en laptop de nieuwe modulebestanden ophalen.
-- Bestaande voorraad-, synchronisatie-, recept- en PDF-functies behouden.
+- Startscherm compacter en lichter gemaakt in de Huize Chaos paars/lavendelstijl.
+- Vandaag staat nu op één regel als: Vandaag • datum.
+- Deze week staat nu op één regel als: Deze week • weeknummer.
+- Het volledige weekmenu van de huidige week blijft zichtbaar op het startscherm.
+- Elk gerecht heeft een afvinkvakje om aan te geven of het al gekookt is.
+- Afgevinkte gerechten blijven normaal leesbaar en worden niet doorgestreept.
+- Gerechtnaam blijft aanklikbaar om het recept te openen.
+- Menu en Tankbeurt zijn compacter gemaakt.
+- Zoeken en het modulemenu via de drie streepjes blijven beschikbaar.
+- Cacheversie bijgewerkt naar V1.4.123.
