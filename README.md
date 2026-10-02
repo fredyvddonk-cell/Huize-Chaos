@@ -1,4 +1,13 @@
-# Huize Chaos V1.4.119
+# Huize Chaos V1.4.121
+
+## V1.4.121
+- Startscherm toont nu de belangrijke afspraken en open taken van vandaag.
+- Startscherm toont het weekmenu van de huidige week met alleen de aanklikbare gerechtnaam.
+- Eén duidelijke knop Menu opent het volledige weekmenu.
+- Snelle knop Tankbeurt opent direct het tankbeurtenformulier.
+- Bestaande modules blijven onder het dagoverzicht beschikbaar.
+- De verbeterde productverwijdering uit V1.4.120 blijft behouden.
+- Cacheversie bijgewerkt naar V1.4.121.
 
 ## V1.4.119
 - Per vaste plek toont nu alle artikelen waaraan een vaste plek is gekoppeld, ook als ze onder Niet in voorraad vallen.
