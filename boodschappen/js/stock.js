@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateStockViewControls();
 
-  // V1.4.128: een product uit Zoeken opent precies dat product.
+  // V1.4.129: een product uit Zoeken opent precies dat product.
   const requestedProductId = new URLSearchParams(location.search).get('product');
   if (requestedProductId) {
     const product = products.find(item => String(item.id) === String(requestedProductId));

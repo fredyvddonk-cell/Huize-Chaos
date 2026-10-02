@@ -14,7 +14,7 @@
     .hc-global-nav-head strong{font-size:20px;color:#7353a5}.hc-global-nav-head button{border:0;background:#e9ddf3;color:#7353a5;width:38px;height:38px;border-radius:11px;font-size:24px}
     .hc-global-nav-list{display:grid;gap:6px}.hc-global-nav-list a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:12px;background:#fff;border:1px solid #e4d9ec;color:#2d2d37;text-decoration:none;font-weight:700}.hc-global-nav-list a.active{background:#eadff4;color:#654099;border-color:#cdb8df}.hc-global-nav-list a span:last-child{color:#957ac1;font-size:20px}
     @media(max-width:430px){.hc-global-nav-btn{width:39px;height:39px;right:10px;top:calc(env(safe-area-inset-top) + 8px)}}
-    /* V1.4.128: één vaste Huize Chaos-lijn op alle modules */
+    /* V1.4.129: één vaste Huize Chaos-lijn op alle modules */
     body{background:#f5f0f9!important}
     .hc-module-top,.module-topbar,.topbar{background:transparent!important;border-bottom:1px solid #ded3e8!important;box-shadow:none!important}
     .hc-module-top,.module-topbar,.topbar{min-height:62px!important;padding-right:64px!important}
@@ -24,6 +24,13 @@
     .title-icon{display:none!important}
     button,.button{font-family:inherit}
     .hc-global-nav-list a{min-height:47px}
+    /* Eén navigatielaag: lokale hamburgermenu's verbergen, globale HC-menu gebruiken */
+    #openHouseholdMenu,.hc-household-menu-button,#householdMenu,#householdMenuBackdrop{display:none!important}
+    /* Eén herkenbare HC-kop op alle modules */
+    .hc-module-top,.module-topbar,.topbar{background:#f5f0f9!important;border-bottom:1px solid #e5daec!important;box-shadow:none!important;min-height:60px!important;margin-bottom:12px!important;padding-top:8px!important;padding-bottom:8px!important}
+    .hc-module-top,.module-topbar,.topbar{padding-right:62px!important}
+    .hc-module-top .hc-version,.module-topbar .module-version,.topbar .version{opacity:.72}
+    .hc-global-nav-btn{background:#f8f4fb;border-color:#d8cbe5;box-shadow:none}
 
   `;
   document.head.appendChild(style);

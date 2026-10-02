@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.128
+# Huize Chaos V1.4.129
 
 - Zoektoetsenbord sluit direct bij tikken op het vergrootglas (ook op Android).
 - Enter/zoeken op het toetsenbord voert dezelfde zoekactie uit en sluit het toetsenbord.
@@ -7,7 +7,7 @@
 - Startscherm gebruikt de volledige schermhoogte; HC-achtergrond en versievoet lopen door tot onderaan.
 - Bestaande functies en navigatie uit V1.4.127 behouden.
 
-## V1.4.128
+## V1.4.129
 - Startscherm verder verfijnd in de Huize Chaos paars/lavendelstijl.
 - Vandaag toont taken zonder het woord Taak; taken krijgen een paars vinkje.
 - Afspraken tonen eerst de afspraak en daarna de tijd.
@@ -15,9 +15,9 @@
 - Zoeken: het toetsenbord sluit bij het kiezen van een resultaat.
 - Een voorraadproduct uit Zoeken opent nu precies dat product in Voorraad.
 - Menu, Tankbeurt, zoeken en het modulemenu blijven behouden.
-- Cacheversie bijgewerkt naar V1.4.128.
+- Cacheversie bijgewerkt naar V1.4.129.
 
-## V1.4.128
+## V1.4.129
 - Startscherm: taken hebben alleen een paars vinkje; afspraken hebben geen icoon en tonen de tijd direct achter de afspraak.
 - Tikken op een taak of afspraak op Home opent het betreffende planneritem.
 - Startscherm vult de volledige schermhoogte in de Huize Chaos-achtergrond.
