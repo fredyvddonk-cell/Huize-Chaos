@@ -650,3 +650,94 @@ main.app>h1::first-letter{font-size:inherit!important}
 @media(max-width:430px){
   .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.shopping-module-heading h1{font-size:22px!important}
 }
+
+/* ============================================================
+   V1.4.136 — rustigere, compactere bovenkant op alle modules
+   De inhoud komt eerder in beeld; dubbele schermtitels verdwijnen.
+   ============================================================ */
+.module-topbar,.hc-module-top,.topbar,.fixed-head .top{
+  height:66px!important;
+  min-height:66px!important;
+  padding:6px 0!important;
+}
+.module-app-icon,.hc-app-icon,.module-brand>img:first-child,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{
+  width:42px!important;
+  height:42px!important;
+  max-width:42px!important;
+  max-height:42px!important;
+  flex-basis:42px!important;
+  border-radius:10px!important;
+}
+.module-wordmark,.hc-wordmark,.module-brand>img:nth-child(2),.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{
+  height:30px!important;
+  max-height:30px!important;
+  max-width:176px!important;
+}
+.version,.module-version,.hc-version,.topbar-meta .version,.hc-module-top>span:not(.hc-sync){
+  font-size:12px!important;
+  font-weight:600!important;
+}
+
+.hc-page-heading,.module-heading,.hc-heading,.day-heading,.title,.shopping-module-heading{
+  margin:4px 0 8px!important;
+}
+.hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
+  margin:0 0 2px!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+.hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1,main.app>h1{
+  font-size:19px!important;
+  line-height:1.15!important;
+  font-weight:720!important;
+  letter-spacing:0!important;
+}
+.hc-page-heading .intro,.module-heading .intro,.hc-heading .intro,.title .intro{
+  margin:4px 0 0!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+}
+
+.tabs,.planner-tabs,.module-tabs,.occasion-tabs,.type-switch{
+  min-height:0!important;
+  padding:3px!important;
+  margin-bottom:10px!important;
+  border-radius:14px!important;
+}
+.tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 12px!important;
+  border-radius:11px!important;
+  font-size:14px!important;
+  font-weight:700!important;
+}
+
+/* De actieve planner-tab zegt al Vandaag; alleen datum blijft als context zichtbaar. */
+.planner-view-title{display:none!important}
+.day-heading-row{margin-top:4px!important}
+.today-date{font-size:14px!important}
+
+/* Geen extra verticale titelruimte boven de Auto-formulieren. */
+#app .page{padding-top:0!important}
+#app .page>.card:first-child{margin-top:0!important}
+
+/* Zoek-/actiebalk direct onder het submenu. */
+.toolbar,.tools,.filter-row,.recipe-library-actions,.occasion-main-actions{
+  margin-top:0!important;
+}
+.fixed-head .tabs{margin-bottom:8px!important}
+.shopping-title-row{margin:10px 0 6px!important}
+
+@media(max-width:430px){
+  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:62px!important;min-height:62px!important}
+  .module-app-icon,.hc-app-icon,.module-brand>img:first-child,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{
+    width:40px!important;height:40px!important;max-width:40px!important;max-height:40px!important;flex-basis:40px!important;
+  }
+  .module-wordmark,.hc-wordmark,.module-brand>img:nth-child(2),.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{
+    height:28px!important;max-height:28px!important;max-width:166px!important;
+  }
+  .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1,main.app>h1{
+    font-size:19px!important;
+  }
+}
