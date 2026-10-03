@@ -77,3 +77,6 @@
 .study-period-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .study-period-actions small{width:100%;color:var(--muted)}
 .text-button{border:0;background:transparent;padding:3px 0;margin-right:12px;color:var(--purple-dark);font-weight:750;text-decoration:underline;cursor:pointer}
+
+/* Auth gate must stay hidden until Firebase confirms signed-out state. */
+.auth-gate[hidden]{display:none!important}

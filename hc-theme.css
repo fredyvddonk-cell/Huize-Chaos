@@ -911,7 +911,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 .hc-module-top,.module-topbar,.topbar,.fixed-head .top{display:flex;align-items:center}
 .hc-module-top .hc-global-module-menu,.module-topbar .hc-global-module-menu,.topbar .hc-global-module-menu,.fixed-head .top .hc-global-module-menu{order:99}
 
-/* V1.4.155 — modulemenu altijd boven alle pagina-inhoud */
+/* V1.4.156 — modulemenu altijd boven alle pagina-inhoud */
 .hc-global-module-menu{z-index:10020!important}
 .hc-global-module-menu-panel{
   position:fixed!important;
@@ -936,7 +936,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 body.hc-module-menu-open{overflow:hidden!important}
 
 
-/* V1.4.155 — stabiele, scherpe module-overlay zonder blur of stacking-conflicten */
+/* V1.4.156 — stabiele, scherpe module-overlay zonder blur of stacking-conflicten */
 .hc-global-module-menu{position:relative!important;margin-left:8px!important;flex:0 0 auto!important;z-index:1!important}
 .hc-global-module-menu-trigger{
   width:36px!important;height:36px!important;min-width:36px!important;padding:0!important;

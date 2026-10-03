@@ -1,12 +1,12 @@
-# Huize Chaos V1.4.155
+# Huize Chaos V1.4.156
 
 - Alleen de twee menu-positioneringen aangepast.
 - ▼ bij Boodschappen/Voorraad opent als los dropdownpaneel boven de pagina en wordt niet meer afgeknipt.
 - ☰ modulemenu opent als vaste overlay boven zoekvelden, tabs en lijsten; onderliggende pagina is tijdens openen niet aanklikbaar.
 
-# Huize Chaos V1.4.155
+# Huize Chaos V1.4.156
 
-## V1.4.155
+## V1.4.156
 - Voorraad & Boodschappen opent zonder expliciete deeplink altijd op Boodschappen.
 - Elke hoofdmodule heeft rechtsboven hetzelfde hamburgermenu om direct naar Home of een andere module te gaan.
 - De wijziging in Voorraad & Boodschappen is in de modulecode zelf verwerkt; niet alleen het versienummer is aangepast.
