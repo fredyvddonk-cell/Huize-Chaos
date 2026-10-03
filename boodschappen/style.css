@@ -1286,14 +1286,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .product-search-suggestion{touch-action:manipulation}
 
 
-/* V1.4.154 - native ▼-menu en directe zoekselectie */
+/* V1.4.155 - native ▼-menu en directe zoekselectie */
 .shopping-section-menu>summary{list-style:none;cursor:pointer;user-select:none;width:100%;height:36px;min-height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#694d88;font-size:17px;font-weight:800}
 .shopping-section-menu>summary::-webkit-details-marker{display:none}
 .shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
 .shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
 .shopping-section-menu[open] .shopping-section-popover{display:grid!important}
 
-/* V1.4.154 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
+/* V1.4.155 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
 .shopping-section-menu{z-index:5200!important}
 .shopping-section-popover{
   position:fixed!important;
@@ -1307,7 +1307,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 
 
-/* V1.4.154 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
+/* V1.4.155 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
 .shopping-section-menu{position:relative!important;z-index:auto!important}
 .shopping-section-menu>summary{cursor:pointer!important}
 .shopping-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}

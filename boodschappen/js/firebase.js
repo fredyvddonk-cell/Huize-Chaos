@@ -76,6 +76,7 @@ function setSyncStatus(text, state = '') {
 
 function showSignedOut() {
   window.huizeChaosAuthState = 'signed-out';
+  gate.hidden = false;
   gate.classList.remove('ready');
   message.textContent = 'Meld je aan met Google om de gezamenlijke lijst te openen.';
   signInButton.hidden = false;
@@ -86,6 +87,7 @@ function showSignedOut() {
 
 function showWaiting(currentUser) {
   window.huizeChaosAuthState = 'waiting-access';
+  gate.hidden = false;
   gate.classList.remove('ready');
   message.textContent = `Je bent aangemeld als ${currentUser.displayName || currentUser.email || 'Google-gebruiker'}, maar hebt nog geen toegang.`;
   signInButton.hidden = true;
@@ -594,6 +596,7 @@ async function openFor(currentUser) {
   role = member.data().role === 'owner' ? 'owner' : 'member';
   window.huizeChaosAuthState = 'signed-in';
   gate.classList.add('ready');
+  gate.hidden = true;
   signOutButton.hidden = false;
   window.applyHuizeChaosRole(role);
   setSyncStatus('Verbinden…');
