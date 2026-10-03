@@ -722,6 +722,8 @@ function render() {
   document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
   document.body.classList.toggle('insight-page', page === 'insight');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
+  const moreListActions = document.getElementById('shoppingMoreListActions');
+  if (moreListActions) moreListActions.hidden = page !== 'list';
   const addBtn = $('#add');
   addBtn.textContent = '+';
   const addLabel = page === 'insight' ? 'Bon toevoegen' : page === 'hutsel' ? 'Restje toevoegen' : 'Product toevoegen';
@@ -976,6 +978,7 @@ function initApp() {
         search.value = '';
         updateSearchClear();
       }
+      const moreMenu=document.getElementById('shoppingMoreMenu'); if(moreMenu) moreMenu.open=false;
       setPage(nextPage);
     };
   });

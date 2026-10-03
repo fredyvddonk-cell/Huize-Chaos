@@ -652,7 +652,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 /* ============================================================
-   V1.4.140 — rustigere, compactere bovenkant op alle modules
+   V1.4.141 — rustigere, compactere bovenkant op alle modules
    De inhoud komt eerder in beeld; dubbele schermtitels verdwijnen.
    ============================================================ */
 .module-topbar,.hc-module-top,.topbar,.fixed-head .top{
@@ -743,7 +743,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 
-/* V1.4.140 - rustige, compacte toevoegknoppen */
+/* V1.4.141 - rustige, compacte toevoegknoppen */
 .hc-icon-add{
   width:46px!important;
   min-width:46px!important;
@@ -768,4 +768,88 @@ main.app>h1::first-letter{font-size:inherit!important}
 @media(max-width:500px){
   .tools{grid-template-columns:minmax(0,1fr) auto!important;}
   .tools .hc-icon-add{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;flex-basis:44px!important;}
+}
+
+
+/* ============================================================
+   V1.4.141 — compacte titelregel op alle vervolgschermen
+   Geen extra 'Huize Chaos'-kicker boven de modulenaam.
+   ============================================================ */
+.hc-page-heading,.module-heading,.hc-heading,.day-heading,.title,.shopping-module-heading{
+  margin:2px 0 7px!important;
+}
+.hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
+  display:none!important;
+}
+.hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1,main.app>h1{
+  font-size:18px!important;
+  line-height:1.18!important;
+  font-weight:700!important;
+  margin:0!important;
+}
+
+/* Voorraad & Boodschappen: minder functies permanent bovenin. */
+.shopping-more-menu{
+  position:relative;
+  margin:0 0 8px auto;
+  width:max-content;
+  max-width:100%;
+}
+.shopping-more-menu>summary{
+  list-style:none;
+  cursor:pointer;
+  user-select:none;
+  min-height:36px;
+  padding:0 12px;
+  border:1px solid rgba(101,71,143,.18);
+  border-radius:11px;
+  background:rgba(255,255,255,.72);
+  color:#67478f;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  font-weight:700;
+}
+.shopping-more-menu>summary::-webkit-details-marker{display:none}
+.shopping-more-popover{
+  position:absolute;
+  z-index:50;
+  right:0;
+  top:calc(100% + 6px);
+  min-width:190px;
+  padding:6px;
+  border:1px solid rgba(101,71,143,.16);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 10px 26px rgba(70,45,100,.14);
+  display:grid;
+  gap:4px;
+}
+.shopping-more-popover button{
+  width:100%;
+  min-height:34px!important;
+  height:auto!important;
+  padding:7px 10px!important;
+  border-radius:9px!important;
+  border:0!important;
+  background:#f4eff9!important;
+  color:#55366f!important;
+  text-align:left!important;
+  font-size:13px!important;
+  font-weight:650!important;
+}
+.shopping-more-popover button.active{background:#8f70bd!important;color:#fff!important}
+.shopping-more-list-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding-top:4px;
+  margin-top:2px;
+  border-top:1px solid rgba(101,71,143,.12);
+}
+.shopping-more-list-actions[hidden]{display:none!important}
+
+@media(max-width:430px){
+  .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1,main.app>h1{font-size:18px!important}
 }

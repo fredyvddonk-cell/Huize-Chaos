@@ -72,7 +72,7 @@ body{min-height:100dvh}
 @media(min-width:721px){.home{min-height:100dvh}}
 
 
-/* V1.4.140 - nieuw startscherm, alleen Home */
+/* V1.4.141 - nieuw startscherm, alleen Home */
 .home{padding:10px 12px max(18px,env(safe-area-inset-bottom));}
 .home-topbar{padding:6px 0!important;min-height:64px!important;height:64px!important;margin:0 0 8px!important;}
 .home-topbar .hc-app-icon{width:46px!important;height:46px!important;max-width:46px!important;max-height:46px!important;flex-basis:46px!important;}

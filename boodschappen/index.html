@@ -8,7 +8,7 @@
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
   <link rel="stylesheet" href="style.css?v=1.4.117">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.140">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.141">
 </head>
 <body>
   <main class="app">
@@ -19,9 +19,9 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.140</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.141</span></div>
     </div>
-    <section class="module-heading hc-page-heading shopping-module-heading"><p>Huize Chaos</p><h1>Voorraad &amp; Boodschappen</h1></section>
+    <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
     <nav class="tabs tabs-primary" aria-label="Boodschappen en voorraad">
       <button class="tab active" data-page="list">Boodschappen</button>
@@ -37,11 +37,18 @@
       <button id="add" class="plus add-labelled hc-icon-add" aria-label="Product toevoegen" title="Product toevoegen">+</button>
     </div>
 
-    <nav class="tabs-secondary" aria-label="Extra onderdelen">
-      <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
-      <button class="tab-secondary" data-page="insight">Inzicht</button>
-      <button class="tab-secondary" data-page="manage">Beheer</button>
-    </nav>
+    <details class="shopping-more-menu" id="shoppingMoreMenu">
+      <summary aria-label="Meer opties">Meer <span aria-hidden="true">▾</span></summary>
+      <div class="shopping-more-popover">
+        <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
+        <button class="tab-secondary" data-page="insight">Inzicht</button>
+        <button class="tab-secondary" data-page="manage">Beheer</button>
+        <div class="shopping-more-list-actions" id="shoppingMoreListActions">
+          <button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button>
+          <button id="printList" class="print-btn" type="button">Printen</button>
+        </div>
+      </div>
+    </details>
 
     <div id="stockControls" class="stock-check-controls" hidden>
       <div class="stock-check-mode" role="group" aria-label="Controlemoment">
@@ -71,7 +78,7 @@
           <button data-group="store" class="active">Winkel</button>
           <button data-group="category">Categorie</button>
         </div>
-        <div class="list-action-buttons"><button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button><button id="printList" class="print-btn" type="button">Printen</button></div>
+
       </div>
     </div>
 
