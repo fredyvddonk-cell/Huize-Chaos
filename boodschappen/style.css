@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.143 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.144 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,
@@ -891,7 +891,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.143 - producten als compacte lijsten, geen losse grote kaarten */
+/* V1.4.144 - producten als compacte lijsten, geen losse grote kaarten */
 .shopping-page .shopping-group-body,
 .stock-category .shopping-group-body{
   background:#fff!important;
@@ -979,7 +979,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-actions-compact .stock-hutsel-link{font-size:10.5px!important}
 }
 
-/* V1.4.143 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
+/* V1.4.144 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
 .tabs-primary{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
@@ -1126,7 +1126,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-category-toggle{font-size:13.5px!important;padding:6px 4px!important}
 }
 
-/* V1.4.143 - compacte hoofdkeuze met ▼ en winkelkeuze als dropdown */
+/* V1.4.144 - compacte hoofdkeuze met ▼ en winkelkeuze als dropdown */
 .tabs-primary{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px!important;
   align-items:stretch!important;
@@ -1183,4 +1183,42 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .shopping-section-menu{min-width:38px}
   .shopping-section-menu>summary{height:36px;min-height:36px}
   .shopping-list-filterbar{margin-top:2px;margin-bottom:4px}
+}
+
+/* V1.4.144 - boodschappen: week + acties compact op één regel */
+.shopping-week-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:6px;
+  align-items:center;
+  margin:3px 0 5px;
+}
+.shopping-week-actions .shopping-weekbar{
+  margin:0!important;
+  justify-content:flex-start;
+  gap:5px;
+  min-width:0;
+}
+.shopping-week-actions .shopping-weekbar button{
+  min-width:30px;
+  min-height:32px;
+  padding:4px 8px;
+  border-radius:9px;
+}
+.shopping-week-actions .shopping-weekbar strong{
+  min-width:68px;
+  font-size:12.5px;
+  white-space:nowrap;
+}
+.shopping-compact-action{
+  min-height:32px!important;
+  padding:5px 8px!important;
+  border-radius:9px!important;
+  font-size:11.5px!important;
+  white-space:nowrap;
+}
+@media(max-width:390px){
+  .shopping-week-actions{gap:4px}
+  .shopping-compact-action{font-size:10.8px!important;padding:5px 6px!important}
+  .shopping-week-actions .shopping-weekbar strong{min-width:62px;font-size:11.8px}
 }

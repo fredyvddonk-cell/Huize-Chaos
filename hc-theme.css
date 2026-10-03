@@ -853,3 +853,60 @@ main.app>h1::first-letter{font-size:inherit!important}
 @media(max-width:430px){
   .hc-page-heading>h1,.module-heading>h1,.hc-heading>h1,.day-heading>h1,.title h1,.shopping-module-heading h1,main.app>h1{font-size:18px!important}
 }
+
+
+/* V1.4.145 — hetzelfde modulemenu op ieder hoofdscherm */
+.hc-global-module-menu{
+  position:relative;
+  margin-left:8px;
+  flex:0 0 auto;
+  z-index:200;
+}
+.hc-global-module-menu>summary{
+  list-style:none;
+  width:36px;
+  height:36px;
+  min-width:36px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  border:1px solid rgba(101,71,143,.18);
+  border-radius:11px;
+  background:rgba(255,255,255,.82);
+  color:#67478f;
+  font-size:20px;
+  line-height:1;
+  user-select:none;
+}
+.hc-global-module-menu>summary::-webkit-details-marker{display:none}
+.hc-global-module-menu[open]>summary{background:#eee7f7}
+.hc-global-module-menu-panel{
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  width:min(285px,calc(100vw - 28px));
+  padding:7px;
+  display:grid;
+  gap:3px;
+  border:1px solid rgba(101,71,143,.16);
+  border-radius:13px;
+  background:#fff;
+  box-shadow:0 12px 32px rgba(70,45,100,.18);
+}
+.hc-global-module-menu-panel a{
+  min-height:38px;
+  padding:8px 11px;
+  display:flex;
+  align-items:center;
+  border-radius:9px;
+  color:#4f3964;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:650;
+}
+.hc-global-module-menu-panel a:hover,
+.hc-global-module-menu-panel a:focus-visible{background:#f4eff9;outline:none}
+.hc-global-module-menu-panel a.active{background:#8f70bd;color:#fff}
+/* Bestaande sync/meta mag ruimte innemen, maar het modulemenu blijft helemaal rechts bereikbaar. */
+.hc-module-top,.module-topbar,.topbar,.fixed-head .top{display:flex;align-items:center}
+.hc-module-top .hc-global-module-menu,.module-topbar .hc-global-module-menu,.topbar .hc-global-module-menu,.fixed-head .top .hc-global-module-menu{order:99}

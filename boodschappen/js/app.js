@@ -155,7 +155,7 @@ window.findExistingHuizeChaosProductByName = name => findExistingProductByName(n
 })();
 const wideDesktop=window.matchMedia('(min-width:851px)').matches;
 const requestedPage = new URLSearchParams(location.search).get('page');
-let page = ['list','stock','hutsel','insight','manage'].includes(requestedPage) ? requestedPage : (wideDesktop ? (sessionStorage.getItem('hc-household-page-session') || 'list') : (localStorage.getItem('household-page') || 'list'));
+let page = ['list','stock','hutsel','insight','manage'].includes(requestedPage) ? requestedPage : 'list';
 let group = localStorage.getItem('household-group') || 'store';
 
 const $ = selector => document.querySelector(selector);
@@ -969,6 +969,19 @@ function initApp() {
     render();
   };
   updateSearchClear();
+
+  const sectionMenu=document.getElementById('shoppingSectionMenu');
+  const sectionSummary=sectionMenu?.querySelector('summary');
+  if(sectionSummary){
+    sectionSummary.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      sectionMenu.open=!sectionMenu.open;
+    });
+    document.addEventListener('click',event=>{
+      if(sectionMenu.open&&!sectionMenu.contains(event.target))sectionMenu.open=false;
+    });
+  }
 
   document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {

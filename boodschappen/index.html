@@ -7,8 +7,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.117">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.143">
+  <link rel="stylesheet" href="style.css?v=1.4.145">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.145">
 </head>
 <body>
   <main class="app">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.143</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.145</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
@@ -52,31 +52,21 @@
         <details class="stock-filter-menu">
           <summary>Filter <span aria-hidden="true">▾</span></summary>
           <div class="stock-filter-popover" role="menu">
+            <button type="button" data-stock-view="all" role="menuitem">Alles binnen deze check</button>
             <button type="button" data-stock-view="standard" role="menuitem">Standaard voorraad</button>
             <button type="button" data-stock-view="meal" role="menuitem">Maaltijdvoorraad</button>
             <button type="button" data-stock-view="hidden" role="menuitem">Niet in voorraad</button>
             <button type="button" data-stock-view="location" role="menuitem">Vaste plek</button>
-            <button type="button" data-stock-view="rare" role="menuitem">Zelden checken</button>
-            <button type="button" data-stock-view="work" role="menuitem">Wat kan ik maken</button>
           </div>
         </details>
       </div>
     </div>
 
     <div id="listControls">
-      <div class="shopping-weekbar"><button id="prevShoppingWeek" type="button">‹</button><strong id="shoppingWeekLabel">Deze week</strong><button id="nextShoppingWeek" type="button">›</button></div>
-      <div class="shopping-list-filterbar">
-        <details class="store-filter-menu" id="storeFilterMenu">
-          <summary>Winkel <span aria-hidden="true">▾</span></summary>
-          <div id="storeChips" class="store-filter-popover" aria-label="Winkels"></div>
-        </details>
-        <details class="shopping-list-options-menu">
-          <summary>Opties <span aria-hidden="true">▾</span></summary>
-          <div class="shopping-list-options-popover">
-            <button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button>
-            <button id="printList" class="print-btn" type="button">Printen</button>
-          </div>
-        </details>
+      <div class="shopping-week-actions">
+        <div class="shopping-weekbar"><button id="prevShoppingWeek" type="button" aria-label="Vorige week">‹</button><strong id="shoppingWeekLabel">Deze week</strong><button id="nextShoppingWeek" type="button" aria-label="Volgende week">›</button></div>
+        <button id="collapseShoppingBtn" class="print-btn shopping-compact-action" type="button">Alles inklappen</button>
+        <button id="printList" class="print-btn shopping-compact-action" type="button">Printen</button>
       </div>
       <div class="summary">
         <span id="count"></span>
@@ -375,12 +365,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.117"></script>
-  <script src="js/shopping.js?v=1.4.117"></script>
-  <script src="js/stock.js?v=1.4.117"></script>
-  <script src="js/hutsel.js?v=1.4.117"></script>
-  <script src="js/insight.js?v=1.4.117"></script>
-  <script type="module" src="js/firebase.js?v=1.4.117"></script>
+  <script src="js/app.js?v=1.4.145"></script>
+  <script src="js/shopping.js?v=1.4.145"></script>
+  <script src="js/stock.js?v=1.4.145"></script>
+  <script src="js/hutsel.js?v=1.4.145"></script>
+  <script src="js/insight.js?v=1.4.145"></script>
+  <script type="module" src="js/firebase.js?v=1.4.145"></script>
 
-</body>
+<script src="../hc-module-nav.js?v=1.4.145"></script></body>
 </html>
