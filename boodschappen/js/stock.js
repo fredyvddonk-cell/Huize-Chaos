@@ -1,12 +1,16 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
 let stockView = localStorage.getItem('household-stock-view') || 'standard';
-if (!['standard','meal','hidden','location'].includes(stockView)) stockView = 'standard';
+if (!['standard','meal','hidden','location','rare','work'].includes(stockView)) stockView = 'standard';
+let stockCheckMode = localStorage.getItem('household-stock-check-mode') || 'week';
+if (!['week','month','filter'].includes(stockCheckMode)) stockCheckMode = 'week';
 
 const STOCK_VIEW_HELP = {
   standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
   meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
   hidden: 'Producten die je niet als gewone voorraad bijhoudt. Ze blijven wel beschikbaar in Beheer en voor recepten.',
-  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.'
+  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.',
+  rare: 'Producten die je maar af en toe hoeft te controleren.',
+  work: 'Producten die alleen relevant zijn bij Wat kan ik maken.'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 
@@ -27,7 +31,7 @@ window.toggleAllStock = () => {
     expandedStockCategories.clear();
   } else {
     const visible = stockProductsForView(products);
-    const groupKey = stockView === 'location' ? 'stockLocation' : 'category';
+    const groupKey = stockCheckMode === 'filter' && stockView === 'location' ? 'stockLocation' : 'category';
     groups(visible, groupKey).forEach(([groupName]) => expandedStockCategories.add(groupName || 'Niet ingesteld'));
   }
   saveStockExpansion();
@@ -35,18 +39,32 @@ window.toggleAllStock = () => {
 };
 
 window.setStockView = next => {
-  if (!['standard','meal','hidden','location'].includes(next)) return;
+  if (!['standard','meal','hidden','location','rare','work'].includes(next)) return;
   stockView = next;
+  stockCheckMode = 'filter';
   localStorage.setItem('household-stock-view', stockView);
+  localStorage.setItem('household-stock-check-mode', stockCheckMode);
+  expandedStockCategories.clear();
+  saveStockExpansion();
+  const menu = document.querySelector('.stock-filter-menu');
+  if (menu) menu.open = false;
+  render();
+};
+
+window.setStockCheckMode = next => {
+  if (!['week','month'].includes(next)) return;
+  stockCheckMode = next;
+  localStorage.setItem('household-stock-check-mode', stockCheckMode);
   expandedStockCategories.clear();
   saveStockExpansion();
   render();
 };
 
 function updateStockViewControls(){
-  document.querySelectorAll('[data-stock-view]').forEach(button => button.classList.toggle('active', button.dataset.stockView === stockView));
-  const help = document.querySelector('#stockViewHelp');
-  if (help) help.textContent = STOCK_VIEW_HELP[stockView] || '';
+  document.querySelectorAll('[data-stock-check]').forEach(button => button.classList.toggle('active', stockCheckMode !== 'filter' && button.dataset.stockCheck === stockCheckMode));
+  document.querySelectorAll('[data-stock-view]').forEach(button => button.classList.toggle('active', stockCheckMode === 'filter' && button.dataset.stockView === stockView));
+  const filter = document.querySelector('.stock-filter-menu');
+  if (filter) filter.classList.toggle('active', stockCheckMode === 'filter');
 }
 
 function stockBadges(product){ return ''; }
@@ -224,9 +242,13 @@ function bindStockSwipeActions(){
 
 function stockProductsForView(arr){
   const all=(arr||[]);
+  if(stockCheckMode==='week') return all.filter(p=>p.stockRole!=='hidden' && p.checkCycle==='week');
+  if(stockCheckMode==='month') return all.filter(p=>p.stockRole!=='hidden' && p.checkCycle==='month');
   if(stockView==='standard') return all.filter(p=>p.stockRole==='standard');
   if(stockView==='meal') return all.filter(p=>p.stockRole==='meal');
   if(stockView==='hidden') return all.filter(p=>p.stockRole==='hidden');
+  if(stockView==='rare') return all.filter(p=>p.stockRole!=='hidden' && p.checkCycle==='rare');
+  if(stockView==='work') return all.filter(p=>p.stockRole!=='hidden' && p.checkCycle==='work');
   return all.filter(p=>p.stockRole!=='hidden');
 }
 
@@ -234,12 +256,14 @@ function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
-    content.innerHTML = `<div class="empty">${stockView==='meal'?'Geen producten in Maaltijdvoorraad.':stockView==='hidden'?'Geen producten bij Niet in voorraad.':'Geen producten gevonden.'}</div>`;
+    const emptyText = stockCheckMode==='week' ? 'Geen producten voor de Weekcheck.' : stockCheckMode==='month' ? 'Geen producten voor de Maandcheck.' : stockView==='meal' ? 'Geen producten in Maaltijdvoorraad.' : stockView==='hidden' ? 'Geen producten bij Niet in voorraad.' : stockView==='rare' ? 'Geen producten bij Zelden checken.' : stockView==='work' ? 'Geen producten voor Wat kan ik maken.' : 'Geen producten gevonden.';
+    content.innerHTML = `<div class="empty">${emptyText}</div>`;
     return;
   }
 
   let rows='';
-  if(stockView==='standard'){
+  const standardGrouping = stockCheckMode !== 'filter' || ['standard','rare','work'].includes(stockView);
+  if(standardGrouping){
     // V1.4.103: de actuele productcategorie is leidend. De oude PTE-indeling
     // bepaalt alleen welke producten standaardvoorraad zijn, niet waar een
     // handmatig verplaatst product wordt weergegeven.
@@ -267,19 +291,19 @@ function renderStock(arr) {
       </section>`;
     }).join('');
   }else{
-    const groupKey=stockView==='location'?'stockLocation':'category';
+    const groupKey=stockCheckMode==='filter' && stockView==='location'?'stockLocation':'category';
     rows=groups(visible,groupKey).map(([rawName,items])=>{
-      const categoryName=rawName||(stockView==='location'?'Locatie nog instellen':'Overig');
+      const categoryName=rawName||((stockCheckMode==='filter' && stockView==='location')?'Locatie nog instellen':'Overig');
       const collapsed=!expandedStockCategories.has(categoryName);
       return `<section class="stock-category ${collapsed?'collapsed':''}">
-        <div class="shopping-group-head stock-category-head ${stockView==='location'?'stock-location-head':''}">
+        <div class="shopping-group-head stock-category-head ${(stockCheckMode==='filter' && stockView==='location')?'stock-location-head':''}">
           <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')"><span>${esc(categoryName)}</span><span>${collapsed?'⌄':'⌃'}</span></button>
         </div>
         <div class="shopping-group-body">${items.sort(sortProducts).map(stockItemHtml).join('')}</div>
       </section>`;
     }).join('');
   }
-  const intro=stockView==='meal'?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Hier blijft je volledige houdbare maaltijdvoorraad zichtbaar. <b>In huis</b> telt mee bij recepten; <b>Niet in huis</b> blijft hier staan zodat je het later eenvoudig weer op In huis kunt zetten.</span></div>`:'';
+  const intro=(stockCheckMode==='filter' && stockView==='meal')?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Hier blijft je volledige houdbare maaltijdvoorraad zichtbaar. <b>In huis</b> telt mee bij recepten; <b>Niet in huis</b> blijft hier staan zodat je het later eenvoudig weer op In huis kunt zetten.</span></div>`:'';
   content.innerHTML = `${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
   bindStockSwipeActions();
 }
@@ -330,6 +354,9 @@ window.toggleStockBuy = (id, checked) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-stock-check]').forEach(button => {
+    button.addEventListener('click', () => setStockCheckMode(button.dataset.stockCheck));
+  });
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
   });

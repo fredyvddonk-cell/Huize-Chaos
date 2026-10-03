@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.138
+# Huize Chaos V1.4.139
 
-## V1.4.138
+## V1.4.139
 - Dubbele kop “Verlanglijstjes” verwijderd; in het tabblad staat nu direct de knop + Wens toevoegen.
 - Auto opent standaard op Tankbeurten.
 - Auto toont bovenaan alleen Tankbeurten en Kilometers.
@@ -60,14 +60,14 @@
 - Modulekoppen kleiner en minder prominent.
 - Verticale ruimte rond paginatitels, tabs en eerste inhoudsblok verkleind.
 
-## V1.4.138
+## V1.4.139
 - Bovenkant van alle modules compacter en rustiger gemaakt.
 - Logo, woordmerk, versie, modulekoppen en submenu's kleiner gemaakt.
 - Minder verticale witruimte vóór de inhoud.
 - Dubbele kop Tankbeurten/Kilometers bij Auto verwijderd.
 - Dubbele kop Vandaag in Gezinsplanner visueel verwijderd; datum blijft zichtbaar.
 
-## V1.4.138
+## V1.4.139
 - Boodschappen en Voorraad tonen producten compacter als echte lijstregels.
 - Minder verticale witruimte per product.
 - Geen losse afgeronde productkaarten binnen een categorie.

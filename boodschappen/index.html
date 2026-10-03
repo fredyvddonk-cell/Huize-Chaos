@@ -8,7 +8,7 @@
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
   <link rel="stylesheet" href="style.css?v=1.4.117">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.138">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.139">
 </head>
 <body>
   <main class="app">
@@ -19,16 +19,13 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.138</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.139</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><p>Huize Chaos</p><h1>Voorraad &amp; Boodschappen</h1></section>
 
-    <nav class="tabs">
-      <button class="tab active" data-page="list">Lijst</button>
+    <nav class="tabs tabs-primary" aria-label="Boodschappen en voorraad">
+      <button class="tab active" data-page="list">Boodschappen</button>
       <button class="tab" data-page="stock">Voorraad</button>
-      <button class="tab" data-page="hutsel">Hutsel Frutsel</button>
-      <button class="tab" data-page="insight">Inzicht</button>
-      <button class="tab" data-page="manage">Beheer</button>
     </nav>
     </header>
 
@@ -40,14 +37,28 @@
       <button id="add" class="plus add-labelled hc-icon-add" aria-label="Product toevoegen" title="Product toevoegen">+</button>
     </div>
 
+    <nav class="tabs-secondary" aria-label="Extra onderdelen">
+      <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
+      <button class="tab-secondary" data-page="insight">Inzicht</button>
+      <button class="tab-secondary" data-page="manage">Beheer</button>
+    </nav>
+
     <div id="stockControls" class="stock-check-controls" hidden>
-      <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
-        <button type="button" data-stock-view="standard" class="active">Standaard voorraad</button>
-        <button type="button" data-stock-view="meal">Maaltijdvoorraad</button>
-        <button type="button" data-stock-view="hidden">Niet in voorraad</button>
-        <button type="button" data-stock-view="location">Per vaste plek</button>
+      <div class="stock-check-mode" role="group" aria-label="Controlemoment">
+        <button type="button" data-stock-check="week" class="active">Weekcheck</button>
+        <button type="button" data-stock-check="month">Maandcheck</button>
+        <details class="stock-filter-menu">
+          <summary>Filter <span aria-hidden="true">▾</span></summary>
+          <div class="stock-filter-popover" role="menu">
+            <button type="button" data-stock-view="standard" role="menuitem">Standaard voorraad</button>
+            <button type="button" data-stock-view="meal" role="menuitem">Maaltijdvoorraad</button>
+            <button type="button" data-stock-view="hidden" role="menuitem">Niet in voorraad</button>
+            <button type="button" data-stock-view="location" role="menuitem">Vaste plek</button>
+            <button type="button" data-stock-view="rare" role="menuitem">Zelden checken</button>
+            <button type="button" data-stock-view="work" role="menuitem">Wat kan ik maken</button>
+          </div>
+        </details>
       </div>
-      <p id="stockViewHelp" class="stock-view-help">Je vaste controlelijst volgens je oude Plan to Eat-indeling.</p>
     </div>
 
     <div id="listControls">

@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.138 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.139 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,
@@ -891,7 +891,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.138 - producten als compacte lijsten, geen losse grote kaarten */
+/* V1.4.139 - producten als compacte lijsten, geen losse grote kaarten */
 .shopping-page .shopping-group-body,
 .stock-category .shopping-group-body{
   background:#fff!important;
@@ -977,4 +977,151 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-actions-compact .stock-status-toggle,
   .stock-actions-compact .stock-buy-red,
   .stock-actions-compact .stock-hutsel-link{font-size:10.5px!important}
+}
+
+/* V1.4.139 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
+.tabs-primary{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:0!important;
+  margin:2px 0 8px!important;
+  padding:3px!important;
+  border:1px solid #e5ddea!important;
+  border-radius:14px!important;
+  background:#f1eaf8!important;
+  overflow:hidden!important;
+}
+.tabs-primary .tab{
+  min-width:0!important;
+  min-height:38px!important;
+  padding:7px 10px!important;
+  border-radius:11px!important;
+  font-size:14px!important;
+}
+.tabs-secondary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin:0 0 8px;
+}
+.tab-secondary{
+  min-height:34px;
+  border:1px solid #e3d9ee;
+  border-radius:11px;
+  background:#f7f3fa;
+  color:#654b7f;
+  font:inherit;
+  font-size:12.5px;
+  line-height:1.1;
+  font-weight:700;
+  padding:6px 8px;
+}
+.tab-secondary.active{
+  background:#957ac1;
+  color:#fff;
+  border-color:#957ac1;
+}
+.toolbar{
+  margin:6px 0 7px!important;
+  gap:7px!important;
+  padding:5px!important;
+}
+.toolbar .search-wrap{min-height:44px!important}
+.toolbar .search{min-height:44px!important;padding:9px 12px!important;font-size:15px!important}
+.toolbar .plus{width:44px!important;height:44px!important;min-width:44px!important;border-radius:12px!important;font-size:25px!important}
+
+.stock-check-controls{margin:0 0 7px!important}
+.stock-check-mode{
+  display:grid!important;
+  grid-template-columns:1fr 1fr auto!important;
+  gap:6px!important;
+  overflow:visible!important;
+  padding:0!important;
+}
+.stock-check-mode>button,
+.stock-filter-menu>summary{
+  min-height:36px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid #dfd4eb!important;
+  border-radius:11px!important;
+  background:#f3edf8!important;
+  color:#604977!important;
+  padding:7px 10px!important;
+  font:inherit!important;
+  font-size:12.5px!important;
+  line-height:1!important;
+  font-weight:750!important;
+  white-space:nowrap!important;
+  cursor:pointer;
+  list-style:none;
+}
+.stock-check-mode>button.active,
+.stock-filter-menu.active>summary{
+  background:#957ac1!important;
+  color:#fff!important;
+  border-color:#957ac1!important;
+}
+.stock-filter-menu{position:relative;min-width:94px}
+.stock-filter-menu>summary::-webkit-details-marker{display:none}
+.stock-filter-popover{
+  position:absolute;
+  z-index:40;
+  right:0;
+  top:calc(100% + 5px);
+  width:min(250px,78vw);
+  padding:6px;
+  border:1px solid #dfd4eb;
+  border-radius:13px;
+  background:#fff;
+  box-shadow:0 10px 28px rgba(75,53,99,.16);
+}
+.stock-filter-popover button{
+  width:100%;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:#42384d;
+  text-align:left;
+  padding:9px 10px;
+  font:inherit;
+  font-size:13px;
+}
+.stock-filter-popover button+button{margin-top:2px}
+.stock-filter-popover button.active{background:#efe7f7;color:#684b88;font-weight:750}
+.stock-view-help{display:none!important}
+
+/* categorieën echt als lijstkoppen: lager en dichter op elkaar */
+.stock-category{margin:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.stock-category+.stock-category{margin-top:1px!important}
+.stock-category-head,
+.shopping-group-head.stock-category-head{
+  min-height:42px!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:0!important;
+  border:0!important;
+  border-bottom:1px solid #e8e1ec!important;
+  background:transparent!important;
+}
+.stock-category-toggle{
+  min-height:42px!important;
+  padding:7px 5px!important;
+  border-radius:0!important;
+  font-size:14px!important;
+  line-height:1.1!important;
+}
+.stock-category .shopping-group-body{border-radius:0!important}
+.stock-tools{margin:3px 0 5px!important}
+.stock-tools .clear{min-height:34px!important;padding:6px 10px!important;font-size:12.5px!important}
+
+@media(max-width:430px){
+  .shopping-module-heading{margin-bottom:3px!important}
+  .tabs-secondary{gap:4px;margin-bottom:6px}
+  .tab-secondary{font-size:11.5px;padding:5px 6px;min-height:32px}
+  .stock-check-mode{gap:4px!important;grid-template-columns:1fr 1fr 88px!important}
+  .stock-check-mode>button,.stock-filter-menu>summary{font-size:11.5px!important;min-height:34px!important;padding:6px 7px!important}
+  .stock-category-head,.shopping-group-head.stock-category-head,.stock-category-toggle{min-height:40px!important}
+  .stock-category-toggle{font-size:13.5px!important;padding:6px 4px!important}
 }

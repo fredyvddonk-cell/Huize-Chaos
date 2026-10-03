@@ -710,7 +710,7 @@ window.deleteCategory=e=>{const old=decodeURIComponent(e);if(old==='Overig'){ale
 window.renameStore=e=>{const old=decodeURIComponent(e),v=prompt('Nieuwe naam voor winkel:',old)?.trim();if(!v||v===old)return;products.forEach(x=>{if(x.store===old)x.store=v});stores=stores.map(x=>x===old?v:x);save();render();};
 window.deleteStore=e=>{const old=decodeURIComponent(e);if(old==='Overig'){alert('Overig blijft beschikbaar.');return;}if(confirm(`Winkel ${old} verwijderen? Producten gaan naar Overig.`)){products.forEach(x=>{if(x.store===old)x.store='Overig'});stores=stores.filter(x=>x!==old);if(!stores.includes('Overig'))stores.push('Overig');save();render();}};
 function render() {
-  document.querySelectorAll('.tab').forEach(button => {
+  document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.classList.toggle('active', button.dataset.page === page);
   });
 
@@ -969,7 +969,7 @@ function initApp() {
   };
   updateSearchClear();
 
-  document.querySelectorAll('.tab').forEach(button => {
+  document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {
       const nextPage=button.dataset.page;
       if (nextPage === 'hutsel') {
