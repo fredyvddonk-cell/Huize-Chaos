@@ -240,8 +240,12 @@ function bindStockSwipeActions(){
 
 function stockProductsForView(arr){
   const all=(arr||[]);
-  // Weekcheck/Maandcheck blijven altijd leidend. Filter verfijnt alleen binnen
-  // het gekozen controlemoment en vervangt de check dus nooit.
+  // Tijdens zoeken altijd in ALLE producten zoeken, onafhankelijk van
+  // Weekcheck/Maandcheck en het actieve voorraadfilter.
+  const globalSearch = typeof search !== 'undefined' && String(search?.value || '').trim();
+  if(globalSearch) return all;
+  // Zonder zoekterm blijven Weekcheck/Maandcheck leidend. Filter verfijnt alleen
+  // binnen het gekozen controlemoment en vervangt de check dus nooit.
   let visible=all.filter(p=>p.checkCycle===stockCheckMode);
   if(stockView==='standard') return visible.filter(p=>p.stockRole==='standard');
   if(stockView==='meal') return visible.filter(p=>p.stockRole==='meal');

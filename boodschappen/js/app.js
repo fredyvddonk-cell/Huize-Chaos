@@ -964,10 +964,9 @@ function initApp() {
   const productSearchSuggestions = $('#productSearchSuggestions');
   const hideProductSearchSuggestions = () => { if(productSearchSuggestions) productSearchSuggestions.hidden = true; };
   const suggestionSource = () => {
-    if (page === 'list') return products.filter(x => x && x.shopping && !x.temporary);
-    if (page === 'stock') return products.filter(x => x && !x.temporary);
-    if (page === 'manage') return products.filter(x => x && !x.temporary);
-    return [];
+    // Zoeken is app-breed binnen alle bekende producten en staat los van
+    // de actieve boodschappen-/voorraadfilters.
+    return products.filter(x => x && String(x.name || '').trim());
   };
   const renderProductSearchSuggestions = () => {
     if(!productSearchSuggestions) return;
@@ -992,7 +991,14 @@ function initApp() {
     search.value=product.name;
     updateSearchClear();
     hideProductSearchSuggestions();
-    render();
+    // Een product dat niet op de boodschappenlijst staat, tonen we in Voorraad.
+    // Tijdens zoeken negeert Voorraad de actieve Week-/Maandcheck en filters,
+    // zodat elk bestaand product gevonden en zichtbaar kan worden.
+    if(page==='list' && !product.shopping){
+      setPage('stock');
+    } else {
+      render();
+    }
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       const row=document.querySelector(`[data-product-id="${CSS.escape(targetId)}"]`);
       if(!row)return;
@@ -1008,13 +1014,6 @@ function initApp() {
     renderProductSearchSuggestions();
   };
   search.addEventListener('focus', renderProductSearchSuggestions);
-  productSearchSuggestions?.addEventListener('pointerdown', event => {
-    const button=event.target.closest('[data-product-suggestion]');
-    if(!button)return;
-    event.preventDefault();
-    search.blur();
-    jumpToProduct(button.dataset.productSuggestion);
-  });
   productSearchSuggestions?.addEventListener('click', event => {
     const button=event.target.closest('[data-product-suggestion]');
     if(!button)return;
@@ -1040,14 +1039,16 @@ function initApp() {
     sectionPopover.hidden=true;
     sectionToggle.setAttribute('aria-expanded','false');
   };
+  window.toggleShoppingSectionMenu = event => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if(!sectionPopover||!sectionToggle)return false;
+    const shouldOpen = sectionPopover.hidden || getComputedStyle(sectionPopover).display === 'none';
+    sectionPopover.hidden = !shouldOpen;
+    sectionToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    return false;
+  };
   if(sectionMenu&&sectionToggle&&sectionPopover){
-    sectionToggle.addEventListener('click',event=>{
-      event.preventDefault();
-      event.stopPropagation();
-      const shouldOpen=sectionPopover.hidden;
-      sectionPopover.hidden=!shouldOpen;
-      sectionToggle.setAttribute('aria-expanded',shouldOpen?'true':'false');
-    });
     sectionPopover.addEventListener('click',event=>event.stopPropagation());
     document.addEventListener('click',event=>{
       if(!sectionMenu.contains(event.target))closeSectionMenu();
