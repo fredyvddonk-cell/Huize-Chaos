@@ -722,8 +722,6 @@ function render() {
   document.body.classList.toggle('search-page', page === 'list' || page === 'stock' || page === 'manage');
   document.body.classList.toggle('insight-page', page === 'insight');
   $('#listControls').style.display = page === 'list' ? 'block' : 'none';
-  const moreListActions = document.getElementById('shoppingMoreListActions');
-  if (moreListActions) moreListActions.hidden = page !== 'list';
   const addBtn = $('#add');
   addBtn.textContent = '+';
   const addLabel = page === 'insight' ? 'Bon toevoegen' : page === 'hutsel' ? 'Restje toevoegen' : 'Product toevoegen';
@@ -755,6 +753,7 @@ function setPage(nextPage,{fromHistory=false}={}) {
     huizeChaosHistoryState=nextState;
   }
   render();
+  document.getElementById('shoppingSectionMenu')?.removeAttribute('open');
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{

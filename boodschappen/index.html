@@ -8,7 +8,7 @@
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
   <link rel="stylesheet" href="style.css?v=1.4.117">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.141">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.142">
 </head>
 <body>
   <main class="app">
@@ -19,13 +19,21 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.141</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.142</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
     <nav class="tabs tabs-primary" aria-label="Boodschappen en voorraad">
       <button class="tab active" data-page="list">Boodschappen</button>
       <button class="tab" data-page="stock">Voorraad</button>
+      <details class="shopping-section-menu" id="shoppingSectionMenu">
+        <summary aria-label="Meer onderdelen" title="Meer onderdelen"><span aria-hidden="true">▼</span></summary>
+        <div class="shopping-section-popover">
+          <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
+          <button class="tab-secondary" data-page="insight">Inzicht</button>
+          <button class="tab-secondary" data-page="manage">Beheer</button>
+        </div>
+      </details>
     </nav>
     </header>
 
@@ -36,19 +44,6 @@
       </div>
       <button id="add" class="plus add-labelled hc-icon-add" aria-label="Product toevoegen" title="Product toevoegen">+</button>
     </div>
-
-    <details class="shopping-more-menu" id="shoppingMoreMenu">
-      <summary aria-label="Meer opties">Meer <span aria-hidden="true">▾</span></summary>
-      <div class="shopping-more-popover">
-        <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
-        <button class="tab-secondary" data-page="insight">Inzicht</button>
-        <button class="tab-secondary" data-page="manage">Beheer</button>
-        <div class="shopping-more-list-actions" id="shoppingMoreListActions">
-          <button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button>
-          <button id="printList" class="print-btn" type="button">Printen</button>
-        </div>
-      </div>
-    </details>
 
     <div id="stockControls" class="stock-check-controls" hidden>
       <div class="stock-check-mode" role="group" aria-label="Controlemoment">
@@ -69,7 +64,20 @@
     </div>
 
     <div id="listControls">
-      <div class="shopping-weekbar"><button id="prevShoppingWeek" type="button">‹</button><strong id="shoppingWeekLabel">Deze week</strong><button id="nextShoppingWeek" type="button">›</button></div><div id="storeChips" class="store-chips" aria-label="Winkels"></div>
+      <div class="shopping-weekbar"><button id="prevShoppingWeek" type="button">‹</button><strong id="shoppingWeekLabel">Deze week</strong><button id="nextShoppingWeek" type="button">›</button></div>
+      <div class="shopping-list-filterbar">
+        <details class="store-filter-menu" id="storeFilterMenu">
+          <summary>Winkel <span aria-hidden="true">▾</span></summary>
+          <div id="storeChips" class="store-filter-popover" aria-label="Winkels"></div>
+        </details>
+        <details class="shopping-list-options-menu">
+          <summary>Opties <span aria-hidden="true">▾</span></summary>
+          <div class="shopping-list-options-popover">
+            <button id="collapseShoppingBtn" class="print-btn" type="button">Alles inklappen</button>
+            <button id="printList" class="print-btn" type="button">Printen</button>
+          </div>
+        </details>
+      </div>
       <div class="summary">
         <span id="count"></span>
       </div>

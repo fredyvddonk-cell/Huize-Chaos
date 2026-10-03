@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.141 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.142 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,
@@ -891,7 +891,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.141 - producten als compacte lijsten, geen losse grote kaarten */
+/* V1.4.142 - producten als compacte lijsten, geen losse grote kaarten */
 .shopping-page .shopping-group-body,
 .stock-category .shopping-group-body{
   background:#fff!important;
@@ -979,7 +979,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-actions-compact .stock-hutsel-link{font-size:10.5px!important}
 }
 
-/* V1.4.141 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
+/* V1.4.142 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
 .tabs-primary{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
@@ -1124,4 +1124,63 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-check-mode>button,.stock-filter-menu>summary{font-size:11.5px!important;min-height:34px!important;padding:6px 7px!important}
   .stock-category-head,.shopping-group-head.stock-category-head,.stock-category-toggle{min-height:40px!important}
   .stock-category-toggle{font-size:13.5px!important;padding:6px 4px!important}
+}
+
+/* V1.4.142 - compacte hoofdkeuze met ▼ en winkelkeuze als dropdown */
+.tabs-primary{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px!important;
+  align-items:stretch!important;
+  overflow:visible!important;
+}
+.shopping-section-menu{position:relative;min-width:42px}
+.shopping-section-menu>summary{
+  list-style:none;cursor:pointer;user-select:none;
+  height:38px;min-height:38px;padding:0;
+  display:grid;place-items:center;
+  border:0;border-radius:11px;background:transparent;color:#694d88;
+  font-size:16px;font-weight:800;
+}
+.shopping-section-menu>summary::-webkit-details-marker{display:none}
+.shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
+.shopping-section-popover{
+  position:absolute;z-index:80;right:0;top:calc(100% + 6px);
+  min-width:190px;padding:6px;border:1px solid #dfd4eb;border-radius:12px;
+  background:#fff;box-shadow:0 10px 28px rgba(75,53,99,.16);display:grid;gap:3px;
+}
+.shopping-section-popover .tab-secondary{
+  width:100%;min-height:34px!important;text-align:left!important;
+  background:#f6f1fa!important;color:#58406f!important;border:0!important;
+}
+.shopping-section-popover .tab-secondary.active{background:#957ac1!important;color:#fff!important}
+
+.shopping-list-filterbar{display:flex;gap:6px;align-items:center;margin:3px 0 5px}
+.store-filter-menu,.shopping-list-options-menu{position:relative}
+.store-filter-menu>summary,.shopping-list-options-menu>summary{
+  list-style:none;cursor:pointer;user-select:none;min-height:32px;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:5px 10px;border:1px solid #dfd4eb;border-radius:10px;
+  background:#f5f0f8;color:#604977;font-size:12px;font-weight:750;
+}
+.store-filter-menu>summary::-webkit-details-marker,.shopping-list-options-menu>summary::-webkit-details-marker{display:none}
+.store-filter-popover,.shopping-list-options-popover{
+  position:absolute;z-index:70;left:0;top:calc(100% + 5px);
+  min-width:190px;max-width:78vw;padding:5px;border:1px solid #dfd4eb;
+  border-radius:11px;background:#fff;box-shadow:0 10px 26px rgba(75,53,99,.15);
+  display:grid;gap:2px;
+}
+.shopping-list-options-popover{left:auto;right:0;min-width:165px}
+.store-filter-popover .store-chip,.shopping-list-options-popover button{
+  width:100%!important;min-height:32px!important;height:auto!important;
+  padding:6px 9px!important;border:0!important;border-radius:8px!important;
+  background:transparent!important;color:#493d53!important;text-align:left!important;
+  font:inherit!important;font-size:12.5px!important;font-weight:650!important;
+}
+.store-filter-popover .store-chip.active{background:#eee5f6!important;color:#654789!important;font-weight:800!important}
+.shopping-list-options-popover button:hover,.store-filter-popover .store-chip:hover{background:#f5f0f8!important}
+#listControls .store-chips{margin:0!important;padding:0!important;display:grid!important;gap:2px!important}
+@media(max-width:430px){
+  .tabs-primary{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 38px!important}
+  .shopping-section-menu{min-width:38px}
+  .shopping-section-menu>summary{height:36px;min-height:36px}
+  .shopping-list-filterbar{margin-top:2px;margin-bottom:4px}
 }

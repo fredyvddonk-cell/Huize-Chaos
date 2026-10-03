@@ -263,8 +263,10 @@ function renderShopping(allProducts) {
   const stores = groups(arr, 'store');
   const chips = document.getElementById('storeChips');
   if (chips) {
-    chips.innerHTML = `<button class="store-chip ${shoppingStoreFilter === 'all' ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('all')">Alle (${arr.length})</button>` +
-      stores.map(([storeName, items]) => `<button class="store-chip ${shoppingStoreFilter === storeName ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('${encodeURIComponent(storeName)}')">${esc(storeName)} (${items.length})</button>`).join('');
+    chips.innerHTML = `<button class="store-chip ${shoppingStoreFilter === 'all' ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('all');document.getElementById('storeFilterMenu')?.removeAttribute('open')">Alle winkels (${arr.length})</button>` +
+      stores.map(([storeName, items]) => `<button class="store-chip ${shoppingStoreFilter === storeName ? 'active' : ''}" type="button" onclick="setShoppingStoreFilter('${encodeURIComponent(storeName)}');document.getElementById('storeFilterMenu')?.removeAttribute('open')">${esc(storeName)} (${items.length})</button>`).join('');
+    const storeSummary = document.querySelector('#storeFilterMenu>summary');
+    if (storeSummary) storeSummary.innerHTML = `${shoppingStoreFilter === 'all' ? 'Winkel' : esc(shoppingStoreFilter)} <span aria-hidden="true">▾</span>`;
   }
 
   const row = (x, showLocation = false) => {
