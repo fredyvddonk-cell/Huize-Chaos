@@ -1,0 +1,356 @@
+:root{--purple:#957ac1;--purple-dark:#7353a5;--lav:#e9e2f4;--pale:#f7f3fb;--green:#3fa7a3;--green-pale:#e6f5f3;--text:#2d2d37;--muted:#74707a;--line:#e3e3e8;--danger:#b84f62}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);background:linear-gradient(180deg,#f7f3fb 0,#fff 360px)}button,input,textarea{font:inherit}.planner-app{max-width:720px;margin:auto;padding:18px 16px 42px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}.brand img{width:auto;height:34px;max-width:55vw;object-fit:contain}.calendar-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--green-pale);font-size:28px}.version{font-size:12px;color:#8a8490}.day-heading{margin:25px 2px 18px}.day-heading p{margin:0;color:var(--purple-dark);font-weight:700}.day-heading h1{margin:2px 0 1px;font-size:34px;line-height:1.1}.today-date{color:var(--muted);font-size:15px}.panel{margin:14px 0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 5px 18px rgba(72,54,85,.06)}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}.panel-heading>div{display:flex;align-items:center;gap:8px}.panel h2{margin:0;font-size:20px}.section-icon{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;font-weight:800}.section-icon.appointment{background:var(--lav);color:var(--purple-dark);font-size:12px}.section-icon.task{background:var(--green-pale);color:#277e79}.add-button{border:0;border-radius:13px;background:var(--purple);color:#fff;font-weight:750;cursor:pointer}.add-button:active{transform:scale(.98)}.add-button.compact{padding:9px 11px;font-size:14px}.main-add{display:block;width:100%;padding:14px;margin-top:18px;font-size:17px}.progress-text{margin:-2px 0 8px 37px;color:var(--muted);font-size:13px}.item-list{display:grid;gap:8px}.empty{padding:17px 10px;text-align:center;color:#8b858f;background:#faf9fb;border-radius:14px}.planner-item{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:11px;padding:11px;border:1px solid #ece9ef;border-radius:14px;background:#fff}.planner-item.done .item-copy{text-decoration:line-through;color:#918b95}.check{appearance:none;width:23px;height:23px;margin:1px 0 0;border:2px solid var(--green);border-radius:7px;display:grid;place-items:center}.check:checked{background:var(--green)}.check:checked:after{content:"✓";color:#fff;font-weight:900;font-size:15px}.time-badge{min-width:51px;padding:5px 7px;border-radius:9px;background:var(--lav);color:var(--purple-dark);font-weight:800;text-align:center;font-size:13px}.item-copy strong{display:block;font-size:15px;line-height:1.25}.item-copy small{display:block;margin-top:3px;color:var(--muted);line-height:1.35}.item-actions{display:flex;gap:3px}.icon-button{border:0;background:transparent;color:#77717c;padding:3px 5px;font-size:19px;line-height:1;cursor:pointer}.icon-button.delete{color:var(--danger)}.modal{position:fixed;inset:0;display:none;place-items:end center;padding:18px;background:rgba(36,29,42,.38);z-index:10}.modal.open{display:grid}.modal-card{width:min(100%,520px);background:#fff;border-radius:22px;padding:20px;box-shadow:0 20px 60px rgba(36,29,42,.25)}.modal-card h2{margin:0 0 15px}.type-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--pale);border-radius:13px;padding:4px;margin-bottom:16px}.type-switch button{border:0;background:transparent;padding:9px;border-radius:10px;color:var(--muted);font-weight:700}.type-switch button.active{background:#fff;color:var(--purple-dark);box-shadow:0 2px 8px rgba(70,54,82,.1)}.field{display:grid;gap:6px;margin:13px 0}.field span{font-size:14px;font-weight:700}.field input,.field textarea{width:100%;border:1px solid #cbc6cf;border-radius:12px;padding:11px;background:#fff;color:var(--text)}.field textarea{resize:vertical}.field input:focus,.field textarea:focus{outline:3px solid rgba(149,122,193,.2);border-color:var(--purple)}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.modal-actions button{border-radius:12px;padding:11px 16px;font-weight:750}.secondary{border:1px solid var(--line);background:#fff;color:var(--text)}.primary{border:0;background:var(--purple);color:#fff}@media(max-width:430px){.planner-app{padding:14px 12px 34px}.brand img{height:29px}.calendar-icon{width:46px;height:46px;font-size:25px}.day-heading h1{font-size:30px}.panel{padding:13px}.panel-heading{align-items:flex-start}.add-button.compact{padding:8px 9px}.planner-item{padding:10px 8px;gap:8px}.modal{padding:10px}.modal-card{padding:17px}}
+
+
+/* V1.3.154 - terugkerende checklists */
+.recurring-checklist-section{margin:14px 0}.recurring-checklist-heading{display:none}.hc-checklist-card{overflow:hidden;margin:14px 0;border-radius:22px;background:#fff;box-shadow:0 5px 18px rgba(72,54,85,.08);border:1px solid #eee9f3}.hc-checklist-card>header{padding:22px 24px 24px;background:var(--purple);color:#fff;border-radius:22px 22px 0 0}.hc-checklist-card>header span{display:block;font-size:13px;font-weight:850;letter-spacing:.02em}.hc-checklist-card>header h3{margin:5px 0 0;font-size:28px;line-height:1.1}.hc-checklist-body{padding:20px 24px 14px}.hc-checklist-date{display:block;font-size:18px}.hc-checklist-body>p{margin:12px 0 17px;font-weight:650;line-height:1.4}.hc-checklist-tasks{display:grid;gap:8px}.hc-checklist-task{display:grid;grid-template-columns:24px 1fr;align-items:start;gap:10px;padding:5px 0;cursor:pointer}.hc-checklist-task input{appearance:none;width:23px;height:23px;margin:0;border:2px solid var(--green);border-radius:6px;display:grid;place-items:center}.hc-checklist-task input:checked{background:var(--green)}.hc-checklist-task input:checked:after{content:"✓";color:#fff;font-weight:900;font-size:15px}.hc-checklist-task.done span{text-decoration:line-through;color:#918b95}.hc-checklist-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.hc-checklist-actions button{padding:8px 11px;border-radius:11px;font-size:13px}.hc-checklist-card>footer{padding:10px 24px 18px;background:#fff}.hc-checklist-card>footer i{display:block;width:112px;height:5px;margin-bottom:7px;background:var(--green)}.hc-checklist-card>footer span{color:var(--muted);font-size:12px}.recurring-checklist-library{margin-top:14px}.checklist-library-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:12px 4px;border-bottom:1px solid #eeeaf1}.checklist-library-item:last-child{border-bottom:0}.checklist-library-item strong,.checklist-library-item small{display:block}.checklist-library-item small{margin-top:4px;color:var(--muted);line-height:1.35}.checklist-show-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field select{width:100%;border:1px solid #cbc6cf;border-radius:12px;padding:11px;background:#fff;color:var(--text)}.field select:focus{outline:3px solid rgba(149,122,193,.2);border-color:var(--purple)}.field-help{color:var(--muted);font-weight:400!important}.checklist-modal-card{max-height:min(90vh,820px);overflow:auto}@media(max-width:430px){.hc-checklist-card>header{padding:19px 18px 21px}.hc-checklist-card>header h3{font-size:25px}.hc-checklist-body{padding:17px 18px 12px}.hc-checklist-card>footer{padding:9px 18px 16px}.checklist-show-grid{grid-template-columns:1fr}.hc-checklist-actions{display:grid;grid-template-columns:1fr 1fr}.hc-checklist-actions button{width:100%}}
+
+
+/* V1.4.20 - zoeken op datum */
+.date-search-help{margin:-2px 0 12px;color:var(--muted);font-size:14px;line-height:1.4}.date-search-controls{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}.date-search-controls input{min-width:0;width:100%;border:1px solid #cbc6cf;border-radius:12px;padding:10px 11px;background:#fff;color:var(--text)}.date-search-controls input:focus{outline:3px solid rgba(149,122,193,.2);border-color:var(--purple)}.date-search-controls button{border-radius:11px;padding:10px 11px;font-weight:700}.date-search-status{margin:12px 2px 8px;color:var(--purple-dark);font-size:14px;font-weight:750}.date-search-result .date-result-type{min-width:62px;padding:5px 7px;border-radius:9px;background:var(--lav);color:var(--purple-dark);font-weight:800;text-align:center;font-size:12px}.date-search-result .item-copy small+small{margin-top:2px}@media(max-width:430px){.date-search-controls{grid-template-columns:1fr 1fr}.date-search-controls input{grid-column:1/-1}.date-search-controls button{width:100%}.date-search-result{grid-template-columns:auto 1fr auto}.date-search-result .date-result-type{min-width:56px}}
+
+
+/* V1.4.21 - compact Vandaag-overzicht en datum kiezen via kalendericoon */
+.day-heading{margin:14px 2px 10px}
+.day-heading>p{font-size:13px;line-height:1.2}
+.day-heading-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px}
+.day-heading-copy{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 10px;min-width:0}
+.day-heading h1{margin:0;font-size:27px;line-height:1.08}
+.today-date{font-size:14px;white-space:nowrap}
+.calendar-picker-button{position:relative;display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border:1px solid #ded5eb;border-radius:12px;background:#fff;color:var(--purple-dark);cursor:pointer;overflow:hidden;box-shadow:0 2px 8px rgba(72,54,85,.05)}
+.calendar-picker-button span{font-size:20px;line-height:1}
+.calendar-picker-button input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.compact-date-status{margin:8px 0 0;font-size:12px}
+.compact-date-status:empty{display:none}
+.compact-date-results{margin-top:8px}
+.date-search-clear{margin-top:7px;border:0;background:transparent;color:var(--purple-dark);padding:3px 0;font-size:12px;font-weight:750;text-decoration:underline;cursor:pointer}
+.today-timer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.today-timer-grid .today-timer-panel{margin:0;padding:12px 13px;border-radius:16px}
+.today-timer-grid .panel-heading{align-items:center;margin:0}
+.today-timer-grid .panel-heading>div{gap:6px}
+.today-timer-grid .section-icon{width:26px;height:26px;border-radius:8px}
+.today-timer-grid h2{font-size:15px}
+.today-timer-grid .household-timer{font-size:19px;padding:6px 4px}
+#todayPage>section[aria-labelledby="appointmentsTitle"]{margin-top:10px}
+@media(max-width:430px){
+  .day-heading{margin:11px 2px 8px}
+  .day-heading h1{font-size:24px}
+  .today-date{font-size:13px}
+  .calendar-picker-button{width:38px;height:38px;flex-basis:38px}
+  .today-timer-grid{gap:8px;margin:10px 0}
+  .today-timer-grid .today-timer-panel{padding:10px}
+  .today-timer-grid h2{font-size:14px}
+  .today-timer-grid .household-timer{font-size:17px}
+}
+
+
+/* V1.4.43 - Vandaag als rustig dagoverzicht */
+#todayPage>section[aria-labelledby="appointmentsTitle"] .appointment-search,
+#todayPage>section[aria-labelledby="appointmentsTitle"] .search-status,
+#todayPage>section[aria-labelledby="appointmentsTitle"] .availability-link,
+#todayPage>section[aria-labelledby="tasksTitle"] .household-link,
+#todayPage>section[aria-labelledby="tasksTitle"] .maintenance-hidden-trigger,
+#todayPage>.main-add{display:none!important}
+
+.planner-tabs{margin-bottom:12px}
+#todayPage>section[aria-labelledby="appointmentsTitle"],
+#todayPage>section[aria-labelledby="tasksTitle"]{padding:18px;border-radius:22px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading{margin-bottom:14px;align-items:center}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading>div,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading>div{gap:10px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+#todayPage>section[aria-labelledby="tasksTitle"] h2{font-size:24px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon,
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon{width:34px;height:34px;border-radius:11px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment{font-size:0}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment::before{content:"▣";font-size:17px}
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task{font-size:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task::before{content:"✓";font-size:21px}
+
+.icon-add{display:grid!important;place-items:center;width:38px;height:38px;padding:0!important;border-radius:50%!important;background:var(--lav)!important;color:var(--purple-dark)!important;font-size:25px!important;font-weight:600!important;line-height:1!important}
+#todayPage>section[aria-labelledby="appointmentsTitle"] #openRoster{padding:10px 15px;border-radius:16px;background:var(--green);font-size:14px}
+
+#todayPage>section[aria-labelledby="appointmentsTitle"] .planner-item{padding:14px 13px;border-radius:16px;align-items:center}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .time-badge{padding:8px 10px;border-radius:11px;font-size:15px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .item-copy strong{font-size:17px}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .work-badge{margin-top:6px}
+
+.today-timer-grid{gap:10px;margin:12px 0}
+.today-timer-grid .today-timer-panel{padding:13px 14px;border-radius:18px}
+.today-timer-grid .panel-heading{display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center}
+.today-timer-grid .panel-heading>div{display:contents}
+.today-timer-grid .section-icon{grid-row:1/3;width:32px;height:32px;border-radius:10px}
+.today-timer-grid h2{font-size:14px;align-self:end}
+.today-timer-grid .household-timer{grid-column:2;font-size:23px!important;padding:0!important;text-align:left;align-self:start}
+
+#todayPage>section[aria-labelledby="tasksTitle"] .progress-text{margin:-6px 0 12px 44px;font-size:13px}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-list{gap:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .planner-item{border:0;border-bottom:1px solid #ece9ef;border-radius:0;padding:13px 4px;align-items:center}
+#todayPage>section[aria-labelledby="tasksTitle"] .planner-item:last-child{border-bottom:0}
+#todayPage>section[aria-labelledby="tasksTitle"] .check{width:25px;height:25px;border-color:var(--purple);border-radius:7px}
+#todayPage>section[aria-labelledby="tasksTitle"] .check:checked{background:var(--purple)}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-copy strong{font-size:16px}
+#todayPage>section[aria-labelledby="tasksTitle"] .item-actions{opacity:.85}
+
+@media(max-width:430px){
+  #todayPage>section[aria-labelledby="appointmentsTitle"],
+  #todayPage>section[aria-labelledby="tasksTitle"]{padding:15px}
+  #todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+  #todayPage>section[aria-labelledby="tasksTitle"] h2{font-size:22px}
+  #todayPage>section[aria-labelledby="appointmentsTitle"] #openRoster{padding:9px 12px;font-size:13px}
+  .icon-add{width:36px;height:36px;font-size:23px!important}
+  .today-timer-grid .today-timer-panel{padding:12px}
+  .today-timer-grid .household-timer{font-size:21px!important}
+}
+
+
+/* V1.4.43 - vervolgafspraak plannen met weekoverzicht */
+.followup-quick-section{margin-top:14px;padding:13px;border:1px solid #e7e0ef;border-radius:14px;background:#faf8fc}
+.followup-quick-section>span{display:block;margin-bottom:8px;font-size:14px;font-weight:800}
+.followup-week-button{width:100%;border:0;border-radius:12px;background:var(--lav);color:var(--purple-dark);padding:11px 13px;font-weight:800;text-align:left;cursor:pointer}
+.followup-quick-section small{display:block;margin-top:7px;color:var(--muted);font-size:12px;line-height:1.35}
+.four-week-card{max-height:min(91vh,850px);overflow:auto}
+.four-week-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.four-week-heading h2{margin:0 0 4px}
+.four-week-heading p{margin:0;color:var(--purple-dark);font-weight:800}
+.four-week-heading small{display:block;margin-top:4px;color:var(--muted)}
+.followup-intervals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.followup-intervals button,.week-navigation button{border-radius:11px;padding:10px;font-weight:800}
+.week-navigation{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}
+.followup-help{margin:10px 0 12px;color:var(--muted);font-size:13px;line-height:1.4}
+.four-week-days{display:grid;gap:9px}
+.availability-day{border:1px solid #e8e4eb;border-radius:14px;padding:12px;background:#fff}
+.availability-day>div{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.availability-day>div>strong{text-transform:capitalize}
+.availability-day button{border:0;border-radius:10px;background:var(--lav);color:var(--purple-dark);padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.availability-day ul{list-style:none;margin:9px 0 0;padding:0;display:grid;gap:6px}
+.availability-day li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding-top:6px;border-top:1px solid #f0edf2}
+.availability-day li strong{color:var(--purple-dark);font-size:13px}
+.availability-day li span{font-size:13px;line-height:1.3}
+.availability-empty{margin:8px 0 0;color:#318c87;font-size:13px;font-weight:750}
+.availability-day.is-free{background:#fbfefd;border-color:#dcefeb}
+@media(max-width:430px){.week-navigation{grid-template-columns:1fr 1fr}.week-navigation #resetFourWeek{grid-column:1/-1;grid-row:2}.four-week-card{padding:16px}.availability-day{padding:11px}.availability-day>div{align-items:flex-start}}
+
+
+/* V1.4.43 - vervolgafspraak mobiel binnen schermbreedte */
+#fourWeekModal{overflow-x:hidden}
+#fourWeekModal .four-week-card{
+  width:calc(100vw - 20px);
+  max-width:520px;
+  min-width:0;
+  overflow-x:hidden;
+}
+#fourWeekModal .four-week-heading,
+#fourWeekModal .four-week-heading>div,
+#fourWeekModal .followup-intervals,
+#fourWeekModal .week-navigation,
+#fourWeekModal .four-week-days,
+#fourWeekModal .availability-day,
+#fourWeekModal .availability-day>div,
+#fourWeekModal .availability-day li{
+  min-width:0;
+  max-width:100%;
+}
+#fourWeekModal .followup-intervals button,
+#fourWeekModal .week-navigation button{
+  min-width:0;
+  width:100%;
+  white-space:normal;
+}
+#fourWeekModal .availability-day>div>strong{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#fourWeekModal .availability-day button{
+  flex:0 0 auto;
+  max-width:42%;
+  white-space:normal;
+}
+#fourWeekModal .availability-day li span{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media(max-width:430px){
+  #fourWeekModal{padding:8px}
+  #fourWeekModal .four-week-card{width:calc(100vw - 16px);padding:15px}
+  #fourWeekModal .four-week-heading{gap:8px}
+  #fourWeekModal .four-week-heading h2{font-size:26px;line-height:1.08}
+  #fourWeekModal .followup-intervals{grid-template-columns:1fr 1fr}
+  #fourWeekModal .followup-intervals button{padding:10px 6px;font-size:15px}
+  #fourWeekModal .week-navigation{grid-template-columns:1fr 1fr}
+  #fourWeekModal .week-navigation button{padding:10px 6px;font-size:13px}
+  #fourWeekModal .availability-day>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  #fourWeekModal .availability-day button{max-width:none;padding:7px 9px;font-size:11px}
+  #fourWeekModal .availability-day li{grid-template-columns:minmax(88px,auto) minmax(0,1fr);gap:8px}
+}
+@media(max-width:360px){
+  #fourWeekModal .four-week-card{padding:13px}
+  #fourWeekModal .four-week-heading h2{font-size:23px}
+  #fourWeekModal .availability-day>div{grid-template-columns:1fr}
+  #fourWeekModal .availability-day button{justify-self:start}
+}
+
+
+/* V1.4.43 - Afspraak toevoegen passend op smalle telefoons */
+#entryModal{
+  overflow-x:hidden;
+}
+#entryModal .modal-card{
+  width:calc(100vw - 20px);
+  max-width:520px;
+  min-width:0;
+  overflow-x:hidden;
+}
+#entryModal .type-switch,
+#entryModal .field,
+#entryModal .quick-section,
+#entryModal .quick-buttons,
+#entryModal .task-option,
+#entryModal .modal-actions{
+  min-width:0;
+  max-width:100%;
+}
+#entryModal input,
+#entryModal textarea,
+#entryModal select,
+#entryModal button{
+  max-width:100%;
+}
+#entryModal .quick-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+#entryModal .quick-buttons button{
+  width:100%;
+  min-width:0;
+  white-space:normal;
+  line-height:1.25;
+}
+#entryModal .followup-week-button{
+  width:100%;
+  min-width:0;
+  white-space:normal;
+}
+#entryModal .type-switch{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+#entryModal .modal-actions{
+  flex-wrap:wrap;
+}
+#entryModal .modal-actions button{
+  flex:1 1 120px;
+  min-width:0;
+}
+@media(max-width:430px){
+  #entryModal{padding:8px}
+  #entryModal .modal-card{
+    width:calc(100vw - 16px);
+    padding:15px;
+  }
+  #entryModal h2{
+    font-size:26px;
+    line-height:1.1;
+  }
+  #entryModal .quick-buttons{
+    grid-template-columns:1fr;
+  }
+  #entryModal .type-switch button{
+    padding:9px 6px;
+  }
+}
+
+
+/* V1.4.43 - modals stabiel centreren op mobiel */
+#entryModal{
+  inset:0;
+  width:100%;
+  max-width:100%;
+  padding:8px;
+  place-items:center;
+  overflow-x:hidden;
+}
+#entryModal.open{
+  display:grid;
+}
+#entryModal .modal-card{
+  width:100%;
+  max-width:520px;
+  min-width:0;
+  margin:auto;
+  max-height:calc(100dvh - 16px);
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+@media(max-width:430px){
+  #entryModal{
+    padding:8px;
+  }
+  #entryModal .modal-card{
+    width:100%;
+    max-width:100%;
+    margin:auto;
+    border-radius:20px;
+  }
+}
+
+
+/* V1.4.43 - Binnenkort begrenzen zonder desktopbreedte van de planner te wijzigen */
+html, body{
+  overflow-x:hidden;
+}
+.planner-app{
+  min-width:0;
+  max-width:720px;
+}
+#todayPage,
+#todayPage > section,
+#upcomingList{
+  min-width:0;
+  max-width:100%;
+}
+#upcomingList .planner-item{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+#upcomingList .upcoming-date{
+  min-width:0;
+  width:auto;
+  max-width:86px;
+  white-space:normal;
+}
+#upcomingList .item-copy{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#upcomingList .item-actions{
+  min-width:0;
+  max-width:100%;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+#upcomingList .icon-button{
+  flex:0 0 auto;
+  padding:3px;
+}
+@media(max-width:430px){
+  #upcomingList .planner-item{
+    grid-template-columns:minmax(58px,auto) minmax(0,1fr) auto;
+    gap:7px;
+    padding:10px 8px;
+  }
+  #upcomingList .item-actions{
+    gap:1px;
+  }
+  #upcomingList .icon-button{
+    font-size:17px;
+    padding:2px;
+  }
+}
+
+/* V1.4.43 uniforme Huize Chaos-kop */
+.brand{gap:8px}.brand .hc-app-icon{width:44px!important;height:44px!important;object-fit:contain}.brand img:not(.hc-app-icon){height:31px!important;width:auto!important}.sync-status:empty{display:none}
