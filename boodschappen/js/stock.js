@@ -72,7 +72,7 @@ function updateStockViewControls(){
 function stockBadges(product){ return ''; }
 
 function stockItemHtml(x){
-  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${esc(String(x.id))}">
+  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${esc(String(x.id))}" data-product-id="${esc(String(x.id))}">
     <div class="stock-swipe-back stock-swipe-delete"><button type="button" class="stock-swipe-delete-button">Verwijderen</button></div>
     <div class="stock-swipe-back stock-swipe-cycle">
       <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'standard')">Standaard</button>
@@ -251,11 +251,21 @@ function stockProductsForView(arr){
   // Zonder zoekterm blijven Weekcheck/Maandcheck leidend. Filter verfijnt alleen
   // binnen het gekozen controlemoment en vervangt de check dus nooit.
   let visible=all.filter(p=>p.checkCycle===stockCheckMode);
-  if(stockView==='standard') return visible.filter(p=>p.stockRole==='standard');
-  if(stockView==='meal') return visible.filter(p=>p.stockRole==='meal');
-  if(stockView==='hidden') return visible.filter(p=>p.stockRole==='hidden');
-  if(stockView==='location') return visible.filter(p=>p.stockRole!=='hidden');
-  return visible.filter(p=>p.stockRole!=='hidden');
+  if(stockView==='standard') visible=visible.filter(p=>p.stockRole==='standard');
+  else if(stockView==='meal') visible=visible.filter(p=>p.stockRole==='meal');
+  else if(stockView==='hidden') visible=visible.filter(p=>p.stockRole==='hidden');
+  else if(stockView==='location') visible=visible.filter(p=>p.stockRole!=='hidden');
+  else visible=visible.filter(p=>p.stockRole!=='hidden');
+
+  // Een product dat vanuit zoeken is gekozen, moet altijd één keer zichtbaar zijn,
+  // ook wanneer het buiten de huidige check/filter valt. Bij de volgende gewone
+  // render geldt de normale Weekcheck/Maandcheck-filtering weer.
+  const jumpId=String(window.__hcPendingProductJumpId||'');
+  if(jumpId && !visible.some(p=>String(p.id)===jumpId)){
+    const target=all.find(p=>String(p.id)===jumpId);
+    if(target) visible=[...visible,target];
+  }
+  return visible;
 }
 
 function renderStock(arr) {

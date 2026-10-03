@@ -754,7 +754,7 @@ function setPage(nextPage,{fromHistory=false}={}) {
   }
   render();
   const sectionMenu=document.getElementById('shoppingSectionMenu');
-  if(sectionMenu?.open)sectionMenu.open=false;
+  if(sectionMenu) sectionMenu.open=false;
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
@@ -985,28 +985,41 @@ function initApp() {
     const targetId=String(id||'');
     const product=products.find(x=>String(x.id)===targetId);
     if(!product)return;
-    // Keuze is definitief: suggesties dicht en mobiel toetsenbord direct sluiten.
+
+    // Zoekactie is klaar: suggesties weg, zoekveld leeg en toetsenbord direct dicht.
     hideProductSearchSuggestions();
-    search.value=product.name;
+    search.value='';
     updateSearchClear();
     search.blur();
-    if(document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    if(document.activeElement && typeof document.activeElement.blur==='function') document.activeElement.blur();
 
-    // Een product dat niet op de boodschappenlijst staat, tonen we in Voorraad.
-    // Tijdens zoeken negeert Voorraad de actieve Week-/Maandcheck en filters,
-    // zodat elk bestaand product gevonden en zichtbaar kan worden.
-    if(page==='list' && !product.shopping){
-      setPage('stock');
+    // Zorg dat het gekozen product bij deze render zichtbaar blijft, ook als het
+    // buiten de huidige Week-/Maandcheck of het tijdelijke filter valt.
+    window.__hcPendingProductJumpId=targetId;
+
+    if(product.shopping){
+      shoppingStoreFilter='all';
+      const groupName=group==='category' ? (product.category||'Overig') : (product.store||'Overig');
+      expandedShoppingGroups.add(shoppingGroupKey(1,'',groupName));
+      saveShoppingExpansion();
+      if(page!=='list') setPage('list'); else render();
     } else {
-      render();
+      stockView='all';
+      const category=String(product.category||'Overig').trim()||'Overig';
+      expandedStockCategories.add(category);
+      saveStockExpansion();
+      if(page!=='stock') setPage('stock'); else render();
     }
+
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const escaped=CSS.escape(targetId);
-      const row=document.querySelector(`[data-product-id="${escaped}"], [data-stock-swipe][data-id="${escaped}"]`);
-      if(!row)return;
+      const row=document.querySelector(`[data-product-id="${CSS.escape(targetId)}"]`);
+      if(!row){ window.__hcPendingProductJumpId=''; return; }
       row.scrollIntoView({behavior:'smooth',block:'center'});
       row.classList.add('search-jump-highlight');
-      setTimeout(()=>row.classList.remove('search-jump-highlight'),1600);
+      setTimeout(()=>{
+        row.classList.remove('search-jump-highlight');
+        window.__hcPendingProductJumpId='';
+      },1600);
     }));
   };
   window.jumpToHuizeChaosProduct = jumpToProduct;
@@ -1016,18 +1029,9 @@ function initApp() {
     renderProductSearchSuggestions();
   };
   search.addEventListener('focus', renderProductSearchSuggestions);
-  let suggestionPointerStartY=0;
-  let suggestionPointerMoved=false;
-  productSearchSuggestions?.addEventListener('pointerdown', event => {
-    suggestionPointerStartY=event.clientY;
-    suggestionPointerMoved=false;
-  }, {passive:true});
-  productSearchSuggestions?.addEventListener('pointermove', event => {
-    if(Math.abs(event.clientY-suggestionPointerStartY)>8) suggestionPointerMoved=true;
-  }, {passive:true});
   productSearchSuggestions?.addEventListener('click', event => {
     const button=event.target.closest('[data-product-suggestion]');
-    if(!button || suggestionPointerMoved){ suggestionPointerMoved=false; return; }
+    if(!button)return;
     jumpToProduct(button.dataset.productSuggestion);
   });
   document.addEventListener('pointerdown', event => {
@@ -1043,7 +1047,11 @@ function initApp() {
   updateSearchClear();
 
   const sectionMenu=document.getElementById('shoppingSectionMenu');
-  const closeSectionMenu=()=>{ if(sectionMenu?.open) sectionMenu.open=false; };
+  if(sectionMenu){
+    document.addEventListener('click',event=>{
+      if(sectionMenu.open && !sectionMenu.contains(event.target)) sectionMenu.open=false;
+    });
+  }
 
   document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {
@@ -1052,7 +1060,8 @@ function initApp() {
         search.value = '';
         updateSearchClear();
       }
-      closeSectionMenu();
+      const moreMenu=document.getElementById('shoppingMoreMenu'); if(moreMenu) moreMenu.open=false;
+      if(sectionMenu) sectionMenu.open=false;
       setPage(nextPage);
     };
   });
