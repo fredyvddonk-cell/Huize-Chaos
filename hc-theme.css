@@ -652,7 +652,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 /* ============================================================
-   V1.4.143 — rustigere, compactere bovenkant op alle modules
+   V1.4.144 — rustigere, compactere bovenkant op alle modules
    De inhoud komt eerder in beeld; dubbele schermtitels verdwijnen.
    ============================================================ */
 .module-topbar,.hc-module-top,.topbar,.fixed-head .top{
@@ -743,7 +743,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 
-/* V1.4.143 - rustige, compacte toevoegknoppen */
+/* V1.4.144 - rustige, compacte toevoegknoppen */
 .hc-icon-add{
   width:46px!important;
   min-width:46px!important;
@@ -772,7 +772,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 
 
 /* ============================================================
-   V1.4.143 — compacte titelregel op alle vervolgschermen
+   V1.4.144 — compacte titelregel op alle vervolgschermen
    Geen extra 'Huize Chaos'-kicker boven de modulenaam.
    ============================================================ */
 .hc-page-heading,.module-heading,.hc-heading,.day-heading,.title,.shopping-module-heading{

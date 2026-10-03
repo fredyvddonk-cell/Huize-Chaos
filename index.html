@@ -8,8 +8,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.143">
-  <link rel="stylesheet" href="hc-theme.css?v=1.4.143">
+  <link rel="stylesheet" href="style.css?v=1.4.144">
+  <link rel="stylesheet" href="hc-theme.css?v=1.4.144">
 </head>
 <body>
   <main class="home">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <div class="home-top-actions">
-        <span class="hc-version">V1.4.143</span>
+        <span class="hc-version">V1.4.144</span>
         <button class="home-icon-button" id="openGlobalSearch" type="button" aria-label="Zoeken in Huize Chaos" title="Zoeken">⌕</button>
         <button class="home-icon-button menu-button" id="openModuleMenu" type="button" aria-label="Modulemenu openen" title="Menu"><span></span><span></span><span></span></button>
       </div>
@@ -38,7 +38,8 @@
           <div><h2>Deze week <span class="home-heading-detail">• <span id="homeWeekLabel"></span></span></h2></div>
         </div>
         <div id="homeWeekMenu" class="home-menu-list"><div class="home-empty">Weekmenu laden…</div></div>
-        <div class="home-quick-actions">
+        <div class="home-quick-actions" id="homeQuickActions">
+          <a class="home-quick home-shopping-quick" id="homeShoppingQuick" href="boodschappen/?hcnav=home" hidden><span><strong>Boodschappen</strong><small>Lijst openen</small></span><b>›</b></a>
           <a class="home-quick primary" href="recepten/?hcnav=home"><span><strong>Menu</strong><small>Volledig weekmenu</small></span><b>›</b></a>
           <a class="home-quick" href="auto/?hcnav=home&tab=fuel&new=1"><span><strong>Tankbeurt</strong><small>Snel invullen</small></span><b>›</b></a>
         </div>
@@ -53,7 +54,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.143</footer>
+    <footer>Huize Chaos · V1.4.144</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -80,7 +81,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.143"></script>
+<script src="recepten/recipes-data.js?v=1.4.144"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -123,6 +124,20 @@
   function nextIsoWeekKey(date=new Date()){
     const d=new Date(date);d.setDate(d.getDate()+7);return isoWeekKey(d);
   }
+  function renderShoppingQuick(){
+    const button=document.getElementById('homeShoppingQuick');
+    const wrap=document.getElementById('homeQuickActions');
+    if(!button||!wrap)return;
+    const products=readJson('household-products-v2',[]);
+    const plans=readJson('huize-chaos-recipe-weeks-v1',[]);
+    const key=isoWeekKey(new Date());
+    const hasProduct=Array.isArray(products)&&products.some(p=>p&&p.shopping&&!p.done);
+    const hasRecipe=Array.isArray(plans)&&plans.some(plan=>plan&&plan.week===key&&Array.isArray(plan.ingredients)&&plan.ingredients.some(i=>i&&i.shoppingSelected!==false&&!i.done&&!i.ordered&&!i.stockEnough));
+    const visible=hasProduct||hasRecipe;
+    button.hidden=!visible;
+    wrap.classList.toggle('has-shopping',visible);
+  }
+
   function renderWeekMenu(){
     const now=new Date(),key=isoWeekKey(now),label=document.getElementById('homeWeekLabel'),box=document.getElementById('homeWeekMenu');if(!box)return;
     const match=key.match(/W(\d{2})$/);if(label)label.textContent=match?`week ${Number(match[1])}`:'huidige week';
@@ -189,11 +204,11 @@
   searchResults.addEventListener('click',event=>{if(event.target.closest('a')){searchInput.blur();document.body.classList.remove('hc-no-scroll')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!searchOverlay.hidden)closeSearch();else if(moduleMenu.classList.contains('open'))setMenu(false)}});
 
-  renderToday();renderWeekMenu();
-  window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
+  renderToday();renderWeekMenu();renderShoppingQuick();
+  window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu();renderShoppingQuick()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1','household-products-v2'].includes(event.key)){renderToday();renderWeekMenu();renderShoppingQuick()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.143'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.144'))}
 </script>
 </body>
 </html>
