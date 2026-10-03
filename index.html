@@ -8,8 +8,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.142">
-  <link rel="stylesheet" href="hc-theme.css?v=1.4.142">
+  <link rel="stylesheet" href="style.css?v=1.4.143">
+  <link rel="stylesheet" href="hc-theme.css?v=1.4.143">
 </head>
 <body>
   <main class="home">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <div class="home-top-actions">
-        <span class="hc-version">V1.4.142</span>
+        <span class="hc-version">V1.4.143</span>
         <button class="home-icon-button" id="openGlobalSearch" type="button" aria-label="Zoeken in Huize Chaos" title="Zoeken">⌕</button>
         <button class="home-icon-button menu-button" id="openModuleMenu" type="button" aria-label="Modulemenu openen" title="Menu"><span></span><span></span><span></span></button>
       </div>
@@ -43,10 +43,17 @@
           <a class="home-quick" href="auto/?hcnav=home&tab=fuel&new=1"><span><strong>Tankbeurt</strong><small>Snel invullen</small></span><b>›</b></a>
         </div>
       </section>
+
+      <section class="home-panel next-week-panel" id="homeNextWeekPanel" hidden>
+        <div class="home-panel-head">
+          <div><h2>Volgende week <span class="home-heading-detail">• <span id="homeNextWeekLabel"></span></span></h2></div>
+        </div>
+        <div id="homeNextWeekMenu" class="home-menu-list home-next-menu-list"></div>
+      </section>
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.142</footer>
+    <footer>Huize Chaos · V1.4.143</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -73,7 +80,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.142"></script>
+<script src="recepten/recipes-data.js?v=1.4.143"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -113,22 +120,37 @@
     ).join('');
   }
   function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
+  function nextIsoWeekKey(date=new Date()){
+    const d=new Date(date);d.setDate(d.getDate()+7);return isoWeekKey(d);
+  }
   function renderWeekMenu(){
-    const key=isoWeekKey(new Date()),label=document.getElementById('homeWeekLabel'),box=document.getElementById('homeWeekMenu');if(!box)return;
+    const now=new Date(),key=isoWeekKey(now),label=document.getElementById('homeWeekLabel'),box=document.getElementById('homeWeekMenu');if(!box)return;
     const match=key.match(/W(\d{2})$/);if(label)label.textContent=match?`week ${Number(match[1])}`:'huidige week';
-    let allPlans=readJson('huize-chaos-recipe-weeks-v1',[]);const plans=Array.isArray(allPlans)?allPlans.filter(p=>p.week===key):[];
-    if(!plans.length){box.innerHTML='<div class="home-empty">Nog geen gerechten gepland voor deze week.</div>';return}
-    box.innerHTML=plans.map(plan=>`<div class="home-menu-row"><label class="home-menu-check" title="${plan.cooked?'Gekookt':'Nog niet gekookt'}"><input type="checkbox" data-week-cooked="${esc(plan.id)}" ${plan.cooked?'checked':''} aria-label="${plan.cooked?'Gekookt':'Markeer als gekookt'}: ${esc(plan.title||'Recept')}"><span aria-hidden="true"></span></label><a class="home-menu-link" href="recepten/?hcnav=home&recipe=${encodeURIComponent(String(plan.recipeId||''))}"><strong>${esc(plan.title||'Recept')}</strong><span>›</span></a></div>`).join('');
-    box.querySelectorAll('[data-week-cooked]').forEach(input=>input.addEventListener('change',()=>{
-      const id=String(input.dataset.weekCooked||'');
-      const current=readJson('huize-chaos-recipe-weeks-v1',[]);
-      if(!Array.isArray(current))return;
-      const plan=current.find(p=>String(p.id)===id);if(!plan)return;
-      plan.cooked=Boolean(input.checked);plan.changedAt=Date.now();
-      localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(current));
-      window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
-      input.closest('.home-menu-check')?.setAttribute('title',input.checked?'Gekookt':'Nog niet gekookt');
-    }));
+    let allPlans=readJson('huize-chaos-recipe-weeks-v1',[]);allPlans=Array.isArray(allPlans)?allPlans:[];
+    const plans=allPlans.filter(p=>p.week===key);
+    if(!plans.length){box.innerHTML='<div class="home-empty">Nog geen gerechten gepland voor deze week.</div>'}else{
+      box.innerHTML=plans.map(plan=>`<div class="home-menu-row"><label class="home-menu-check" title="${plan.cooked?'Gekookt':'Nog niet gekookt'}"><input type="checkbox" data-week-cooked="${esc(plan.id)}" ${plan.cooked?'checked':''} aria-label="${plan.cooked?'Gekookt':'Markeer als gekookt'}: ${esc(plan.title||'Recept')}"><span aria-hidden="true"></span></label><a class="home-menu-link" href="recepten/?hcnav=home&recipe=${encodeURIComponent(String(plan.recipeId||''))}"><strong>${esc(plan.title||'Recept')}</strong><span>›</span></a></div>`).join('');
+      box.querySelectorAll('[data-week-cooked]').forEach(input=>input.addEventListener('change',()=>{
+        const id=String(input.dataset.weekCooked||'');
+        const current=readJson('huize-chaos-recipe-weeks-v1',[]);
+        if(!Array.isArray(current))return;
+        const plan=current.find(p=>String(p.id)===id);if(!plan)return;
+        plan.cooked=Boolean(input.checked);plan.changedAt=Date.now();
+        localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(current));
+        window.dispatchEvent(new Event('huize-chaos-recipe-weeks-changed'));
+        input.closest('.home-menu-check')?.setAttribute('title',input.checked?'Gekookt':'Nog niet gekookt');
+      }));
+    }
+
+    const nextPanel=document.getElementById('homeNextWeekPanel'),nextBox=document.getElementById('homeNextWeekMenu'),nextLabel=document.getElementById('homeNextWeekLabel');
+    if(!nextPanel||!nextBox)return;
+    const showNext=now.getDay()===6||now.getDay()===0;
+    if(!showNext){nextPanel.hidden=true;nextBox.innerHTML='';return}
+    const nextKey=nextIsoWeekKey(now),nextPlans=allPlans.filter(p=>p.week===nextKey);
+    if(!nextPlans.length){nextPanel.hidden=true;nextBox.innerHTML='';return}
+    const nextMatch=nextKey.match(/W(\d{2})$/);if(nextLabel)nextLabel.textContent=nextMatch?`week ${Number(nextMatch[1])}`:'volgende week';
+    nextBox.innerHTML=nextPlans.map(plan=>`<a class="home-next-menu-row" href="recepten/?hcnav=home&recipe=${encodeURIComponent(String(plan.recipeId||''))}"><strong>${esc(plan.title||'Recept')}</strong><span>›</span></a>`).join('');
+    nextPanel.hidden=false;
   }
 
   const moduleMenu=document.getElementById('moduleMenu'),moduleBackdrop=document.getElementById('moduleMenuBackdrop');
@@ -171,7 +193,7 @@
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1'].includes(event.key)){renderToday();renderWeekMenu()}});
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.142'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.143'))}
 </script>
 </body>
 </html>

@@ -72,7 +72,7 @@ body{min-height:100dvh}
 @media(min-width:721px){.home{min-height:100dvh}}
 
 
-/* V1.4.142 - nieuw startscherm, alleen Home */
+/* V1.4.143 - nieuw startscherm, alleen Home */
 .home{padding:10px 12px max(18px,env(safe-area-inset-bottom));}
 .home-topbar{padding:6px 0!important;min-height:64px!important;height:64px!important;margin:0 0 8px!important;}
 .home-topbar .hc-app-icon{width:46px!important;height:46px!important;max-width:46px!important;max-height:46px!important;flex-basis:46px!important;}
@@ -94,3 +94,10 @@ body{min-height:100dvh}
   .home-topbar .hc-wordmark-image{height:29px!important;max-height:29px!important;max-width:168px!important;}
   .home-top-actions .hc-version{font-size:10px;}
 }
+
+/* V1.4.143 - vanaf zaterdag compact menu van volgende week op Home */
+.next-week-panel[hidden]{display:none!important}
+.home-next-menu-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:7px;min-height:30px;border-top:1px solid #eee7f3;text-decoration:none;color:inherit}
+.home-next-menu-row:first-child{border-top:0}
+.home-next-menu-row strong{font-size:12.6px;line-height:1.15;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-next-menu-row>span{color:#a18ab8;font-size:16px}
