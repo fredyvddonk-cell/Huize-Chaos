@@ -1286,9 +1286,22 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .product-search-suggestion{touch-action:manipulation}
 
 
-/* V1.4.151 - native ▼-menu en directe zoekselectie */
+/* V1.4.152 - native ▼-menu en directe zoekselectie */
 .shopping-section-menu>summary{list-style:none;cursor:pointer;user-select:none;width:100%;height:36px;min-height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#694d88;font-size:17px;font-weight:800}
 .shopping-section-menu>summary::-webkit-details-marker{display:none}
 .shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
 .shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
 .shopping-section-menu[open] .shopping-section-popover{display:grid!important}
+
+/* V1.4.152 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
+.shopping-section-menu{z-index:5200!important}
+.shopping-section-popover{
+  position:fixed!important;
+  z-index:5205!important;
+  top:0;
+  left:0;
+  right:auto!important;
+  min-width:210px!important;
+  max-width:calc(100vw - 24px)!important;
+  box-shadow:0 14px 34px rgba(62,42,82,.22)!important;
+}
