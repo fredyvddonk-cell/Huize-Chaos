@@ -1,6 +1,8 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
-let stockView = localStorage.getItem('household-stock-view') || 'all';
-if (!['all','standard','meal','hidden','location'].includes(stockView)) stockView = 'all';
+// Voorraadfilters zijn tijdelijk. Een Weekcheck of Maandcheck opent altijd
+// met alle producten binnen die check, nooit met een oud opgeslagen filter.
+let stockView = 'all';
+localStorage.removeItem('household-stock-view');
 let stockCheckMode = localStorage.getItem('household-stock-check-mode') || 'week';
 if (!['week','month'].includes(stockCheckMode)) stockCheckMode = 'week';
 
@@ -41,7 +43,6 @@ window.toggleAllStock = () => {
 window.setStockView = next => {
   if (!['all','standard','meal','hidden','location'].includes(next)) return;
   stockView = next;
-  localStorage.setItem('household-stock-view', stockView);
   expandedStockCategories.clear();
   saveStockExpansion();
   const menu = document.querySelector('.stock-filter-menu');
@@ -53,6 +54,9 @@ window.setStockCheckMode = next => {
   if (!['week','month'].includes(next)) return;
   stockCheckMode = next;
   localStorage.setItem('household-stock-check-mode', stockCheckMode);
+  // Elke check start bewust op 'Alles binnen deze check'.
+  stockView = 'all';
+  localStorage.removeItem('household-stock-view');
   expandedStockCategories.clear();
   saveStockExpansion();
   render();

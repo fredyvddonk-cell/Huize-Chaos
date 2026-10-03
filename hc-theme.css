@@ -855,7 +855,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 
 
-/* V1.4.149 — hetzelfde modulemenu op ieder hoofdscherm */
+/* V1.4.150 — hetzelfde modulemenu op ieder hoofdscherm */
 .hc-global-module-menu{
   position:relative;
   margin-left:8px;
