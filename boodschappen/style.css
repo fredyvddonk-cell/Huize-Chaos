@@ -1230,9 +1230,9 @@ body.receipt-reordering #receiptModal{touch-action:none}
   background:transparent;color:#694d88;font-size:17px;font-weight:800;cursor:pointer;
   display:grid;place-items:center;
 }
-.shopping-section-menu[open] .shopping-section-toggle{background:#e6daf2;color:#5e3f7d}
-.shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
-.shopping-section-menu[open] .shopping-section-popover{display:grid!important}
+.shopping-section-toggle[aria-expanded="true"]{background:#e6daf2;color:#5e3f7d}
+.shopping-section-popover[hidden]{display:none!important}
+.shopping-section-popover:not([hidden]){display:grid!important}
 
 .shopping-week-actions{
   display:flex!important;justify-content:center!important;align-items:center!important;

@@ -7,8 +7,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.151">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.151">
+  <link rel="stylesheet" href="style.css?v=1.4.150">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.150">
 </head>
 <body>
   <main class="app">
@@ -19,21 +19,21 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.151</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.150</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
     <nav class="tabs tabs-primary" aria-label="Boodschappen en voorraad">
       <button class="tab active" data-page="list">Boodschappen</button>
       <button class="tab" data-page="stock">Voorraad</button>
-      <details class="shopping-section-menu" id="shoppingSectionMenu">
-        <summary id="shoppingSectionToggle" class="shopping-section-toggle" aria-label="Meer onderdelen" title="Meer onderdelen">▼</summary>
-        <div class="shopping-section-popover" id="shoppingSectionPopover">
+      <div class="shopping-section-menu" id="shoppingSectionMenu">
+        <button id="shoppingSectionToggle" class="shopping-section-toggle" type="button" onclick="return window.toggleShoppingSectionMenu ? window.toggleShoppingSectionMenu(event) : false" aria-label="Meer onderdelen" title="Meer onderdelen" aria-expanded="false" aria-controls="shoppingSectionPopover">▼</button>
+        <div class="shopping-section-popover" id="shoppingSectionPopover" hidden>
           <button class="tab-secondary" data-page="hutsel">Hutsel Frutsel</button>
           <button class="tab-secondary" data-page="insight">Inzicht</button>
           <button class="tab-secondary" data-page="manage">Beheer</button>
         </div>
-      </details>
+      </div>
     </nav>
     </header>
 
@@ -367,12 +367,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.151"></script>
-  <script src="js/shopping.js?v=1.4.151"></script>
-  <script src="js/stock.js?v=1.4.151"></script>
-  <script src="js/hutsel.js?v=1.4.151"></script>
-  <script src="js/insight.js?v=1.4.151"></script>
-  <script type="module" src="js/firebase.js?v=1.4.151"></script>
+  <script src="js/app.js?v=1.4.150"></script>
+  <script src="js/shopping.js?v=1.4.150"></script>
+  <script src="js/stock.js?v=1.4.150"></script>
+  <script src="js/hutsel.js?v=1.4.150"></script>
+  <script src="js/insight.js?v=1.4.150"></script>
+  <script type="module" src="js/firebase.js?v=1.4.150"></script>
 
-<script src="../hc-module-nav.js?v=1.4.151"></script></body>
+<script src="../hc-module-nav.js?v=1.4.150"></script></body>
 </html>
