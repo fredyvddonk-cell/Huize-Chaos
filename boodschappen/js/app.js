@@ -1047,23 +1047,7 @@ function initApp() {
   updateSearchClear();
 
   const sectionMenu=document.getElementById('shoppingSectionMenu');
-  const sectionToggle=document.getElementById('shoppingSectionToggle');
-  const sectionPopover=document.getElementById('shoppingSectionPopover');
-  const positionSectionMenu=()=>{
-    if(!sectionMenu?.open||!sectionToggle||!sectionPopover)return;
-    const r=sectionToggle.getBoundingClientRect();
-    const width=Math.min(230,window.innerWidth-24);
-    const left=Math.max(12,Math.min(window.innerWidth-width-12,r.right-width));
-    sectionPopover.style.width=width+'px';
-    sectionPopover.style.left=left+'px';
-    sectionPopover.style.top=Math.min(window.innerHeight-12,r.bottom+6)+'px';
-  };
   if(sectionMenu){
-    sectionMenu.addEventListener('toggle',()=>{
-      if(sectionMenu.open) requestAnimationFrame(positionSectionMenu);
-    });
-    window.addEventListener('resize',positionSectionMenu);
-    window.addEventListener('scroll',positionSectionMenu,{passive:true});
     document.addEventListener('click',event=>{
       if(sectionMenu.open && !sectionMenu.contains(event.target)) sectionMenu.open=false;
     });
