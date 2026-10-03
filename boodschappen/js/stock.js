@@ -72,7 +72,7 @@ function updateStockViewControls(){
 function stockBadges(product){ return ''; }
 
 function stockItemHtml(x){
-  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${esc(String(x.id))}" data-product-id="${esc(String(x.id))}">
+  return `<div class="stock-swipe-shell" data-stock-swipe data-id="${esc(String(x.id))}">
     <div class="stock-swipe-back stock-swipe-delete"><button type="button" class="stock-swipe-delete-button">Verwijderen</button></div>
     <div class="stock-swipe-back stock-swipe-cycle">
       <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'standard')">Standaard</button>
