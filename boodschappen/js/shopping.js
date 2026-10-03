@@ -272,7 +272,7 @@ function renderShopping(allProducts) {
   const row = (x, showLocation = false) => {
     const isUrgent = x.status === 'Niet in huis' && x.buyDirectWhenOut;
     return `
-    <div class="item shopping-item ${x.done ? 'done' : ''} ${isUrgent ? 'urgent-item' : ''}" role="button" tabindex="0" onclick="editProduct(${x.id})">
+    <div class="item shopping-item ${x.done ? 'done' : ''} ${isUrgent ? 'urgent-item' : ''}" data-product-id="${esc(String(x.id))}" role="button" tabindex="0" onclick="editProduct(${x.id})">
       <input class="check" type="checkbox" aria-label="${esc(x.name)} gekocht" ${x.done ? 'checked' : ''} onclick="event.stopPropagation()" onchange="markBought(${x.id}, this.checked)">
       <div class="main">
         <div class="name">${esc([quantityText(x), x.name].filter(Boolean).join(' '))}</div>

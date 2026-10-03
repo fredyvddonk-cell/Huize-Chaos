@@ -961,13 +961,72 @@ function initApp() {
   const updateSearchClear = () => {
     $('#clearSearch').classList.toggle('visible', Boolean(search.value));
   };
+  const productSearchSuggestions = $('#productSearchSuggestions');
+  const hideProductSearchSuggestions = () => { if(productSearchSuggestions) productSearchSuggestions.hidden = true; };
+  const suggestionSource = () => {
+    if (page === 'list') return products.filter(x => x && x.shopping && !x.temporary);
+    if (page === 'stock') return products.filter(x => x && !x.temporary);
+    if (page === 'manage') return products.filter(x => x && !x.temporary);
+    return [];
+  };
+  const renderProductSearchSuggestions = () => {
+    if(!productSearchSuggestions) return;
+    const q = search.value.trim().toLowerCase();
+    if(q.length < 1 || !['list','stock','manage'].includes(page)){ hideProductSearchSuggestions(); return; }
+    const matches = suggestionSource()
+      .filter(x => String(x.name||'').toLowerCase().includes(q))
+      .sort((a,b) => {
+        const an=String(a.name||'').toLowerCase(), bn=String(b.name||'').toLowerCase();
+        const as=an.startsWith(q)?0:1, bs=bn.startsWith(q)?0:1;
+        return as-bs || an.localeCompare(bn,'nl');
+      })
+      .slice(0,6);
+    if(!matches.length){ hideProductSearchSuggestions(); return; }
+    productSearchSuggestions.innerHTML = matches.map(x => `<button type="button" class="product-search-suggestion" role="option" data-product-suggestion="${esc(String(x.id))}">${esc(x.name)}</button>`).join('');
+    productSearchSuggestions.hidden = false;
+  };
+  const jumpToProduct = id => {
+    const targetId=String(id||'');
+    const product=products.find(x=>String(x.id)===targetId);
+    if(!product)return;
+    search.value=product.name;
+    updateSearchClear();
+    hideProductSearchSuggestions();
+    render();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const row=document.querySelector(`[data-product-id="${CSS.escape(targetId)}"]`);
+      if(!row)return;
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+      row.classList.add('search-jump-highlight');
+      setTimeout(()=>row.classList.remove('search-jump-highlight'),1600);
+    }));
+  };
+  window.jumpToHuizeChaosProduct = jumpToProduct;
   search.oninput = () => {
     updateSearchClear();
     render();
+    renderProductSearchSuggestions();
   };
+  search.addEventListener('focus', renderProductSearchSuggestions);
+  productSearchSuggestions?.addEventListener('pointerdown', event => {
+    const button=event.target.closest('[data-product-suggestion]');
+    if(!button)return;
+    event.preventDefault();
+    search.blur();
+    jumpToProduct(button.dataset.productSuggestion);
+  });
+  productSearchSuggestions?.addEventListener('click', event => {
+    const button=event.target.closest('[data-product-suggestion]');
+    if(!button)return;
+    jumpToProduct(button.dataset.productSuggestion);
+  });
+  document.addEventListener('pointerdown', event => {
+    if(!event.target.closest('.search-wrap')) hideProductSearchSuggestions();
+  });
   $('#clearSearch').onclick = () => {
     search.value = '';
     updateSearchClear();
+    hideProductSearchSuggestions();
     search.focus();
     render();
   };
