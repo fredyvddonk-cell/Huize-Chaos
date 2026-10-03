@@ -1,6 +1,6 @@
-# Huize Chaos V1.4.145
+# Huize Chaos V1.4.146
 
-## V1.4.145
+## V1.4.146
 - Voorraad & Boodschappen opent zonder expliciete deeplink altijd op Boodschappen.
 - Elke hoofdmodule heeft rechtsboven hetzelfde hamburgermenu om direct naar Home of een andere module te gaan.
 - De wijziging in Voorraad & Boodschappen is in de modulecode zelf verwerkt; niet alleen het versienummer is aangepast.
