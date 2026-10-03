@@ -834,7 +834,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .stock-status-toggle:focus-visible{outline:2px solid #6f3fba;outline-offset:2px}
 
 
-/* V1.4.139 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
+/* V1.4.140 - één vaste stijl voor submenu's binnen Voorraad & Boodschappen */
 .tabs,
 .stock-check-mode,
 .period-switch,
@@ -891,7 +891,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.139 - producten als compacte lijsten, geen losse grote kaarten */
+/* V1.4.140 - producten als compacte lijsten, geen losse grote kaarten */
 .shopping-page .shopping-group-body,
 .stock-category .shopping-group-body{
   background:#fff!important;
@@ -979,7 +979,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .stock-actions-compact .stock-hutsel-link{font-size:10.5px!important}
 }
 
-/* V1.4.139 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
+/* V1.4.140 - compacte Boodschappen/Voorraad-kop en duidelijke hoofd-/subnavigatie */
 .tabs-primary{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
