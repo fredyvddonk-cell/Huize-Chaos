@@ -1224,7 +1224,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 
 
-/* V1.4.150 - werkende ▼ en compactere boodschappenkop */
+/* V1.4.152 - werkende ▼ en compactere boodschappenkop */
 .shopping-section-toggle{
   width:100%;height:36px;min-height:36px;padding:0;border:0;border-radius:11px;
   background:transparent;color:#694d88;font-size:17px;font-weight:800;cursor:pointer;
@@ -1260,7 +1260,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   .shopping-list-compact-actions .shopping-compact-action{padding:4px 6px!important;font-size:10.5px!important}
 }
 
-/* V1.4.150 - compact zoeken met productsuggesties en sprong naar product */
+/* V1.4.152 - compact zoeken met productsuggesties en sprong naar product */
 .toolbar{margin:5px 0 7px!important;gap:6px!important;align-items:center!important}
 .search{min-height:36px!important;height:36px!important;padding:6px 38px 6px 11px!important;font-size:14px!important;border-radius:11px!important}
 .plus{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;font-size:22px!important;border-radius:10px!important;padding:0!important}
@@ -1281,6 +1281,13 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .search-jump-highlight{animation:hcSearchJump 1.6s ease}
 @keyframes hcSearchJump{0%,35%{background:#eee5f7}100%{background:transparent}}
 
-/* V1.4.150 - zoekresultaten mobiel scrollbaar zonder onbedoeld kiezen */
+/* V1.4.152 - zoekresultaten mobiel scrollbaar zonder onbedoeld kiezen */
 .product-search-suggestions{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .product-search-suggestion{touch-action:manipulation}
+
+/* V1.4.152: robuust native uitklapmenu voor extra onderdelen */
+.shopping-section-menu>summary.shopping-section-toggle{list-style:none;cursor:pointer;user-select:none}
+.shopping-section-menu>summary.shopping-section-toggle::-webkit-details-marker{display:none}
+.shopping-section-menu[open]>.shopping-section-toggle{background:#e6daf2;color:#5e3f7d}
+.shopping-section-menu:not([open])>.shopping-section-popover{display:none!important}
+.shopping-section-menu[open]>.shopping-section-popover{display:grid!important}

@@ -753,10 +753,8 @@ function setPage(nextPage,{fromHistory=false}={}) {
     huizeChaosHistoryState=nextState;
   }
   render();
-  const sectionPopover=document.getElementById('shoppingSectionPopover');
-  const sectionToggle=document.getElementById('shoppingSectionToggle');
-  if(sectionPopover)sectionPopover.hidden=true;
-  if(sectionToggle)sectionToggle.setAttribute('aria-expanded','false');
+  const sectionMenu=document.getElementById('shoppingSectionMenu');
+  if(sectionMenu)sectionMenu.open=false;
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
@@ -844,6 +842,15 @@ function updatePackageSizeFields() {
 function initApp() {
   content = $('#content');
   search = $('#search');
+
+  // Extra onderdelen-menu is een native <details>: werkt zonder afhankelijke click-handler.
+  const sectionMenu = document.getElementById('shoppingSectionMenu');
+  const sectionPopover = document.getElementById('shoppingSectionPopover');
+  if (sectionMenu) {
+    document.addEventListener('pointerdown', event => {
+      if (sectionMenu.open && !sectionMenu.contains(event.target)) sectionMenu.open = false;
+    });
+  }
   content.addEventListener('change', handleManageBulkChange);
 
   $('#store').innerHTML = '<option value="">Geen</option>' + stores.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
@@ -978,8 +985,7 @@ function initApp() {
         const an=String(a.name||'').toLowerCase(), bn=String(b.name||'').toLowerCase();
         const as=an.startsWith(q)?0:1, bs=bn.startsWith(q)?0:1;
         return as-bs || an.localeCompare(bn,'nl');
-      })
-      .slice(0,6);
+      });
     if(!matches.length){ hideProductSearchSuggestions(); return; }
     productSearchSuggestions.innerHTML = matches.map(x => `<button type="button" class="product-search-suggestion" role="option" data-product-suggestion="${esc(String(x.id))}">${esc(x.name)}</button>`).join('');
     productSearchSuggestions.hidden = false;
@@ -1014,10 +1020,36 @@ function initApp() {
     renderProductSearchSuggestions();
   };
   search.addEventListener('focus', renderProductSearchSuggestions);
+  let suggestionPointerStart = null;
+  let suggestionPointerMoved = false;
+  productSearchSuggestions?.addEventListener('pointerdown', event => {
+    const button = event.target.closest('[data-product-suggestion]');
+    if (!button) return;
+    suggestionPointerStart = { x: event.clientX, y: event.clientY };
+    suggestionPointerMoved = false;
+  }, {passive:true});
+  productSearchSuggestions?.addEventListener('pointermove', event => {
+    if (!suggestionPointerStart) return;
+    if (Math.hypot(event.clientX - suggestionPointerStart.x, event.clientY - suggestionPointerStart.y) > 8) {
+      suggestionPointerMoved = true;
+    }
+  }, {passive:true});
+  productSearchSuggestions?.addEventListener('pointerup', () => {
+    setTimeout(() => { suggestionPointerStart = null; }, 0);
+  }, {passive:true});
   productSearchSuggestions?.addEventListener('click', event => {
     const button=event.target.closest('[data-product-suggestion]');
     if(!button)return;
+    if (suggestionPointerMoved) {
+      event.preventDefault();
+      suggestionPointerMoved = false;
+      return;
+    }
+    search.blur();
+    if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    hideProductSearchSuggestions();
     jumpToProduct(button.dataset.productSuggestion);
+    setTimeout(() => { try { search.blur(); document.activeElement?.blur?.(); } catch (_) {} }, 0);
   });
   document.addEventListener('pointerdown', event => {
     if(!event.target.closest('.search-wrap')) hideProductSearchSuggestions();
@@ -1032,29 +1064,6 @@ function initApp() {
   updateSearchClear();
 
   const sectionMenu=document.getElementById('shoppingSectionMenu');
-  const sectionToggle=document.getElementById('shoppingSectionToggle');
-  const sectionPopover=document.getElementById('shoppingSectionPopover');
-  const closeSectionMenu=()=>{
-    if(!sectionPopover||!sectionToggle)return;
-    sectionPopover.hidden=true;
-    sectionToggle.setAttribute('aria-expanded','false');
-  };
-  window.toggleShoppingSectionMenu = event => {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if(!sectionPopover||!sectionToggle)return false;
-    const shouldOpen = sectionPopover.hidden || getComputedStyle(sectionPopover).display === 'none';
-    sectionPopover.hidden = !shouldOpen;
-    sectionToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-    return false;
-  };
-  if(sectionMenu&&sectionToggle&&sectionPopover){
-    sectionPopover.addEventListener('click',event=>event.stopPropagation());
-    document.addEventListener('click',event=>{
-      if(!sectionMenu.contains(event.target))closeSectionMenu();
-    });
-  }
-
   document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {
       const nextPage=button.dataset.page;
@@ -1063,6 +1072,7 @@ function initApp() {
         updateSearchClear();
       }
       const moreMenu=document.getElementById('shoppingMoreMenu'); if(moreMenu) moreMenu.open=false;
+      const sectionMenu=document.getElementById('shoppingSectionMenu'); if(sectionMenu) sectionMenu.open=false;
       setPage(nextPage);
     };
   });
