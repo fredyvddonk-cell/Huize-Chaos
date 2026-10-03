@@ -13,16 +13,27 @@
   const header=document.querySelector('.fixed-head .top, .hc-module-top, .module-topbar, .topbar');
   if(!header||header.querySelector('.hc-global-module-menu')) return;
 
-  const menu=document.createElement('details');
+  const menu=document.createElement('div');
   menu.className='hc-global-module-menu';
-  const summary=document.createElement('summary');
-  summary.setAttribute('aria-label','Open modulemenu');
-  summary.setAttribute('title','Ga naar een andere module');
-  summary.innerHTML='<span aria-hidden="true">☰</span>';
+
+  const trigger=document.createElement('button');
+  trigger.type='button';
+  trigger.className='hc-global-module-menu-trigger';
+  trigger.setAttribute('aria-label','Open modulemenu');
+  trigger.setAttribute('title','Ga naar een andere module');
+  trigger.setAttribute('aria-expanded','false');
+  trigger.innerHTML='<span aria-hidden="true">☰</span>';
+  menu.appendChild(trigger);
+  header.appendChild(menu);
+
+  const backdrop=document.createElement('div');
+  backdrop.className='hc-global-module-menu-backdrop';
+  backdrop.hidden=true;
 
   const panel=document.createElement('nav');
   panel.className='hc-global-module-menu-panel';
   panel.setAttribute('aria-label','Huize Chaos modules');
+  panel.hidden=true;
   items.forEach(([key,href,label])=>{
     const a=document.createElement('a');
     a.href=href;
@@ -31,32 +42,36 @@
     panel.appendChild(a);
   });
 
-  const backdrop=document.createElement('div');
-  backdrop.className='hc-global-module-menu-backdrop';
-  backdrop.hidden=true;
-  document.body.appendChild(backdrop);
+  // Body-level overlay avoids stacking-context conflicts with search fields and sticky headers.
+  document.body.append(backdrop,panel);
 
-  menu.append(summary,panel);
-  header.appendChild(menu);
-
+  let open=false;
   function positionPanel(){
-    if(!menu.open)return;
-    const r=summary.getBoundingClientRect();
+    if(!open||panel.hidden) return;
+    const r=trigger.getBoundingClientRect();
     const gap=8;
-    panel.style.top=Math.min(window.innerHeight-12,r.bottom+gap)+'px';
-    panel.style.right=Math.max(12,window.innerWidth-r.right)+'px';
+    const side=12;
+    const width=Math.min(292,window.innerWidth-side*2);
+    panel.style.width=width+'px';
+    panel.style.right=side+'px';
+    panel.style.left='auto';
+    const maxTop=Math.max(side,window.innerHeight-panel.offsetHeight-side);
+    panel.style.top=Math.max(side,Math.min(r.bottom+gap,maxTop))+'px';
   }
-  function setOpen(open){
-    if(menu.open!==open) menu.open=open;
+  function setOpen(next){
+    open=!!next;
+    trigger.setAttribute('aria-expanded',String(open));
+    trigger.classList.toggle('active',open);
     backdrop.hidden=!open;
+    panel.hidden=!open;
     document.body.classList.toggle('hc-module-menu-open',open);
     if(open) requestAnimationFrame(positionPanel);
   }
 
-  menu.addEventListener('toggle',()=>setOpen(menu.open));
+  trigger.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setOpen(!open)});
   backdrop.addEventListener('click',()=>setOpen(false));
-  panel.addEventListener('click',()=>setOpen(false));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.open)setOpen(false)});
+  panel.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open)setOpen(false)});
   window.addEventListener('resize',positionPanel);
   window.addEventListener('scroll',positionPanel,{passive:true});
 })();

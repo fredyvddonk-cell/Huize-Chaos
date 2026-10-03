@@ -911,7 +911,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 .hc-module-top,.module-topbar,.topbar,.fixed-head .top{display:flex;align-items:center}
 .hc-module-top .hc-global-module-menu,.module-topbar .hc-global-module-menu,.topbar .hc-global-module-menu,.fixed-head .top .hc-global-module-menu{order:99}
 
-/* V1.4.152 — modulemenu altijd boven alle pagina-inhoud */
+/* V1.4.154 — modulemenu altijd boven alle pagina-inhoud */
 .hc-global-module-menu{z-index:10020!important}
 .hc-global-module-menu-panel{
   position:fixed!important;
@@ -933,4 +933,29 @@ main.app>h1::first-letter{font-size:inherit!important}
   background:rgba(56,39,72,.18);
   backdrop-filter:blur(1px);
 }
+body.hc-module-menu-open{overflow:hidden!important}
+
+
+/* V1.4.154 — stabiele, scherpe module-overlay zonder blur of stacking-conflicten */
+.hc-global-module-menu{position:relative!important;margin-left:8px!important;flex:0 0 auto!important;z-index:1!important}
+.hc-global-module-menu-trigger{
+  width:36px!important;height:36px!important;min-width:36px!important;padding:0!important;
+  display:grid!important;place-items:center!important;border:1px solid rgba(101,71,143,.18)!important;
+  border-radius:11px!important;background:#fff!important;color:#67478f!important;
+  font-size:20px!important;line-height:1!important;cursor:pointer!important;
+}
+.hc-global-module-menu-trigger.active{background:#eee7f7!important}
+.hc-global-module-menu-panel{
+  position:fixed!important;z-index:30020!important;display:grid!important;gap:3px!important;
+  padding:7px!important;border:1px solid rgba(101,71,143,.16)!important;border-radius:13px!important;
+  background:#fff!important;opacity:1!important;filter:none!important;backdrop-filter:none!important;
+  box-shadow:0 14px 36px rgba(55,34,75,.24)!important;overflow:auto!important;
+  max-height:calc(100dvh - 24px)!important;
+}
+.hc-global-module-menu-panel[hidden]{display:none!important}
+.hc-global-module-menu-backdrop{
+  position:fixed!important;inset:0!important;z-index:30010!important;
+  background:rgba(45,35,55,.12)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.hc-global-module-menu-backdrop[hidden]{display:none!important}
 body.hc-module-menu-open{overflow:hidden!important}

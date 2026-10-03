@@ -1286,14 +1286,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .product-search-suggestion{touch-action:manipulation}
 
 
-/* V1.4.152 - native ▼-menu en directe zoekselectie */
+/* V1.4.154 - native ▼-menu en directe zoekselectie */
 .shopping-section-menu>summary{list-style:none;cursor:pointer;user-select:none;width:100%;height:36px;min-height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#694d88;font-size:17px;font-weight:800}
 .shopping-section-menu>summary::-webkit-details-marker{display:none}
 .shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
 .shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
 .shopping-section-menu[open] .shopping-section-popover{display:grid!important}
 
-/* V1.4.152 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
+/* V1.4.154 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
 .shopping-section-menu{z-index:5200!important}
 .shopping-section-popover{
   position:fixed!important;
@@ -1304,4 +1304,23 @@ body.receipt-reordering #receiptModal{touch-action:none}
   min-width:210px!important;
   max-width:calc(100vw - 24px)!important;
   box-shadow:0 14px 34px rgba(62,42,82,.22)!important;
+}
+
+
+/* V1.4.154 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
+.shopping-section-menu{position:relative!important;z-index:auto!important}
+.shopping-section-menu>summary{cursor:pointer!important}
+.shopping-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}
+.shopping-section-popover.hc-floating-section-menu{
+  position:fixed!important;z-index:25020!important;right:auto!important;
+  min-width:0!important;max-width:calc(100vw - 24px)!important;
+  padding:5px!important;gap:2px!important;border:1px solid #ded3e8!important;
+  border-radius:11px!important;background:#fff!important;opacity:1!important;
+  filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  box-shadow:0 10px 28px rgba(62,42,82,.20)!important;overflow:auto!important;
+}
+.shopping-section-popover.hc-floating-section-menu[hidden]{display:none!important}
+.shopping-section-popover.hc-floating-section-menu .tab-secondary{
+  min-height:36px!important;height:auto!important;padding:8px 10px!important;border-radius:8px!important;
+  text-align:left!important;font-size:13px!important;white-space:nowrap!important;
 }

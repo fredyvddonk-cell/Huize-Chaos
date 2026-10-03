@@ -755,6 +755,7 @@ function setPage(nextPage,{fromHistory=false}={}) {
   render();
   const sectionMenu=document.getElementById('shoppingSectionMenu');
   if(sectionMenu) sectionMenu.open=false;
+  window.closeShoppingSectionMenu?.();
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
@@ -1049,25 +1050,54 @@ function initApp() {
   const sectionMenu=document.getElementById('shoppingSectionMenu');
   const sectionToggle=document.getElementById('shoppingSectionToggle');
   const sectionPopover=document.getElementById('shoppingSectionPopover');
+  let sectionMenuOpen=false;
+
+  // Put the popup directly under <body>. The tabs have horizontal overflow,
+  // which otherwise clips a dropdown even when it uses a large z-index.
+  if(sectionPopover){
+    sectionPopover.hidden=true;
+    sectionPopover.classList.add('hc-floating-section-menu');
+    document.body.appendChild(sectionPopover);
+  }
   const positionSectionMenu=()=>{
-    if(!sectionMenu?.open||!sectionToggle||!sectionPopover)return;
+    if(!sectionMenuOpen||!sectionToggle||!sectionPopover||sectionPopover.hidden)return;
     const r=sectionToggle.getBoundingClientRect();
-    const width=Math.min(230,window.innerWidth-24);
-    const left=Math.max(12,Math.min(window.innerWidth-width-12,r.right-width));
+    const side=12;
+    const gap=6;
+    const width=Math.min(196,window.innerWidth-side*2);
     sectionPopover.style.width=width+'px';
+    const left=Math.max(side,Math.min(window.innerWidth-width-side,r.right-width));
     sectionPopover.style.left=left+'px';
-    sectionPopover.style.top=Math.min(window.innerHeight-12,r.bottom+6)+'px';
+    sectionPopover.style.right='auto';
+    const maxTop=Math.max(side,window.innerHeight-sectionPopover.offsetHeight-side);
+    sectionPopover.style.top=Math.max(side,Math.min(r.bottom+gap,maxTop))+'px';
   };
-  if(sectionMenu){
-    sectionMenu.addEventListener('toggle',()=>{
-      if(sectionMenu.open) requestAnimationFrame(positionSectionMenu);
-    });
-    window.addEventListener('resize',positionSectionMenu);
-    window.addEventListener('scroll',positionSectionMenu,{passive:true});
-    document.addEventListener('click',event=>{
-      if(sectionMenu.open && !sectionMenu.contains(event.target)) sectionMenu.open=false;
+  const setSectionMenuOpen=open=>{
+    sectionMenuOpen=!!open;
+    if(sectionToggle){
+      sectionToggle.setAttribute('aria-expanded',String(sectionMenuOpen));
+      sectionToggle.classList.toggle('active',sectionMenuOpen);
+    }
+    if(sectionPopover)sectionPopover.hidden=!sectionMenuOpen;
+    if(sectionMenu) sectionMenu.removeAttribute('open'); // never use native details positioning
+    if(sectionMenuOpen) requestAnimationFrame(positionSectionMenu);
+  };
+  window.closeShoppingSectionMenu=()=>setSectionMenuOpen(false);
+  if(sectionToggle){
+    sectionToggle.setAttribute('aria-expanded','false');
+    sectionToggle.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      setSectionMenuOpen(!sectionMenuOpen);
     });
   }
+  window.addEventListener('resize',positionSectionMenu);
+  window.addEventListener('scroll',positionSectionMenu,{passive:true});
+  document.addEventListener('pointerdown',event=>{
+    if(!sectionMenuOpen)return;
+    if(sectionToggle?.contains(event.target)||sectionPopover?.contains(event.target))return;
+    setSectionMenuOpen(false);
+  });
 
   document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {
@@ -1078,6 +1108,7 @@ function initApp() {
       }
       const moreMenu=document.getElementById('shoppingMoreMenu'); if(moreMenu) moreMenu.open=false;
       if(sectionMenu) sectionMenu.open=false;
+      window.closeShoppingSectionMenu?.();
       setPage(nextPage);
     };
   });
