@@ -753,10 +753,8 @@ function setPage(nextPage,{fromHistory=false}={}) {
     huizeChaosHistoryState=nextState;
   }
   render();
-  const sectionPopover=document.getElementById('shoppingSectionPopover');
-  const sectionToggle=document.getElementById('shoppingSectionToggle');
-  if(sectionPopover)sectionPopover.hidden=true;
-  if(sectionToggle)sectionToggle.setAttribute('aria-expanded','false');
+  const sectionMenu=document.getElementById('shoppingSectionMenu');
+  if(sectionMenu?.open)sectionMenu.open=false;
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
@@ -978,8 +976,7 @@ function initApp() {
         const an=String(a.name||'').toLowerCase(), bn=String(b.name||'').toLowerCase();
         const as=an.startsWith(q)?0:1, bs=bn.startsWith(q)?0:1;
         return as-bs || an.localeCompare(bn,'nl');
-      })
-      .slice(0,6);
+      });
     if(!matches.length){ hideProductSearchSuggestions(); return; }
     productSearchSuggestions.innerHTML = matches.map(x => `<button type="button" class="product-search-suggestion" role="option" data-product-suggestion="${esc(String(x.id))}">${esc(x.name)}</button>`).join('');
     productSearchSuggestions.hidden = false;
@@ -988,9 +985,13 @@ function initApp() {
     const targetId=String(id||'');
     const product=products.find(x=>String(x.id)===targetId);
     if(!product)return;
+    // Keuze is definitief: suggesties dicht en mobiel toetsenbord direct sluiten.
+    hideProductSearchSuggestions();
     search.value=product.name;
     updateSearchClear();
-    hideProductSearchSuggestions();
+    search.blur();
+    if(document.activeElement instanceof HTMLElement) document.activeElement.blur();
+
     // Een product dat niet op de boodschappenlijst staat, tonen we in Voorraad.
     // Tijdens zoeken negeert Voorraad de actieve Week-/Maandcheck en filters,
     // zodat elk bestaand product gevonden en zichtbaar kan worden.
@@ -1000,7 +1001,8 @@ function initApp() {
       render();
     }
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const row=document.querySelector(`[data-product-id="${CSS.escape(targetId)}"]`);
+      const escaped=CSS.escape(targetId);
+      const row=document.querySelector(`[data-product-id="${escaped}"], [data-stock-swipe][data-id="${escaped}"]`);
       if(!row)return;
       row.scrollIntoView({behavior:'smooth',block:'center'});
       row.classList.add('search-jump-highlight');
@@ -1014,9 +1016,18 @@ function initApp() {
     renderProductSearchSuggestions();
   };
   search.addEventListener('focus', renderProductSearchSuggestions);
+  let suggestionPointerStartY=0;
+  let suggestionPointerMoved=false;
+  productSearchSuggestions?.addEventListener('pointerdown', event => {
+    suggestionPointerStartY=event.clientY;
+    suggestionPointerMoved=false;
+  }, {passive:true});
+  productSearchSuggestions?.addEventListener('pointermove', event => {
+    if(Math.abs(event.clientY-suggestionPointerStartY)>8) suggestionPointerMoved=true;
+  }, {passive:true});
   productSearchSuggestions?.addEventListener('click', event => {
     const button=event.target.closest('[data-product-suggestion]');
-    if(!button)return;
+    if(!button || suggestionPointerMoved){ suggestionPointerMoved=false; return; }
     jumpToProduct(button.dataset.productSuggestion);
   });
   document.addEventListener('pointerdown', event => {
@@ -1032,28 +1043,7 @@ function initApp() {
   updateSearchClear();
 
   const sectionMenu=document.getElementById('shoppingSectionMenu');
-  const sectionToggle=document.getElementById('shoppingSectionToggle');
-  const sectionPopover=document.getElementById('shoppingSectionPopover');
-  const closeSectionMenu=()=>{
-    if(!sectionPopover||!sectionToggle)return;
-    sectionPopover.hidden=true;
-    sectionToggle.setAttribute('aria-expanded','false');
-  };
-  window.toggleShoppingSectionMenu = event => {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if(!sectionPopover||!sectionToggle)return false;
-    const shouldOpen = sectionPopover.hidden || getComputedStyle(sectionPopover).display === 'none';
-    sectionPopover.hidden = !shouldOpen;
-    sectionToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-    return false;
-  };
-  if(sectionMenu&&sectionToggle&&sectionPopover){
-    sectionPopover.addEventListener('click',event=>event.stopPropagation());
-    document.addEventListener('click',event=>{
-      if(!sectionMenu.contains(event.target))closeSectionMenu();
-    });
-  }
+  const closeSectionMenu=()=>{ if(sectionMenu?.open) sectionMenu.open=false; };
 
   document.querySelectorAll('.tab, .tab-secondary').forEach(button => {
     button.onclick = () => {
@@ -1062,7 +1052,7 @@ function initApp() {
         search.value = '';
         updateSearchClear();
       }
-      const moreMenu=document.getElementById('shoppingMoreMenu'); if(moreMenu) moreMenu.open=false;
+      closeSectionMenu();
       setPage(nextPage);
     };
   });

@@ -1,17 +1,12 @@
-# Huize Chaos V1.4.150
+# Huize Chaos V1.4.151
 
-- Zoekveld en plusknop in Boodschappen/Voorraad compacter gemaakt.
-- Productsuggesties verschijnen tijdens het typen.
-- Selecteren van een suggestie springt naar het betreffende product.
-- Geselecteerd product wordt kort gemarkeerd.
-- Bestaande functies uit V1.4.147 behouden.
-
-# Huize Chaos V1.4.150
-
-## V1.4.150
-- Voorraad & Boodschappen opent zonder expliciete deeplink altijd op Boodschappen.
-- Elke hoofdmodule heeft rechtsboven hetzelfde hamburgermenu om direct naar Home of een andere module te gaan.
-- De wijziging in Voorraad & Boodschappen is in de modulecode zelf verwerkt; niet alleen het versienummer is aangepast.
+## V1.4.151
+- Gebaseerd op de stabiele V1.4.150.
+- Zoeksuggesties in Boodschappen/Voorraad tonen alle producten waarvan de naam de getypte lettercombinatie bevat.
+- De suggestielijst blijft scrollbaar; scrollen kiest geen product.
+- Tik op een zoekresultaat sluit direct het toetsenbord en springt rechtstreeks naar het product.
+- De ▼ naast Boodschappen/Voorraad gebruikt nu een native uitklapmenu met Hutsel Frutsel, Inzicht en Beheer.
+- Geen andere functionele wijzigingen meegenomen.
 
 ## V1.4.144
 - Startscherm toont Boodschappen alleen wanneer er een open boodschap staat.
