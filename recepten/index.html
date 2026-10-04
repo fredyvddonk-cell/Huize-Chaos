@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Weekmenu & Recepten · Huize Chaos</title>
-  <link rel="stylesheet" href="style.css?v=1.4.179">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.179">
+  <link rel="stylesheet" href="style.css?v=1.4.180">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.180">
 </head>
 <body>
 <main class="recipes">
@@ -13,7 +13,7 @@
     <a class="module-brand" href="../" aria-label="Terug naar Huize Chaos">
       <img class="module-app-icon" src="../icons/icon-192.png" alt=""><img class="module-wordmark" src="../assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
     </a>
-    <div class="module-meta"><span class="module-version">V1.4.179</span><span id="recipeSyncStatus" class="module-sync">Recepten laden…</span></div>
+    <div class="module-meta"><span class="module-version">V1.4.180</span><span id="recipeSyncStatus" class="module-sync">Recepten laden…</span></div>
   </header>
   <section class="module-heading hc-page-heading">
     <h1>Weekmenu & Recepten</h1>
@@ -37,7 +37,7 @@
   </section>
 
   <section id="recipeLibraryPanel" class="hidden">
-    <div class="recipe-library-actions"><button class="btn primary" id="addRecipeManual" type="button">+ Recept toevoegen</button><button class="btn" id="importRecipeUrl" type="button">Recept importeren</button><button class="btn" id="addRecipeFromPhotos" type="button">Recept uit foto's</button><button class="btn" id="addRecipeFromPdf" type="button">Recept uit PDF</button><input id="recipePhotoImportInput" class="recipe-photo-input" type="file" accept="image/*" multiple><input id="recipePdfImportInput" class="recipe-photo-input" type="file" accept="application/pdf,.pdf"></div>
+    <div class="recipe-library-actions"><button class="btn primary recipe-add-main" id="addRecipeManual" type="button">+ Recept toevoegen</button><div class="recipe-import-actions"><button class="btn" id="importRecipeUrl" type="button">Importeren</button><button class="btn" id="addRecipeFromFile" type="button">Uit foto / PDF</button></div><input id="recipeFileImportInput" class="recipe-photo-input" type="file" accept="image/*,application/pdf,.pdf" multiple></div>
     <div class="search"><input id="search" placeholder="Zoek recept…" autocomplete="off"></div><div id="smartRecipePicker"></div>
     <div class="stock-recipe-tools"><button class="btn" id="stockRecipeButton" type="button">Uit voorraad recepten zoeken</button><div id="stockPicker"></div></div>
     <div id="pending"></div>
@@ -48,6 +48,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="recipes-data.js"></script>
-<script type="module" src="app.js?v=1.4.179"></script>
-<script src="../hc-module-nav.js?v=1.4.179"></script></body>
+<script type="module" src="app.js?v=1.4.180"></script>
+<script src="../hc-module-nav.js?v=1.4.180"></script></body>
 </html>

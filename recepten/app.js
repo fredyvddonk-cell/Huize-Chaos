@@ -898,7 +898,7 @@ function renderSmartRecipePicker(){
     labelFor=r=>`${counts.get(String(r.id))||0}× eerder gepland`
   }else{
     rows.sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)||String(a.title).localeCompare(String(b.title),'nl'));
-    labelFor=r=>[recipeCategory(r),recipeType(r),recipeMainIngredient(r),recipeHomeTime(r),r.servings?r.servings+' personen':''].filter(Boolean).join(' · ')
+    labelFor=r=>[recipeCategory(r),recipeMainIngredient(r),r.servings?r.servings+' personen':''].filter(Boolean).join(' · ')
   }
   if(smartRecipeCategory!=='Alles')rows=rows.filter(r=>recipeCategory(r)===smartRecipeCategory);
   if(smartRecipeType!=='Alles')rows=rows.filter(r=>recipeType(r)===smartRecipeType);
@@ -906,7 +906,8 @@ function renderSmartRecipePicker(){
   if(smartRecipeTime!=='Alles')rows=rows.filter(r=>recipeHomeTime(r)===smartRecipeTime);
   const visible=rows.slice(0,smartRecipeLimit);
   const button=r=>`<button class="smart-recipe ${r.photo?'has-photo':''}" type="button" data-smart-recipe="${esc(r.id)}">${r.photo?`<img class="smart-recipe-photo" src="${esc(r.photo)}" alt="">`:''}<span>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</span><small>${esc(labelFor(r))}</small></button>`;
-  box.innerHTML=`<div class="smart-picker calm"><div class="smart-picker-title"><strong>Recept kiezen</strong><small>Tik op een recept om het eerst te bekijken.</small></div><div class="smart-modes"><button type="button" data-smart-mode="all" class="${smartRecipeMode==='all'?'active':''}">Alles</button><button type="button" data-smart-mode="stock" class="${smartRecipeMode==='stock'?'active':''}">Past bij voorraad</button><button type="button" data-smart-mode="variation" class="${smartRecipeMode==='variation'?'active':''}">Variatie</button><button type="button" data-smart-mode="frequent" class="${smartRecipeMode==='frequent'?'active':''}">Vaak gegeten</button></div><div class="smart-filter-block"><span>Categorie</span><div class="smart-categories">${cats.map(c=>`<button type="button" data-smart-cat="${esc(c)}" class="${smartRecipeCategory===c?'active':''}">${esc(c)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Soort</span><div class="smart-times">${['Alles',...RECIPE_TYPES].map(t=>`<button type="button" data-smart-type="${esc(t)}" class="${smartRecipeType===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Hoofdingrediënt</span><div class="smart-times">${['Alles',...MAIN_INGREDIENT_OPTIONS].map(t=>`<button type="button" data-smart-main="${esc(t)}" class="${smartRecipeMain===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-time-row"><span>Tijd thuis</span><div class="smart-times">${['Alles',...HOME_TIME_OPTIONS].map(t=>`<button type="button" data-smart-time="${esc(t)}" class="${smartRecipeTime===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-category-results">${visible.length?visible.map(button).join(''):'<div class="empty">Geen recepten binnen deze keuze.</div>'}</div>${rows.length>visible.length?`<button class="btn smart-more" id="smartMore" type="button">Meer recepten tonen</button>`:''}</div>`;
+  const filtersActive=smartRecipeCategory!=='Alles'||smartRecipeType!=='Alles'||smartRecipeMain!=='Alles'||smartRecipeTime!=='Alles';
+  box.innerHTML=`<div class="smart-picker calm"><div class="smart-picker-title"><strong>Recept kiezen</strong><small>Tik op een recept om het eerst te bekijken.</small></div><div class="smart-modes"><button type="button" data-smart-mode="all" class="${smartRecipeMode==='all'?'active':''}">Alles</button><button type="button" data-smart-mode="stock" class="${smartRecipeMode==='stock'?'active':''}">Past bij voorraad</button><button type="button" data-smart-mode="variation" class="${smartRecipeMode==='variation'?'active':''}">Variatie</button><button type="button" data-smart-mode="frequent" class="${smartRecipeMode==='frequent'?'active':''}">Vaak gegeten</button></div><details class="smart-filters" ${filtersActive?'open':''}><summary>Filters${filtersActive?' · actief':''}</summary><div class="smart-filters-body"><div class="smart-filter-block"><span>Categorie</span><div class="smart-categories">${cats.map(c=>`<button type="button" data-smart-cat="${esc(c)}" class="${smartRecipeCategory===c?'active':''}">${esc(c)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Soort</span><div class="smart-times">${['Alles',...RECIPE_TYPES].map(t=>`<button type="button" data-smart-type="${esc(t)}" class="${smartRecipeType===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Hoofdingrediënt</span><div class="smart-times">${['Alles',...MAIN_INGREDIENT_OPTIONS].map(t=>`<button type="button" data-smart-main="${esc(t)}" class="${smartRecipeMain===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-time-row"><span>Tijd thuis</span><div class="smart-times">${['Alles',...HOME_TIME_OPTIONS].map(t=>`<button type="button" data-smart-time="${esc(t)}" class="${smartRecipeTime===t?'active':''}">${esc(t)}</button>`).join('')}</div></div></div></details><div class="smart-category-results">${visible.length?visible.map(button).join(''):'<div class="empty">Geen recepten binnen deze keuze.</div>'}</div>${rows.length>visible.length?`<button class="btn smart-more" id="smartMore" type="button">Meer recepten tonen</button>`:''}</div>`;
   box.querySelectorAll('[data-smart-recipe]').forEach(b=>b.onclick=()=>openRecipe(b.dataset.smartRecipe));
   box.querySelectorAll('[data-smart-mode]').forEach(b=>b.onclick=()=>{smartRecipeMode=b.dataset.smartMode;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelectorAll('[data-smart-cat]').forEach(b=>b.onclick=()=>{smartRecipeCategory=b.dataset.smartCat;smartRecipeLimit=24;renderSmartRecipePicker()});
@@ -1281,8 +1282,7 @@ function showImportedPhotoRecipeReview(){
   detail.querySelector('#savePhotoRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'4');showView('ingredients')};
   detail.querySelector('#cancelPhotoRecipe').onclick=backList;
 }
-function setupPhotoRecipeImport(){const b=document.querySelector('#addRecipeFromPhotos'),input=document.querySelector('#recipePhotoImportInput');if(!b||!input)return;b.onclick=()=>{input.value='';input.click()};input.onchange=()=>{const files=[...(input.files||[])];if(files.length>2){alert('Kies maximaal 2 foto\'s.');return}importRecipeFromPhotos(files)}}
-setupPhotoRecipeImport();
+// V1.4.180 - foto en PDF delen één compacte importknop; afhandeling staat na de PDF-import.
 
 
 // V1.4.107 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.
@@ -1370,8 +1370,19 @@ function showImportedPdfRecipeReview(){
   detail.querySelector('#savePdfRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'');showView('ingredients')};
   detail.querySelector('#cancelPdfRecipe').onclick=backList;
 }
-function setupPdfRecipeImport(){const b=document.querySelector('#addRecipeFromPdf'),input=document.querySelector('#recipePdfImportInput');if(!b||!input)return;b.onclick=()=>{input.value='';input.click()};input.onchange=()=>{const file=input.files?.[0];if(file)importRecipeFromPdf(file)}}
-setupPdfRecipeImport();
+function setupUnifiedRecipeImport(){
+  const b=document.querySelector('#addRecipeFromFile'),input=document.querySelector('#recipeFileImportInput');if(!b||!input)return;
+  b.onclick=()=>{input.value='';input.click()};
+  input.onchange=()=>{
+    const files=[...(input.files||[])];if(!files.length)return;
+    const pdfs=files.filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name||''));
+    const photos=files.filter(f=>!pdfs.includes(f));
+    if(pdfs.length){if(files.length!==1){alert('Kies één PDF, of maximaal 2 foto\'s.');return}importRecipeFromPdf(pdfs[0]);return}
+    if(photos.length>2){alert('Kies maximaal 2 foto\'s.');return}
+    importRecipeFromPhotos(photos);
+  };
+}
+setupUnifiedRecipeImport();
 
 
 // V1.3.116 - Ga/Enter: invoer toepassen en toetsenbord sluiten; textarea houdt nieuwe regels.

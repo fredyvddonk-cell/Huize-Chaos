@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.179
+# Huize Chaos V1.4.180
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -107,6 +107,14 @@
 - Minder verticale witruimte per product.
 - Geen losse afgeronde productkaarten binnen een categorie.
 - Status, Kopen en Hutsel compacter gehouden.
+
+## V1.4.180
+- Receptenbibliotheek rustiger ingedeeld: één hoofdknop voor toevoegen en twee compacte importacties.
+- Foto- en PDF-import delen nu één knop; het bestandstype bepaalt automatisch de juiste import.
+- Snelle receptkeuzes blijven direct zichtbaar; Categorie, Soort, Hoofdingrediënt en Tijd thuis staan in één inklapbaar blok Filters.
+- Actieve detailfilters openen het filterblok automatisch en tonen “Filters · actief”.
+- Receptkaartjes tonen compactere kerninformatie.
+
 
 ## V1.4.179
 - Voorraadsoort Niet in voorraad vervalt.
