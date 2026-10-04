@@ -80,3 +80,73 @@
 
 /* Auth gate must stay hidden until Firebase confirms signed-out state. */
 .auth-gate[hidden]{display:none!important}
+
+
+/* V1.4.157 - Planner in dezelfde compacte Huize Chaos-stijl als Boodschappen en Voorraad. */
+.planner-app{padding-top:14px!important;padding-bottom:34px!important}
+.day-heading{margin:8px 0 10px!important}
+.day-heading-row{margin-top:7px!important}
+.planner-view-title{font-size:17px!important}
+.today-date{font-size:13px!important}
+.calendar-picker-button{transform:scale(.92);transform-origin:right center}
+
+.planner-tabs-primary{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px!important;gap:4px!important;padding:4px!important;margin-bottom:10px!important;overflow:visible!important}
+.planner-tabs-primary>button{min-width:0!important;height:40px!important;min-height:40px!important;padding:0 10px!important;font-size:14px!important}
+.planner-section-menu{position:relative;min-width:0}
+.planner-section-menu>summary{display:grid;place-items:center;height:40px;min-height:40px;border-radius:12px;color:var(--purple-dark);cursor:pointer;font-size:12px;font-weight:850;list-style:none}
+.planner-section-menu>summary::-webkit-details-marker{display:none}
+.planner-section-menu:has(button.active)>summary{background:var(--purple);color:#fff}
+.planner-section-popover{position:absolute;z-index:40;top:44px;right:0;display:grid;min-width:150px;padding:5px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 10px 28px rgba(45,35,55,.16)}
+.planner-section-popover button{width:100%!important;height:auto!important;min-height:38px!important;padding:8px 10px!important;border-radius:9px!important;background:#fff!important;color:var(--text)!important;text-align:left!important;font-size:13px!important}
+.planner-section-popover button.active{background:var(--lav)!important;color:var(--purple-dark)!important}
+
+#todayPage>.panel,#routinesPage>.panel,#householdPage>.panel,.today-timer-grid>.panel{margin:8px 0!important;padding:10px 11px!important;border-radius:14px!important;box-shadow:none!important}
+.panel-heading{margin-bottom:7px!important;gap:7px!important}
+.panel-heading>div{gap:6px!important}
+.panel h2{font-size:16px!important;line-height:1.2!important;margin:0!important}
+.section-icon{width:24px!important;height:24px!important;border-radius:7px!important;font-size:12px!important}
+.heading-actions{gap:4px!important}
+.heading-actions .add-button.compact{min-height:34px!important;height:34px!important;padding:0 9px!important;border-radius:10px!important;font-size:12px!important}
+.heading-actions .icon-add{width:34px!important;min-width:34px!important;padding:0!important;font-size:20px!important}
+
+.item-list{gap:4px!important}
+.planner-item,.compact-task-card,.household-block,.compact-house-task{min-height:48px!important;padding:7px 7px!important;gap:8px!important;border-radius:10px!important}
+.planner-item .check,.compact-task-card .check,.household-block .check,.compact-house-task .check{width:20px!important;height:20px!important}
+.item-copy strong,.compact-task-card .item-copy>strong{font-size:14px!important;line-height:1.2!important}
+.item-copy small,.compact-task-card .item-copy>small{margin-top:2px!important;font-size:11px!important;line-height:1.25!important}
+.time-badge,.upcoming-date{min-width:48px!important;padding:4px 6px!important;font-size:11px!important;border-radius:8px!important}
+.progress-text{margin:0 2px 5px!important;font-size:11px!important}
+
+.appointment-search{min-height:42px!important;margin-bottom:6px!important;padding:5px 8px!important;border-radius:10px!important}
+.appointment-search input{min-height:30px!important;padding:0!important;font-size:13px!important}
+.availability-link{min-height:38px!important;margin:2px 0 7px!important;padding:6px 9px!important;font-size:12px!important}
+.household-link{min-height:42px!important;margin:0 0 6px!important;padding:6px 9px!important;border-radius:10px!important}
+.household-link strong{font-size:13px!important}.household-link small{font-size:10px!important}
+
+.today-timer-grid{gap:8px!important;margin:8px 0!important}
+.today-timer-panel{min-height:54px!important;padding:8px 10px!important}
+.today-timer-panel .panel-heading{min-height:36px!important}
+.household-timer{font-size:20px!important}
+.timer-toggle{min-height:34px!important;padding:5px 7px!important;border-radius:9px!important}
+
+.waste-reminder-panel{min-height:58px!important;gap:9px!important;padding:9px 10px!important}
+.waste-reminder-icon{width:34px!important;height:34px!important;border-radius:10px!important;font-size:19px!important}
+.waste-reminder-panel h2{font-size:15px!important}.waste-reminder-panel p{font-size:12px!important}.waste-share-hint{margin-top:3px!important;font-size:10px!important}
+
+.routine-help,.household-help{margin:0 0 8px!important;font-size:12px!important;line-height:1.35!important}
+.household-library details{margin:5px 0!important;border-radius:11px!important}
+.household-library summary,.due-group>summary{min-height:42px!important;padding:8px 9px!important;font-size:13px!important}
+.library-list>div{padding:7px 9px!important}
+.library-list strong{font-size:13px!important}.library-list small{font-size:11px!important}
+.due-list{gap:4px!important;padding:0 5px 5px!important}
+.house-section-title{margin:10px 2px 5px!important;font-size:13px!important}
+.subtask-list{gap:3px!important;margin-top:5px!important}.subtask{padding:5px 6px!important;font-size:11px!important}
+
+.main-add{width:48px!important;height:48px!important;min-height:48px!important;margin:12px auto 0!important;padding:0!important;border-radius:14px!important;font-size:25px!important}
+
+@media(max-width:430px){
+  .planner-app{padding-left:12px!important;padding-right:12px!important}
+  .planner-tabs-primary>button{font-size:13px!important;padding:0 8px!important}
+  #todayPage>.panel,#routinesPage>.panel,#householdPage>.panel,.today-timer-grid>.panel{padding:9px 10px!important}
+  .secondary-add{max-width:124px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}

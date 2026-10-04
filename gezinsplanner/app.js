@@ -177,7 +177,7 @@ els.form.addEventListener('submit',saveEntry);
 els.hasDeadline.addEventListener('change',()=>{els.deadlineField.hidden=!els.hasDeadline.checked;if(!els.hasDeadline.checked)els.deadline.value='' });
 els.school.addEventListener('change',()=>{if(els.school.checked){els.private.checked=true;els.category.value='';document.querySelectorAll('[data-shift]').forEach(item=>item.classList.remove('active'))}els.private.disabled=els.school.checked});
 document.querySelectorAll('[data-shift]').forEach(button=>button.addEventListener('click',()=>{els.category.value='work';els.school.checked=false;els.private.disabled=false;els.title.value=button.dataset.shift;els.time.value=button.dataset.start;els.endTime.value=button.dataset.end;document.querySelectorAll('[data-shift]').forEach(item=>item.classList.toggle('active',item===button))}));
-document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>showPlannerPage(button.dataset.plannerPage)));
+document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>{showPlannerPage(button.dataset.plannerPage);const menu=button.closest('details');if(menu)menu.open=false;}));
 document.addEventListener('click',event=>{const activeMenu=event.target.closest('.item-menu');document.querySelectorAll('.item-menu[open]').forEach(menu=>{if(menu!==activeMenu||event.target.closest('.item-menu-popover button'))menu.removeAttribute('open')})});
 document.getElementById('openHouseholdFromTasks').addEventListener('click',()=>showPlannerPage('household'));
 document.getElementById('openHouseholdFromTime')?.addEventListener('click',()=>showPlannerPage('household'));
