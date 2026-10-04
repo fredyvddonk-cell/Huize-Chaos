@@ -92,6 +92,7 @@ function migrateProduct(x) {
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
   product.temporary = Boolean(product.temporary);
   product.cloudPending = Boolean(product.cloudPending);
+  product.shoppingUpdatedAt = Number(product.shoppingUpdatedAt) || 0;
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
   product.stockLocation = String(product.stockLocation || '');
   if (!['standard','meal','hidden'].includes(product.stockRole)) product.stockRole = defaultStockRole(product);
@@ -120,6 +121,37 @@ stockLocations = [...new Set([...stockLocations, ...products.map(product => Stri
 function normalizedProductName(value) {
   return String(value || '').trim().toLocaleLowerCase('nl-NL').replace(/\s+/g,' ');
 }
+function dedupeProductsByName(items) {
+  const byName = new Map();
+  const withoutName = [];
+  for (const item of items || []) {
+    const product = migrateProduct(item);
+    const key = normalizedProductName(product.name);
+    if (!key) { withoutName.push(product); continue; }
+    const current = byName.get(key);
+    if (!current) { byName.set(key, product); continue; }
+    const currentTime = Math.max(Number(current.inventoryUpdatedAt)||0, Number(current.shoppingUpdatedAt)||0);
+    const productTime = Math.max(Number(product.inventoryUpdatedAt)||0, Number(product.shoppingUpdatedAt)||0);
+    const newer = productTime > currentTime ? product : current;
+    const older = newer === product ? current : product;
+    byName.set(key, migrateProduct({
+      ...older,
+      ...newer,
+      shopping: Boolean(current.shopping || product.shopping),
+      done: Boolean((newer.shopping ? newer.done : false)),
+      temporary: Boolean(current.temporary && product.temporary),
+      inventoryUpdatedAt: Math.max(Number(current.inventoryUpdatedAt)||0, Number(product.inventoryUpdatedAt)||0),
+      shoppingUpdatedAt: Math.max(Number(current.shoppingUpdatedAt)||0, Number(product.shoppingUpdatedAt)||0)
+    }));
+  }
+  return [...byName.values(), ...withoutName];
+}
+
+// Exact dezelfde productnaam hoort maar één voorraadregel te hebben.
+// Ruim oude lokale dubbelen direct op; Firebase ruimt dubbele cloud-id's daarna op.
+products = dedupeProductsByName(products);
+localStorage.setItem('household-products-v2', JSON.stringify(products));
+
 function findExistingProductByName(name, excludeId = 0) {
   const key = normalizedProductName(name);
   if (!key) return null;
@@ -165,7 +197,7 @@ let pendingProductDelete = null;
 
 function inventoryComparable(product = {}) {
   const copy = { ...product };
-  ['shopping','done','cloudPending','cloudId','cloudSource','cloudAddedBy','cloudAddedByName','inventoryUpdatedAt'].forEach(key => delete copy[key]);
+  ['shopping','done','cloudPending','cloudId','cloudSource','cloudAddedBy','cloudAddedByName','inventoryUpdatedAt','shoppingUpdatedAt'].forEach(key => delete copy[key]);
   return JSON.stringify(copy);
 }
 
@@ -183,8 +215,30 @@ function stampChangedInventoryProducts() {
   });
 }
 
+function shoppingComparable(product = {}) {
+  return JSON.stringify({
+    name:String(product.name||''), quantity:String(product.quantity||''), unit:String(product.unit||''),
+    store:String(product.store||''), category:String(product.category||''), memo:String(product.memo||''),
+    shopping:Boolean(product.shopping), done:Boolean(product.done), temporary:Boolean(product.temporary)
+  });
+}
+
+function stampChangedShoppingProducts() {
+  let previous = [];
+  try { previous = JSON.parse(localStorage.getItem('household-products-v2') || '[]') || []; } catch (_) {}
+  const previousById = new Map(previous.map(product => [String(product.id), product]));
+  const now = Date.now();
+  products.forEach(product => {
+    const before = previousById.get(String(product.id));
+    if (!before || shoppingComparable(before) !== shoppingComparable(product)) {
+      product.shoppingUpdatedAt = Math.max(now, Number(product.shoppingUpdatedAt) || 0);
+    }
+  });
+}
+
 function save() {
   stampChangedInventoryProducts();
+  stampChangedShoppingProducts();
   localStorage.setItem('household-products-v2', JSON.stringify(products));
   localStorage.setItem('household-stores', JSON.stringify(stores));
   localStorage.setItem('household-categories', JSON.stringify(categories));
@@ -774,7 +828,7 @@ huizeChaosHistoryState=initialHistoryState;
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {
-  products = nextProducts.map(migrateProduct);
+  products = dedupeProductsByName(nextProducts.map(migrateProduct));
   stockLocations = [...new Set([...stockLocations, ...products.map(product => String(product.stockLocation || '').trim()).filter(Boolean)])];
   refreshStockLocationSelect();
   localStorage.setItem('household-products-v2', JSON.stringify(products));
@@ -881,7 +935,10 @@ function initApp() {
         alert(`${duplicate.name} staat al in Voorraad.`);
         return;
       }
-      Object.assign(products.find(x => x.id === id), data);
+      const edited = products.find(x => x.id === id);
+      Object.assign(edited, data);
+      edited.inventoryUpdatedAt = Date.now();
+      edited.shoppingUpdatedAt = Date.now();
     } else {
       const existing = findExistingProductByName(name);
       if (existing) {

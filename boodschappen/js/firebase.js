@@ -109,6 +109,7 @@ function inventoryProductData(product){
   delete copy.cloudAddedByName;
   delete copy.shopping;
   delete copy.done;
+  delete copy.shoppingUpdatedAt;
   return copy;
 }
 
@@ -121,15 +122,37 @@ function inventoryDeleted(){try{return JSON.parse(localStorage.getItem(INVENTORY
 function saveInventoryDeleted(value){localStorage.setItem(INVENTORY_DELETED_KEY,JSON.stringify(value||{}))}
 window.markInventoryProductDeleted=id=>{const deleted=inventoryDeleted();deleted[String(id)]=Date.now();saveInventoryDeleted(deleted);scheduleInventorySync();};
 
+function inventoryNameKey(value){
+  return String(value||'').trim().toLocaleLowerCase('nl-NL').replace(/\s+/g,' ');
+}
+
+function dedupeInventoryRows(rows, deleted={}){
+  const byName=new Map();
+  const now=Date.now();
+  for(const row of rows||[]){
+    if(!row || deleted[String(row.id)]) continue;
+    const key=inventoryNameKey(row.name);
+    if(!key){ byName.set(`__id__${row.id}`,row); continue; }
+    const current=byName.get(key);
+    if(!current){ byName.set(key,row); continue; }
+    const a=Number(current.inventoryUpdatedAt)||0, b=Number(row.inventoryUpdatedAt)||0;
+    const winner=b>a?row:current, loser=winner===row?current:row;
+    deleted[String(loser.id)]=Math.max(Number(deleted[String(loser.id)]||0),now);
+    byName.set(key,winner);
+  }
+  return [...byName.values()];
+}
+
 async function syncInventoryNow(){
   if(!inventoryCloudReady || !user || applyingInventoryCloud) return;
-  const localProducts = inventoryProducts();
+  let localProducts = inventoryProducts();
   const latest = await getDoc(inventoryRef);
-  const remoteProducts = latest.exists() && Array.isArray(latest.data()?.products) ? latest.data().products : [];
+  let remoteProducts = latest.exists() && Array.isArray(latest.data()?.products) ? latest.data().products : [];
   const deleted={...(latest.data()?.deletedProducts||{}),...inventoryDeleted()};
-  saveInventoryDeleted(deleted);
+  localProducts=dedupeInventoryRows(localProducts,deleted);
+  remoteProducts=dedupeInventoryRows(remoteProducts,deleted);
   const remoteById = new Map(remoteProducts.filter(p=>!deleted[String(p.id)]).map(product => [String(product.id), product]));
-  const products = localProducts.filter(p=>!deleted[String(p.id)]).map(local => {
+  let products = localProducts.filter(p=>!deleted[String(p.id)]).map(local => {
     const remote = remoteById.get(String(local.id));
     if(!remote) return local;
     const localChanged = Number(local.inventoryUpdatedAt) || 0;
@@ -139,6 +162,8 @@ async function syncInventoryNow(){
   remoteProducts.forEach(remote => {
     if(!deleted[String(remote.id)] && !products.some(local => String(local.id) === String(remote.id))) products.push(remote);
   });
+  products=dedupeInventoryRows(products,deleted);
+  saveInventoryDeleted(deleted);
   await setDoc(inventoryRef, {
     products, deletedProducts:deleted,
     updatedAt: serverTimestamp(),
@@ -158,8 +183,8 @@ function scheduleInventorySync(){
 
 function mergeInventoryFromCloud(remoteProducts,remoteDeleted={}){
   const deleted={...remoteDeleted,...inventoryDeleted()}; saveInventoryDeleted(deleted);
-  remoteProducts=(remoteProducts||[]).filter(p=>!deleted[String(p.id)]);
-  const local=window.getHuizeChaosProducts().filter(p=>!deleted[String(p.id)]);
+  remoteProducts=dedupeInventoryRows((remoteProducts||[]).filter(p=>!deleted[String(p.id)]),deleted);
+  const local=dedupeInventoryRows(window.getHuizeChaosProducts().filter(p=>!deleted[String(p.id)]),deleted);
   const localById=new Map(local.map(product=>[String(product.id),product]));
   let localNewer=false;
   // Per product wint de nieuwste wijziging. Daardoor kan een toestel met een
@@ -187,8 +212,10 @@ function mergeInventoryFromCloud(remoteProducts,remoteDeleted={}){
   local.filter(product=>product.temporary || product.cloudSource==='family').forEach(product=>{
     if(!merged.some(x=>String(x.id)===String(product.id))) merged.push(product);
   });
+  const cleanMerged=dedupeInventoryRows(merged,deleted);
+  saveInventoryDeleted(deleted);
   applyingInventoryCloud=true;
-  window.replaceHuizeChaosProducts(merged);
+  window.replaceHuizeChaosProducts(cleanMerged);
   applyingInventoryCloud=false;
   if(localNewer) scheduleInventorySync();
 }
@@ -294,7 +321,8 @@ function cloudData(product) {
     temporary: Boolean(product.temporary),
     source: product.cloudSource || (product.status === 'In huis' ? 'family' : 'stock'),
     addedBy: product.cloudAddedBy || user.uid,
-    addedByName: product.cloudAddedByName || user.displayName || 'Gezinslid'
+    addedByName: product.cloudAddedByName || user.displayName || 'Gezinslid',
+    clientUpdatedAt: Number(product.shoppingUpdatedAt) || 0
   };
 }
 
@@ -302,7 +330,7 @@ function cloudChanged(current, next) {
   return Object.keys(next).some(key => current?.[key] !== next[key]);
 }
 
-const syncedFields = ['localId', 'name', 'quantity', 'unit', 'store', 'category', 'memo', 'done', 'temporary', 'source', 'addedBy', 'addedByName'];
+const syncedFields = ['localId', 'name', 'quantity', 'unit', 'store', 'category', 'memo', 'done', 'temporary', 'source', 'addedBy', 'addedByName', 'clientUpdatedAt'];
 
 function sameRemoteItems(current, next) {
   if (current.size !== next.size) return false;
@@ -345,22 +373,29 @@ function applySnapshot(snapshot) {
       product = { id: Date.now() + counter++, status: 'In huis', shopping: true, buyDirectWhenOut: false };
       products.push(product);
     }
+    const localShoppingChanged=Number(product.shoppingUpdatedAt)||0;
+    const remoteShoppingChanged=Number(data.clientUpdatedAt)||0;
+    const keepLocalShopping=localShoppingChanged>remoteShoppingChanged;
     Object.assign(product, {
       cloudId,
       cloudSource: data.source || 'family',
       cloudAddedBy: data.addedBy || '',
       cloudAddedByName: data.addedByName || '',
-      cloudPending: false,
-      name: data.name || '',
-      quantity: data.quantity || '',
-      unit: data.unit || '',
-      store: data.store || '',
-      category: data.category || '',
-      memo: data.memo || '',
-      done: Boolean(data.done),
-      temporary: Boolean(data.temporary),
+      cloudPending: keepLocalShopping,
+      ...(keepLocalShopping ? {} : {
+        name: data.name || '',
+        quantity: data.quantity || '',
+        unit: data.unit || '',
+        store: data.store || '',
+        category: data.category || '',
+        memo: data.memo || '',
+        done: Boolean(data.done),
+        temporary: Boolean(data.temporary),
+        shoppingUpdatedAt: remoteShoppingChanged
+      }),
       shopping: true
     });
+    if(keepLocalShopping) syncPending=true;
   });
 
   products = products.filter(product => {
@@ -428,6 +463,7 @@ async function syncNow() {
       product.cloudAddedBy = user.uid;
       product.cloudAddedByName = user.displayName || 'Gezinslid';
       product.cloudPending = true;
+      product.shoppingUpdatedAt = Number(product.shoppingUpdatedAt) || Date.now();
       localStorage.setItem('household-products-v2', JSON.stringify(products));
     }
     activeIds.add(product.cloudId);
