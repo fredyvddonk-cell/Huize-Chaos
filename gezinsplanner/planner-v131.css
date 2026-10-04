@@ -150,3 +150,22 @@
   #todayPage>.panel,#routinesPage>.panel,#householdPage>.panel,.today-timer-grid>.panel{padding:9px 10px!important}
   .secondary-add{max-width:124px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+
+
+/* V1.4.159 — Planner ▼ gebruikt dezelfde vrije body-level popup als Boodschappen/Voorraad */
+.planner-section-menu{position:relative!important;z-index:auto!important}
+.planner-section-menu>summary{cursor:pointer!important}
+.planner-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}
+.planner-section-popover.hc-floating-section-menu{
+  position:fixed!important;z-index:25020!important;right:auto!important;
+  min-width:0!important;max-width:calc(100vw - 24px)!important;
+  padding:5px!important;gap:2px!important;border:1px solid #ded3e8!important;
+  border-radius:11px!important;background:#fff!important;opacity:1!important;
+  filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  box-shadow:0 10px 28px rgba(62,42,82,.20)!important;overflow:auto!important;
+}
+.planner-section-popover.hc-floating-section-menu[hidden]{display:none!important}
+.planner-section-popover.hc-floating-section-menu button{
+  min-height:36px!important;height:auto!important;padding:8px 10px!important;border-radius:8px!important;
+  text-align:left!important;font-size:13px!important;white-space:nowrap!important;
+}

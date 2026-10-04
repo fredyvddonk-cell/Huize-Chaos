@@ -177,7 +177,61 @@ els.form.addEventListener('submit',saveEntry);
 els.hasDeadline.addEventListener('change',()=>{els.deadlineField.hidden=!els.hasDeadline.checked;if(!els.hasDeadline.checked)els.deadline.value='' });
 els.school.addEventListener('change',()=>{if(els.school.checked){els.private.checked=true;els.category.value='';document.querySelectorAll('[data-shift]').forEach(item=>item.classList.remove('active'))}els.private.disabled=els.school.checked});
 document.querySelectorAll('[data-shift]').forEach(button=>button.addEventListener('click',()=>{els.category.value='work';els.school.checked=false;els.private.disabled=false;els.title.value=button.dataset.shift;els.time.value=button.dataset.start;els.endTime.value=button.dataset.end;document.querySelectorAll('[data-shift]').forEach(item=>item.classList.toggle('active',item===button))}));
-document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>{showPlannerPage(button.dataset.plannerPage);const menu=button.closest('details');if(menu)menu.open=false;}));
+const plannerSectionMenu=document.getElementById('plannerSectionMenu');
+const plannerSectionToggle=document.getElementById('plannerSectionToggle');
+const plannerSectionPopover=document.getElementById('plannerSectionPopover');
+let plannerSectionMenuOpen=false;
+
+// Zelfde aanpak als Boodschappen/Voorraad: popup direct onder <body>,
+// zodat de paarse tabbalk de tekst niet kan vasthouden of afknippen.
+if(plannerSectionPopover){
+  plannerSectionPopover.hidden=true;
+  plannerSectionPopover.classList.add('hc-floating-section-menu');
+  document.body.appendChild(plannerSectionPopover);
+}
+const positionPlannerSectionMenu=()=>{
+  if(!plannerSectionMenuOpen||!plannerSectionToggle||!plannerSectionPopover||plannerSectionPopover.hidden)return;
+  const r=plannerSectionToggle.getBoundingClientRect();
+  const side=12;
+  const gap=6;
+  const width=Math.min(196,window.innerWidth-side*2);
+  plannerSectionPopover.style.width=width+'px';
+  const left=Math.max(side,Math.min(window.innerWidth-width-side,r.right-width));
+  plannerSectionPopover.style.left=left+'px';
+  plannerSectionPopover.style.right='auto';
+  const maxTop=Math.max(side,window.innerHeight-plannerSectionPopover.offsetHeight-side);
+  plannerSectionPopover.style.top=Math.max(side,Math.min(r.bottom+gap,maxTop))+'px';
+};
+const setPlannerSectionMenuOpen=open=>{
+  plannerSectionMenuOpen=!!open;
+  if(plannerSectionToggle){
+    plannerSectionToggle.setAttribute('aria-expanded',String(plannerSectionMenuOpen));
+    plannerSectionToggle.classList.toggle('active',plannerSectionMenuOpen);
+  }
+  if(plannerSectionPopover)plannerSectionPopover.hidden=!plannerSectionMenuOpen;
+  if(plannerSectionMenu)plannerSectionMenu.removeAttribute('open');
+  if(plannerSectionMenuOpen)requestAnimationFrame(positionPlannerSectionMenu);
+};
+if(plannerSectionToggle){
+  plannerSectionToggle.setAttribute('aria-expanded','false');
+  plannerSectionToggle.addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    setPlannerSectionMenuOpen(!plannerSectionMenuOpen);
+  });
+}
+window.addEventListener('resize',positionPlannerSectionMenu);
+window.addEventListener('scroll',positionPlannerSectionMenu,{passive:true});
+document.addEventListener('pointerdown',event=>{
+  if(!plannerSectionMenuOpen)return;
+  if(plannerSectionToggle?.contains(event.target)||plannerSectionPopover?.contains(event.target))return;
+  setPlannerSectionMenuOpen(false);
+});
+
+document.querySelectorAll('[data-planner-page]').forEach(button=>button.addEventListener('click',()=>{
+  showPlannerPage(button.dataset.plannerPage);
+  setPlannerSectionMenuOpen(false);
+}));
 document.addEventListener('click',event=>{const activeMenu=event.target.closest('.item-menu');document.querySelectorAll('.item-menu[open]').forEach(menu=>{if(menu!==activeMenu||event.target.closest('.item-menu-popover button'))menu.removeAttribute('open')})});
 document.getElementById('openHouseholdFromTasks').addEventListener('click',()=>showPlannerPage('household'));
 document.getElementById('openHouseholdFromTime')?.addEventListener('click',()=>showPlannerPage('household'));
