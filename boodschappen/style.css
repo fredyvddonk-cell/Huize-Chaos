@@ -1286,14 +1286,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .product-search-suggestion{touch-action:manipulation}
 
 
-/* V1.4.172 - native ▼-menu en directe zoekselectie */
+/* V1.4.173 - native ▼-menu en directe zoekselectie */
 .shopping-section-menu>summary{list-style:none;cursor:pointer;user-select:none;width:100%;height:36px;min-height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#694d88;font-size:17px;font-weight:800}
 .shopping-section-menu>summary::-webkit-details-marker{display:none}
 .shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
 .shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
 .shopping-section-menu[open] .shopping-section-popover{display:grid!important}
 
-/* V1.4.172 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
+/* V1.4.173 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
 .shopping-section-menu{z-index:5200!important}
 .shopping-section-popover{
   position:fixed!important;
@@ -1307,7 +1307,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 
 
-/* V1.4.172 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
+/* V1.4.173 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
 .shopping-section-menu{position:relative!important;z-index:auto!important}
 .shopping-section-menu>summary{cursor:pointer!important}
 .shopping-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}
@@ -1329,10 +1329,10 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .auth-gate[hidden]{display:none!important}
 
 
-/* V1.4.172 - verwijderbevestiging staat direct boven Product wijzigen. */
+/* V1.4.173 - verwijderbevestiging staat direct boven Product wijzigen. */
 #deleteModal.modal{z-index:3600}
 
-/* V1.4.172 — Product wijzigen compacter op telefoon, inhoud/werking ongewijzigd */
+/* V1.4.173 — Product wijzigen compacter op telefoon, inhoud/werking ongewijzigd */
 #modal{padding:6px;align-items:center}
 #modal .card{width:min(100%,620px);max-height:calc(100dvh - 12px);padding:12px;border-radius:16px;overflow:auto}
 #modal .card h2{font-size:1.18rem;line-height:1.15;margin:0 0 7px}
@@ -1361,7 +1361,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   #modal .modal-actions{margin-top:6px}
 }
 
-/* V1.4.172 — Product wijzigen: één vaste veldhoogte voor inputs en keuzemenu's */
+/* V1.4.173 — Product wijzigen: één vaste veldhoogte voor inputs en keuzemenu's */
 #modal .field input:not([type="checkbox"]),
 #modal .field select{
   height:42px;
@@ -1390,7 +1390,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.172 — Product wijzigen: compacte uniforme veldhoogte */
+/* V1.4.173 — Product wijzigen: compacte uniforme veldhoogte */
 #modal .field input:not([type="checkbox"]),
 #modal .field select,
 #modal .category-input-wrap input{

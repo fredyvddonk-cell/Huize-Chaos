@@ -82,7 +82,7 @@
 .auth-gate[hidden]{display:none!important}
 
 
-/* V1.4.172 - Planner in dezelfde compacte Huize Chaos-stijl als Boodschappen en Voorraad. */
+/* V1.4.173 - Planner in dezelfde compacte Huize Chaos-stijl als Boodschappen en Voorraad. */
 .planner-app{padding-top:14px!important;padding-bottom:34px!important}
 .day-heading{margin:8px 0 10px!important}
 .day-heading-row{margin-top:7px!important}
@@ -186,4 +186,35 @@
  .planner-heading-line h1{font-size:20px!important}
  .planner-heading-date{font-size:12px!important}
  .planner-heading-calendar{width:26px!important;height:26px!important;min-width:26px!important}
+}
+
+/* V1.4.173 — Gezinsplanner: dezelfde compacte standaard veldhoogte als Product wijzigen V1.4.172 */
+.modal-card .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.modal-card .field select{
+  height:36px!important;
+  min-height:36px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  padding-left:10px!important;
+  font-size:.86rem!important;
+  line-height:1.15!important;
+  border-radius:9px!important;
+}
+.modal-card .field select{
+  padding-right:34px!important;
+}
+.modal-card .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]){
+  padding-right:10px!important;
+}
+.modal-card .field textarea{
+  height:auto!important;
+  min-height:44px!important;
+}
+.modal-card .field{
+  gap:2px!important;
+  margin:4px 0!important;
+}
+.modal-card .field>span{
+  font-size:.72rem!important;
+  line-height:1.1!important;
 }
