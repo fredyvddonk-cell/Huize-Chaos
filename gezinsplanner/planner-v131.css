@@ -152,7 +152,7 @@
 }
 
 
-/* V1.4.159 — Planner ▼ gebruikt dezelfde vrije body-level popup als Boodschappen/Voorraad */
+/* V1.4.160 — Planner ▼ gebruikt dezelfde vrije body-level popup als Boodschappen/Voorraad */
 .planner-section-menu{position:relative!important;z-index:auto!important}
 .planner-section-menu>summary{cursor:pointer!important}
 .planner-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}
@@ -168,4 +168,22 @@
 .planner-section-popover.hc-floating-section-menu button{
   min-height:36px!important;height:auto!important;padding:8px 10px!important;border-radius:8px!important;
   text-align:left!important;font-size:13px!important;white-space:nowrap!important;
+}
+
+/* V1.4.160 — compacte titelregel + dropdown gelijk aan Boodschappen/Voorraad */
+.planner-heading-line{display:flex!important;align-items:center!important;gap:6px!important;min-width:0!important;flex-wrap:nowrap!important}
+.planner-heading-line h1{margin:0!important;white-space:nowrap!important}
+.planner-heading-calendar{flex:0 0 auto!important;transform:none!important;width:28px!important;height:28px!important;min-width:28px!important;padding:0!important;border-radius:8px!important}
+.planner-heading-calendar>span{font-size:15px!important;line-height:1!important}
+.planner-heading-date{flex:1 1 auto!important;min-width:0!important;margin:0!important;font-size:13px!important;line-height:1.2!important;color:var(--muted)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.day-heading>.planner-view-title{margin:5px 0 0!important;font-size:15px!important;line-height:1.2!important}
+.planner-section-popover.hc-floating-section-menu{background:#fff!important;border:1px solid #ded3e8!important}
+.planner-section-popover.hc-floating-section-menu button{background:#f6f1fa!important;color:#58406f!important;border:0!important}
+.planner-section-popover.hc-floating-section-menu button:hover,.planner-section-popover.hc-floating-section-menu button:focus-visible{background:#eee5f6!important}
+.planner-section-popover.hc-floating-section-menu button.active{background:#957ac1!important;color:#fff!important}
+@media(max-width:430px){
+ .planner-heading-line{gap:5px!important}
+ .planner-heading-line h1{font-size:20px!important}
+ .planner-heading-date{font-size:12px!important}
+ .planner-heading-calendar{width:26px!important;height:26px!important;min-width:26px!important}
 }
