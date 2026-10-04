@@ -204,7 +204,7 @@
 /* V1.4.117 - compacte, bruikbare variatiecontrole */
 .week-variation{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .55rem}.week-variation>strong{margin-right:.1rem}.week-variation>span{color:var(--muted,#6f6b73)}.week-variation>span+span{flex-basis:100%;padding-left:0}.week-variation-warning{flex-basis:100%;color:#8b3a4b;font-weight:600;margin-top:.15rem}
 
-/* V1.4.175 — Weekmenu rustiger: compacte weekinfo en recepten pas bij openen bewerken */
+/* V1.4.176 — Weekmenu rustiger: compacte weekinfo en recepten pas bij openen bewerken */
 .week-menu-context{gap:7px;margin-top:9px}
 .week-info{background:#fff;border:1px solid #e7e0ec;border-radius:14px;overflow:hidden}
 .week-info>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;color:#5b347c}
@@ -238,3 +238,8 @@
   .week-info>summary{padding:9px 10px}
   .week-menu-card{padding:9px 11px}
 }
+
+/* V1.4.176 — receptactie direct bij verwijderen in uitgeklapt weekmenu */
+.week-menu-card-actions{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 100%}
+.week-menu-card-actions .btn{flex:1 1 180px}
+@media(max-width:500px){.week-menu-actions .week-menu-card-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.week-menu-actions .week-menu-card-actions .remove-week-plan{grid-column:auto;width:auto}}
