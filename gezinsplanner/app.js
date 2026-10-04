@@ -273,16 +273,7 @@ els.clearAppointmentSearch.addEventListener('click',()=>{els.appointmentSearch.v
 const plannerDateButton=document.getElementById('plannerDateButton');
 function openPlannerDatePicker(event){
   event?.preventDefault();
-  const input=els.dateSearch;
-  if(!input)return;
-  try{
-    if(typeof input.showPicker==='function'){
-      input.showPicker();
-      return;
-    }
-  }catch(_){ }
-  try{input.focus({preventScroll:true})}catch(_){input.focus()}
-  input.click();
+  if(els.dateSearch) openHcPicker(els.dateSearch);
 }
 plannerDateButton?.addEventListener('click',openPlannerDatePicker);
 els.dateSearch?.addEventListener('change',renderDateSearch);
@@ -682,3 +673,96 @@ window.getHuizeChaosPlannerEntries=()=>entries;
 window.replaceHuizeChaosPlannerEntries=next=>{const obsoleteIds=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);entries=normalizePlannerEntries(next.filter(item=>!obsoleteIds.has(item.id)));localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));initializeHouseholdWeekSchedule();balanceHouseholdWeekSchedule();render()};
 window.applyHuizeChaosPlannerRole=role=>{window.huizeChaosPlannerRole=role;els.privateField.hidden=role!=='owner';els.schoolField.hidden=role!=='owner';if(role!=='owner'){els.private.checked=false;els.school.checked=false}};
 window.applyHuizeChaosBigState=state=>{localStorage.setItem(BIG_STATE_KEY,JSON.stringify(state));render()};
+
+
+/* V1.4.174 — eigen HC datum- en tijdkiezer; voorkomt de donkere systeemkiezer. */
+let hcPickerTarget=null;
+let hcPickerType='date';
+let hcPickerMonth=new Date();
+let hcPickerSelected='';
+
+function hcPad(value){return String(value).padStart(2,'0')}
+function hcDateValue(date){return `${date.getFullYear()}-${hcPad(date.getMonth()+1)}-${hcPad(date.getDate())}`}
+function hcPrettyDate(value){if(!value)return 'Geen datum gekozen';const d=new Date(`${value}T12:00:00`);return new Intl.DateTimeFormat('nl-NL',{weekday:'short',day:'numeric',month:'long',year:'numeric'}).format(d)}
+function hcPrettyTime(value){return value?value.replace(':','.'):'Geen tijd gekozen'}
+
+function setupHcPicker(){
+  const modal=document.getElementById('hcPickerModal');
+  if(!modal)return;
+  const hour=document.getElementById('hcPickerHour');
+  const minute=document.getElementById('hcPickerMinute');
+  if(hour&&!hour.options.length)hour.innerHTML=Array.from({length:24},(_,i)=>`<option value="${hcPad(i)}">${hcPad(i)}</option>`).join('');
+  if(minute&&!minute.options.length)minute.innerHTML=Array.from({length:60},(_,i)=>`<option value="${hcPad(i)}">${hcPad(i)}</option>`).join('');
+  document.getElementById('hcPrevMonth')?.addEventListener('click',()=>{hcPickerMonth.setMonth(hcPickerMonth.getMonth()-1);renderHcCalendar()});
+  document.getElementById('hcNextMonth')?.addEventListener('click',()=>{hcPickerMonth.setMonth(hcPickerMonth.getMonth()+1);renderHcCalendar()});
+  hour?.addEventListener('change',updateHcPickerValue);
+  minute?.addEventListener('change',updateHcPickerValue);
+  document.getElementById('hcPickerClear')?.addEventListener('click',()=>finishHcPicker('clear'));
+  document.getElementById('hcPickerCancel')?.addEventListener('click',()=>finishHcPicker('cancel'));
+  document.getElementById('hcPickerSet')?.addEventListener('click',()=>finishHcPicker('set'));
+  modal.addEventListener('click',event=>{if(event.target===modal)finishHcPicker('cancel')});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))finishHcPicker('cancel')});
+
+  document.querySelectorAll('input[type="date"],input[type="time"]').forEach(prepareHcPickerInput);
+  document.addEventListener('pointerdown',event=>{const input=event.target.closest?.('input[type="date"],input[type="time"]');if(!input)return;prepareHcPickerInput(input);event.preventDefault();openHcPicker(input)});
+  document.addEventListener('click',event=>{const input=event.target.closest?.('input[type="date"],input[type="time"]');if(input)event.preventDefault()},true);
+}
+
+function prepareHcPickerInput(input){if(!input||input.dataset.hcPickerReady==='1')return;input.dataset.hcPickerReady='1';input.classList.add('hc-custom-picker');input.setAttribute('inputmode','none')}
+
+function openHcPicker(input){
+  if(!input)return;
+  const modal=document.getElementById('hcPickerModal');
+  if(!modal)return;
+  hcPickerTarget=input;
+  hcPickerType=input.type==='time'?'time':'date';
+  hcPickerSelected=input.value||'';
+  document.getElementById('hcPickerTitle').textContent=hcPickerType==='time'?'Kies tijd':'Kies datum';
+  document.getElementById('hcDatePicker').hidden=hcPickerType!=='date';
+  document.getElementById('hcTimePicker').hidden=hcPickerType!=='time';
+  if(hcPickerType==='date'){
+    const base=hcPickerSelected?new Date(`${hcPickerSelected}T12:00:00`):new Date();
+    hcPickerMonth=new Date(base.getFullYear(),base.getMonth(),1);
+    renderHcCalendar();
+  }else{
+    const parts=(hcPickerSelected||new Date().toTimeString().slice(0,5)).split(':');
+    document.getElementById('hcPickerHour').value=parts[0]||'00';
+    document.getElementById('hcPickerMinute').value=parts[1]||'00';
+    updateHcPickerValue();
+  }
+  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+}
+
+function closeHcPicker(){const modal=document.getElementById('hcPickerModal');modal?.classList.remove('open');modal?.setAttribute('aria-hidden','true');hcPickerTarget=null}
+
+function renderHcCalendar(){
+  const grid=document.getElementById('hcCalendarGrid');
+  const label=document.getElementById('hcMonthLabel');
+  if(!grid||!label)return;
+  label.textContent=new Intl.DateTimeFormat('nl-NL',{month:'long',year:'numeric'}).format(hcPickerMonth);
+  const year=hcPickerMonth.getFullYear(),month=hcPickerMonth.getMonth();
+  const first=new Date(year,month,1);
+  const offset=(first.getDay()+6)%7;
+  const days=new Date(year,month+1,0).getDate();
+  const today=hcDateValue(new Date());
+  let html='';
+  for(let i=0;i<offset;i++)html+='<span></span>';
+  for(let day=1;day<=days;day++){const value=`${year}-${hcPad(month+1)}-${hcPad(day)}`;html+=`<button type="button" data-hc-date="${value}" class="${value===today?'today ':''}${value===hcPickerSelected?'selected':''}">${day}</button>`}
+  grid.innerHTML=html;
+  grid.querySelectorAll('[data-hc-date]').forEach(button=>button.addEventListener('click',()=>{hcPickerSelected=button.dataset.hcDate;renderHcCalendar();updateHcPickerValue()}));
+  updateHcPickerValue();
+}
+
+function updateHcPickerValue(){
+  const value=document.getElementById('hcPickerValue');if(!value)return;
+  if(hcPickerType==='time'){const h=document.getElementById('hcPickerHour')?.value||'00',m=document.getElementById('hcPickerMinute')?.value||'00';hcPickerSelected=`${h}:${m}`;value.textContent=hcPrettyTime(hcPickerSelected)}else value.textContent=hcPrettyDate(hcPickerSelected);
+}
+
+function finishHcPicker(action){
+  const target=hcPickerTarget;if(!target){closeHcPicker();return}
+  if(action==='set'){target.value=hcPickerSelected;target.dispatchEvent(new Event('input',{bubbles:true}));target.dispatchEvent(new Event('change',{bubbles:true}))}
+  if(action==='clear'){target.value='';target.dispatchEvent(new Event('input',{bubbles:true}));target.dispatchEvent(new Event('change',{bubbles:true}))}
+  closeHcPicker();
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupHcPicker);else setupHcPicker();

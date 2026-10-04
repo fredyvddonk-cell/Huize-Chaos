@@ -82,7 +82,7 @@
 .auth-gate[hidden]{display:none!important}
 
 
-/* V1.4.173 - Planner in dezelfde compacte Huize Chaos-stijl als Boodschappen en Voorraad. */
+/* V1.4.174 - Planner in dezelfde compacte Huize Chaos-stijl als Boodschappen en Voorraad. */
 .planner-app{padding-top:14px!important;padding-bottom:34px!important}
 .day-heading{margin:8px 0 10px!important}
 .day-heading-row{margin-top:7px!important}
@@ -188,7 +188,7 @@
  .planner-heading-calendar{width:26px!important;height:26px!important;min-width:26px!important}
 }
 
-/* V1.4.173 — Gezinsplanner: dezelfde compacte standaard veldhoogte als Product wijzigen V1.4.172 */
+/* V1.4.174 — Gezinsplanner: dezelfde compacte standaard veldhoogte als Product wijzigen V1.4.172 */
 .modal-card .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .modal-card .field select{
   height:36px!important;
@@ -218,3 +218,36 @@
   font-size:.72rem!important;
   line-height:1.1!important;
 }
+
+
+/* V1.4.174 — datum- en tijdkiezers in Huize Chaos-stijl */
+.hc-picker-modal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(45,45,55,.28)}
+.hc-picker-modal.open{display:flex}
+.hc-picker-card{width:min(92vw,420px);max-height:min(84vh,620px);overflow:auto;background:#fbf9fe;border:1px solid #dfd6ec;border-radius:22px;box-shadow:0 18px 52px rgba(64,47,86,.24);padding:16px;color:var(--text)}
+.hc-picker-head{padding:2px 2px 12px;border-bottom:1px solid #e7e0ef}
+.hc-picker-head h2{margin:0;font-size:21px;line-height:1.15;color:#3b3344}
+.hc-picker-value{margin-top:5px;color:var(--purple-dark);font-weight:800;font-size:15px}
+.hc-picker-body{padding:14px 0 4px}
+.hc-month-nav{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;margin-bottom:10px}
+.hc-month-nav strong{text-align:center;font-size:17px}
+.hc-month-nav button{height:38px;border:1px solid #ded5e9;border-radius:12px;background:#fff;color:var(--purple-dark);font-size:24px;line-height:1;cursor:pointer}
+.hc-weekdays,.hc-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.hc-weekdays{margin-bottom:5px;color:#7d7487;font-size:12px;font-weight:800;text-align:center}
+.hc-calendar-grid button,.hc-calendar-grid span{display:grid;place-items:center;min-width:0;aspect-ratio:1;border-radius:11px}
+.hc-calendar-grid button{border:0;background:#fff;color:#3f3747;font-weight:700;cursor:pointer}
+.hc-calendar-grid button:hover{background:#f1eafa}
+.hc-calendar-grid button.today{box-shadow:inset 0 0 0 2px #c8b5df}
+.hc-calendar-grid button.selected{background:var(--purple);color:#fff}
+.hc-calendar-grid span{visibility:hidden}
+.hc-time-picker{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px;padding:16px 10px 18px}
+.hc-time-picker label{display:grid;gap:6px}
+.hc-time-picker label span{font-size:13px;font-weight:800;color:#5a5064}
+.hc-time-picker select{width:100%;height:52px;border:1px solid #d8cfe3;border-radius:14px;background:#fff;color:#302a36;font-size:22px;font-weight:750;text-align:center;padding:0 10px}
+.hc-time-separator{padding-bottom:11px;font-size:30px;font-weight:800;color:var(--purple-dark)}
+.hc-picker-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;padding-top:12px;border-top:1px solid #e7e0ef}
+.hc-picker-actions button{min-width:0;height:42px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer}
+.hc-picker-clear{border:1px solid #ded5e9;background:#fff;color:var(--purple-dark)}
+.hc-picker-cancel{border:1px solid #ded5e9;background:#fff;color:#5f5668}
+.hc-picker-set{border:0;background:var(--purple);color:#fff}
+input[type="date"].hc-custom-picker,input[type="time"].hc-custom-picker{cursor:pointer}
+@media(max-width:430px){.hc-picker-modal{padding:12px}.hc-picker-card{width:100%;padding:14px;border-radius:20px}.hc-picker-actions{gap:6px}.hc-picker-actions button{font-size:13px;height:40px}.hc-calendar-grid{gap:4px}.hc-calendar-grid button{border-radius:9px}.hc-time-picker{padding:12px 2px 16px}}
