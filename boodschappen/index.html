@@ -7,8 +7,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.168">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.168">
+  <link rel="stylesheet" href="style.css?v=1.4.169">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.169">
 </head>
 <body>
   <main class="app">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.168</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.169</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
@@ -56,7 +56,6 @@
             <button type="button" data-stock-view="all" role="menuitem">Alles binnen deze check</button>
             <button type="button" data-stock-view="standard" role="menuitem">Standaard voorraad</button>
             <button type="button" data-stock-view="meal" role="menuitem">Maaltijdvoorraad</button>
-            <button type="button" data-stock-view="hidden" role="menuitem">Niet in voorraad</button>
             <button type="button" data-stock-view="location" role="menuitem">Vaste plek</button>
           </div>
         </details>
@@ -203,9 +202,8 @@
         <select id="stockRole">
           <option value="standard">Standaard voorraad</option>
           <option value="meal">Maaltijdvoorraad</option>
-          <option value="hidden">Niet in voorraad</option>
         </select>
-        <small class="field-help">Maaltijdvoorraad wordt automatisch gebruikt bij receptcontrole. ‘Niet in voorraad’ blijft beschikbaar in Beheer en bij recepten, maar staat niet in je gewone voorraad.</small>
+        <small class="field-help">Maaltijdvoorraad wordt automatisch gebruikt bij receptcontrole. Overige producten staan onder Standaard voorraad.</small>
       </div>
 
       <div class="field-row stock-classification-row">
@@ -367,12 +365,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.168"></script>
-  <script src="js/shopping.js?v=1.4.168"></script>
-  <script src="js/stock.js?v=1.4.168"></script>
-  <script src="js/hutsel.js?v=1.4.168"></script>
-  <script src="js/insight.js?v=1.4.168"></script>
-  <script type="module" src="js/firebase.js?v=1.4.168"></script>
+  <script src="js/app.js?v=1.4.169"></script>
+  <script src="js/shopping.js?v=1.4.169"></script>
+  <script src="js/stock.js?v=1.4.169"></script>
+  <script src="js/hutsel.js?v=1.4.169"></script>
+  <script src="js/insight.js?v=1.4.169"></script>
+  <script type="module" src="js/firebase.js?v=1.4.169"></script>
 
-<script src="../hc-module-nav.js?v=1.4.168"></script></body>
+<script src="../hc-module-nav.js?v=1.4.169"></script></body>
 </html>

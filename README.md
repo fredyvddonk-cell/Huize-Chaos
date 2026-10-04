@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.168
+# Huize Chaos V1.4.169
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -108,7 +108,8 @@
 - Geen losse afgeronde productkaarten binnen een categorie.
 - Status, Kopen en Hutsel compacter gehouden.
 
-## V1.4.168
-- Voorraad: dubbele producten met exact dezelfde naam worden samengevoegd en dubbele cloudregels worden opgeruimd.
-- Boodschappen: wijzigingen in hoeveelheid/eenheid krijgen een wijzigingstijd zodat oudere clouddata ze niet direct terugzet.
-- Verwijderen: bevestigingsvenster staat direct boven Product wijzigen.
+## V1.4.169
+- Voorraadsoort Niet in voorraad vervalt.
+- Bestaande producten met voorraadsoort Niet in voorraad worden automatisch onder Standaard voorraad geplaatst.
+- Nieuwe en bestaande producten gebruiken voortaan alleen Standaard voorraad of Maaltijdvoorraad als voorraadsoort.
+- Filter- en beheerkeuzes voor Niet in voorraad zijn verwijderd.

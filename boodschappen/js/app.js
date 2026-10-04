@@ -27,10 +27,10 @@ function normalizeStockName(value){return String(value||'').toLowerCase().normal
 function defaultStockRole(product){
   const name=String(product?.name||''),category=String(product?.category||'');
   if(STANDARD_STOCK_NAMES.has(normalizeStockName(name))) return 'standard';
-  if(category==='Kruiden') return /^(zout|peper)$/i.test(name.trim()) ? 'standard' : 'hidden';
+  if(category==='Kruiden') return /^(zout|peper)$/i.test(name.trim()) ? 'standard' : 'standard';
   if(/^(Schoonmaak & huishouden|Huisdier|Persoonlijke verzorging|Keukenbenodigdheden)$/i.test(category)) return 'standard';
   if(category==='Bewaarproducten (voorraad)' || /maaltijd/i.test(category) || DURABLE_MEAL_RE.test(name)) return 'meal';
-  return 'hidden';
+  return 'standard';
 }
 
 const rawSeed = [
@@ -95,7 +95,12 @@ function migrateProduct(x) {
   product.shoppingUpdatedAt = Number(product.shoppingUpdatedAt) || 0;
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
   product.stockLocation = String(product.stockLocation || '');
-  if (!['standard','meal','hidden'].includes(product.stockRole)) product.stockRole = defaultStockRole(product);
+  if (product.stockRole === 'hidden') {
+    product.stockRole = 'standard';
+    product.inventoryUpdatedAt = Math.max(Date.now(), Number(product.inventoryUpdatedAt) || 0);
+  } else if (!['standard','meal'].includes(product.stockRole)) {
+    product.stockRole = defaultStockRole(product);
+  }
   if (!['week','month','work','rare'].includes(product.checkCycle)) {
     product.checkCycle = product.category === 'Kruiden' || product.category === 'Bakproducten' ? 'rare' : (product.category === 'Bewaarproducten (voorraad)' ? 'month' : 'week');
   }

@@ -9,7 +9,6 @@ if (!['week','month'].includes(stockCheckMode)) stockCheckMode = 'week';
 const STOCK_VIEW_HELP = {
   standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
   meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
-  hidden: 'Producten die je niet als gewone voorraad bijhoudt. Ze blijven wel beschikbaar in Beheer en voor recepten.',
   location: 'Je zichtbare voorraad gegroepeerd op vaste plek.',
   rare: 'Producten die je maar af en toe hoeft te controleren.',
   work: 'Producten die alleen relevant zijn bij Wat kan ik maken.'
@@ -41,7 +40,7 @@ window.toggleAllStock = () => {
 };
 
 window.setStockView = next => {
-  if (!['all','standard','meal','hidden','location'].includes(next)) return;
+  if (!['all','standard','meal','location'].includes(next)) return;
   stockView = next;
   expandedStockCategories.clear();
   saveStockExpansion();
@@ -77,7 +76,6 @@ function stockItemHtml(x){
     <div class="stock-swipe-back stock-swipe-cycle">
       <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'standard')">Standaard</button>
       <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'meal')">Maaltijd</button>
-      <button type="button" onclick="setStockRole(${JSON.stringify(String(x.id))},'hidden')">Niet in voorraad</button>
     </div>
     <div class="item stock-item stock-swipe-content">
       <div class="main" data-stock-edit="${esc(String(x.id))}" role="button" tabindex="0">
@@ -104,7 +102,7 @@ window.setStockCheckCycle = (id, cycle) => {
 };
 
 window.setStockRole = (id, role) => {
-  if (!['standard','meal','hidden'].includes(role)) return;
+  if (!['standard','meal'].includes(role)) return;
   const product = products.find(x => String(x.id) === String(id));
   if (!product) return;
   product.stockRole = role;
@@ -253,9 +251,8 @@ function stockProductsForView(arr){
   let visible=all.filter(p=>p.checkCycle===stockCheckMode);
   if(stockView==='standard') visible=visible.filter(p=>p.stockRole==='standard');
   else if(stockView==='meal') visible=visible.filter(p=>p.stockRole==='meal');
-  else if(stockView==='hidden') visible=visible.filter(p=>p.stockRole==='hidden');
-  else if(stockView==='location') visible=visible.filter(p=>p.stockRole!=='hidden');
-  else visible=visible.filter(p=>p.stockRole!=='hidden');
+  else if(stockView==='location') visible=visible;
+  else visible=visible;
 
   // Een product dat vanuit zoeken is gekozen, moet altijd één keer zichtbaar zijn,
   // ook wanneer het buiten de huidige check/filter valt. Bij de volgende gewone
@@ -272,7 +269,7 @@ function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
-    const emptyText = stockView==='meal' ? `Geen producten in Maaltijdvoorraad voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.` : stockView==='hidden' ? `Geen producten bij Niet in voorraad voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.` : `Geen producten voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.`;
+    const emptyText = stockView==='meal' ? `Geen producten in Maaltijdvoorraad voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.` : `Geen producten voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.`;
     content.innerHTML = `<div class="empty">${emptyText}</div>`;
     return;
   }
