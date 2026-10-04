@@ -204,7 +204,7 @@
 /* V1.4.117 - compacte, bruikbare variatiecontrole */
 .week-variation{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .55rem}.week-variation>strong{margin-right:.1rem}.week-variation>span{color:var(--muted,#6f6b73)}.week-variation>span+span{flex-basis:100%;padding-left:0}.week-variation-warning{flex-basis:100%;color:#8b3a4b;font-weight:600;margin-top:.15rem}
 
-/* V1.4.176 — Weekmenu rustiger: compacte weekinfo en recepten pas bij openen bewerken */
+/* V1.4.177 — Weekmenu rustiger: compacte weekinfo en recepten pas bij openen bewerken */
 .week-menu-context{gap:7px;margin-top:9px}
 .week-info{background:#fff;border:1px solid #e7e0ec;border-radius:14px;overflow:hidden}
 .week-info>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;color:#5b347c}
@@ -239,7 +239,25 @@
   .week-menu-card{padding:9px 11px}
 }
 
-/* V1.4.176 — receptactie direct bij verwijderen in uitgeklapt weekmenu */
+/* V1.4.177 — receptactie direct bij verwijderen in uitgeklapt weekmenu */
 .week-menu-card-actions{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 100%}
 .week-menu-card-actions .btn{flex:1 1 180px}
 @media(max-width:500px){.week-menu-actions .week-menu-card-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.week-menu-actions .week-menu-card-actions .remove-week-plan{grid-column:auto;width:auto}}
+
+
+/* V1.4.177 — uitgeklapt weekmenu compacter ingedeeld */
+.week-menu-expanded{margin-top:6px;padding-top:6px}
+.week-menu-card-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;margin:0 0 6px}
+.week-menu-card-actions .btn{min-height:34px;padding:6px 9px;font-size:12px;line-height:1.15;white-space:normal}
+.week-menu-card-actions .remove-week-plan{width:auto}
+.week-menu-controls{display:grid;grid-template-columns:auto minmax(118px,1fr) auto;align-items:end;gap:5px;margin:0}
+.week-menu-controls .week-menu-servings{display:flex;align-items:center;gap:5px;margin:0;font-size:12px;white-space:nowrap;color:#5b347c;font-weight:750}
+.week-menu-controls .week-menu-servings input{width:58px;height:34px;min-height:34px;box-sizing:border-box;padding:4px 7px}
+.week-menu-controls select,.week-menu-controls .btn{height:34px;min-height:34px;box-sizing:border-box;margin:0;padding:5px 8px;font-size:12px}
+.week-menu-controls select{min-width:0;width:100%;border:1px solid #d8d3dc;border-radius:10px;background:#fff}
+.week-menu-stock-check{margin-top:7px;padding-top:7px}
+@media(max-width:500px){
+  .week-menu-card-actions{grid-template-columns:1fr 1fr}
+  .week-menu-controls{grid-template-columns:auto minmax(0,1fr) auto}
+  .week-menu-controls .week-menu-servings input{width:52px}
+}
