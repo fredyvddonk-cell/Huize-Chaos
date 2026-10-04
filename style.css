@@ -111,7 +111,7 @@ body{min-height:100dvh}
 .home-shopping-quick[hidden]{display:none!important}
 
 
-/* V1.4.171 — taken en routines direct afwerken op Home */
+/* V1.4.172 — taken en routines direct afwerken op Home */
 .home-check-row{grid-template-columns:24px minmax(0,1fr)!important;cursor:pointer;text-decoration:none}
 .home-task-check{width:24px;height:35px;display:grid;place-items:center}
 .home-task-check input{position:absolute;opacity:0;pointer-events:none}
