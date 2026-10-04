@@ -157,6 +157,10 @@ dialog{border:0;border-radius:20px;box-shadow:0 18px 60px rgba(36,29,42,.24)}
   --hc-shadow:0 3px 12px rgba(74,54,91,.06);
   --hc-page-pad:16px;
   --hc-page-top:6px;
+  --hc-header-h:58px;
+  --hc-header-pad-top:2px;
+  --hc-logo-icon:43px;
+  --hc-logo-wordmark:29px;
   --hc-control-h:48px;
 }
 
@@ -182,46 +186,55 @@ html,body{
    ------------------------------------------------------------ */
 .module-topbar,.hc-module-top,.topbar,.fixed-head .top{
   box-sizing:border-box!important;
-  min-height:64px!important;
-  height:64px!important;
+  min-height:var(--hc-header-h)!important;
+  height:var(--hc-header-h)!important;
   display:flex!important;
-  align-items:center!important;
+  align-items:flex-start!important;
   justify-content:space-between!important;
   gap:12px!important;
   margin:0!important;
-  padding:4px 0!important;
+  padding:var(--hc-header-pad-top) 0 0!important;
   background:transparent!important;
   border:0!important;
   box-shadow:none!important;
 }
-.module-brand,.hc-brand,.brand{
+.module-brand,.hc-brand,.brand,.hc-brand-combo{
   display:flex!important;
   align-items:center!important;
-  gap:10px!important;
+  align-self:flex-start!important;
+  gap:8px!important;
   min-width:0!important;
+  min-height:var(--hc-logo-icon)!important;
+  margin:0!important;
+  padding:0!important;
   text-decoration:none!important;
 }
-.module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child{
-  width:46px!important;
-  height:46px!important;
-  max-width:46px!important;
-  max-height:46px!important;
-  flex:0 0 46px!important;
+.module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{
+  width:var(--hc-logo-icon)!important;
+  height:var(--hc-logo-icon)!important;
+  max-width:var(--hc-logo-icon)!important;
+  max-height:var(--hc-logo-icon)!important;
+  flex:0 0 var(--hc-logo-icon)!important;
   object-fit:contain!important;
   border-radius:12px!important;
+  margin:0!important;
 }
 .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{
   width:auto!important;
-  height:31px!important;
+  height:var(--hc-logo-wordmark)!important;
   max-width:190px!important;
-  max-height:31px!important;
+  max-height:var(--hc-logo-wordmark)!important;
   object-fit:contain!important;
+  object-position:left center!important;
+  margin:0!important;
 }
 .module-meta,.topbar-meta,.top-actions{
   margin-left:auto!important;
   display:flex!important;
   align-items:center!important;
+  align-self:flex-start!important;
   gap:8px!important;
+  padding-top:6px!important;
 }
 .version,.module-version,.hc-version,.topbar-meta .version{
   color:#89838D!important;
@@ -413,10 +426,11 @@ main.app>h1::first-letter{font-size:0!important}
 .occasion-tabs{margin-bottom:0!important}
 
 @media(max-width:430px){
-  :root{--hc-page-pad:12px;--hc-page-top:4px}
-  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:58px!important;min-height:58px!important;padding:2px 0!important}
-  .module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{width:43px!important;height:43px!important;max-width:43px!important;max-height:43px!important;flex-basis:43px!important}
-  .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{height:29px!important;max-height:29px!important;max-width:168px!important}
+  :root{--hc-page-pad:12px;--hc-page-top:4px;--hc-header-h:54px;--hc-header-pad-top:1px;--hc-logo-icon:42px;--hc-logo-wordmark:28px}
+  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:var(--hc-header-h)!important;min-height:var(--hc-header-h)!important;padding:var(--hc-header-pad-top) 0 0!important}
+  .module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{width:var(--hc-logo-icon)!important;height:var(--hc-logo-icon)!important;max-width:var(--hc-logo-icon)!important;max-height:var(--hc-logo-icon)!important;flex-basis:var(--hc-logo-icon)!important}
+  .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{height:var(--hc-logo-wordmark)!important;max-height:var(--hc-logo-wordmark)!important;max-width:168px!important}
+  .module-meta,.topbar-meta,.top-actions{padding-top:5px!important}
   .module-heading h1,.hc-heading h1,.title h1,.day-heading h1,main.app>h1{font-size:21px!important}
   .shopping-title-row h1{font-size:21px!important}
   .tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{font-size:14px!important;padding:0 13px!important}
