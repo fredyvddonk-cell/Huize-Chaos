@@ -1,5 +1,6 @@
-# Huize Chaos V1.4.164
+# Huize Chaos V1.4.165
 
+- Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
 - Startscherm Vandaag: maximaal één open huishoudtaak uit Huishouden → Deze week wordt getoond; na afronden schuift de volgende door.
 - Planner-taken op Vandaag zijn direct afvinkbaar vanaf het startscherm.

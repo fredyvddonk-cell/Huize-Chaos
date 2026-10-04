@@ -271,6 +271,20 @@ deleteModal.addEventListener('click',event=>{if(event.target===deleteModal)close
 els.appointmentSearch.addEventListener('input',()=>{els.clearAppointmentSearch.hidden=!els.appointmentSearch.value;render()});
 els.clearAppointmentSearch.addEventListener('click',()=>{els.appointmentSearch.value='';els.clearAppointmentSearch.hidden=true;els.appointmentSearch.focus();render()});
 const plannerDateButton=document.getElementById('plannerDateButton');
+function openPlannerDatePicker(event){
+  event?.preventDefault();
+  const input=els.dateSearch;
+  if(!input)return;
+  try{
+    if(typeof input.showPicker==='function'){
+      input.showPicker();
+      return;
+    }
+  }catch(_){ }
+  try{input.focus({preventScroll:true})}catch(_){input.focus()}
+  input.click();
+}
+plannerDateButton?.addEventListener('click',openPlannerDatePicker);
 els.dateSearch?.addEventListener('change',renderDateSearch);
 els.dateSearchToday?.addEventListener('click',()=>{els.dateSearch.value=todayKey();renderDateSearch()});
 els.dateSearchClear?.addEventListener('click',()=>{els.dateSearch.value='';renderDateSearch()});
