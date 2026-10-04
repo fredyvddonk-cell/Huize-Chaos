@@ -7,7 +7,7 @@
 <meta content="#957AC1" name="theme-color"/>
 <title>Gezinsplanner · Huize Chaos</title>
 <link href="style.css?v=1.4.47" rel="stylesheet"/>
-<link href="planner-v131.css?v=1.4.160" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.161" rel="stylesheet"/>
 <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
   <link rel="stylesheet" href="../hc-theme.css?v=1.4.158">
 <style>
@@ -26,6 +26,108 @@
   .today-timer-grid .today-timer-panel{padding:5px 7px!important}
   .today-timer-grid .household-timer{font-size:15px!important;min-height:28px!important}
 }
+
+/* V1.4.162 — Plannerkaarten strak uitlijnen; dubbele bron-tekens verbergen */
+#todayPage>section[aria-labelledby="appointmentsTitle"],
+#todayPage>section[aria-labelledby="tasksTitle"]{
+  padding:10px 11px!important;
+}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading{
+  min-height:34px!important;
+  margin:0 0 7px!important;
+  align-items:center!important;
+}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading>div,
+#todayPage>section[aria-labelledby="tasksTitle"] .panel-heading>div{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-width:0!important;
+}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment,
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task{
+  flex:0 0 24px!important;
+  width:24px!important;
+  height:24px!important;
+  font-size:0!important;
+  line-height:1!important;
+}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .section-icon.appointment::before{
+  content:"▣"!important;
+  font-size:13px!important;
+}
+#todayPage>section[aria-labelledby="tasksTitle"] .section-icon.task::before{
+  content:"✓"!important;
+  font-size:15px!important;
+}
+#todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+#todayPage>section[aria-labelledby="tasksTitle"] h2{
+  margin:0!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+}
+#todayPage>section[aria-labelledby="tasksTitle"] .progress-text{
+  margin:0 0 6px 30px!important;
+  padding:0!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+@media(max-width:430px){
+  #todayPage>section[aria-labelledby="appointmentsTitle"] h2,
+  #todayPage>section[aria-labelledby="tasksTitle"] h2{font-size:15px!important}
+}
+</style>
+
+<style>
+/* V1.4.162 — Planner-header gelijk aan Boodschappen/Voorraad */
+.day-heading.hc-page-heading{
+  margin:10px 0 8px!important;
+  padding:0!important;
+}
+.planner-heading-line{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-width:0!important;
+  flex-wrap:nowrap!important;
+}
+.planner-heading-line h1{
+  margin:0!important;
+  font-size:22px!important;
+  line-height:1.15!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.planner-heading-calendar{
+  flex:0 0 28px!important;
+  width:28px!important;
+  height:28px!important;
+  min-width:28px!important;
+  padding:0!important;
+  border-radius:8px!important;
+}
+.planner-heading-calendar>span{font-size:15px!important;line-height:1!important}
+.planner-heading-date{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  margin:0!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  font-weight:400!important;
+  color:#74707a!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.day-heading>.planner-view-title{margin:4px 0 0!important;font-size:14px!important;line-height:1.2!important}
+@media(max-width:430px){
+  .day-heading.hc-page-heading{margin:8px 0 7px!important}
+  .planner-heading-line{gap:5px!important}
+  .planner-heading-line h1{font-size:20px!important}
+  .planner-heading-calendar{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important}
+  .planner-heading-date{font-size:12px!important}
+}
 </style>
 </head>
 <body>
@@ -34,16 +136,16 @@
 <a aria-label="Terug naar Huize Chaos" class="brand" href="../">
 <img class="hc-app-icon" alt="" src="../icons/icon-192.png"/><img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
 </a>
-<div class="topbar-meta"><span class="version">V1.4.160</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+<div class="topbar-meta"><span class="version">V1.4.162</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
 </header>
 <section class="day-heading hc-page-heading"><div class="planner-heading-line"><h1>Gezinsplanner</h1><label aria-label="Kies een datum" class="calendar-picker-button planner-heading-calendar" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label><div class="today-date planner-heading-date" id="todayDate"></div></div><h2 class="planner-view-title">Vandaag</h2><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
 <nav aria-label="Gezinsplanner onderdelen" class="planner-tabs planner-tabs-primary">
 <button class="active" data-planner-page="today" type="button">Vandaag</button>
-<button data-planner-page="routines" type="button">Routines</button>
+<button data-planner-page="household" type="button">Huishouden</button>
 <details class="planner-section-menu" id="plannerSectionMenu">
 <summary id="plannerSectionToggle" aria-label="Meer onderdelen" title="Meer onderdelen">▼</summary>
 <div class="planner-section-popover" id="plannerSectionPopover">
-<button data-planner-page="household" type="button">Huishouden</button>
+<button data-planner-page="routines" type="button">Routines</button>
 </div>
 </details>
 </nav>
@@ -407,7 +509,7 @@ Kliko aan de straat" rows="9"></textarea>
 <button class="auth-link" hidden="" id="googleSignOut" type="button">Afmelden</button>
 </div>
 </div>
-<script src="app.js?v=1.4.160"></script>
+<script src="app.js?v=1.4.161"></script>
 <script src="firebase.js?v=1.4.47" type="module"></script>
-<script src="../hc-module-nav.js?v=1.4.160"></script></body>
+<script src="../hc-module-nav.js?v=1.4.161"></script></body>
 </html>
