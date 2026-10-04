@@ -8,8 +8,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.178">
-  <link rel="stylesheet" href="hc-theme.css?v=1.4.178">
+  <link rel="stylesheet" href="style.css?v=1.4.179">
+  <link rel="stylesheet" href="hc-theme.css?v=1.4.179">
 </head>
 <body>
   <main class="home">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <div class="home-top-actions">
-        <span class="hc-version">V1.4.178</span>
+        <span class="hc-version">V1.4.179</span>
         <button class="home-icon-button" id="openGlobalSearch" type="button" aria-label="Zoeken in Huize Chaos" title="Zoeken">⌕</button>
         <button class="home-icon-button menu-button" id="openModuleMenu" type="button" aria-label="Modulemenu openen" title="Menu"><span></span><span></span><span></span></button>
       </div>
@@ -54,7 +54,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.178</footer>
+    <footer>Huize Chaos · V1.4.179</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -81,7 +81,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.178"></script>
+<script src="recepten/recipes-data.js?v=1.4.179"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -271,7 +271,7 @@
   window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu();renderShoppingQuick()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huizeChaosDailyRoutinesV132','huize-chaos-recipe-weeks-v1','household-products-v2'].includes(event.key)){renderToday();renderWeekMenu();renderShoppingQuick()}});window.addEventListener('huize-chaos-planner-changed',renderToday);
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.178'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.179'))}
 </script>
 </body>
 </html>

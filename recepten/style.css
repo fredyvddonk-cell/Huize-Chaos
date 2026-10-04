@@ -273,3 +273,5 @@
 .hc-confirm-actions .hc-confirm-cancel{background:#f7f3fb;color:#5b347c;border-color:#ded3e8}
 .hc-confirm-actions .hc-confirm-remove{background:#7353a5;border-color:#7353a5;color:#fff}
 @media(max-width:420px){.hc-confirm-card{padding:17px;border-radius:18px}.hc-confirm-actions{gap:7px}.hc-confirm-card h3{font-size:19px}}
+
+/* V1.4.179 — HC-bevestiging voor definitief verwijderen van recepten uit de receptendatabase. */

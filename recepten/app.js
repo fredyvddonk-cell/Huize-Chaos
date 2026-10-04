@@ -142,7 +142,51 @@ function bindRecipePhotoControls(afterChange){
 function editForm(r,review){return `${photoEditor(r)}<div class="review-fields"><label>Titel<input id="titleEdit" value="${esc(r.title||'')}"></label><label>Personen<input id="servingsEdit" type="number" min="1" inputmode="numeric" value="${esc(r.servings||'')}"></label><label>Categorie <small class="field-help">Keuken / smaakrichting</small><select id="categoryEdit">${RECIPE_CATEGORIES.map(c=>`<option value="${esc(c)}" ${recipeCategory(r)===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label>Soort <small class="field-help">Vorm van het gerecht</small><select id="typeEdit">${RECIPE_TYPES.map(c=>`<option value="${esc(c)}" ${recipeType(r)===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label>Hoofdingrediënt<select id="mainIngredientEdit">${MAIN_INGREDIENT_OPTIONS.map(c=>`<option value="${esc(c)}" ${recipeMainIngredient(r)===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label>Tijd thuis<select id="homeTimeEdit"><option value="">Niet ingesteld</option>${HOME_TIME_OPTIONS.map(c=>`<option value="${esc(c)}" ${recipeHomeTime(r)===c?'selected':''}>${esc(c)}</option>`).join('')}</select><small class="field-help">Kort = binnen ±30 min · Middellang = ±30–60 min · Lang = langer</small></label><label class="source-field">Bron<input id="sourceEdit" value="${esc(r.source||'')}" placeholder="Bijv. Picnic, Allerhande, eigen recept"></label><label class="source-field">Bron / URL<input id="sourceUrlEdit" type="url" value="${esc(r.sourceUrl||'')}" placeholder="https://…"></label></div><div class="edit-section open"><button type="button">Ingrediënten <span>▾</span></button><div class="edit-body"><div id="ingredientEditor">${ingredientRows(r)}</div><button type="button" class="btn add-ing" id="addIngredient">+ Ingrediënt</button></div></div><div class="edit-section open"><button type="button">Bereiding <span>▾</span></button><div class="edit-body"><textarea id="directionsEdit">${esc(r.directions||'')}</textarea></div></div><div class="actions review-actions">${review?'<button class="btn primary" id="approve">Goedkeuren</button><button class="btn" id="keepPending">Bewaren voor later</button><button class="btn danger" id="deletePending">Verwijderen</button>':'<button class="btn primary" id="save">Opslaan</button><button class="btn" id="cancel">Annuleren</button><button class="btn danger" id="deleteRecipe">Verwijder recept</button>'}</div>`}
 function bindCommonEdit(){detail.querySelector('#titleEdit').oninput=e=>edited.title=e.target.value;detail.querySelector('#servingsEdit').oninput=e=>edited.servings=e.target.value;detail.querySelector('#categoryEdit')?.addEventListener('change',e=>edited.category=e.target.value);detail.querySelector('#typeEdit')?.addEventListener('change',e=>edited.type=e.target.value);detail.querySelector('#mainIngredientEdit')?.addEventListener('change',e=>edited.mainIngredient=e.target.value);detail.querySelector('#homeTimeEdit')?.addEventListener('change',e=>edited.homeTime=e.target.value);detail.querySelector('#sourceEdit')?.addEventListener('input',e=>edited.source=e.target.value);detail.querySelector('#sourceUrlEdit')?.addEventListener('input',e=>edited.sourceUrl=e.target.value);bindRecipePhotoControls(showReviewOrEdit);detail.querySelector('#directionsEdit').oninput=e=>edited.directions=e.target.value;detail.querySelectorAll('.edit-section>button').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'));detail.querySelectorAll('input[data-f]').forEach(el=>el.oninput=()=>edited.ingredients[+el.dataset.i][el.dataset.f]=el.value);detail.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{edited.ingredients.splice(+b.dataset.remove,1);showReviewOrEdit()});detail.querySelectorAll('[data-link-subrecipe]').forEach(b=>b.onclick=()=>chooseSubrecipe(+b.dataset.linkSubrecipe));detail.querySelectorAll('[data-unlink-subrecipe]').forEach(b=>b.onclick=()=>{delete edited.ingredients[+b.dataset.unlinkSubrecipe].linkedRecipeId;showReviewOrEdit()});detail.querySelectorAll('[data-stock-product]').forEach(sel=>sel.onchange=()=>{const i=+sel.dataset.stockProduct,ing=edited.ingredients[i];if(!ing)return;ing.stockProductId=sel.value||'';if(sel.value){const all=stockProducts(),prod=all.find(p=>String(p.id)===String(sel.value)),alias=String(ing.ingredient||'').trim();if(prod&&alias){prod.aliases=Array.isArray(prod.aliases)?prod.aliases:[];if(!prod.aliases.some(a=>normFood(a)===normFood(alias))&&normFood(prod.name)!==normFood(alias))prod.aliases.push(alias);localStorage.setItem(STOCK_KEY,JSON.stringify(all));window.dispatchEvent(new Event('huize-chaos-products-changed'))}}});detail.querySelector('#addIngredient').onclick=()=>{edited.ingredients.push({qty:'',unit:'',ingredient:'',memo:'',linkedRecipeId:'',stockProductId:''});showReviewOrEdit()}}
 function showReviewOrEdit(){if(String(current).startsWith('pending:'))showReview();else showView('edit')}
-function deleteCurrentRecipe(){const id=String(current||edited?.id||''),title=edited?.title||'Dit recept';if(!id||id.startsWith('pending:'))return;if(!confirm(`Weet je zeker dat je \"${title}\" wilt verwijderen?`))return;if(isCustom(id)){write(CUSTOM_KEY,custom().filter(r=>String(r.id)!==id))}else{saveDeletedRecipes([...deletedRecipes(),id]);localStorage.removeItem('hc_recipe_'+id)}write(META_KEY,recipeMeta().filter(m=>String(m.id)!==id));stockRankCache=stockRankCache.filter(x=>String(x.r?.id)!==id);stockResultsReady=Boolean(stockFilterIds.length);scheduleSync();backList(true)}
+function confirmRecipeDeletion(title,plannedCount){
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='hc-confirm-overlay';
+    overlay.innerHTML=`<div class="hc-confirm-card" role="dialog" aria-modal="true" aria-labelledby="hcDeleteRecipeTitle" aria-describedby="hcDeleteRecipeText"><h3 id="hcDeleteRecipeTitle">Recept verwijderen?</h3><p id="hcDeleteRecipeText"></p><div class="hc-confirm-actions"><button type="button" class="btn hc-confirm-cancel">Annuleren</button><button type="button" class="btn primary hc-confirm-remove">Verwijderen</button></div></div>`;
+    const usage=plannedCount===1?'Dit recept staat nog in 1 weekmenu. Het wordt daar ook verwijderd.':plannedCount>1?`Dit recept staat nog in ${plannedCount} weekmenu's. Het wordt daar ook verwijderd.`:'';
+    overlay.querySelector('#hcDeleteRecipeText').textContent=`${title} definitief uit Recepten verwijderen?${usage?' '+usage:''}`;
+    document.body.appendChild(overlay);
+    const cancel=overlay.querySelector('.hc-confirm-cancel'),remove=overlay.querySelector('.hc-confirm-remove');
+    let done=false;
+    const finish=value=>{if(done)return;done=true;document.removeEventListener('keydown',onKey);overlay.remove();resolve(value)};
+    const onKey=e=>{if(e.key==='Escape')finish(false)};
+    document.addEventListener('keydown',onKey);
+    cancel.addEventListener('click',()=>finish(false));
+    remove.addEventListener('click',()=>finish(true));
+    overlay.addEventListener('click',e=>{if(e.target===overlay)finish(false)});
+    requestAnimationFrame(()=>cancel.focus());
+  });
+}
+async function deleteCurrentRecipe(){
+  const id=String(current||edited?.id||''),title=edited?.title||'Dit recept';
+  if(!id||id.startsWith('pending:'))return;
+  const plans=recipeWeekPlans(),usedPlans=plans.filter(p=>String(p.recipeId)===id);
+  if(!await confirmRecipeDeletion(title,usedPlans.length))return;
+  if(usedPlans.length){
+    const deleted=recipeWeekDeleted(),stamp=Date.now();
+    usedPlans.forEach(p=>{deleted[String(p.id)]=stamp});
+    saveRecipeWeekDeleted(deleted);
+    saveRecipeWeekPlans(plans.filter(p=>String(p.recipeId)!==id));
+  }
+  if(isCustom(id)){
+    write(CUSTOM_KEY,custom().filter(r=>String(r.id)!==id));
+    saveDeletedRecipes([...deletedRecipes(),id]);
+  }else{
+    saveDeletedRecipes([...deletedRecipes(),id]);
+    localStorage.removeItem('hc_recipe_'+id);
+  }
+  write(META_KEY,recipeMeta().filter(m=>String(m.id)!==id));
+  stockRankCache=stockRankCache.filter(x=>String(x.r?.id)!==id);
+  stockResultsReady=Boolean(stockFilterIds.length);
+  invalidateRecipeCaches();
+  scheduleSync();
+  renderWeekMenu?.();
+  backList(true);
+}
 function readClassificationEdits(){
   const category=detail.querySelector('#categoryEdit'),type=detail.querySelector('#typeEdit'),main=detail.querySelector('#mainIngredientEdit'),home=detail.querySelector('#homeTimeEdit');
   if(category)edited.category=category.value;if(type)edited.type=type.value;if(main)edited.mainIngredient=main.value;if(home)edited.homeTime=home.value;
