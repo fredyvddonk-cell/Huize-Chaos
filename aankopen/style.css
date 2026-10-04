@@ -4,3 +4,34 @@
 .category-entry{display:flex;gap:8px;align-items:stretch}.category-entry select{flex:1;min-width:0}.category-add{white-space:nowrap;padding:0 12px}@media(max-width:560px){.category-entry{flex-direction:column}.category-add{min-height:42px}}
 
 .hc-module-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}.hc-brand{display:flex;align-items:center;gap:8px;text-decoration:none}.hc-brand img:first-child{width:44px;height:44px;object-fit:contain}.hc-brand img:last-child{height:31px;width:auto;max-width:180px}.hc-version{margin-left:auto;font-size:12px;color:#8a8490}
+
+
+/* V1.4.183 - Aankoop toevoegen compacter, zonder functiewijzigingen */
+#editor form{padding:14px 16px 12px;max-height:94vh}
+#editor .dialog-head{margin-bottom:9px;min-height:32px}
+#editor .dialog-head h2{font-size:20px;line-height:1.15}
+#editor .grid{gap:7px 10px}
+#editor .compact-purchase-grid .field-full{grid-column:1/-1}
+#editor label{gap:3px;margin-bottom:6px;line-height:1.15}
+#editor label input,#editor label select{height:36px;min-height:36px;padding:6px 10px;border-radius:10px}
+#editor .money{height:36px;min-height:36px;padding-left:9px;border-radius:10px}
+#editor .money input{height:34px;min-height:34px;padding:5px 8px}
+#editor .category-entry{gap:6px}
+#editor .category-add{height:36px;min-height:36px;padding:0 10px;border-radius:10px}
+#editor .editor-note{margin-top:1px}
+#editor .editor-note textarea{min-height:56px;height:56px;padding:7px 10px;border-radius:10px}
+#editor .receipt-box{padding:9px 11px;margin-top:1px;border-radius:11px}
+#editor .receipt-box small{margin-top:2px;font-size:12px;line-height:1.25}
+#editor .file-button{margin:7px 0 4px;padding:6px 10px;border-radius:9px;font-size:13px}
+#editor .attachment-info{font-size:12px;line-height:1.2}
+#editor .text-button{padding:4px 0}
+#editor .actions{margin-top:9px;gap:7px}
+#editor .actions button{height:36px;padding:6px 12px}
+@media(max-width:600px){
+  #editor form{padding:11px 12px 10px}
+  #editor .compact-purchase-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 8px}
+  #editor .compact-purchase-grid .field-full{grid-column:1/-1}
+  #editor .category-entry{flex-direction:row}
+  #editor .category-add{min-height:36px;font-size:12px;padding:0 8px}
+  #editor .actions{position:sticky;bottom:-10px;padding:8px 0 1px;margin-top:7px}
+}
