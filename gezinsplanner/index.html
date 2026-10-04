@@ -7,9 +7,26 @@
 <meta content="#957AC1" name="theme-color"/>
 <title>Gezinsplanner · Huize Chaos</title>
 <link href="style.css?v=1.4.47" rel="stylesheet"/>
-<link href="planner-v131.css?v=1.4.157" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.158" rel="stylesheet"/>
 <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.157">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.158">
+<style>
+/* V1.4.158 — Planner compact houden na de algemene HC-stijl */
+#todayPage>section[aria-labelledby="appointmentsTitle"] h2{font-size:16px!important;line-height:1.2!important;font-weight:750!important}
+#todayPage>section[aria-labelledby="appointmentsTitle"] .panel-heading{margin-bottom:7px!important}
+.today-timer-grid{gap:6px!important;margin:6px 0!important}
+.today-timer-grid .today-timer-panel{min-height:0!important;padding:6px 8px!important;border-radius:12px!important}
+.today-timer-grid .panel-heading{display:grid!important;grid-template-columns:auto 1fr auto!important;column-gap:6px!important;min-height:0!important;margin:0!important;align-items:center!important}
+.today-timer-grid .panel-heading>div{display:contents!important}
+.today-timer-grid .section-icon{grid-row:auto!important;width:22px!important;height:22px!important;border-radius:7px!important}
+.today-timer-grid h2{font-size:13px!important;line-height:1.1!important;align-self:center!important}
+.today-timer-grid .household-timer{grid-column:auto!important;font-size:16px!important;line-height:1!important;min-height:30px!important;padding:4px 6px!important;text-align:right!important;align-self:center!important}
+@media(max-width:430px){
+  #todayPage>section[aria-labelledby="appointmentsTitle"] h2{font-size:15px!important}
+  .today-timer-grid .today-timer-panel{padding:5px 7px!important}
+  .today-timer-grid .household-timer{font-size:15px!important;min-height:28px!important}
+}
+</style>
 </head>
 <body>
 <main class="planner-app">
@@ -17,7 +34,7 @@
 <a aria-label="Terug naar Huize Chaos" class="brand" href="../">
 <img class="hc-app-icon" alt="" src="../icons/icon-192.png"/><img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
 </a>
-<div class="topbar-meta"><span class="version">V1.4.157</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+<div class="topbar-meta"><span class="version">V1.4.158</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
 </header>
 <section class="day-heading hc-page-heading"><h1>Gezinsplanner</h1><div class="day-heading-row"><div class="day-heading-copy"><h2 class="planner-view-title">Vandaag</h2><div class="today-date" id="todayDate"></div></div><label aria-label="Kies een datum" class="calendar-picker-button" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label></div><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
 <nav aria-label="Gezinsplanner onderdelen" class="planner-tabs planner-tabs-primary">
@@ -55,12 +72,12 @@
 <div class="item-list" id="appointmentList"></div>
 </section><div class="today-timer-grid"><section aria-labelledby="householdTimeTitle" class="panel today-timer-panel household-time-panel">
 <div class="panel-heading">
-<div><span class="section-icon task">◷</span><h2 id="householdTimeTitle">Huishoudtijd</h2></div>
+<div><span class="section-icon task">◷</span><h2 id="householdTimeTitle">Huishouden</h2></div>
 <button aria-label="Huishoudtimer starten" class="household-timer timer-toggle" id="householdTimer" type="button">30:00</button>
 </div>
 </section><section aria-labelledby="studyTimeTitle" class="panel today-timer-panel study-time-panel">
 <div class="panel-heading">
-<div><span class="section-icon task">▣</span><h2 id="studyTimeTitle">Studietijd</h2></div>
+<div><span class="section-icon task">▣</span><h2 id="studyTimeTitle">Studie</h2></div>
 <button aria-label="Studietimer starten" class="household-timer timer-toggle" id="studyTimer" type="button">60:00</button>
 </div>
 </section></div><section aria-labelledby="wasteReminderTitle" class="panel waste-reminder-panel" hidden="" id="wasteReminderPanel" role="button" tabindex="0">
@@ -93,14 +110,14 @@
 </section><button class="add-button main-add hc-icon-add" data-add="task" type="button" aria-label="Taak toevoegen" title="Taak toevoegen">+</button></div>
 <div hidden="" id="routinesPage">
 <section aria-labelledby="householdTimeInfoTitle" class="panel household-time-panel">
-<div class="panel-heading"><div><span class="section-icon task">◷</span><h2 id="householdTimeInfoTitle">Huishoudtijd</h2></div></div>
+<div class="panel-heading"><div><span class="section-icon task">◷</span><h2 id="householdTimeInfoTitle">Huishouden</h2></div></div>
 <p class="routine-help household-time-help" id="householdTimeText">Iedere dag 30 minuten. Doe in die tijd de huishoudtaken die al in je planner staan.</p>
 <button class="household-link compact-household-link" id="openHouseholdFromTime" type="button"><span><strong>Bekijk wat er gedaan moet worden</strong><small>Open Huishouden</small></span><span aria-hidden="true" class="go">›</span></button>
 <div class="household-time-actions"><button class="primary" id="startHouseholdTimer" type="button">Start 30 minuten</button><button class="secondary" hidden="" id="pauseHouseholdTimer" type="button">Pauze</button><button class="secondary" hidden="" id="resetHouseholdTimer" type="button">Stop voor vandaag</button></div>
 <div class="household-extra-actions" hidden="" id="householdExtraActions"><span>Wil je doorgaan?</span><button data-household-extra="15" type="button">+ 15 min</button><button data-household-extra="30" type="button">+ 30 min</button></div>
 </section>
 <section aria-labelledby="studyTimeInfoTitle" class="panel study-time-panel">
-<div class="panel-heading"><div><span class="section-icon task">▣</span><h2 id="studyTimeInfoTitle">Studietijd</h2></div></div>
+<div class="panel-heading"><div><span class="section-icon task">▣</span><h2 id="studyTimeInfoTitle">Studie</h2></div></div>
 <p class="routine-help household-time-help" id="studyTimeText">Iedere dag minimaal 60 minuten. Streefdoel: 90 minuten.</p>
 <div class="household-time-actions"><button class="primary" id="startStudyTimer" type="button">Start 60 minuten</button><button class="secondary" hidden="" id="pauseStudyTimer" type="button">Pauze</button><button class="secondary" hidden="" id="finishStudyTimer" type="button">Stop voor vandaag</button></div>
 <div class="household-extra-actions" hidden="" id="studyExtraActions"><span>Minimum gehaald. Wil je naar het streefdoel?</span><button id="continueStudy30" type="button">+ 30 min</button></div>
@@ -392,5 +409,5 @@ Kliko aan de straat" rows="9"></textarea>
 </div>
 <script src="app.js?v=1.4.47"></script>
 <script src="firebase.js?v=1.4.47" type="module"></script>
-<script src="../hc-module-nav.js?v=1.4.157"></script></body>
+<script src="../hc-module-nav.js?v=1.4.158"></script></body>
 </html>
