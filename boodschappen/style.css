@@ -1286,14 +1286,14 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .product-search-suggestion{touch-action:manipulation}
 
 
-/* V1.4.169 - native ▼-menu en directe zoekselectie */
+/* V1.4.170 - native ▼-menu en directe zoekselectie */
 .shopping-section-menu>summary{list-style:none;cursor:pointer;user-select:none;width:100%;height:36px;min-height:36px;padding:0;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:#694d88;font-size:17px;font-weight:800}
 .shopping-section-menu>summary::-webkit-details-marker{display:none}
 .shopping-section-menu[open]>summary{background:#e6daf2;color:#5e3f7d}
 .shopping-section-menu:not([open]) .shopping-section-popover{display:none!important}
 .shopping-section-menu[open] .shopping-section-popover{display:grid!important}
 
-/* V1.4.169 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
+/* V1.4.170 — dropdown binnen Voorraad & Boodschappen vrij boven de pagina */
 .shopping-section-menu{z-index:5200!important}
 .shopping-section-popover{
   position:fixed!important;
@@ -1307,7 +1307,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 }
 
 
-/* V1.4.169 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
+/* V1.4.170 — ▼ submenu als body-level popup: niet meer afgeknipt door de tabbalk */
 .shopping-section-menu{position:relative!important;z-index:auto!important}
 .shopping-section-menu>summary{cursor:pointer!important}
 .shopping-section-menu>summary.active{background:#e6daf2!important;color:#5e3f7d!important}
@@ -1329,5 +1329,34 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .auth-gate[hidden]{display:none!important}
 
 
-/* V1.4.169 - verwijderbevestiging staat direct boven Product wijzigen. */
+/* V1.4.170 - verwijderbevestiging staat direct boven Product wijzigen. */
 #deleteModal.modal{z-index:3600}
+
+/* V1.4.170 — Product wijzigen compacter op telefoon, inhoud/werking ongewijzigd */
+#modal{padding:6px;align-items:center}
+#modal .card{width:min(100%,620px);max-height:calc(100dvh - 12px);padding:12px;border-radius:16px;overflow:auto}
+#modal .card h2{font-size:1.18rem;line-height:1.15;margin:0 0 7px}
+#modal .field{margin:5px 0}
+#modal .field-row{gap:6px}
+#modal .field label{font-size:.72rem;line-height:1.1;margin-bottom:2px}
+#modal .field input,#modal .field select,#modal .field textarea{border-radius:9px;padding:7px 9px;font-size:.9rem;line-height:1.2}
+#modal .field textarea{min-height:44px;max-height:70px}
+#modal .field-help{font-size:.64rem;line-height:1.2;margin-top:2px}
+#modal .stock-classification-help{font-size:.66rem;line-height:1.2;margin:-1px 0 5px}
+#modal .direct-buy-option{gap:7px;margin:6px 0;padding:7px 9px;border-radius:9px}
+#modal .direct-buy-option input{width:17px;height:17px;margin-top:0}
+#modal .direct-buy-option span{gap:1px;font-size:.78rem;line-height:1.15}
+#modal .direct-buy-option small{font-size:.64rem;line-height:1.2}
+#modal .stock-recipe-suggestion-wrap{margin:5px 0}
+#modal .modal-actions{gap:6px;margin-top:8px;position:sticky;bottom:-12px;background:#fff;padding:7px 0 2px;z-index:2}
+#modal .btn{border-radius:9px;padding:8px 11px;font-size:.82rem}
+#modal .product-delete-button{margin-right:auto}
+#modal .category-suggestions{max-height:150px}
+@media(max-width:420px){
+  #modal .card{padding:10px;max-height:calc(100dvh - 8px)}
+  #modal .card h2{font-size:1.08rem;margin-bottom:5px}
+  #modal .field{margin:4px 0}
+  #modal .field-row{gap:5px}
+  #modal .field input,#modal .field select,#modal .field textarea{padding:6px 8px;font-size:.86rem}
+  #modal .modal-actions{margin-top:6px}
+}
