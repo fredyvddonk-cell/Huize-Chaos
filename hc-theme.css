@@ -156,6 +156,7 @@ dialog{border:0;border-radius:20px;box-shadow:0 18px 60px rgba(36,29,42,.24)}
   --hc-radius-control:14px;
   --hc-shadow:0 3px 12px rgba(74,54,91,.06);
   --hc-page-pad:16px;
+  --hc-page-top:6px;
   --hc-control-h:48px;
 }
 
@@ -174,21 +175,21 @@ html,body{
   max-width:720px!important;
   margin:0 auto!important;
 }
-.app,.planner-app,.recipes{padding-left:var(--hc-page-pad)!important;padding-right:var(--hc-page-pad)!important}
+.app,.planner-app,.recipes{padding-left:var(--hc-page-pad)!important;padding-right:var(--hc-page-pad)!important;padding-top:var(--hc-page-top)!important}
 
 /* ------------------------------------------------------------
    Vaste HC-header
    ------------------------------------------------------------ */
 .module-topbar,.hc-module-top,.topbar,.fixed-head .top{
   box-sizing:border-box!important;
-  min-height:82px!important;
-  height:82px!important;
+  min-height:64px!important;
+  height:64px!important;
   display:flex!important;
   align-items:center!important;
   justify-content:space-between!important;
   gap:12px!important;
   margin:0!important;
-  padding:10px 0!important;
+  padding:4px 0!important;
   background:transparent!important;
   border:0!important;
   box-shadow:none!important;
@@ -201,19 +202,19 @@ html,body{
   text-decoration:none!important;
 }
 .module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child{
-  width:54px!important;
-  height:54px!important;
-  max-width:54px!important;
-  max-height:54px!important;
-  flex:0 0 54px!important;
+  width:46px!important;
+  height:46px!important;
+  max-width:46px!important;
+  max-height:46px!important;
+  flex:0 0 46px!important;
   object-fit:contain!important;
   border-radius:12px!important;
 }
 .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{
   width:auto!important;
-  height:39px!important;
-  max-width:240px!important;
-  max-height:39px!important;
+  height:31px!important;
+  max-width:190px!important;
+  max-height:31px!important;
   object-fit:contain!important;
 }
 .module-meta,.topbar-meta,.top-actions{
@@ -224,7 +225,7 @@ html,body{
 }
 .version,.module-version,.hc-version,.topbar-meta .version{
   color:#89838D!important;
-  font-size:14px!important;
+  font-size:13px!important;
   font-weight:650!important;
   white-space:nowrap!important;
 }
@@ -238,23 +239,23 @@ html,body{
    ------------------------------------------------------------ */
 .module-heading,.hc-heading,.title,.day-heading{
   box-sizing:border-box!important;
-  margin:12px 0 18px!important;
+  margin:8px 0 12px!important;
   padding:0!important;
   background:transparent!important;
   border:0!important;
 }
 .module-heading>p,.hc-heading>p,.title>div>p:first-of-type,.day-heading>p{
-  margin:0 0 3px!important;
+  margin:0 0 2px!important;
   padding:0!important;
   color:var(--hc-purple-strong)!important;
-  font-size:15px!important;
+  font-size:14px!important;
   line-height:1.2!important;
   font-weight:800!important;
 }
 .module-heading h1,.hc-heading h1,.title h1,.day-heading h1,.shopping-title-row h1,main.app>h1{
   margin:0!important;
   color:var(--hc-text)!important;
-  font-size:28px!important;
+  font-size:24px!important;
   line-height:1.12!important;
   letter-spacing:-.35px!important;
   font-weight:800!important;
@@ -273,7 +274,7 @@ html,body{
   display:flex!important;
   gap:4px!important;
   padding:4px!important;
-  margin:0 0 18px!important;
+  margin:0 0 12px!important;
   border:1px solid #E9E3EE!important;
   border-radius:16px!important;
   background:var(--hc-purple-soft)!important;
@@ -294,7 +295,7 @@ html,body{
   background:transparent!important;
   color:#5C4B70!important;
   box-shadow:none!important;
-  font-size:15px!important;
+  font-size:14px!important;
   line-height:1!important;
   font-weight:750!important;
   white-space:nowrap!important;
@@ -373,12 +374,12 @@ textarea{min-height:110px!important}
 .toolbar{gap:10px!important}
 .toolbar .search-wrap{flex:1 1 auto!important}
 .toolbar .plus{min-height:48px!important}
-.shopping-title-row{margin:18px 0 10px!important}
-.shopping-title-row h1{font-size:24px!important}
+.shopping-title-row{margin:12px 0 8px!important}
+.shopping-title-row h1{font-size:22px!important}
 
 /* Planner */
 .day-heading-row{align-items:center!important}
-.today-date{font-size:16px!important;color:var(--hc-muted)!important}
+.today-date{font-size:14px!important;color:var(--hc-muted)!important}
 .calendar-picker-button{border-radius:12px!important;box-shadow:none!important}
 .planner-tabs{margin-top:0!important}
 .section-icon{background:var(--hc-purple-soft)!important;color:var(--hc-purple-strong)!important}
@@ -386,7 +387,7 @@ textarea{min-height:110px!important}
 /* Recepten */
 .recipes{padding-top:0!important}
 .module-heading{display:block!important}
-.module-heading h1{font-size:28px!important}
+.module-heading h1{font-size:24px!important}
 .week-nav,.week-current-button{border-radius:12px!important}
 
 /* Auto */
@@ -412,12 +413,12 @@ main.app>h1::first-letter{font-size:0!important}
 .occasion-tabs{margin-bottom:0!important}
 
 @media(max-width:430px){
-  :root{--hc-page-pad:14px}
-  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:76px!important;min-height:76px!important}
-  .module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;flex-basis:48px!important}
-  .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{height:34px!important;max-height:34px!important;max-width:195px!important}
-  .module-heading h1,.hc-heading h1,.title h1,.day-heading h1,main.app>h1{font-size:27px!important}
-  .shopping-title-row h1{font-size:23px!important}
+  :root{--hc-page-pad:12px;--hc-page-top:4px}
+  .module-topbar,.hc-module-top,.topbar,.fixed-head .top{height:58px!important;min-height:58px!important;padding:2px 0!important}
+  .module-app-icon,.hc-app-icon,.hc-brand>img:first-child,.brand>img:first-child,.hc-shopping-icon{width:43px!important;height:43px!important;max-width:43px!important;max-height:43px!important;flex-basis:43px!important}
+  .module-wordmark,.hc-wordmark,.hc-brand>img:nth-child(2),.brand>img:nth-child(2),.hc-wordmark-image{height:29px!important;max-height:29px!important;max-width:168px!important}
+  .module-heading h1,.hc-heading h1,.title h1,.day-heading h1,main.app>h1{font-size:21px!important}
+  .shopping-title-row h1{font-size:21px!important}
   .tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{font-size:14px!important;padding:0 13px!important}
   .panel,.card,.purchase-card,.note-card,.occasion-card{padding:14px!important}
 }
@@ -471,7 +472,7 @@ body>.hc-module-top,body>.hc-heading,body>.gate{
   height:78px!important;
   min-height:78px!important;
   margin:0!important;
-  padding:10px 0!important;
+  padding:4px 0!important;
   display:flex!important;
   align-items:center!important;
   justify-content:space-between!important;
@@ -495,7 +496,7 @@ body>.hc-module-top,body>.hc-heading,body>.gate{
   width:auto!important;height:35px!important;max-height:35px!important;max-width:210px!important;object-fit:contain!important;
 }
 .version,.module-version,.hc-version,.hc-module-top>span:not(.hc-sync){
-  font-size:14px!important;font-weight:650!important;color:#8a858e!important;white-space:nowrap!important;
+  font-size:13px!important;font-weight:650!important;color:#8a858e!important;white-space:nowrap!important;
 }
 .module-sync,.sync-status,.hc-sync{font-size:12px!important;color:var(--hc132-muted)!important}
 
@@ -510,7 +511,7 @@ body>.hc-module-top,body>.hc-heading,body>.gate{
 .hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
   margin:0 0 4px!important;
   color:var(--hc132-purple-dark)!important;
-  font-size:15px!important;
+  font-size:14px!important;
   line-height:1.2!important;
   font-weight:800!important;
 }
@@ -518,7 +519,7 @@ body>.hc-module-top,body>.hc-heading,body>.gate{
 .shopping-module-heading h1{
   margin:0!important;
   color:var(--hc132-text)!important;
-  font-size:28px!important;
+  font-size:24px!important;
   line-height:1.12!important;
   letter-spacing:-.35px!important;
   font-weight:800!important;
@@ -542,7 +543,7 @@ body>.hc-module-top,body>.hc-heading,body>.gate{
 .tabs button,.planner-tabs button,.module-tabs button,.occasion-tabs button,.type-switch button,.tab,.module-tab{
   min-height:44px!important;height:44px!important;padding:0 15px!important;flex:1 0 auto!important;
   border:0!important;border-radius:12px!important;background:transparent!important;color:#5b4b6e!important;
-  font-size:15px!important;line-height:1!important;font-weight:750!important;box-shadow:none!important;white-space:nowrap!important;
+  font-size:14px!important;line-height:1!important;font-weight:750!important;box-shadow:none!important;white-space:nowrap!important;
 }
 .tabs button.active,.planner-tabs button.active,.module-tabs button.active,.occasion-tabs button.active,.type-switch button.active,.tab.active,.module-tab.active{
   background:var(--hc132-purple)!important;color:white!important;box-shadow:none!important;
@@ -623,7 +624,7 @@ main.app>h1::first-letter{font-size:inherit!important}
   margin:6px 0 10px!important;
 }
 .hc-page-heading>p:first-child,.module-heading>p:first-child,.hc-heading>p:first-child,.day-heading>p:first-child{
-  margin:0 0 3px!important;
+  margin:0 0 2px!important;
   font-size:13px!important;
   line-height:1.2!important;
   font-weight:750!important;
@@ -636,7 +637,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 .hc-page-heading .intro,.module-heading .intro,.hc-heading .intro,.title .intro{
   margin:6px 0 0!important;
-  font-size:15px!important;
+  font-size:14px!important;
   line-height:1.4!important;
 }
 .day-heading-row{margin-top:8px!important}
@@ -694,7 +695,7 @@ main.app>h1::first-letter{font-size:inherit!important}
 }
 .hc-page-heading .intro,.module-heading .intro,.hc-heading .intro,.title .intro{
   margin:4px 0 0!important;
-  font-size:14px!important;
+  font-size:13px!important;
   line-height:1.35!important;
 }
 
@@ -709,7 +710,7 @@ main.app>h1::first-letter{font-size:inherit!important}
   height:38px!important;
   padding:0 12px!important;
   border-radius:11px!important;
-  font-size:14px!important;
+  font-size:13px!important;
   font-weight:700!important;
 }
 
