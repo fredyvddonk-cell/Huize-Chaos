@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.174
+# Huize Chaos V1.4.175
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -108,7 +108,7 @@
 - Geen losse afgeronde productkaarten binnen een categorie.
 - Status, Kopen en Hutsel compacter gehouden.
 
-## V1.4.174
+## V1.4.175
 - Voorraadsoort Niet in voorraad vervalt.
 - Bestaande producten met voorraadsoort Niet in voorraad worden automatisch onder Standaard voorraad geplaatst.
 - Nieuwe en bestaande producten gebruiken voortaan alleen Standaard voorraad of Maaltijdvoorraad als voorraadsoort.

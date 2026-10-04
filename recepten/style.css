@@ -203,3 +203,38 @@
 
 /* V1.4.117 - compacte, bruikbare variatiecontrole */
 .week-variation{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .55rem}.week-variation>strong{margin-right:.1rem}.week-variation>span{color:var(--muted,#6f6b73)}.week-variation>span+span{flex-basis:100%;padding-left:0}.week-variation-warning{flex-basis:100%;color:#8b3a4b;font-weight:600;margin-top:.15rem}
+
+/* V1.4.175 — Weekmenu rustiger: compacte weekinfo en recepten pas bij openen bewerken */
+.week-menu-context{gap:7px;margin-top:9px}
+.week-info{background:#fff;border:1px solid #e7e0ec;border-radius:14px;overflow:hidden}
+.week-info>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;color:#5b347c}
+.week-info>summary::-webkit-details-marker{display:none}
+.week-info>summary strong{font-size:14px;white-space:nowrap}
+.week-info>summary span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#716b75}
+.week-info>summary::after{content:'⌄';margin-left:auto;color:#7353a5;font-weight:800}
+.week-info[open]>summary::after{content:'⌃'}
+.week-info-body{border-top:1px solid #eee7f4;padding:8px 10px;display:grid;gap:6px;background:#fcfaff}
+.week-info-body .week-fixed-meals,.week-info-body .week-work-info,.week-info-body .week-variation,.week-info-body .week-hutsel{border:0;border-radius:0;background:transparent;padding:4px 2px}
+.week-info-body .week-fixed-meals{display:flex;gap:7px;flex-wrap:wrap;align-items:baseline}
+.week-info-body .week-fixed-meals strong,.week-info-body .week-work-info strong,.week-info-body .week-variation strong,.week-info-body .week-hutsel strong{font-size:12px}
+.week-menu-tools{gap:7px;margin-top:0;flex-wrap:nowrap}
+.week-menu-tools .btn{padding:8px 12px;min-height:36px;font-size:13px;border-radius:11px}
+.week-menu-tools .week-add-recipe{flex:1}
+.week-menu-tools .week-print-button{flex:0 0 auto}
+.week-menu-list{gap:7px;margin-top:10px}
+.week-menu-card{padding:10px 12px;border-radius:14px}
+.week-menu-card .week-menu-recipe-link strong{font-size:15px}
+.week-menu-card .week-menu-recipe-link small{font-size:11px;margin-top:2px}
+.week-menu-card.expanded{padding-bottom:11px}
+.week-menu-expanded{margin-top:9px;padding-top:8px;border-top:1px solid #eee7f4}
+.week-menu-servings{margin-top:0;font-size:13px;justify-content:space-between}
+.week-menu-servings input{width:70px;height:36px;box-sizing:border-box;padding:5px 8px}
+.week-menu-actions{margin-top:8px;gap:6px}
+.week-menu-actions select,.week-menu-actions .btn{min-height:36px;box-sizing:border-box}
+.week-menu-stock-check{margin-top:9px;padding-top:8px}
+@media(max-width:600px){
+  .week-menu-tools{display:flex}
+  .week-menu-tools .btn{width:auto}
+  .week-info>summary{padding:9px 10px}
+  .week-menu-card{padding:9px 11px}
+}
