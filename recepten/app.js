@@ -1,3 +1,4 @@
+// V1.4.181 - receptenmenu sneller: metadata/indexcaches, snelle id-lookup, zoek-debounce en render na directe tabfeedback.
 // V1.4.113 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
 // V1.4.113 - laptopfilters lopen door op meerdere regels; Past bij voorraad toont ook gedeeltelijke voorraadmatches.
 // V1.4.104 - categorie, soort en hoofdingrediënt uitgebreid en handmatig wijzigbaar; stoof/peulvruchten worden herkend.
@@ -19,19 +20,22 @@ const RECIPE_CATEGORIES=['Nederlands','Italiaans','Aziatisch','Thais','Indonesis
 const RECIPE_TYPES=['Pastagerecht','Rijstgerecht','Noedelgerecht','Aardappelgerecht','Bowl','Wrap / tortilla','Ovenschotel','Stoofgerecht','Curry','Soep','Salade','Pizza / plaatgerecht','Broodgerecht','Stamppot','Eenpansgerecht','Anders'];
 const MAIN_INGREDIENT_OPTIONS=['Kip','Rund','Varken','Vis','Schaal- en schelpdieren','Ei','Kaas','Peulvruchten','Tofu / tempeh','Groente','Vegetarisch','Anders'];
 const HOME_TIME_OPTIONS=['Kort','Middellang','Lang'];
-let allRecipesCache=null,stockFitCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',recipeListScrollY=0;
-function invalidateRecipeCaches(){allRecipesCache=null;stockFitCache.clear()}
+let allRecipesCache=null,allRecipesByIdCache=null,recipeMetaArrayCache=null,recipeMetaMapCache=null,recipeClassCache=new Map(),stockFitCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',recipeListScrollY=0;
+function invalidateRecipeCaches(){allRecipesCache=null;allRecipesByIdCache=null;recipeClassCache.clear();stockFitCache.clear()}
+function invalidateRecipeMetaCache(){recipeMetaArrayCache=null;recipeMetaMapCache=null}
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-const read=(k,f=[])=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:f}catch(_){return f}};const pending=()=>read(PENDING_KEY),custom=()=>read(CUSTOM_KEY),recipeMeta=()=>read(META_KEY),deletedRecipes=()=>read(DELETED_KEY);
+const read=(k,f=[])=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:f}catch(_){return f}};const pending=()=>read(PENDING_KEY),custom=()=>read(CUSTOM_KEY),deletedRecipes=()=>read(DELETED_KEY);
+function recipeMeta(){if(recipeMetaArrayCache)return recipeMetaArrayCache;recipeMetaArrayCache=read(META_KEY);return recipeMetaArrayCache}
+function recipeMetaMap(){if(recipeMetaMapCache)return recipeMetaMapCache;recipeMetaMapCache=new Map(recipeMeta().map(x=>[String(x.id),x]));return recipeMetaMapCache}
 function saveDeletedRecipes(ids){write(DELETED_KEY,[...new Set((ids||[]).map(String))]);invalidateRecipeCaches();scheduleSync()}
-function metaFor(id){return recipeMeta().find(x=>String(x.id)===String(id))||{id:String(id),favorite:false,memo:''}}
+function metaFor(id){return recipeMetaMap().get(String(id))||{id:String(id),favorite:false,memo:''}}
 function saveMetaFor(id,patch){const a=recipeMeta(),key=String(id),i=a.findIndex(x=>String(x.id)===key),next={...(i>=0?a[i]:{id:key,favorite:false,memo:''}),...patch,id:key};if(i>=0)a[i]=next;else a.push(next);write(META_KEY,a);scheduleSync();renderList();return next}
-const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));const mergeById=(a,b)=>{const m=new Map();[...a,...b].forEach(x=>m.set(String(x.id),x));return [...m.values()]};
+const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if(k===META_KEY)invalidateRecipeMetaCache()};const mergeById=(a,b)=>{const m=new Map();[...a,...b].forEach(x=>m.set(String(x.id),x));return [...m.values()]};
 function recipeWeekDeleted(){try{return JSON.parse(localStorage.getItem(RECIPE_WEEK_DELETED_KEY)||'{}')||{}}catch(_){return {}}}
 function saveRecipeWeekDeleted(v){localStorage.setItem(RECIPE_WEEK_DELETED_KEY,JSON.stringify(v||{}))}
 function mergeWeekDeleted(remote={},local={}){const out={...remote};Object.entries(local||{}).forEach(([id,ts])=>out[id]=Math.max(Number(out[id]||0),Number(ts||0)));return out}
 function mergeWeekPlans(remote=[],local=[],deleted=recipeWeekDeleted()){const merged=new Map();(remote||[]).forEach(plan=>merged.set(String(plan.id),plan));(local||[]).forEach(plan=>{const id=String(plan.id),current=merged.get(id);if(!current||Number(plan.changedAt||0)>Number(current.changedAt||0))merged.set(id,plan)});return [...merged.values()].filter(plan=>Number(deleted[String(plan.id)]||0)<Number(plan.changedAt||0))}
-function allRecipes(){if(allRecipesCache)return allRecipesCache;const deleted=new Set(deletedRecipes().map(String)),edits=new Map();BASE.forEach(r=>{if(deleted.has(String(r.id)))return;try{const x=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(x)edits.set(String(r.id),x)}catch(_){}});allRecipesCache=[...BASE.filter(r=>!deleted.has(String(r.id))).map(r=>edits.get(String(r.id))||r),...custom().filter(r=>!deleted.has(String(r.id)))];return allRecipesCache}
+function allRecipes(){if(allRecipesCache)return allRecipesCache;const deleted=new Set(deletedRecipes().map(String)),edits=new Map();BASE.forEach(r=>{if(deleted.has(String(r.id)))return;try{const x=JSON.parse(localStorage.getItem('hc_recipe_'+r.id)||'null');if(x)edits.set(String(r.id),x)}catch(_){}});allRecipesCache=[...BASE.filter(r=>!deleted.has(String(r.id))).map(r=>edits.get(String(r.id))||r),...custom().filter(r=>!deleted.has(String(r.id)))];allRecipesByIdCache=new Map(allRecipesCache.map(r=>[String(r.id),r]));return allRecipesCache}
 function setStatus(t){if(syncStatus){syncStatus.textContent=t;syncStatus.hidden=/^(Gesynchroniseerd|Recepten laden…)$/.test(t)}}
 function scheduleSync(){if(!cloudReady||applyingCloud||!user)return;clearTimeout(syncTimer);setStatus('Synchroniseren…');syncTimer=setTimeout(syncCloud,250)}
 async function syncCloud(){if(!user||!recipeRef||!fbSetDoc||!fbServerTimestamp)return;await fbSetDoc(recipeRef,{pending:pending(),custom:custom(),meta:recipeMeta(),deleted:deletedRecipes(),weekPlans:recipeWeekPlans(),deletedWeekPlans:recipeWeekDeleted(),updatedAt:fbServerTimestamp(),updatedBy:user.uid},{merge:false});setStatus('Gesynchroniseerd')}
@@ -64,7 +68,7 @@ function hideList(){if(recipeModuleView==='recipes')recipeListScrollY=window.scr
 function pushRecipeHistory(state){if(!recipeHistoryReady)return;history.pushState({...history.state,hcRecipeScreen:'detail',hcRecipeModule:recipeModuleView,...state},'',location.href)}
 function backListDirect(refresh=false){detail.classList.add('hidden');document.querySelector('.recipes')?.classList.remove('recipe-detail-open');current=null;edited=null;displayServings='';const target=openedFromWeekMenu?'weekmenu':recipeModuleView;openedFromWeekMenu=false;showRecipeModule(target,true);if(refresh&&target==='recipes')renderList();if(target==='recipes')requestAnimationFrame(()=>window.scrollTo({top:recipeListScrollY,behavior:'instant'}))}
 function backList(refresh=false){if(returnEventId){const id=returnEventId;returnEventId='';window.location.href=`../gelegenheden/?event=${encodeURIComponent(id)}`;return}if(history.state?.hcRecipeScreen==='detail'){history.back();return}backListDirect(refresh)}
-function getRecipe(id){return allRecipes().find(r=>String(r.id)===String(id))}function isCustom(id){return custom().some(r=>String(r.id)===String(id))}
+function getRecipe(id){if(!allRecipesByIdCache)allRecipes();return allRecipesByIdCache.get(String(id))||null}function isCustom(id){return custom().some(r=>String(r.id)===String(id))}
 function openRecipe(id,{fromHistory=false}={}){const recipe=getRecipe(id);if(!recipe)return;if(!fromHistory)pushRecipeHistory({hcRecipeKind:'recipe',hcRecipeId:String(id),hcRecipeReturn:recipeModuleView});current=String(id);edited=JSON.parse(JSON.stringify(recipe));displayServings=String(edited?.servings||'');hideList();showView('ingredients')}
 function openPending(id,{fromHistory=false}={}){const r=pending().find(x=>String(x.id)===String(id));if(!r)return;if(!fromHistory)pushRecipeHistory({hcRecipeKind:'pending',hcRecipeId:String(id),hcRecipeReturn:recipeModuleView});current='pending:'+id;edited=JSON.parse(JSON.stringify(r));hideList();showReview()}
 function parseQtyNumber(value){let s=String(value??'').trim().replace(',','.');if(!s)return null;const u={'¼':.25,'½':.5,'¾':.75,'⅓':1/3,'⅔':2/3,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875};if(u[s]!=null)return u[s];const m=s.match(/^(\d+)\s+(\d+)\/(\d+)$/);if(m)return Number(m[1])+Number(m[2])/Number(m[3]);const f=s.match(/^(\d+)\/(\d+)$/);if(f)return Number(f[1])/Number(f[2]);const n=Number(s);return Number.isFinite(n)?n:null}
@@ -374,7 +378,7 @@ function showRecipeUrlImport(){
 document.querySelector('#importRecipeUrl')?.addEventListener('click',showRecipeUrlImport);
 async function takeSharedRecipe(){const url=new URL(location.href);if(!url.searchParams.has('share-target')||!('caches'in window))return null;try{const cache=await caches.open('huize-chaos-shared-content-v1'),key=new URL('__shared-recipe__',url).href,res=await cache.match(key);if(!res)return null;await cache.delete(key);return await res.json()}catch(err){console.warn(err);return null}}
 async function receiveSharedRecipe(){const payload=await takeSharedRecipe();if(!payload)return;let draft=parseSharedText(payload);draft=await enrichFromUrl(draft);savePending([...pending(),draft]);history.replaceState({...history.state,hcRecipeScreen:'module',hcRecipeModule:recipeModuleView},'',location.pathname+location.hash);openPending(draft.id)}
-search.oninput=()=>{renderList();renderSmartRecipePicker()};renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();
+renderList();setStatus('Recepten geladen');initCloud();receiveSharedRecipe();
 
 // V1.3.116 - voorraad koppelen aan recepten
 const STOCK_KEY='household-products-v2';
@@ -474,7 +478,7 @@ function renderStockPicker(){const a=relevantStock();stockPicker.innerHTML=`<div
 stockRecipeButton?.addEventListener('click',renderStockPicker);
 const originalRenderList=renderList;
 renderList=function(){if(!stockFilterIds.length)return originalRenderList();if(stockResultsReady)return renderStockResults();return originalRenderList()};
-search.oninput=()=>{renderList();renderSmartRecipePicker()};
+let recipeSearchTimer=0;search.oninput=()=>{clearTimeout(recipeSearchTimer);recipeSearchTimer=setTimeout(()=>{renderList();renderSmartRecipePicker()},90)};
 function deductionCandidates(r){const stock=stockProducts().filter(p=>p.status==='In huis');return (r.ingredients||[]).map(i=>{const p=stock.find(p=>i.stockProductId&&String(p.id)===String(i.stockProductId))||stock.find(p=>ingredientMatchesProduct(i.ingredient,p));return p?{ingredient:i,product:p}:null}).filter(Boolean)}
 function showDeduct(r){const rows=deductionCandidates(r);detail.innerHTML=`<div class="detail-head"><div><h2>Recept gemaakt</h2><small>${esc(r.title)}</small></div></div><div class="panel deduct-panel"><p>Controleer wat van de voorraad wordt afgeboekt. Pas een hoeveelheid aan als je minder of meer hebt gebruikt.</p>${rows.length?rows.map((x,i)=>`<div class="deduct-row"><span>${esc(x.product.name)}</span><input data-deduct="${i}" inputmode="decimal" value="${esc(x.ingredient.qty||'')}" aria-label="Hoeveelheid"><span>${esc(x.ingredient.unit||x.product.unit||'')}</span></div>`).join(''):'<div class="empty">Geen ingrediënten gevonden die aan je voorraad gekoppeld kunnen worden.</div>'}</div><div class="actions"><button class="btn primary" id="confirmDeduct" ${rows.length?'':'disabled'}>Bevestigen en afboeken</button><button class="btn" id="cancelDeduct">Annuleren</button></div>`;detail.querySelector('#cancelDeduct').onclick=()=>showView('ingredients');detail.querySelector('#confirmDeduct')?.addEventListener('click',()=>{const products=stockProducts();rows.forEach((row,i)=>{const p=products.find(x=>String(x.id)===String(row.product.id));if(!p)return;const used=parseFloat(String(detail.querySelector(`[data-deduct="${i}"]`).value).replace(',','.'));const have=parseFloat(String(p.quantity).replace(',','.'));if(Number.isFinite(used)&&Number.isFinite(have)){p.quantity=String(Math.max(0,have-used));if(+p.quantity===0){p.status='Niet in huis';p.shopping=false;p.done=false}}});localStorage.setItem(STOCK_KEY,JSON.stringify(products));window.dispatchEvent(new Event('huize-chaos-products-changed'));alert('Voorraad is bijgewerkt.');showView('ingredients')})}
 function ensureRecipeActions(){
@@ -962,7 +966,13 @@ function showRecipeModule(view,fromHistory=false){
   recipeLibraryPanel?.classList.toggle('hidden',!recipes);
   showWeekMenuButton?.classList.toggle('active',!recipes);
   showRecipesButton?.classList.toggle('active',recipes);
-  if(recipes){list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');renderList();renderSmartRecipePicker()}else renderWeekMenu();
+  if(recipes){
+    list.classList.remove('hidden');pendingBox.classList.remove('hidden');search.classList.remove('hidden');
+    // Eerst de tab direct zichtbaar maken; de zwaardere receptenlijst volgt in het volgende frame.
+    requestAnimationFrame(()=>{renderList();renderSmartRecipePicker()});
+  }else{
+    requestAnimationFrame(()=>renderWeekMenu());
+  }
   if(recipeHistoryReady&&!fromHistory&&changed)history.pushState({...history.state,hcRecipeScreen:'module',hcRecipeModule:safe,hcRecipeKind:'',hcRecipeId:''},'',location.href);
 }
 window.hcShowRecipeModule=showRecipeModule;
@@ -1282,7 +1292,7 @@ function showImportedPhotoRecipeReview(){
   detail.querySelector('#savePhotoRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'4');showView('ingredients')};
   detail.querySelector('#cancelPhotoRecipe').onclick=backList;
 }
-// V1.4.180 - foto en PDF delen één compacte importknop; afhandeling staat na de PDF-import.
+// V1.4.181 - foto en PDF delen één compacte importknop; afhandeling staat na de PDF-import.
 
 
 // V1.4.107 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.

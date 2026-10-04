@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.180
+# Huize Chaos V1.4.181
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -121,3 +121,11 @@
 - Bestaande producten met voorraadsoort Niet in voorraad worden automatisch onder Standaard voorraad geplaatst.
 - Nieuwe en bestaande producten gebruiken voortaan alleen Standaard voorraad of Maaltijdvoorraad als voorraadsoort.
 - Filter- en beheerkeuzes voor Niet in voorraad zijn verwijderd.
+
+
+## V1.4.181
+- Receptenmenu sneller gemaakt zonder de indeling of werking te veranderen.
+- Receptmetadata wordt tijdens gebruik gecachet, zodat favorieten niet bij iedere sortering opnieuw uit localStorage worden gelezen.
+- Recepten krijgen een snelle ID-index voor openen en weekmenu-bewerkingen.
+- Zoeken gebruikt een korte debounce in plaats van twee volledige renders per toetsaanslag.
+- Bij wisselen tussen Weekmenu en Recepten wordt de tab direct zichtbaar; de zwaardere lijstweergave volgt in het volgende renderframe.
