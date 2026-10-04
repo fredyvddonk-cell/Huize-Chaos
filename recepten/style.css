@@ -277,7 +277,7 @@
 /* V1.4.179 — HC-bevestiging voor definitief verwijderen van recepten uit de receptendatabase. */
 
 
-/* V1.4.181 — rustigere receptenbibliotheek: compacte importacties en inklapbare filters. */
+/* V1.4.182 — rustigere receptenbibliotheek: compacte importacties en inklapbare filters. */
 .recipe-library-actions{display:grid;grid-template-columns:1fr;gap:8px;margin:0 0 10px}
 .recipe-library-actions .recipe-add-main{width:100%;min-height:42px}
 .recipe-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
