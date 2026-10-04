@@ -14,6 +14,52 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const euro=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const nlDate=s=>s?new Intl.DateTimeFormat('nl-NL').format(new Date(`${s}T12:00:00`)):'';
 const daysUntil=s=>s?Math.ceil((new Date(`${s}T23:59:59`)-new Date())/86400000):null;
+const isoToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const parseIso=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12)};
+const isoFromDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const shortDate=s=>s?new Intl.DateTimeFormat('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(parseIso(s)):'Kies datum';
+function refreshDateButtons(){
+  $('dateButton').textContent=shortDate($('date').value);
+  $('warrantyButton').textContent=$('warranty').value?shortDate($('warranty').value):'Optioneel';
+  $('dateButton').classList.toggle('is-empty',!$('date').value);
+  $('warrantyButton').classList.toggle('is-empty',!$('warranty').value);
+}
+let activeDateInput=null,dateCursor=new Date(),dateDraft='';
+function renderDateDialog(){
+  const selected=parseIso(dateDraft);
+  $('hcDateSelected').textContent=selected?new Intl.DateTimeFormat('nl-NL',{weekday:'short',day:'numeric',month:'long',year:'numeric'}).format(selected):'Geen datum gekozen';
+  $('hcDateMonth').textContent=new Intl.DateTimeFormat('nl-NL',{month:'long',year:'numeric'}).format(dateCursor);
+  const y=dateCursor.getFullYear(),m=dateCursor.getMonth();
+  const first=new Date(y,m,1,12),offset=(first.getDay()+6)%7,days=new Date(y,m+1,0,12).getDate();
+  let html='';
+  for(let i=0;i<offset;i++)html+='<span class="hc-date-empty"></span>';
+  for(let day=1;day<=days;day++){
+    const d=new Date(y,m,day,12),iso=isoFromDate(d),selectedClass=iso===dateDraft?' is-selected':'',todayClass=iso===isoToday()?' is-today':'';
+    html+=`<button type="button" class="hc-date-day${selectedClass}${todayClass}" data-date="${iso}">${day}</button>`;
+  }
+  $('hcDateGrid').innerHTML=html;
+}
+function openDateDialog(inputId){
+  activeDateInput=$(inputId);dateDraft=activeDateInput.value||'';
+  dateCursor=parseIso(dateDraft)||new Date();dateCursor=new Date(dateCursor.getFullYear(),dateCursor.getMonth(),1,12);
+  renderDateDialog();$('hcDateDialog').showModal();
+}
+$('hcDatePrev').onclick=()=>{dateCursor=new Date(dateCursor.getFullYear(),dateCursor.getMonth()-1,1,12);renderDateDialog()};
+$('hcDateNext').onclick=()=>{dateCursor=new Date(dateCursor.getFullYear(),dateCursor.getMonth()+1,1,12);renderDateDialog()};
+$('hcDateGrid').onclick=e=>{const b=e.target.closest('[data-date]');if(!b)return;dateDraft=b.dataset.date;renderDateDialog()};
+$('hcDateClear').onclick=()=>{dateDraft='';renderDateDialog()};
+$('hcDateCancel').onclick=()=>$('hcDateDialog').close();
+$('hcDateSet').onclick=()=>{if(activeDateInput){activeDateInput.value=dateDraft;refreshDateButtons()}$('hcDateDialog').close()};
+$('dateButton').onclick=()=>openDateDialog('date');
+$('warrantyButton').onclick=()=>openDateDialog('warranty');
+function askCategory(){return new Promise(resolve=>{
+  const dlg=$('hcCategoryDialog'),input=$('hcCategoryName');input.value='';
+  const finish=value=>{dlg.removeEventListener('close',onClose);resolve(value)};
+  const onClose=()=>finish(null);dlg.addEventListener('close',onClose,{once:true});
+  $('hcCategoryCancel').onclick=()=>{dlg.removeEventListener('close',onClose);dlg.close();resolve(null)};
+  $('hcCategoryOk').onclick=e=>{e.preventDefault();const value=input.value.trim();if(!value){input.focus();return}dlg.removeEventListener('close',onClose);dlg.close();resolve(value)};
+  dlg.showModal();requestAnimationFrame(()=>input.focus());
+})}
 function normalizedCategories(){return [...new Set([...DEFAULT_CATEGORIES,...categories,...purchases.map(x=>x.category).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,'nl'))}
 function renderCategoryChoices(){
   categories=normalizedCategories();
@@ -27,7 +73,7 @@ function renderCategoryChoices(){
   $('categoryFilter').value=used.includes(keep)?keep:'';
 }
 function render(){renderCategoryChoices();const q=$('search').value.trim().toLowerCase(),cat=$('categoryFilter').value;let list=purchases.filter(p=>(!q||`${p.name} ${p.store} ${p.category||''} ${p.model||''} ${p.serial||''} ${p.note||''}`.toLowerCase().includes(q))&&(!cat||p.category===cat));const sort=$('sort').value;list.sort((a,b)=>sort==='date-asc'?String(a.date).localeCompare(String(b.date)):sort==='price-desc'?(Number(b.price)||0)-(Number(a.price)||0):sort==='name'?String(a.name).localeCompare(String(b.name),'nl'):String(b.date).localeCompare(String(a.date)));$('purchases').innerHTML=list.length?list.map(p=>{const d=daysUntil(p.warranty),w=p.warranty?(d<0?'Garantie verlopen':d<=60?`Garantie nog ${Math.max(0,d)} dagen`:`Garantie t/m ${nlDate(p.warranty)}`):'';return `<article class="purchase" data-id="${esc(p.id)}"><div class="purchase-main"><div><h2>${esc(p.name)}</h2><div class="meta">${nlDate(p.date)} · ${esc(p.store)}</div></div><div class="price">${euro(p.price)}</div></div><div class="chips">${p.category?`<span class="chip">${esc(p.category)}</span>`:''}${p.attachment?.data?'<span class="chip">Bon bewaard</span>':''}${w?`<span class="chip warranty ${d<=60?'warn':'ok'}">${esc(w)}</span>`:''}</div></article>`}).join(''):'<div class="empty">Nog geen aankopen gevonden.</div>'}
-function resetForm(p={}){current=p.id?p:null;$('purchaseId').value=p.id||'';$('name').value=p.name||'';$('date').value=p.date||new Date().toISOString().slice(0,10);$('store').value=p.store||'';$('price').value=p.price!=null?String(p.price).replace('.',','):'';renderCategoryChoices();$('category').value=p.category||'';$('warranty').value=p.warranty||'';$('model').value=p.model||'';$('serial').value=p.serial||'';$('note').value=p.note||'';$('attachment').value='';pendingAttachment=null;removeExisting=false;$('editorTitle').textContent=p.id?'Aankoop wijzigen':'Aankoop toevoegen';showAttachment(p.attachment)}
+function resetForm(p={}){current=p.id?p:null;$('purchaseId').value=p.id||'';$('name').value=p.name||'';$('date').value=p.date||isoToday();$('store').value=p.store||'';$('price').value=p.price!=null?String(p.price).replace('.',','):'';renderCategoryChoices();$('category').value=p.category||'';$('warranty').value=p.warranty||'';refreshDateButtons();$('model').value=p.model||'';$('serial').value=p.serial||'';$('note').value=p.note||'';$('attachment').value='';pendingAttachment=null;removeExisting=false;$('editorTitle').textContent=p.id?'Aankoop wijzigen':'Aankoop toevoegen';showAttachment(p.attachment)}
 function showAttachment(a){$('attachmentInfo').textContent=a?.data?`${a.name||'Bon'} · opgeslagen bij deze aankoop`:'Nog geen bestand gekoppeld.';$('removeAttachment').hidden=!a?.data}
 function openEditor(p={},fromHistory=false){resetForm(p);if(!fromHistory)history.pushState({...history.state,hcPurchaseScreen:'editor',hcPurchaseId:p.id||''},'',location.href);if(!$('editor').open)$('editor').showModal();$('editor').setAttribute('tabindex','-1');$('editor').focus({preventScroll:true})}
 function closeDialog(id){if(history.state?.hcPurchaseScreen===id){history.back();return}if($(id).open)$(id).close()}
@@ -36,7 +82,7 @@ function openAttachment(a){if(!a?.data)return;const w=window.open();if(!w){alert
 async function imageAttachment(file){const url=URL.createObjectURL(file);const img=await new Promise((res,rej)=>{const i=new Image;i.onload=()=>res(i);i.onerror=rej;i.src=url});let scale=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight)),quality=.78,data='';for(let attempt=0;attempt<6;attempt++){const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*scale);c.height=Math.round(img.naturalHeight*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);data=c.toDataURL('image/jpeg',quality);if(data.length<760000)break;scale*=.82;quality=Math.max(.5,quality-.08)}URL.revokeObjectURL(url);if(data.length>=800000)throw new Error('De foto blijft te groot. Maak een foto met een lagere resolutie.');return{name:file.name.replace(/\.[^.]+$/,'.jpg'),type:'image/jpeg',data}}
 async function fileAttachment(file){if(file.type.startsWith('image/'))return imageAttachment(file);if(file.type!=='application/pdf')throw new Error('Gebruik een foto of PDF.');if(file.size>560000)throw new Error('Deze PDF is te groot om veilig mee te synchroniseren. Gebruik een foto van de bon of een PDF kleiner dan ongeveer 550 kB.');const data=await new Promise((res,rej)=>{const r=new FileReader;r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});return{name:file.name,type:file.type,data}}
 async function saveCategories(){await setDoc(categoryDoc,{kind:'largePurchaseCategories',categories,updatedAt:serverTimestamp()},{merge:true})}
-$('addCategory').onclick=async()=>{const name=prompt('Naam van de nieuwe categorie:')?.trim();if(!name)return;if(categories.some(c=>c.toLowerCase()===name.toLowerCase())){const existing=categories.find(c=>c.toLowerCase()===name.toLowerCase());$('category').value=existing;return}categories.push(name);categories=normalizedCategories();renderCategoryChoices();$('category').value=name;try{await saveCategories()}catch(err){console.error(err);alert('De categorie kon niet worden gesynchroniseerd, maar je kunt hem wel voor deze aankoop gebruiken.')}};
+$('addCategory').onclick=async()=>{const name=await askCategory();if(!name)return;if(categories.some(c=>c.toLowerCase()===name.toLowerCase())){const existing=categories.find(c=>c.toLowerCase()===name.toLowerCase());$('category').value=existing;return}categories.push(name);categories=normalizedCategories();renderCategoryChoices();$('category').value=name;try{await saveCategories()}catch(err){console.error(err);alert('De categorie kon niet worden gesynchroniseerd, maar je kunt hem wel voor deze aankoop gebruiken.')}};
 $('attachment').onchange=async e=>{const file=e.target.files[0];if(!file)return;$('attachmentInfo').textContent='Bon voorbereiden…';try{pendingAttachment=await fileAttachment(file);removeExisting=false;showAttachment(pendingAttachment)}catch(err){pendingAttachment=null;e.target.value='';$('attachmentInfo').textContent=err.message;alert(err.message)}};
 $('removeAttachment').onclick=()=>{pendingAttachment=null;removeExisting=true;showAttachment(null)};$('newPurchase').onclick=()=>openEditor();$('cancel').onclick=()=>closeDialog('editor');$('backEditor').onclick=()=>closeDialog('editor');$('backDetail').onclick=()=>closeDialog('detail');$('search').oninput=render;$('categoryFilter').onchange=render;$('sort').onchange=render;$('purchases').onclick=e=>{const card=e.target.closest('[data-id]');if(card){const p=purchases.find(x=>x.id===card.dataset.id);if(p)openDetail(p)}};
 $('editPurchase').onclick=()=>{const p=current;if(!p)return;if($('detail').open)$('detail').close();openEditor(p)};$('deletePurchase').onclick=async()=>{if(!current||!confirm(`Aankoop “${current.name}” verwijderen?`))return;try{await deleteDoc(doc(coll,current.id));closeDialog('detail')}catch(err){console.error(err);alert('Verwijderen is niet gelukt.')}};

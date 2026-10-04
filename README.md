@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.183
+# Huize Chaos V1.4.184
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -123,7 +123,7 @@
 - Filter- en beheerkeuzes voor Niet in voorraad zijn verwijderd.
 
 
-## V1.4.183
+## V1.4.184
 - `Past bij voorraad` gebruikt blijvende voorraad- en ingrediëntmatchcaches en rekent alleen opnieuw wanneer de voorraad verandert.
 - Voorraadmatches worden rustig vooraf berekend zodra de browser tijd over heeft.
 - De voorraadmatch vergelijkt nu expliciet de ingrediëntnaam met voorraadproducten.
