@@ -270,6 +270,7 @@ document.getElementById('confirmDelete').addEventListener('click',confirmDeleteE
 deleteModal.addEventListener('click',event=>{if(event.target===deleteModal)closeDeleteModal()});
 els.appointmentSearch.addEventListener('input',()=>{els.clearAppointmentSearch.hidden=!els.appointmentSearch.value;render()});
 els.clearAppointmentSearch.addEventListener('click',()=>{els.appointmentSearch.value='';els.clearAppointmentSearch.hidden=true;els.appointmentSearch.focus();render()});
+const plannerDateButton=document.getElementById('plannerDateButton');
 els.dateSearch?.addEventListener('change',renderDateSearch);
 els.dateSearchToday?.addEventListener('click',()=>{els.dateSearch.value=todayKey();renderDateSearch()});
 els.dateSearchClear?.addEventListener('click',()=>{els.dateSearch.value='';renderDateSearch()});

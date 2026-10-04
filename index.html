@@ -8,8 +8,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.161">
-  <link rel="stylesheet" href="hc-theme.css?v=1.4.161">
+  <link rel="stylesheet" href="style.css?v=1.4.164">
+  <link rel="stylesheet" href="hc-theme.css?v=1.4.164">
 </head>
 <body>
   <main class="home">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <div class="home-top-actions">
-        <span class="hc-version">V1.4.162</span>
+        <span class="hc-version">V1.4.164</span>
         <button class="home-icon-button" id="openGlobalSearch" type="button" aria-label="Zoeken in Huize Chaos" title="Zoeken">⌕</button>
         <button class="home-icon-button menu-button" id="openModuleMenu" type="button" aria-label="Modulemenu openen" title="Menu"><span></span><span></span><span></span></button>
       </div>
@@ -54,7 +54,7 @@
     </section>
 
     <div id="homeHutselSignal" class="home-hutsel-signal" hidden></div>
-    <footer>Huize Chaos · V1.4.162</footer>
+    <footer>Huize Chaos · V1.4.164</footer>
   </main>
 
   <div class="hc-sheet-backdrop" id="moduleMenuBackdrop" hidden></div>
@@ -81,7 +81,7 @@
     </section>
   </div>
 
-<script src="recepten/recipes-data.js?v=1.4.161"></script>
+<script src="recepten/recipes-data.js?v=1.4.164"></script>
 <script>
 (function(){
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -102,6 +102,65 @@
   }
   function taskDone(item){return item.repeat&&item.repeat!=='none'?(item.completedPeriods||[]).includes(periodKey(item.repeat)):Boolean(item.done)}
   function plannerItems(){const x=readJson('huizeChaosPlannerV130',[]);return Array.isArray(x)?x:[]}
+  const HOME_ROUTINE_KEY='huizeChaosDailyRoutinesV132';
+  const HOME_ROUTINES=['Keuken opruimen en aanrecht afnemen','Vaatwasser in- of uitruimen','Woonkamer opruimen','Was bijwerken','Kattenbak controleren en zo nodig verschonen','Toilet kort reinigen: doekje en borstel'];
+  const HOME_LONG_HOUSEHOLD_REPEATS=new Set(['biweekly','monthly','bimonthly','quarterly','semiannual','yearly']);
+  const HOME_WEEK_SCHEDULE_HOUSEHOLD_REPEATS=new Set(['monthly','bimonthly','quarterly']);
+  function routineState(){
+    let state=readJson(HOME_ROUTINE_KEY,null);
+    if(!state||state.date!==today)state={date:today,done:{}};
+    state.done=state.done&&typeof state.done==='object'?state.done:{};
+    localStorage.setItem(HOME_ROUTINE_KEY,JSON.stringify(state));
+    return state;
+  }
+  function weekStartKey(){const d=new Date();const day=d.getDay()||7;d.setDate(d.getDate()-day+1);return localDateKey(d)}
+  function weekEndKey(){const d=new Date();d.setDate(d.getDate()+(7-(d.getDay()||7)));return localDateKey(d)}
+  function householdRepeatWeeks(repeat){return ({biweekly:2,monthly:4,bimonthly:8,quarterly:13,semiannual:26,yearly:52})[repeat]||1}
+  function addWeeksKey(value,weeks){const d=new Date(`${value}T12:00:00`);d.setDate(d.getDate()+weeks*7);return localDateKey(d)}
+  const HOME_PLANNER_PATCH_KEY='huizeChaosPlannerHomePatchesV164';
+  function queuePlannerPatch(item){
+    const patches=readJson(HOME_PLANNER_PATCH_KEY,[]),list=Array.isArray(patches)?patches:[];
+    const next=list.filter(patch=>String(patch.id)!==String(item.id));
+    next.push({id:String(item.id),item:{...item},changedAt:Date.now()});
+    localStorage.setItem(HOME_PLANNER_PATCH_KEY,JSON.stringify(next));
+  }
+  function savePlannerItems(items,changedItem=null){localStorage.setItem('huizeChaosPlannerV130',JSON.stringify(items));if(changedItem)queuePlannerPatch(changedItem);window.dispatchEvent(new Event('huize-chaos-planner-changed'))}
+  function setPlannerTaskDone(id,checked){
+    const all=plannerItems(),item=all.find(entry=>String(entry.id)===String(id));if(!item)return;
+    item.completedPeriods=Array.isArray(item.completedPeriods)?item.completedPeriods:[];
+    if(item.repeat&&item.repeat!=='none'){
+      const key=periodKey(item.repeat);
+      if(checked&&!item.completedPeriods.includes(key))item.completedPeriods.push(key);
+      if(!checked)item.completedPeriods=item.completedPeriods.filter(value=>value!==key);
+    }else item.done=checked;
+    savePlannerItems(all,item);renderToday();
+  }
+  function setHomeRoutineDone(index,checked){const state=routineState();state.done[String(index)]=checked;localStorage.setItem(HOME_ROUTINE_KEY,JSON.stringify(state));renderToday()}
+  function setHomeHouseholdDone(id,checked){
+    const all=plannerItems(),item=all.find(entry=>String(entry.id)===String(id)&&entry.category==='household');if(!item)return;
+    item.completedPeriods=Array.isArray(item.completedPeriods)?item.completedPeriods:[];
+    if(item.repeat==='none')item.done=checked;
+    else{
+      const key=periodKey(item.repeat);
+      if(checked&&!item.completedPeriods.includes(key))item.completedPeriods.push(key);
+      if(!checked)item.completedPeriods=item.completedPeriods.filter(value=>value!==key);
+    }
+    if(HOME_LONG_HOUSEHOLD_REPEATS.has(item.repeat)){
+      if(checked){item.lastCompletedDate=today;item.nextDueDate=addWeeksKey(weekStartKey(),householdRepeatWeeks(item.repeat));item.manualWeekKey=''}
+      else{item.lastCompletedDate='';item.nextDueDate='';item.manualWeekKey=periodKey('weekly')}
+    }
+    savePlannerItems(all,item);renderToday();
+  }
+  function oneHouseholdTaskForThisWeek(all){
+    const weekEnd=weekEndKey();
+    const weekly=all.filter(item=>item.type==='task'&&item.category==='household'&&item.repeat==='weekly'&&!taskDone(item));
+    const scheduled=all.filter(item=>item.type==='task'&&item.category==='household'&&HOME_WEEK_SCHEDULE_HOUSEHOLD_REPEATS.has(item.repeat)&&!taskDone(item)&&((item.nextDueDate&&item.nextDueDate<=weekEnd)||Boolean(item.manualWeekKey)));
+    return [...weekly,...scheduled].sort((a,b)=>Number(Boolean(b.manualWeekKey))-Number(Boolean(a.manualWeekKey))||(a.nextDueDate||'9999-12-31').localeCompare(b.nextDueDate||'9999-12-31')||(a.createdAt||0)-(b.createdAt||0))[0]||null;
+  }
+  function taskRow(kind,id,title){
+    const attr=kind==='routine'?`data-home-routine="${esc(id)}"`:kind==='household'?`data-home-household="${esc(id)}"`:`data-home-task="${esc(id)}"`;
+    return `<label class="home-row home-row-task home-check-row"><span class="home-task-check"><input type="checkbox" ${attr} aria-label="Afronden: ${esc(title)}"><span aria-hidden="true"></span></span><strong>${esc(title)}</strong></label>`;
+  }
   function renderToday(){
     const box=document.getElementById('homeTodayList');if(!box)return;
     const all=plannerItems();
@@ -110,15 +169,19 @@
       if(item.type!=='task'||item.category==='household'||taskDone(item))return false;
       if(item.deadline===today)return true;if(item.urgent&&item.date<=today)return true;if(item.date===today)return true;if(item.date<today&&(!item.repeat||item.repeat==='none'))return true;if(item.repeat&&item.repeat!=='none'&&item.date<=today)return true;return false;
     }).sort((a,b)=>Number(Boolean(b.urgent))-Number(Boolean(a.urgent))||(a.deadline||'9999-12-31').localeCompare(b.deadline||'9999-12-31')||(a.createdAt||0)-(b.createdAt||0));
-    const rows=[
-      ...appointments.map(item=>({id:item.id,type:'appointment',title:item.title||'Afspraak',time:item.time?`${item.time}${item.endTime?'–'+item.endTime:''}`:''})),
-      ...tasks.map(item=>({id:item.id,type:'task',title:item.title||'Taak'}))
-    ];
+    const routines=routineState();
+    const openRoutines=HOME_ROUTINES.map((title,index)=>({title,index})).filter(row=>!routines.done[String(row.index)]);
+    const household=oneHouseholdTaskForThisWeek(all);
+    const rows=[];
+    appointments.forEach(item=>rows.push(`<a class="home-row home-row-appointment" href="gezinsplanner/?hcnav=home&item=${encodeURIComponent(String(item.id||''))}"><strong>${esc(item.title||'Afspraak')}${item.time?` <span class="home-inline-time">${esc(`${item.time}${item.endTime?'–'+item.endTime:''}`)}</span>`:''}</strong><span class="home-row-go">›</span></a>`));
+    tasks.forEach(item=>rows.push(taskRow('task',item.id,item.title||'Taak')));
+    openRoutines.forEach(item=>rows.push(taskRow('routine',item.index,item.title)));
+    if(household)rows.push(taskRow('household',household.id,household.title||'Huishoudtaak'));
     if(!rows.length){box.innerHTML='<div class="home-empty">Geen afspraken of open taken voor vandaag.</div>';return}
-    box.innerHTML=rows.map(row=>row.type==='task'
-      ? `<a class="home-row home-row-task" href="gezinsplanner/?hcnav=home&item=${encodeURIComponent(String(row.id||''))}"><span class="home-task-mark" aria-hidden="true">✓</span><strong>${esc(row.title)}</strong><span class="home-row-go">›</span></a>`
-      : `<a class="home-row home-row-appointment" href="gezinsplanner/?hcnav=home&item=${encodeURIComponent(String(row.id||''))}"><strong>${esc(row.title)}${row.time?` <span class="home-inline-time">${esc(row.time)}</span>`:''}</strong><span class="home-row-go">›</span></a>`
-    ).join('');
+    box.innerHTML=rows.join('');
+    box.querySelectorAll('[data-home-task]').forEach(input=>input.addEventListener('change',()=>setPlannerTaskDone(input.dataset.homeTask,input.checked)));
+    box.querySelectorAll('[data-home-routine]').forEach(input=>input.addEventListener('change',()=>setHomeRoutineDone(input.dataset.homeRoutine,input.checked)));
+    box.querySelectorAll('[data-home-household]').forEach(input=>input.addEventListener('change',()=>setHomeHouseholdDone(input.dataset.homeHousehold,input.checked)));
   }
   function isoWeekKey(d=new Date()){const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return `${x.getUTCFullYear()}-W${String(Math.ceil((((x-y)/86400000)+1)/7)).padStart(2,'0')}`}
   function nextIsoWeekKey(date=new Date()){
@@ -205,10 +268,10 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!searchOverlay.hidden)closeSearch();else if(moduleMenu.classList.contains('open'))setMenu(false)}});
 
   renderToday();renderWeekMenu();renderShoppingQuick();
-  window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu();renderShoppingQuick()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huize-chaos-recipe-weeks-v1','household-products-v2'].includes(event.key)){renderToday();renderWeekMenu();renderShoppingQuick()}});
+  window.addEventListener('pageshow',()=>{renderToday();renderWeekMenu();renderShoppingQuick()});window.addEventListener('storage',event=>{if(['huizeChaosPlannerV130','huizeChaosDailyRoutinesV132','huize-chaos-recipe-weeks-v1','household-products-v2'].includes(event.key)){renderToday();renderWeekMenu();renderShoppingQuick()}});window.addEventListener('huize-chaos-planner-changed',renderToday);
   try{const h=readJson('household-hutsel-v1',[]),el=document.getElementById('homeHutselSignal');if(Array.isArray(h)&&h.length){el.hidden=false;el.textContent=`Hutsel Frutsel · ${h.length} ${h.length===1?'ding':'dingen'} opmaken`;el.onclick=()=>location.href='boodschappen/?hcnav=home#hutsel'}}catch(e){}
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.161'))}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=1.4.164'))}
 </script>
 </body>
 </html>

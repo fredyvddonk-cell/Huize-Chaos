@@ -32,6 +32,7 @@ let syncing=false;
 let syncTimer=0;
 let stopListeners=[];
 const LEGACY_HOUSEHOLD_IDS=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
+const HOME_PATCH_KEY='huizeChaosPlannerHomePatchesV164';
 const firstName=value=>String(value||'').trim().split(/\s+/)[0]||'Gezinslid';
 
 function setStatus(text,state=''){syncStatus.textContent=text;syncStatus.className=`sync-status ${state}`.trim();syncStatus.hidden=/^(Gesynchroniseerd|Niet aangemeld)$/.test(text)}
@@ -41,13 +42,19 @@ function showWaiting(currentUser){gate.hidden=false;gate.classList.remove('ready
   function cleanData(item){return {localId:String(item.id),type:item.type==='appointment'?'appointment':item.type==='checklist'?'checklist':'task',date:String(item.date||''),deadline:String(item.deadline||''),urgent:Boolean(item.urgent),category:['school','work','household'].includes(item.category)?item.category:'',title:String(item.title||''),time:String(item.time||''),endTime:String(item.endTime||''),personUid:String(item.personUid||''),personName:String(item.personName||''),participants:Array.isArray(item.participants)?item.participants.map(firstName).filter(Boolean):[],linkedAppointmentId:String(item.linkedAppointmentId||''),note:String(item.note||''),done:Boolean(item.done),repeat:String(item.repeat||'none'),completedPeriods:Array.isArray(item.completedPeriods)?item.completedPeriods:[],manualWeekKey:String(item.manualWeekKey||''),lastCompletedDate:String(item.lastCompletedDate||''),nextDueDate:String(item.nextDueDate||''),checklistTasks:Array.isArray(item.checklistTasks)?item.checklistTasks.map(value=>String(value)).filter(Boolean):[],showBeforeDays:Number(item.showBeforeDays||0),showMoment:String(item.showMoment||'evening'),checklistStates:item.checklistStates&&typeof item.checklistStates==='object'?item.checklistStates:{},skippedOccurrences:Array.isArray(item.skippedOccurrences)?item.skippedOccurrences:[],createdAt:Number(item.createdAt||Date.now()),visibility:item.visibility==='private'?'private':'shared',addedBy:item.addedBy||user.uid,addedByName:firstName(item.addedByName||user.displayName)} }
 function fromCloud(data,cloudId,scope){return {...data,id:data.localId||cloudId,cloudId,cloudScope:scope,visibility:scope==='private'?'private':'shared',completedPeriods:Array.isArray(data.completedPeriods)?data.completedPeriods:[]} }
 
+
+function homePatches(){try{const value=JSON.parse(localStorage.getItem(HOME_PATCH_KEY)||'[]');return Array.isArray(value)?value:[]}catch{return []}}
+function mergeHomePatches(items,patches){if(!patches.length)return items;const byId=new Map(patches.map(patch=>[String(patch.id),patch.item]));return items.map(item=>{const patch=byId.get(String(item.id));return patch?{...item,...patch,id:item.id,cloudId:item.cloudId,cloudScope:item.cloudScope}:item})}
+
 function applyCombined(){
   if(!sharedReady||!privateReady)return;
   if(syncing)return;
   const local=window.getHuizeChaosPlannerEntries();
   const legacyRemote=[...sharedItems.values()].some(data=>LEGACY_HOUSEHOLD_IDS.has(data.localId));
-  const remote=[...sharedItems].map(([id,data])=>fromCloud(data,id,'shared')).filter(item=>!LEGACY_HOUSEHOLD_IDS.has(item.id));
+  let remote=[...sharedItems].map(([id,data])=>fromCloud(data,id,'shared')).filter(item=>!LEGACY_HOUSEHOLD_IDS.has(item.id));
   if(role==='owner')remote.push(...[...privateItems].map(([id,data])=>fromCloud(data,id,'private')));
+  const pendingHome=homePatches();
+  remote=mergeHomePatches(remote,pendingHome);
   const unsaved=local.filter(item=>!item.cloudId&&(role==='owner'||(cloudReady&&item.visibility!=='private')));
   if(!remote.length&&unsaved.length){cloudReady=true;setStatus('Synchroniseren…');scheduleSync();return}
   applyingCloud=true;
@@ -55,7 +62,7 @@ function applyCombined(){
   applyingCloud=false;
   cloudReady=true;
   setStatus('Gesynchroniseerd','online');
-  if(unsaved.length||legacyRemote)scheduleSync();
+  if(unsaved.length||legacyRemote||pendingHome.length)scheduleSync();
 }
 
 async function syncNow(){
@@ -77,6 +84,7 @@ async function syncNow(){
   for(const id of sharedItems.keys())if(!activeShared.has(id))batch.delete(doc(sharedRef,id));
   if(role==='owner')for(const id of privateItems.keys())if(!activePrivate.has(id))batch.delete(doc(privateRef,id));
   await batch.commit();
+  localStorage.removeItem(HOME_PATCH_KEY);
   localStorage.setItem('huizeChaosPlannerV130',JSON.stringify(entries));
   syncing=false;
   applyCombined();

@@ -1,12 +1,22 @@
-# Huize Chaos V1.4.162
+# Huize Chaos V1.4.164
+
+- Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
+- Startscherm Vandaag: maximaal één open huishoudtaak uit Huishouden → Deze week wordt getoond; na afronden schuift de volgende door.
+- Planner-taken op Vandaag zijn direct afvinkbaar vanaf het startscherm.
+- Afgeronde taken/routines verdwijnen direct uit Vandaag.
+- Kalenderknop gebruikt nu het native datumveld direct onder het icoon, zodat de kalender bij de eerste tik opent.
+
+# Huize Chaos V1.4.163
 
 - Alleen de twee menu-positioneringen aangepast.
 - ▼ bij Boodschappen/Voorraad opent als los dropdownpaneel boven de pagina en wordt niet meer afgeknipt.
 - ☰ modulemenu opent als vaste overlay boven zoekvelden, tabs en lijsten; onderliggende pagina is tijdens openen niet aanklikbaar.
 
-# Huize Chaos V1.4.162
+# Huize Chaos V1.4.163
 
-## V1.4.162
+## V1.4.163
+- Kalender in Gezinsplanner opent direct bij de eerste tik.
+- Huishouden en Studie gebruiken dezelfde vaste uitlijning voor icoon, titel en timer.
 - Voorraad & Boodschappen opent zonder expliciete deeplink altijd op Boodschappen.
 - Elke hoofdmodule heeft rechtsboven hetzelfde hamburgermenu om direct naar Home of een andere module te gaan.
 - De wijziging in Voorraad & Boodschappen is in de modulecode zelf verwerkt; niet alleen het versienummer is aangepast.

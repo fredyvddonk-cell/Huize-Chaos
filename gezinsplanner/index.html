@@ -7,9 +7,9 @@
 <meta content="#957AC1" name="theme-color"/>
 <title>Gezinsplanner · Huize Chaos</title>
 <link href="style.css?v=1.4.47" rel="stylesheet"/>
-<link href="planner-v131.css?v=1.4.161" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.164" rel="stylesheet"/>
 <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.158">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.163">
 <style>
 /* V1.4.160 — Planner compact houden na de algemene HC-stijl */
 #todayPage>section[aria-labelledby="appointmentsTitle"] h2{font-size:16px!important;line-height:1.2!important;font-weight:750!important}
@@ -27,7 +27,7 @@
   .today-timer-grid .household-timer{font-size:15px!important;min-height:28px!important}
 }
 
-/* V1.4.162 — Plannerkaarten strak uitlijnen; dubbele bron-tekens verbergen */
+/* V1.4.163 — Plannerkaarten strak uitlijnen; dubbele bron-tekens verbergen */
 #todayPage>section[aria-labelledby="appointmentsTitle"],
 #todayPage>section[aria-labelledby="tasksTitle"]{
   padding:10px 11px!important;
@@ -80,7 +80,7 @@
 </style>
 
 <style>
-/* V1.4.162 — Planner-header gelijk aan Boodschappen/Voorraad */
+/* V1.4.163 — Planner-header gelijk aan Boodschappen/Voorraad */
 .day-heading.hc-page-heading{
   margin:10px 0 8px!important;
   padding:0!important;
@@ -129,6 +129,39 @@
   .planner-heading-date{font-size:12px!important}
 }
 </style>
+
+<style>
+/* V1.4.163 — één tik op kalender + gelijke uitlijning Huishouden/Studie */
+.planner-heading-calendar{position:relative!important;overflow:hidden!important;cursor:pointer!important}
+.planner-heading-calendar input{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:.001!important;pointer-events:auto!important;cursor:pointer!important;border:0!important;padding:0!important;margin:0!important}
+.today-timer-grid .today-timer-panel{padding:6px 8px!important}
+.today-timer-grid .panel-heading{
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr) auto!important;
+  column-gap:7px!important;
+  align-items:center!important;
+  width:100%!important;
+}
+.today-timer-grid .panel-heading>div{display:contents!important}
+.today-timer-grid .section-icon{
+  grid-column:1!important;
+  width:24px!important;
+  height:24px!important;
+  min-width:24px!important;
+  margin:0!important;
+}
+.today-timer-grid h2{
+  grid-column:2!important;
+  margin:0!important;
+  text-align:left!important;
+}
+.today-timer-grid .household-timer{
+  grid-column:3!important;
+  margin:0!important;
+  justify-self:end!important;
+  min-width:54px!important;
+}
+</style>
 </head>
 <body>
 <main class="planner-app">
@@ -136,9 +169,9 @@
 <a aria-label="Terug naar Huize Chaos" class="brand" href="../">
 <img class="hc-app-icon" alt="" src="../icons/icon-192.png"/><img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
 </a>
-<div class="topbar-meta"><span class="version">V1.4.162</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+<div class="topbar-meta"><span class="version">V1.4.164</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
 </header>
-<section class="day-heading hc-page-heading"><div class="planner-heading-line"><h1>Gezinsplanner</h1><label aria-label="Kies een datum" class="calendar-picker-button planner-heading-calendar" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label><div class="today-date planner-heading-date" id="todayDate"></div></div><h2 class="planner-view-title">Vandaag</h2><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
+<section class="day-heading hc-page-heading"><div class="planner-heading-line"><h1>Gezinsplanner</h1><label aria-label="Kies een datum" class="calendar-picker-button planner-heading-calendar" id="plannerDateButton" title="Kies een datum"><span aria-hidden="true">📅</span><input aria-label="Kies een datum" id="plannerDateSearch" type="date"/></label><div class="today-date planner-heading-date" id="todayDate"></div></div><h2 class="planner-view-title">Vandaag</h2><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
 <nav aria-label="Gezinsplanner onderdelen" class="planner-tabs planner-tabs-primary">
 <button class="active" data-planner-page="today" type="button">Vandaag</button>
 <button data-planner-page="household" type="button">Huishouden</button>
@@ -509,7 +542,7 @@ Kliko aan de straat" rows="9"></textarea>
 <button class="auth-link" hidden="" id="googleSignOut" type="button">Afmelden</button>
 </div>
 </div>
-<script src="app.js?v=1.4.161"></script>
-<script src="firebase.js?v=1.4.47" type="module"></script>
-<script src="../hc-module-nav.js?v=1.4.161"></script></body>
+<script src="app.js?v=1.4.164"></script>
+<script src="firebase.js?v=1.4.164" type="module"></script>
+<script src="../hc-module-nav.js?v=1.4.164"></script></body>
 </html>

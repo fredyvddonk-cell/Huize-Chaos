@@ -109,3 +109,13 @@ body{min-height:100dvh}
 .home-quick-actions.has-shopping .home-quick small{display:none}
 @media(max-width:380px){.home-quick-actions.has-shopping{gap:4px}.home-quick-actions.has-shopping .home-quick{padding-left:5px;padding-right:5px}.home-quick-actions.has-shopping .home-quick strong{font-size:11px}}
 .home-shopping-quick[hidden]{display:none!important}
+
+
+/* V1.4.164 — taken en routines direct afwerken op Home */
+.home-check-row{grid-template-columns:24px minmax(0,1fr)!important;cursor:pointer;text-decoration:none}
+.home-task-check{width:24px;height:35px;display:grid;place-items:center}
+.home-task-check input{position:absolute;opacity:0;pointer-events:none}
+.home-task-check span{width:17px;height:17px;border:1.5px solid #aa91c1;border-radius:5px;background:#fcfaff;display:grid;place-items:center;transition:.12s}
+.home-task-check input:checked+span{background:var(--purple-dark);border-color:var(--purple-dark)}
+.home-task-check input:checked+span::after{content:'✓';color:#fff;font-size:12px;font-weight:900;line-height:1}
+.home-check-row strong{min-width:0}
