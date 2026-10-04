@@ -872,6 +872,27 @@ function renderSmartRecipePicker(){
   box.querySelector('#smartMore')?.addEventListener('click',()=>{smartRecipeLimit+=24;renderSmartRecipePicker()})
 }
 
+
+function confirmWeekPlanRemoval(plan,week){
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='hc-confirm-overlay';
+    overlay.innerHTML=`<div class="hc-confirm-card" role="dialog" aria-modal="true" aria-labelledby="hcConfirmTitle" aria-describedby="hcConfirmText"><h3 id="hcConfirmTitle">Uit weekmenu verwijderen?</h3><p id="hcConfirmText"></p><div class="hc-confirm-actions"><button type="button" class="btn hc-confirm-cancel">Annuleren</button><button type="button" class="btn primary hc-confirm-remove">Verwijderen</button></div></div>`;
+    overlay.querySelector('#hcConfirmText').textContent=`${plan.title||'Dit recept'} uit ${weekNumberLabel(week)} verwijderen?`;
+    document.body.appendChild(overlay);
+    const cancel=overlay.querySelector('.hc-confirm-cancel');
+    const remove=overlay.querySelector('.hc-confirm-remove');
+    let done=false;
+    const finish=value=>{if(done)return;done=true;document.removeEventListener('keydown',onKey);overlay.remove();resolve(value)};
+    const onKey=e=>{if(e.key==='Escape')finish(false)};
+    document.addEventListener('keydown',onKey);
+    cancel.addEventListener('click',()=>finish(false));
+    remove.addEventListener('click',()=>finish(true));
+    overlay.addEventListener('click',e=>{if(e.target===overlay)finish(false)});
+    requestAnimationFrame(()=>remove.focus());
+  });
+}
+
 function renderWeekMenu(){
   if(!weekMenuList||!weekMenuTitle)return;
   weekMenuTitle.textContent=weekNumberLabel(selectedMenuWeek);
@@ -885,7 +906,7 @@ function renderWeekMenu(){
   weekMenuList.querySelectorAll('[data-plan-servings]').forEach(input=>{input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyPlannedServings(input)}});input.addEventListener('change',()=>applyPlannedServings(input))});
   weekMenuList.querySelectorAll('[data-open-week-recipe]').forEach(btn=>btn.addEventListener('click',()=>{const r=getRecipe(btn.dataset.openWeekRecipe);if(!r){alert('Dit recept is niet meer beschikbaar in Recepten.');return}const plan=recipeWeekPlans().find(x=>String(x.recipeId)===String(r.id)&&x.week===selectedMenuWeek);pushRecipeHistory({hcRecipeKind:'recipe',hcRecipeId:String(r.id),hcRecipeReturn:'weekmenu'});openedFromWeekMenu=true;current=String(r.id);edited=JSON.parse(JSON.stringify(r));if(plan?.ingredients?.length)edited.ingredients=JSON.parse(JSON.stringify(plan.ingredients));displayServings=String(plan?.servings||r.servings||'');weekMenuPanel?.classList.add('hidden');recipeLibraryPanel?.classList.add('hidden');hideList();showView('ingredients')}));
   weekMenuList.querySelectorAll('[data-move-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.movePlan)),select=weekMenuList.querySelector(`[data-move-week="${CSS.escape(String(btn.dataset.movePlan))}"]`);if(!plan||!select)return;const oldWeek=plan.week,newWeek=select.value;if(newWeek===oldWeek)return;plan.week=newWeek;saveRecipeWeekPlans(plans,plan);expandedWeekPlans.delete(String(plan.id));renderWeekMenu()}));
-  weekMenuList.querySelectorAll('[data-remove-plan]').forEach(btn=>btn.addEventListener('click',()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.removePlan));if(!plan)return;if(!confirm(`${plan.title||'Dit recept'} uit ${weekNumberLabel(selectedMenuWeek)} verwijderen?`))return;expandedWeekPlans.delete(String(plan.id));const removedId=String(btn.dataset.removePlan),deleted=recipeWeekDeleted();deleted[removedId]=Date.now();saveRecipeWeekDeleted(deleted);saveRecipeWeekPlans(plans.filter(x=>String(x.id)!==removedId));renderWeekMenu()}));
+  weekMenuList.querySelectorAll('[data-remove-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plans=recipeWeekPlans(),plan=plans.find(x=>String(x.id)===String(btn.dataset.removePlan));if(!plan)return;const ok=await confirmWeekPlanRemoval(plan,selectedMenuWeek);if(!ok)return;expandedWeekPlans.delete(String(plan.id));const removedId=String(btn.dataset.removePlan),deleted=recipeWeekDeleted();deleted[removedId]=Date.now();saveRecipeWeekDeleted(deleted);saveRecipeWeekPlans(plans.filter(x=>String(x.id)!==removedId));renderWeekMenu()}));
 }
 function showRecipeModule(view,fromHistory=false){
   const safe=view==='recipes'?'recipes':'weekmenu',recipes=safe==='recipes',changed=recipeModuleView!==safe;
