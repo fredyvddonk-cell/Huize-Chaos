@@ -422,7 +422,15 @@ function getRoutineState(){
   if(!state||state.date!==todayKey())state={date:todayKey(),done:{}};
   localStorage.setItem(ROUTINE_KEY,JSON.stringify(state));return state;
 }
-function renderRoutines(){const state=getRoutineState();els.routines.innerHTML=ROUTINES.map((title,index)=>`<article class="planner-item${state.done[index]?' done':''}"><input class="check" type="checkbox" data-routine="${index}" aria-label="Routine afronden" ${state.done[index]?'checked':''}><div class="item-copy"><strong>${escapeHtml(title)}</strong></div></article>`).join('');document.querySelectorAll('[data-routine]').forEach(input=>input.addEventListener('change',()=>{const current=getRoutineState();current.done[input.dataset.routine]=input.checked;localStorage.setItem(ROUTINE_KEY,JSON.stringify(current));renderRoutines()}))}
+function renderRoutines(){const state=getRoutineState();els.routines.innerHTML=ROUTINES.map((title,index)=>`<article class="planner-item${state.done[index]?' done':''}"><input class="check" type="checkbox" data-routine="${index}" aria-label="Routine afronden" ${state.done[index]?'checked':''}><div class="item-copy"><strong>${escapeHtml(title)}</strong></div></article>`).join('');document.querySelectorAll('[data-routine]').forEach(input=>input.addEventListener('change',()=>{const current=getRoutineState();const index=Number(input.dataset.routine);current.done[index]=input.checked;localStorage.setItem(ROUTINE_KEY,JSON.stringify(current));renderRoutines();window.saveHuizeChaosRoutineState?.(index,input.checked,current.date)}))}
+
+window.getHuizeChaosRoutineState=()=>getRoutineState();
+window.applyHuizeChaosRoutineState=state=>{
+  if(!state||state.date!==todayKey())return;
+  const done=state.done&&typeof state.done==='object'?state.done:{};
+  localStorage.setItem(ROUTINE_KEY,JSON.stringify({date:state.date,done}));
+  renderRoutines();
+};
 function escapeHtml(value=''){return String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
 function periodKey(repeat,date=new Date()){
   if(repeat==='biweekly'){const week=periodKey('weekly',date);const number=Number(week.slice(-2));return `${week.slice(0,4)}-B${Math.ceil(number/2)}`}

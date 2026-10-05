@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { getAuth, GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { collection, doc, getDoc, getDocsFromServer, getFirestore, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import { collection, doc, getDoc, getDocFromServer, getDocsFromServer, getFirestore, onSnapshot, runTransaction, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 
 const firebaseConfig={apiKey:'AIzaSyCk8GcRdAtmlGwfVu21YN_571A8KSQ-TFI',authDomain:'huize-chaos.firebaseapp.com',projectId:'huize-chaos',storageBucket:'huize-chaos.firebasestorage.app',messagingSenderId:'742691644230',appId:'1:742691644230:web:1488577640944cc3d6bb47'};
 const app=initializeApp(firebaseConfig,'planner');
@@ -10,6 +10,7 @@ const provider=new GoogleAuthProvider();
 const HOUSEHOLD_ID='huize-chaos';
 const sharedRef=collection(db,'households',HOUSEHOLD_ID,'plannerItems');
 const bigStateRef=doc(db,'households',HOUSEHOLD_ID,'plannerSettings','bigChore');
+const routineRef=doc(db,'households',HOUSEHOLD_ID,'plannerSettings','dailyRoutines');
 
 const gate=document.getElementById('authGate');
 const message=document.getElementById('authMessage');
@@ -33,6 +34,7 @@ let syncTimer=0;
 let stopListeners=[];
 const LEGACY_HOUSEHOLD_IDS=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
 const HOME_PATCH_KEY='huizeChaosPlannerHomePatchesV164';
+const ROUTINE_MIGRATION_KEY='huizeChaosRoutineCloudMigratedV189';
 const firstName=value=>String(value||'').trim().split(/\s+/)[0]||'Gezinslid';
 
 function setStatus(text,state=''){syncStatus.textContent=text;syncStatus.className=`sync-status ${state}`.trim();syncStatus.hidden=/^(Gesynchroniseerd|Niet aangemeld)$/.test(text)}
@@ -84,6 +86,14 @@ async function syncNow(){
   for(const id of sharedItems.keys())if(!activeShared.has(id))batch.delete(doc(sharedRef,id));
   if(role==='owner')for(const id of privateItems.keys())if(!activePrivate.has(id))batch.delete(doc(privateRef,id));
   await batch.commit();
+  // Controleer na het schrijven expliciet de serverstatus. Een lokale Firestore-cache
+  // mag niet langer ten onrechte als 'gesynchroniseerd' worden getoond.
+  const sharedSnap=await getDocsFromServer(sharedRef);
+  sharedItems=new Map();sharedSnap.forEach(item=>sharedItems.set(item.id,item.data()));sharedReady=true;
+  if(role==='owner'){
+    const privateSnap=await getDocsFromServer(privateRef);
+    privateItems=new Map();privateSnap.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;
+  }
   localStorage.removeItem(HOME_PATCH_KEY);
   localStorage.setItem('huizeChaosPlannerV130',JSON.stringify(entries));
   syncing=false;
@@ -93,6 +103,57 @@ async function syncNow(){
 function scheduleSync(){if(!cloudReady||applyingCloud)return;clearTimeout(syncTimer);setStatus('Synchroniseren…');syncTimer=setTimeout(()=>syncNow().catch(error=>{syncing=false;console.error(error);setStatus('Syncfout','error')}),250)}
 window.schedulePlannerCloudSync=scheduleSync;
 window.schedulePlannerBigStateSync=state=>{if(!cloudReady||!user)return;setDoc(bigStateRef,{...state,updatedAt:serverTimestamp()},{merge:true}).catch(error=>{console.error(error);setStatus('Syncfout','error')})};
+
+function normalizeRoutineData(data){
+  const date=String(data?.date||'');
+  const done=data?.done&&typeof data.done==='object'?data.done:{};
+  return {date,done};
+}
+async function writeRoutineState(index,done,date,{quiet=false}={}){
+  if(!cloudReady||!user)return;
+  if(!quiet)setStatus('Synchroniseren…');
+  await runTransaction(db,async transaction=>{
+    const snapshot=await transaction.get(routineRef);
+    const current=normalizeRoutineData(snapshot.exists()?snapshot.data():null);
+    const merged=current.date===date?{...current.done}:{};
+    merged[String(index)]=Boolean(done);
+    transaction.set(routineRef,{date,done:merged,updatedAt:serverTimestamp()});
+  });
+  const verified=await getDocFromServer(routineRef);
+  if(verified.exists())window.applyHuizeChaosRoutineState?.(normalizeRoutineData(verified.data()));
+  if(!quiet)setStatus('Gesynchroniseerd','online');
+}
+window.saveHuizeChaosRoutineState=(index,done,date)=>writeRoutineState(Number(index),Boolean(done),String(date||'')).catch(error=>{console.error(error);setStatus('Syncfout','error')});
+
+async function applyRoutineSnapshot(snapshot){
+  const cloud=normalizeRoutineData(snapshot.exists()?snapshot.data():null);
+  const local=window.getHuizeChaosRoutineState?.();
+  if(!local)return;
+  // Eenmalige V1.4.189-migratie: behoud de vinkjes die vóór cloud-sync op
+  // telefoon/laptop lokaal stonden. Daarna is Firebase leidend, zodat een
+  // bewuste ontvinking niet later door een oud apparaat wordt teruggezet.
+  if(!localStorage.getItem(ROUTINE_MIGRATION_KEY)){
+    const cloudDone=cloud.date===local.date?cloud.done:{};
+    const localTrue=Object.keys(local.done||{}).filter(key=>local.done[key]===true&&cloudDone[key]!==true);
+    if(localTrue.length){
+      await runTransaction(db,async transaction=>{
+        const latestSnap=await transaction.get(routineRef);
+        const latest=normalizeRoutineData(latestSnap.exists()?latestSnap.data():null);
+        const merged=latest.date===local.date?{...latest.done}:{};
+        localTrue.forEach(key=>{merged[String(key)]=true});
+        transaction.set(routineRef,{date:local.date,done:merged,updatedAt:serverTimestamp()});
+      });
+      const verified=await getDocFromServer(routineRef);
+      if(verified.exists())window.applyHuizeChaosRoutineState?.(normalizeRoutineData(verified.data()));
+    }else if(cloud.date===local.date){
+      window.applyHuizeChaosRoutineState?.(cloud);
+    }
+    localStorage.setItem(ROUTINE_MIGRATION_KEY,'1');
+    return;
+  }
+  if(cloud.date===local.date)window.applyHuizeChaosRoutineState?.(cloud);
+}
+
 
 async function openFor(currentUser){
   let stage='ledencontrole';
@@ -112,6 +173,7 @@ async function openFor(currentUser){
     stopListeners.push(onSnapshot(sharedRef,snapshot=>{sharedItems=new Map();snapshot.forEach(item=>sharedItems.set(item.id,item.data()));sharedReady=true;applyCombined()},syncError));
     if(role==='owner')stopListeners.push(onSnapshot(privateRef,snapshot=>{privateItems=new Map();snapshot.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;applyCombined()},syncError));
     stopListeners.push(onSnapshot(bigStateRef,snapshot=>{if(snapshot.exists())window.applyHuizeChaosBigState(snapshot.data())},syncError));
+    stopListeners.push(onSnapshot(routineRef,snapshot=>{applyRoutineSnapshot(snapshot).catch(syncError)},syncError));
   }catch(error){
     error.huizeChaosStage=stage;
     throw error;

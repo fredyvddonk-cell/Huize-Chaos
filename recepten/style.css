@@ -309,7 +309,7 @@
 .smart-sort{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.smart-sort span{font-weight:700;color:#5d397f}.smart-sort button{border:1px solid #ddd2eb;background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-weight:700}.smart-sort button.active{background:#e8dcf5;border-color:#cbb6e3;color:#5d397f}.filter-usage-card{max-width:min(560px,calc(100vw - 28px))}.filter-usage-recipes{display:grid;gap:8px;margin:12px 0}.filter-usage-recipe{text-align:left;white-space:normal}
 
 
-/* V1.4.188 - receptdetail en sortering compacter. */
+/* V1.4.189 - receptdetail en sortering compacter. */
 .recipe-serving-control{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin:6px 0 8px;padding:5px 8px;border-radius:10px}
 .recipe-serving-control label{gap:6px;font-size:13px}
 .recipe-serving-control input{width:58px;min-height:32px;padding:4px 6px;border-radius:8px}
