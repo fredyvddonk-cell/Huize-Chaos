@@ -1,4 +1,4 @@
-# Huize Chaos V1.4.184
+# Huize Chaos V1.4.185
 
 - Kalenderknop in Gezinsplanner opent de datumkiezer nu expliciet bij de eerste tik via de echte knopactie.
 - Startscherm Vandaag: routines staan tussen de taken en zijn direct afvinkbaar.
@@ -6,6 +6,12 @@
 - Planner-taken op Vandaag zijn direct afvinkbaar vanaf het startscherm.
 - Afgeronde taken/routines verdwijnen direct uit Vandaag.
 - Kalenderknop gebruikt nu het native datumveld direct onder het icoon, zodat de kalender bij de eerste tik opent.
+
+## V1.4.185
+- Recepten: per recept een lokaal bestand kiezen vanaf laptop of telefoon.
+- Ondersteunt DOCX, TXT, PDF en de bestaande foto-import.
+- Een lokaal receptbestand opent altijd eerst in het controlescherm; niets wordt automatisch opgeslagen.
+- Categorie, soort en hoofdingrediënt blijven vóór opslaan controleerbaar en wijzigbaar.
 
 # Huize Chaos V1.4.163
 

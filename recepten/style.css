@@ -296,3 +296,9 @@
 .smart-filters .smart-time-row{margin-top:0;gap:5px}
 .smart-picker.calm .smart-category-results{margin-top:1px}
 @media(max-width:600px){.recipe-library-actions{gap:7px}.recipe-import-actions{gap:7px}.recipe-import-actions .btn{font-size:13px}.smart-modes{gap:5px}.smart-filters>summary{padding:8px 10px}.smart-filters-body{padding:0 9px 9px}}
+
+/* V1.4.185 - lokaal één receptbestand kiezen naast import via receptlink. */
+.recipe-local-import{border-top:1px solid #e9e2ef;margin-top:4px;padding-top:14px;display:grid;gap:7px}
+.recipe-local-import strong{font-size:14px}
+.recipe-local-import small{color:#756d7a;line-height:1.4}
+.recipe-local-import .btn{justify-self:start}

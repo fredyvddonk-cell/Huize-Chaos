@@ -1,3 +1,4 @@
+// V1.4.185 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
 // V1.4.182 - Past bij voorraad sneller: voorraad- en matchcaches blijven geldig tot de voorraad echt wijzigt; matches worden rustig vooraf berekend.
 // V1.4.181 - receptenmenu sneller: metadata/indexcaches, snelle id-lookup, zoek-debounce en render na directe tabfeedback.
 // V1.4.113 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
@@ -355,9 +356,12 @@ async function enrichFromUrl(draft){if(!draft.sourceUrl)return draft;try{return 
 function showRecipeUrlImport(){
   pushRecipeHistory({hcRecipeKind:'new',hcRecipeId:'import-url',hcRecipeReturn:recipeModuleView});
   hideList();
-  detail.innerHTML=`<div class="detail-head"><div><h2>Recept importeren</h2><small>Plak een link van bijvoorbeeld Jumbo, HelloFresh of een andere receptsite</small></div><div class="actions"><button class="btn" id="cancelRecipeUrlImport" type="button">Terug</button></div></div><div class="panel recipe-url-import"><label>Receptlink<input id="recipeUrlImportInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…"></label><p class="bulk-help">Huize Chaos probeert naam, foto, personen, ingrediënten en bereidingsstappen automatisch over te nemen. Je controleert alles voordat het wordt opgeslagen.</p><div class="actions"><button class="btn primary" id="fetchRecipeUrl" type="button">Recept ophalen</button></div><div id="recipeUrlImportStatus" class="recipe-url-import-status" aria-live="polite"></div></div>`;
+  detail.innerHTML=`<div class="detail-head"><div><h2>Recept importeren</h2><small>Via een receptlink of één bestand vanaf je laptop of telefoon</small></div><div class="actions"><button class="btn" id="cancelRecipeUrlImport" type="button">Terug</button></div></div><div class="panel recipe-url-import"><label>Receptlink<input id="recipeUrlImportInput" type="url" inputmode="url" autocomplete="off" placeholder="https://…"></label><p class="bulk-help">Huize Chaos probeert naam, foto, personen, ingrediënten en bereidingsstappen automatisch over te nemen. Je controleert alles voordat het wordt opgeslagen.</p><div class="actions"><button class="btn primary" id="fetchRecipeUrl" type="button">Recept ophalen</button></div><div id="recipeUrlImportStatus" class="recipe-url-import-status" aria-live="polite"></div><div class="recipe-local-import"><strong>Of kies één receptbestand</strong><small>DOCX, TXT of PDF. Foto's blijven ook mogelijk. Het recept wordt altijd eerst ter controle geopend.</small><button class="btn" id="chooseRecipeLocalFile" type="button">Bestand kiezen</button><input id="recipeLocalFileInput" class="recipe-photo-input" type="file" accept="image/*,application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,text/plain,.txt" multiple></div></div>`;
   const input=detail.querySelector('#recipeUrlImportInput'),status=detail.querySelector('#recipeUrlImportStatus'),button=detail.querySelector('#fetchRecipeUrl');
   const cancel=()=>backList();detail.querySelector('#cancelRecipeUrlImport').onclick=cancel;
+  const localButton=detail.querySelector('#chooseRecipeLocalFile'),localInput=detail.querySelector('#recipeLocalFileInput');
+  localButton.onclick=()=>{localInput.value='';localInput.click()};
+  localInput.onchange=()=>handleRecipeImportFiles([...(localInput.files||[])]);
   const run=async()=>{
     const url=String(input.value||'').trim();
     if(!/^https?:\/\//i.test(url)){status.textContent='Plak eerst een geldige receptlink.';input.focus();return}
@@ -1332,7 +1336,7 @@ function parseRecipeDocumentText(text,fileName='Recept'){
     if(clean.length<4||clean.length>110||metaRx.test(clean)||looksAmount(clean))continue;
     title=clean;break;
   }
-  if(!title) title=fileName.replace(/\.pdf$/i,'').replace(/[-_]+/g,' ').trim();
+  if(!title) title=fileName.replace(/\.(?:pdf|docx|txt)$/i,'').replace(/[-_]+/g,' ').trim();
   // Sommige recept-PDF's zetten de intro op dezelfde regel als de titel. Knip bij een duidelijke tweede zin.
   title=title.replace(/\s+(?=(?:Poffen|Bak|Kook|Snijd|Verwarm|Serveer|Deze|Dit|Een)\b.*[.!?])/i,'\n').split('\n')[0].trim();
   let ingLines=[];
@@ -1397,22 +1401,55 @@ async function importRecipeFromPdf(file){
   }catch(err){console.error(err);detail.innerHTML='<div class="panel bulk-recipe-panel"><h2>PDF-import niet gelukt</h2><p>Huize Chaos kon uit deze PDF geen bruikbaar recept halen.</p><div class="actions"><button class="btn" id="pdfImportBack" type="button">Terug</button></div></div>';detail.querySelector('#pdfImportBack').onclick=backList}
 }
 function showImportedPdfRecipeReview(){
-  detail.innerHTML=`<div class="detail-head"><div><div class="review-label">Uit PDF gehaald</div><h2>Controleer het recept</h2><small>PDF-import</small></div></div>${editForm(edited,false)}`;bindCommonEdit();
-  const actions=detail.querySelector('.review-actions');if(actions)actions.innerHTML='<button class="btn primary" id="savePdfRecipe">Recept opslaan</button><button class="btn" id="cancelPdfRecipe">Annuleren</button>';
-  detail.querySelector('#savePdfRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'');showView('ingredients')};
-  detail.querySelector('#cancelPdfRecipe').onclick=backList;
+  showImportedDocumentRecipeReview('PDF');
+}
+function showImportedDocumentRecipeReview(kind='bestand'){
+  const label=kind==='PDF'?'Uit PDF gehaald':`Uit ${kind.toLowerCase()} gehaald`;
+  detail.innerHTML=`<div class="detail-head"><div><div class="review-label">${esc(label)}</div><h2>Controleer het recept</h2><small>${esc(kind)}-import · pas alles aan voordat je opslaat</small></div></div>${editForm(edited,false)}`;bindCommonEdit();
+  const actions=detail.querySelector('.review-actions');if(actions)actions.innerHTML='<button class="btn primary" id="saveDocumentRecipe">Recept opslaan</button><button class="btn" id="cancelDocumentRecipe">Annuleren</button>';
+  detail.querySelector('#saveDocumentRecipe').onclick=()=>{edited.directions=stripIngredientAmountsFromDirections(edited.directions,edited.ingredients);if(!edited.title.trim()){alert('Vul eerst een titel in.');return}edited.ingredients=(edited.ingredients||[]).filter(x=>String(x.ingredient||'').trim());saveCustom([...custom(),edited]);current=String(edited.id);displayServings=String(edited.servings||'');showView('ingredients')};
+  detail.querySelector('#cancelDocumentRecipe').onclick=backList;
+}
+async function readRecipeDocx(file,status){
+  if(!window.mammoth?.extractRawText)throw new Error('Word-lezer kon niet worden geladen');
+  if(status)status.textContent='Word-bestand lezen…';
+  const result=await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});
+  return String(result?.value||'');
+}
+async function importRecipeFromTextDocument(file,kind){
+  hideList();detail.innerHTML=`<div class="panel bulk-recipe-panel"><h2>Recept uit ${esc(kind)} halen</h2><p id="documentImportStatus">Bestand openen…</p><p class="field-help">Huize Chaos leest één receptbestand. Daarna controleer en wijzig je het recept voordat je het opslaat.</p></div>`;
+  const status=detail.querySelector('#documentImportStatus');
+  try{
+    const text=kind==='Word'?await readRecipeDocx(file,status):await file.text();
+    if(status)status.textContent='Recept herkennen…';
+    const parsed=parseRecipeDocumentText(text,file.name),id=crypto.randomUUID();
+    if(!parsed.ingredients.length&&!parsed.directions)throw new Error('Geen recepttekst herkend');
+    parsed.source=kind==='Word'?'Eigen Word-bestand':'Eigen tekstbestand';
+    edited=classifyImportedRecipe({id:'custom-'+id,...parsed,photo:'',category:'Overig',type:'Anders',mainIngredient:'Anders',homeTime:parsed.homeTime||'',sourceUrl:'',imported:true});
+    current='new:'+id;displayServings=String(edited.servings||'');showImportedDocumentRecipeReview(kind);
+  }catch(err){console.error(err);detail.innerHTML=`<div class="panel bulk-recipe-panel"><h2>Bestand importeren niet gelukt</h2><p>Huize Chaos kon uit dit ${esc(kind.toLowerCase())}-bestand geen bruikbaar recept halen.</p><div class="actions"><button class="btn" id="documentImportBack" type="button">Terug</button></div></div>`;detail.querySelector('#documentImportBack').onclick=backList}
+}
+function handleRecipeImportFiles(files){
+  files=[...(files||[])];if(!files.length)return;
+  const isPdf=f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name||'');
+  const isDocx=f=>f.type==='application/vnd.openxmlformats-officedocument.wordprocessingml.document'||/\.docx$/i.test(f.name||'');
+  const isTxt=f=>f.type==='text/plain'||/\.txt$/i.test(f.name||'');
+  const documentFiles=files.filter(f=>isPdf(f)||isDocx(f)||isTxt(f));
+  if(documentFiles.length){
+    if(files.length!==1){alert('Kies één receptbestand tegelijk. Voor foto\'s kun je maximaal 2 afbeeldingen van hetzelfde recept kiezen.');return}
+    const file=files[0];
+    if(isPdf(file)){importRecipeFromPdf(file);return}
+    if(isDocx(file)){importRecipeFromTextDocument(file,'Word');return}
+    if(isTxt(file)){importRecipeFromTextDocument(file,'tekst');return}
+  }
+  if(files.length>2){alert('Kies maximaal 2 foto\'s van hetzelfde recept.');return}
+  if(files.some(f=>!String(f.type||'').startsWith('image/'))){alert('Dit bestandstype wordt nog niet ondersteund. Kies DOCX, TXT, PDF of een afbeelding.');return}
+  importRecipeFromPhotos(files);
 }
 function setupUnifiedRecipeImport(){
   const b=document.querySelector('#addRecipeFromFile'),input=document.querySelector('#recipeFileImportInput');if(!b||!input)return;
   b.onclick=()=>{input.value='';input.click()};
-  input.onchange=()=>{
-    const files=[...(input.files||[])];if(!files.length)return;
-    const pdfs=files.filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name||''));
-    const photos=files.filter(f=>!pdfs.includes(f));
-    if(pdfs.length){if(files.length!==1){alert('Kies één PDF, of maximaal 2 foto\'s.');return}importRecipeFromPdf(pdfs[0]);return}
-    if(photos.length>2){alert('Kies maximaal 2 foto\'s.');return}
-    importRecipeFromPhotos(photos);
-  };
+  input.onchange=()=>handleRecipeImportFiles([...(input.files||[])]);
 }
 setupUnifiedRecipeImport();
 
