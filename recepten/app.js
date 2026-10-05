@@ -1,4 +1,5 @@
-// V1.4.185 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
+// V1.4.186 - Receptfilters beheerbaar; zoeken + filteren gecombineerd; bronfilter; weekmenu-ingrediënten gereserveerd voor voorraadadvies.
+// V1.4.186 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
 // V1.4.182 - Past bij voorraad sneller: voorraad- en matchcaches blijven geldig tot de voorraad echt wijzigt; matches worden rustig vooraf berekend.
 // V1.4.181 - receptenmenu sneller: metadata/indexcaches, snelle id-lookup, zoek-debounce en render na directe tabfeedback.
 // V1.4.113 - receptingrediënten tonen direct ✓ in huis, ✕ niet in huis of ≈ alternatief mogelijk; weekmenu-knop blijft beschikbaar.
@@ -18,10 +19,11 @@ const list=document.querySelector('#list'),pendingBox=document.querySelector('#p
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false,returnEventId='',displayServings='';
 let recipeModuleView='weekmenu',recipeHistoryReady=false;
 const launchParams=new URLSearchParams(location.search),stockIngredientQuery=String(launchParams.get('ingredient')||'').trim(),stockIngredientProductId=String(launchParams.get('stockProductId')||'').trim();
-const RECIPE_CATEGORIES=['Nederlands','Italiaans','Aziatisch','Thais','Indonesisch','Indiaas','Japans','Chinees','Koreaans','Grieks / Mediterraan','Mexicaans / Tex-Mex','Midden-Oosters','Amerikaans','Frans','Spaans','Overig'];
-const RECIPE_TYPES=['Pastagerecht','Rijstgerecht','Noedelgerecht','Aardappelgerecht','Bowl','Wrap / tortilla','Ovenschotel','Stoofgerecht','Curry','Soep','Salade','Pizza / plaatgerecht','Broodgerecht','Stamppot','Eenpansgerecht','Anders'];
-const MAIN_INGREDIENT_OPTIONS=['Kip','Rund','Varken','Vis','Schaal- en schelpdieren','Ei','Kaas','Peulvruchten','Tofu / tempeh','Groente','Vegetarisch','Anders'];
-const HOME_TIME_OPTIONS=['Kort','Middellang','Lang'];
+const FILTER_OPTIONS_KEY='hc-recipe-filter-options-v1';
+const DEFAULT_FILTER_OPTIONS={categories:['Nederlands','Italiaans','Aziatisch','Thais','Indonesisch','Indiaas','Japans','Chinees','Koreaans','Grieks / Mediterraan','Mexicaans / Tex-Mex','Midden-Oosters','Amerikaans','Frans','Spaans','Overig'],types:['Pastagerecht','Rijstgerecht','Noedelgerecht','Aardappelgerecht','Bowl','Wrap / tortilla','Ovenschotel','Stoofgerecht','Curry','Soep','Salade','Pizza / plaatgerecht','Broodgerecht','Stamppot','Eenpansgerecht','Anders'],mains:['Kip','Rund','Varken','Vis','Schaal- en schelpdieren','Ei','Kaas','Peulvruchten','Tofu / tempeh','Groente','Vegetarisch','Anders'],times:['Kort','Middellang','Lang']};
+function loadFilterOptions(){try{const x=JSON.parse(localStorage.getItem(FILTER_OPTIONS_KEY)||'null')||{};return {categories:x.categories||[...DEFAULT_FILTER_OPTIONS.categories],types:x.types||[...DEFAULT_FILTER_OPTIONS.types],mains:x.mains||[...DEFAULT_FILTER_OPTIONS.mains],times:x.times||[...DEFAULT_FILTER_OPTIONS.times]}}catch(_){return JSON.parse(JSON.stringify(DEFAULT_FILTER_OPTIONS))}}
+let filterOptions=loadFilterOptions(),RECIPE_CATEGORIES=filterOptions.categories,RECIPE_TYPES=filterOptions.types,MAIN_INGREDIENT_OPTIONS=filterOptions.mains,HOME_TIME_OPTIONS=filterOptions.times;
+function saveFilterOptions(){localStorage.setItem(FILTER_OPTIONS_KEY,JSON.stringify(filterOptions));RECIPE_CATEGORIES=filterOptions.categories;RECIPE_TYPES=filterOptions.types;MAIN_INGREDIENT_OPTIONS=filterOptions.mains;HOME_TIME_OPTIONS=filterOptions.times;invalidateRecipeCaches();renderSmartRecipePicker()}
 let allRecipesCache=null,allRecipesByIdCache=null,recipeMetaArrayCache=null,recipeMetaMapCache=null,recipeClassCache=new Map(),stockFitCache=new Map(),stockIngredientMatchCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',recipeListScrollY=0;
 function invalidateRecipeCaches(){allRecipesCache=null;allRecipesByIdCache=null;recipeClassCache.clear();stockFitCache.clear()}
 function invalidateRecipeMetaCache(){recipeMetaArrayCache=null;recipeMetaMapCache=null}
@@ -57,12 +59,13 @@ async function initCloud(){
 }
 function savePending(a){write(PENDING_KEY,a);renderList();scheduleSync()}function saveCustom(a){write(CUSTOM_KEY,a);invalidateRecipeCaches();renderList();scheduleSync()}
 function sourceLabel(r){try{return r.sourceUrl?new URL(r.sourceUrl).hostname.replace(/^www\./,''):r.source||'Gedeeld'}catch(_){return r.source||'Gedeeld'}}
+function recipeSearchText(r){return `${r.title||''} ${r.source||''} ${(r.ingredients||[]).map(i=>i.ingredient||'').join(' ')}`.toLowerCase()}
 function renderList(){
   const q=search.value.trim().toLowerCase(),drafts=pending();
   pendingBox.innerHTML=drafts.length?`<section class="pending-recipes"><div class="pending-head"><h2>Te controleren</h2><span>${drafts.length}</span></div><p>Gedeelde recepten staan hier tot je ze hebt nagekeken.</p>${drafts.map(r=>`<button class="pending-recipe-card" data-pending="${esc(r.id)}"><span><strong>${esc(r.title||'Gedeeld recept')}</strong><small>${esc(sourceLabel(r))}</small></span><span>Controleren ›</span></button>`).join('')}</section>`:'';
   pendingBox.querySelectorAll('[data-pending]').forEach(b=>b.onclick=()=>openPending(b.dataset.pending));
   if(!q){list.innerHTML='';return}
-  const a=allRecipes().filter(r=>(r.title||'').toLowerCase().includes(q)).sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)).slice(0,40);
+  const a=allRecipes().filter(r=>recipeSearchText(r).includes(q)).sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)).slice(0,40);
   list.innerHTML=a.length?a.map(r=>`<button class="recipe-card compact ${r.photo?'has-photo':''}" data-id="${esc(r.id)}">${r.photo?`<img class="recipe-card-photo" src="${esc(r.photo)}" alt="">`:''}<span class="recipe-card-copy"><strong>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</strong><small>${esc(recipeCategory(r))}${r.servings?' · '+esc(r.servings)+' personen':''}</small></span><span class="go">›</span></button>`).join(''):`<div class="empty">Geen recepten gevonden.</div>`;
   list.querySelectorAll('.recipe-card').forEach(b=>b.onclick=()=>openRecipe(b.dataset.id))
 }
@@ -864,8 +867,9 @@ function recipeMainIngredient(r){
 function recipeHomeTime(r){const saved=String(r?.homeTime||'').trim();return HOME_TIME_OPTIONS.includes(saved)?saved:''}
 function variationScore(r,plans){const cats=new Map(),types=new Map(),mains=new Map();(plans||[]).forEach(p=>{const pr=getRecipe(p.recipeId)||p,c=recipeCategory(pr),typ=recipeType(pr),main=recipeMainIngredient(pr);cats.set(c,(cats.get(c)||0)+1);types.set(typ,(types.get(typ)||0)+1);mains.set(main,(mains.get(main)||0)+1)});const c=recipeCategory(r),typ=recipeType(r),main=recipeMainIngredient(r);let score=8-(cats.get(c)||0)*1.5-(types.get(typ)||0)*2-(mains.get(main)||0)*2;if(c==='Overig')score-=.5;if(typ==='Anders')score-=.25;if(main==='Anders')score-=.25;return {score,category:c,type:typ,mainIngredient:main}}
 function lateMealMode(r){const d=String(r.directions||'').toLowerCase(),t=String(r.title||'').toLowerCase();if(/lasagne|ovenschotel|stamppot|nasi|bami|chili|curry|stoof|soep/.test(t)||/opwarmen|verwarm.*opnieuw|bewaren.*koelkast/.test(d))return 'Opwarmen';if(/oven|ovenschaal/.test(d)&&/verwarm de oven|bak.*oven|zet.*oven/.test(d))return 'Afmaken';return 'Vers maken'}
-function recipeStockFit(r,inhouse=null){const key=String(r.id);if(!inhouse)inhouse=stockProducts().filter(p=>p.status==='In huis'&&isFoodProduct(p));if(stockFitCache.has(key))return stockFitCache.get(key);const stock=inhouse;let need=0,have=0;(r.ingredients||[]).forEach(i=>{const name=String(i.ingredient||'').toLowerCase();if(!name||/water|zout|peper|olie|boter|kruid|specer|bouillon/.test(name))return;need++;if(stock.some(p=>ingredientMatchesProduct(i.ingredient,p)))have++});const result={need,have,missing:Math.max(0,need-have),ratio:need?have/need:0};stockFitCache.set(key,result);return result}
-let smartRecipeCategory='Alles',smartRecipeType='Alles',smartRecipeMain='Alles';
+function reservedStockIdsForWeek(exceptRecipeId=''){const ids=new Set();recipeWeekPlans().filter(p=>p.week===selectedMenuWeek&&String(p.recipeId)!==String(exceptRecipeId)).forEach(p=>(p.ingredients||[]).forEach(i=>{if(i.done)return;if(i.stockProductId)ids.add(String(i.stockProductId));else stockProducts().filter(x=>x.status==='In huis'&&ingredientMatchesProduct(i.ingredient,x)).forEach(x=>ids.add(String(x.id)))}));return ids}
+function recipeStockFit(r,inhouse=null){const key=String(r.id)+'|'+selectedMenuWeek;if(!inhouse)inhouse=stockProducts().filter(p=>p.status==='In huis'&&isFoodProduct(p));if(stockFitCache.has(key))return stockFitCache.get(key);const reserved=reservedStockIdsForWeek(r.id),stock=inhouse.filter(p=>!reserved.has(String(p.id)));let need=0,have=0;(r.ingredients||[]).forEach(i=>{const name=String(i.ingredient||'').toLowerCase();if(!name||/water|zout|peper|olie|boter|kruid|specer|bouillon/.test(name))return;need++;if(stock.some(p=>ingredientMatchesProduct(i.ingredient,p)))have++});const result={need,have,missing:Math.max(0,need-have),ratio:need?have/need:0};stockFitCache.set(key,result);return result}
+let smartRecipeCategory='Alles',smartRecipeType='Alles',smartRecipeMain='Alles',smartRecipeSource='Alles';
 function stockIngredientMatches(r){
   if(!stockIngredientQuery)return false;
   const known=stockProducts().find(p=>String(p.id)===stockIngredientProductId);
@@ -896,10 +900,10 @@ function renderStockIngredientSuggestions(box){
 function renderSmartRecipePicker(){
   const box=document.querySelector('#smartRecipePicker');if(!box||recipeLibraryPanel?.classList.contains('hidden'))return;
   if(stockIngredientQuery){renderStockIngredientSuggestions(box);return}
-  if(search.value.trim()){box.innerHTML='';return}
+  const q=search.value.trim().toLowerCase();
   const plans=recipeWeekPlans().filter(p=>p.week===selectedMenuWeek),selected=new Set(plans.map(p=>String(p.recipeId))),all=allRecipes().filter(r=>!selected.has(String(r.id))),history=recipeWeekPlans(),counts=new Map();
   history.forEach(p=>{const id=String(p.recipeId||'');counts.set(id,(counts.get(id)||0)+1)});
-  const cats=['Alles',...RECIPE_CATEGORIES];
+  const cats=['Alles',...RECIPE_CATEGORIES],sources=['Alles',...new Set(allRecipes().map(r=>String(r.source||'').trim()).filter(Boolean).sort((a,b)=>a.localeCompare(b,'nl')))];
   let rows=[...all],labelFor=()=>'';
   if(smartRecipeMode==='stock'){
     // Voorraadwijzigingen legen de cache automatisch. Daardoor hoeft een tweede tik op
@@ -919,20 +923,23 @@ function renderSmartRecipePicker(){
     rows.sort((a,b)=>Number(metaFor(b.id).favorite)-Number(metaFor(a.id).favorite)||String(a.title).localeCompare(String(b.title),'nl'));
     labelFor=r=>[recipeCategory(r),recipeMainIngredient(r),r.servings?r.servings+' personen':''].filter(Boolean).join(' · ')
   }
+  if(q)rows=rows.filter(r=>recipeSearchText(r).includes(q));
   if(smartRecipeCategory!=='Alles')rows=rows.filter(r=>recipeCategory(r)===smartRecipeCategory);
   if(smartRecipeType!=='Alles')rows=rows.filter(r=>recipeType(r)===smartRecipeType);
   if(smartRecipeMain!=='Alles')rows=rows.filter(r=>recipeMainIngredient(r)===smartRecipeMain);
   if(smartRecipeTime!=='Alles')rows=rows.filter(r=>recipeHomeTime(r)===smartRecipeTime);
+  if(smartRecipeSource!=='Alles')rows=rows.filter(r=>String(r.source||'').trim()===smartRecipeSource);
   const visible=rows.slice(0,smartRecipeLimit);
   const button=r=>`<button class="smart-recipe ${r.photo?'has-photo':''}" type="button" data-smart-recipe="${esc(r.id)}">${r.photo?`<img class="smart-recipe-photo" src="${esc(r.photo)}" alt="">`:''}<span>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</span><small>${esc(labelFor(r))}</small></button>`;
-  const filtersActive=smartRecipeCategory!=='Alles'||smartRecipeType!=='Alles'||smartRecipeMain!=='Alles'||smartRecipeTime!=='Alles';
-  box.innerHTML=`<div class="smart-picker calm"><div class="smart-picker-title"><strong>Recept kiezen</strong><small>Tik op een recept om het eerst te bekijken.</small></div><div class="smart-modes"><button type="button" data-smart-mode="all" class="${smartRecipeMode==='all'?'active':''}">Alles</button><button type="button" data-smart-mode="stock" class="${smartRecipeMode==='stock'?'active':''}">Past bij voorraad</button><button type="button" data-smart-mode="variation" class="${smartRecipeMode==='variation'?'active':''}">Variatie</button><button type="button" data-smart-mode="frequent" class="${smartRecipeMode==='frequent'?'active':''}">Vaak gegeten</button></div><details class="smart-filters" ${filtersActive?'open':''}><summary>Filters${filtersActive?' · actief':''}</summary><div class="smart-filters-body"><div class="smart-filter-block"><span>Categorie</span><div class="smart-categories">${cats.map(c=>`<button type="button" data-smart-cat="${esc(c)}" class="${smartRecipeCategory===c?'active':''}">${esc(c)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Soort</span><div class="smart-times">${['Alles',...RECIPE_TYPES].map(t=>`<button type="button" data-smart-type="${esc(t)}" class="${smartRecipeType===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Hoofdingrediënt</span><div class="smart-times">${['Alles',...MAIN_INGREDIENT_OPTIONS].map(t=>`<button type="button" data-smart-main="${esc(t)}" class="${smartRecipeMain===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-time-row"><span>Tijd thuis</span><div class="smart-times">${['Alles',...HOME_TIME_OPTIONS].map(t=>`<button type="button" data-smart-time="${esc(t)}" class="${smartRecipeTime===t?'active':''}">${esc(t)}</button>`).join('')}</div></div></div></details><div class="smart-category-results">${visible.length?visible.map(button).join(''):'<div class="empty">Geen recepten binnen deze keuze.</div>'}</div>${rows.length>visible.length?`<button class="btn smart-more" id="smartMore" type="button">Meer recepten tonen</button>`:''}</div>`;
+  const filtersActive=smartRecipeCategory!=='Alles'||smartRecipeType!=='Alles'||smartRecipeMain!=='Alles'||smartRecipeTime!=='Alles'||smartRecipeSource!=='Alles';
+  box.innerHTML=`<div class="smart-picker calm"><div class="smart-picker-title"><strong>Recept kiezen</strong><small>Tik op een recept om het eerst te bekijken.</small></div><div class="smart-modes"><button type="button" data-smart-mode="all" class="${smartRecipeMode==='all'?'active':''}">Alles</button><button type="button" data-smart-mode="stock" class="${smartRecipeMode==='stock'?'active':''}">Past bij voorraad</button><button type="button" data-smart-mode="variation" class="${smartRecipeMode==='variation'?'active':''}">Variatie</button><button type="button" data-smart-mode="frequent" class="${smartRecipeMode==='frequent'?'active':''}">Vaak gegeten</button></div><details class="smart-filters" ${filtersActive?'open':''}><summary>Filters${filtersActive?' · actief':''}</summary><div class="smart-filters-body"><div class="smart-filter-block"><span>Categorie</span><div class="smart-categories">${cats.map(c=>`<button type="button" data-smart-cat="${esc(c)}" class="${smartRecipeCategory===c?'active':''}">${esc(c)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Soort</span><div class="smart-times">${['Alles',...RECIPE_TYPES].map(t=>`<button type="button" data-smart-type="${esc(t)}" class="${smartRecipeType===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Hoofdingrediënt</span><div class="smart-times">${['Alles',...MAIN_INGREDIENT_OPTIONS].map(t=>`<button type="button" data-smart-main="${esc(t)}" class="${smartRecipeMain===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-time-row"><span>Tijd thuis</span><div class="smart-times">${['Alles',...HOME_TIME_OPTIONS].map(t=>`<button type="button" data-smart-time="${esc(t)}" class="${smartRecipeTime===t?'active':''}">${esc(t)}</button>`).join('')}</div></div><div class="smart-filter-block"><span>Bron</span><div class="smart-times">${sources.map(t=>`<button type="button" data-smart-source="${esc(t)}" class="${smartRecipeSource===t?'active':''}">${esc(t)}</button>`).join('')}</div></div></div></details><div class="smart-category-results">${visible.length?visible.map(button).join(''):'<div class="empty">Geen recepten binnen deze keuze.</div>'}</div>${rows.length>visible.length?`<button class="btn smart-more" id="smartMore" type="button">Meer recepten tonen</button>`:''}</div>`;
   box.querySelectorAll('[data-smart-recipe]').forEach(b=>b.onclick=()=>openRecipe(b.dataset.smartRecipe));
   box.querySelectorAll('[data-smart-mode]').forEach(b=>b.onclick=()=>{smartRecipeMode=b.dataset.smartMode;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelectorAll('[data-smart-cat]').forEach(b=>b.onclick=()=>{smartRecipeCategory=b.dataset.smartCat;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelectorAll('[data-smart-type]').forEach(b=>b.onclick=()=>{smartRecipeType=b.dataset.smartType;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelectorAll('[data-smart-main]').forEach(b=>b.onclick=()=>{smartRecipeMain=b.dataset.smartMain;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelectorAll('[data-smart-time]').forEach(b=>b.onclick=()=>{smartRecipeTime=b.dataset.smartTime;smartRecipeLimit=24;renderSmartRecipePicker()});
+  box.querySelectorAll('[data-smart-source]').forEach(b=>b.onclick=()=>{smartRecipeSource=b.dataset.smartSource;smartRecipeLimit=24;renderSmartRecipePicker()});
   box.querySelector('#smartMore')?.addEventListener('click',()=>{smartRecipeLimit+=24;renderSmartRecipePicker()})
 }
 
@@ -1459,3 +1466,17 @@ document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName==='
 
 // V1.4.88 - foto toevoegen/vervangen gebruikt een expliciete bestandskiezer voor betrouwbare werking op mobiel en desktop.
 // V1.4.88 - dubbele ingrediënthoeveelheden worden bij nieuwe recepten uit de bereidingsstappen verwijderd.
+
+// V1.4.186 - centraal beheer van de vaste receptfilterwaarden.
+function manageRecipeFilters(){
+  hideList();
+  const groups=[['categories','Categorie'],['types','Soort'],['mains','Hoofdingrediënt'],['times','Tijd thuis']];
+  detail.innerHTML=`<div class="detail-head"><div><h2>Filters beheren</h2><small>Toevoegen, hernoemen, verwijderen en volgorde aanpassen</small></div><button class="btn" id="filterManageBack" type="button">Terug</button></div><div class="panel filter-manager">${groups.map(([key,label])=>`<section><h3>${label}</h3><div data-filter-group="${key}">${filterOptions[key].map((v,i)=>`<div class="filter-manage-row"><input value="${esc(v)}" data-filter-value="${key}:${i}"><button class="btn" data-filter-up="${key}:${i}" ${i===0?'disabled':''}>↑</button><button class="btn" data-filter-down="${key}:${i}" ${i===filterOptions[key].length-1?'disabled':''}>↓</button><button class="btn danger" data-filter-delete="${key}:${i}">Verwijder</button></div>`).join('')}</div><button class="btn" data-filter-add="${key}" type="button">+ Toevoegen</button></section>`).join('')}</div>`;
+  detail.querySelector('#filterManageBack').onclick=()=>backListDirect(true);
+  detail.querySelectorAll('[data-filter-value]').forEach(input=>input.onchange=()=>{const [key,idx]=input.dataset.filterValue.split(':');const old=filterOptions[key][+idx],val=input.value.trim();if(!val||val===old){input.value=old;return}filterOptions[key][+idx]=val;allRecipes().forEach(r=>{const prop=key==='categories'?'category':key==='types'?'type':key==='mains'?'mainIngredient':'homeTime';if(String(r[prop]||'')===old){const c=custom().find(x=>String(x.id)===String(r.id));if(c)c[prop]=val;else localStorage.setItem('hc_recipe_'+r.id,JSON.stringify({...r,[prop]:val}))}});saveCustom(custom());saveFilterOptions();manageRecipeFilters()});
+  detail.querySelectorAll('[data-filter-add]').forEach(b=>b.onclick=()=>{const val=prompt(`Nieuwe ${b.dataset.filterAdd==='categories'?'categorie':'waarde'}:`)?.trim();if(!val)return;if(!filterOptions[b.dataset.filterAdd].includes(val))filterOptions[b.dataset.filterAdd].push(val);saveFilterOptions();manageRecipeFilters()});
+  detail.querySelectorAll('[data-filter-delete]').forEach(b=>b.onclick=()=>{const [key,idx]=b.dataset.filterDelete.split(':'),val=filterOptions[key][+idx],prop=key==='categories'?'category':key==='types'?'type':key==='mains'?'mainIngredient':'homeTime',used=allRecipes().filter(r=>String(r[prop]||'')===val).length;if(used){alert(`${val} wordt nog gebruikt bij ${used} recept${used===1?'':'en'}. Hernoem de waarde eerst; verwijderen is daarom geblokkeerd.`);return}filterOptions[key].splice(+idx,1);saveFilterOptions();manageRecipeFilters()});
+  const move=(spec,delta)=>{const [key,idxs]=spec.split(':'),i=+idxs,j=i+delta;if(j<0||j>=filterOptions[key].length)return;[filterOptions[key][i],filterOptions[key][j]]=[filterOptions[key][j],filterOptions[key][i]];saveFilterOptions();manageRecipeFilters()};
+  detail.querySelectorAll('[data-filter-up]').forEach(b=>b.onclick=()=>move(b.dataset.filterUp,-1));detail.querySelectorAll('[data-filter-down]').forEach(b=>b.onclick=()=>move(b.dataset.filterDown,1));
+}
+document.querySelector('#manageRecipeFilters')?.addEventListener('click',manageRecipeFilters);
