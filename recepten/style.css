@@ -297,10 +297,13 @@
 .smart-picker.calm .smart-category-results{margin-top:1px}
 @media(max-width:600px){.recipe-library-actions{gap:7px}.recipe-import-actions{gap:7px}.recipe-import-actions .btn{font-size:13px}.smart-modes{gap:5px}.smart-filters>summary{padding:8px 10px}.smart-filters-body{padding:0 9px 9px}}
 
-/* V1.4.186 - lokaal één receptbestand kiezen naast import via receptlink. */
+/* V1.4.187 - lokaal één receptbestand kiezen naast import via receptlink. */
 .recipe-local-import{border-top:1px solid #e9e2ef;margin-top:4px;padding-top:14px;display:grid;gap:7px}
 .recipe-local-import strong{font-size:14px}
 .recipe-local-import small{color:#756d7a;line-height:1.4}
 .recipe-local-import .btn{justify-self:start}
-/* V1.4.186 - compact filterbeheer */
+/* V1.4.187 - compact filterbeheer */
 .filter-manager section+section{margin-top:18px}.filter-manager h3{margin:0 0 8px}.filter-manage-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px;align-items:center;margin:6px 0}.filter-manage-row input{min-width:0}.filter-manage-row .btn{padding:7px 9px}@media(max-width:520px){.filter-manage-row{grid-template-columns:minmax(0,1fr) auto auto}.filter-manage-row .danger{grid-column:1/-1;justify-self:end}}
+
+/* V1.4.187 - sortering en bruikbare melding bij filterwaarden die nog in gebruik zijn. */
+.smart-sort{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.smart-sort span{font-weight:700;color:#5d397f}.smart-sort button{border:1px solid #ddd2eb;background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-weight:700}.smart-sort button.active{background:#e8dcf5;border-color:#cbb6e3;color:#5d397f}.filter-usage-card{max-width:min(560px,calc(100vw - 28px))}.filter-usage-recipes{display:grid;gap:8px;margin:12px 0}.filter-usage-recipe{text-align:left;white-space:normal}
