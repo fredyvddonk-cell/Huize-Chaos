@@ -130,7 +130,7 @@ async function applyRoutineSnapshot(snapshot){
   const cloud=normalizeRoutineData(snapshot.exists()?snapshot.data():null);
   const local=window.getHuizeChaosRoutineState?.();
   if(!local)return;
-  // Eenmalige V1.4.191-migratie: behoud de vinkjes die vóór cloud-sync op
+  // Eenmalige V1.4.192-migratie: behoud de vinkjes die vóór cloud-sync op
   // telefoon/laptop lokaal stonden. Daarna is Firebase leidend, zodat een
   // bewuste ontvinking niet later door een oud apparaat wordt teruggezet.
   if(!localStorage.getItem(ROUTINE_MIGRATION_KEY)){

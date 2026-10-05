@@ -975,7 +975,7 @@ body.hc-module-menu-open{overflow:hidden!important}
 .hc-global-module-menu-backdrop[hidden]{display:none!important}
 body.hc-module-menu-open{overflow:hidden!important}
 
-/* V1.4.191 - compacte versie + synchronisatiestatus. */
+/* V1.4.192 - compacte versie + synchronisatiestatus. */
 .hc-sync-compact{font-size:12px!important;line-height:1.2!important;white-space:nowrap!important;color:#6f6874!important;font-weight:650!important}
 .hc-sync-compact[data-sync-state="ok"]{color:#247b4d!important}
 .hc-sync-compact[data-sync-state="busy"]{color:#7353a5!important}
