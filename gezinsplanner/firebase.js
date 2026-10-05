@@ -32,6 +32,7 @@ let applyingCloud=false;
 let syncing=false;
 let syncTimer=0;
 let stopListeners=[];
+let routineRefreshTimer=0;
 const LEGACY_HOUSEHOLD_IDS=new Set(['house-weekly-0','house-weekly-1','house-weekly-2','house-weekly-3','house-weekly-4']);
 const HOME_PATCH_KEY='huizeChaosPlannerHomePatchesV164';
 const ROUTINE_MIGRATION_KEY='huizeChaosRoutineCloudMigratedV189';
@@ -129,7 +130,7 @@ async function applyRoutineSnapshot(snapshot){
   const cloud=normalizeRoutineData(snapshot.exists()?snapshot.data():null);
   const local=window.getHuizeChaosRoutineState?.();
   if(!local)return;
-  // Eenmalige V1.4.190-migratie: behoud de vinkjes die vóór cloud-sync op
+  // Eenmalige V1.4.191-migratie: behoud de vinkjes die vóór cloud-sync op
   // telefoon/laptop lokaal stonden. Daarna is Firebase leidend, zodat een
   // bewuste ontvinking niet later door een oud apparaat wordt teruggezet.
   if(!localStorage.getItem(ROUTINE_MIGRATION_KEY)){
@@ -180,6 +181,16 @@ async function openFor(currentUser){
   }
 }
 
+async function refreshRoutineFromServer({quiet=false}={}){
+  if(!user || !role || document.visibilityState === 'hidden') return;
+  try{
+    const routineSnap=await getDocFromServer(routineRef);
+    if(routineSnap.exists())window.applyHuizeChaosRoutineState?.(normalizeRoutineData(routineSnap.data()));
+  }catch(error){
+    if(!quiet)throw error;
+    console.error('Routine servercontrole',error);
+  }
+}
 async function refreshPlannerFromServer(){
   if(!user || !role || document.visibilityState === 'hidden') return;
   const sharedSnap=await getDocsFromServer(sharedRef);
@@ -188,10 +199,16 @@ async function refreshPlannerFromServer(){
     const privateSnap=await getDocsFromServer(privateRef);
     privateItems=new Map();privateSnap.forEach(item=>privateItems.set(item.id,item.data()));privateReady=true;
   }
+  await refreshRoutineFromServer();
   applyCombined();
+}
+function startRoutineRefreshTimer(){
+  clearInterval(routineRefreshTimer);
+  routineRefreshTimer=setInterval(()=>refreshRoutineFromServer({quiet:true}),4000);
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPlannerFromServer().catch(syncError)});
 window.addEventListener('focus',()=>refreshPlannerFromServer().catch(syncError));
+startRoutineRefreshTimer();
 
 function diagnosticText(error){
   const stage=error?.huizeChaosStage||'onbekende stap';

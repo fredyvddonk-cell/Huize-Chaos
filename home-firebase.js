@@ -9,7 +9,7 @@ const db=getFirestore(app);
 const HOUSEHOLD_ID='huize-chaos';
 const routineRef=doc(db,'households',HOUSEHOLD_ID,'plannerSettings','dailyRoutines');
 const syncStatus=document.getElementById('syncStatus');
-let user=null,allowed=false,stopRoutine=null;
+let user=null,allowed=false,stopRoutine=null,refreshTimer=0;
 
 function setStatus(text,state=''){
   if(!syncStatus)return;
@@ -53,18 +53,23 @@ window.saveHuizeChaosHomeRoutineState=async(index,done,date)=>{
   }catch(error){fail(error)}
 };
 
-async function refresh(){
+async function refresh({quiet=false}={}){
   if(!user||!allowed||document.visibilityState==='hidden')return;
   try{
-    setStatus('Synchroniseren…');
+    if(!quiet)setStatus('Synchroniseren…');
     const verified=await getDocFromServer(routineRef);
     if(verified.exists())applyCloud(verified.data());
-    setStatus('Gesynchroniseerd','online');
+    if(!quiet)setStatus('Gesynchroniseerd','online');
   }catch(error){fail(error)}
 }
+function startRefreshTimer(){
+  clearInterval(refreshTimer);
+  refreshTimer=setInterval(()=>refresh({quiet:true}),4000);
+}
 
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
 window.addEventListener('focus',refresh);
+startRefreshTimer();
 onAuthStateChanged(auth,currentUser=>{
   user=currentUser;allowed=false;
   if(stopRoutine){stopRoutine();stopRoutine=null}
