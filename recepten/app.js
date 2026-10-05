@@ -1,3 +1,4 @@
+// V1.4.188 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
 // V1.4.187 - Receptsortering A-Z/laatst toegevoegd; veilige eenheidsparser; filterverwijdering toont gebruikte recepten.
 // V1.4.187 - Receptfilters beheerbaar; zoeken + filteren gecombineerd; bronfilter; weekmenu-ingrediënten gereserveerd voor voorraadadvies.
 // V1.4.187 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
@@ -17,6 +18,7 @@ let auth=null,db=null,recipeRef=null,occasionRef=null;
 let fbOnAuthStateChanged=null,fbGetDoc=null,fbOnSnapshot=null,fbServerTimestamp=null,fbSetDoc=null,fbDoc=null,fbCollection=null;
 const BASE=window.HUIZE_CHAOS_RECIPES||[];const PENDING_KEY='hc-recipe-pending-v1',CUSTOM_KEY='hc-recipe-custom-v1',META_KEY='hc-recipe-meta-v1',DELETED_KEY='hc-recipe-deleted-v1',RECIPE_WEEK_KEY='huize-chaos-recipe-weeks-v1',RECIPE_WEEK_DELETED_KEY='huize-chaos-recipe-weeks-deleted-v1';
 const list=document.querySelector('#list'),pendingBox=document.querySelector('#pending'),detail=document.querySelector('#detail'),search=document.querySelector('#search'),syncStatus=document.querySelector('#recipeSyncStatus');
+const RECIPE_RECENT_START=new Date('2026-10-05T00:00:00+02:00').getTime();
 let current=null,edited=null,cloudReady=false,applyingCloud=false,syncTimer=0,user=null,stopCloud=null,openedFromWeekMenu=false,returnEventId='',displayServings='';
 let recipeModuleView='weekmenu',recipeHistoryReady=false;
 const launchParams=new URLSearchParams(location.search),stockIngredientQuery=String(launchParams.get('ingredient')||'').trim(),stockIngredientProductId=String(launchParams.get('stockProductId')||'').trim();
@@ -102,7 +104,7 @@ function showView(view){
   if(r.source)sourceBits.push(`Bron: ${esc(r.source)}`);
   if(r.sourceUrl)sourceBits.push(`<a href="${esc(r.sourceUrl)}" target="_blank" rel="noopener">Bron openen</a>`);
   const sourceLine=sourceBits.length?`<div class="recipe-source">${sourceBits.join(' · ')}</div>`:'';
-  const servingsBox=view==='edit'?'':`<div class="recipe-serving-control"><label>Aantal personen <input id="displayServings" type="number" min="1" inputmode="numeric" enterkeyhint="go" value="${esc(displayServings||r.servings||'')}"></label><small>Ingrediënten worden direct omgerekend. Het basisrecept blijft ongewijzigd.</small></div>`;
+  const servingsBox=view==='edit'?'':`<div class="recipe-serving-control"><label>Aantal personen <input id="displayServings" type="number" min="1" inputmode="numeric" enterkeyhint="go" value="${esc(displayServings||r.servings||'')}"></label></div>`;
   const meta=metaFor(r.id);detail.innerHTML=`${r.photo?`<div class="recipe-detail-photo-wrap"><img class="recipe-detail-photo" src="${esc(r.photo)}" alt="${esc(r.title)}"></div>`:''}<div class="detail-head"><div><h2>${esc(r.title)}</h2><small>${[r.servings?`Basis: ${esc(r.servings)} personen`:'',`Categorie: ${esc(recipeCategory(r))}`,`Soort: ${esc(recipeType(r))}`,`Hoofdingrediënt: ${esc(recipeMainIngredient(r))}`,recipeHomeTime(r)?`Tijd thuis: ${esc(recipeHomeTime(r))}`:''].filter(Boolean).join(' · ')}</small>${sourceLine}</div><div class="actions"><button class="btn favorite-recipe ${meta.favorite?'active':''}" id="favoriteRecipe" type="button">${meta.favorite?'★ Favoriet':'☆ Favoriet'}</button><button class="btn" id="backList">Terug</button></div></div>${servingsBox}<div class="recipe-memo-panel"><label>Memo <textarea id="recipeMemo" placeholder="Eigen aanpassingen of opmerkingen…">${esc(meta.memo||'')}</textarea></label></div><div class="tabs"><button class="tab ${view==='ingredients'?'active':''}" data-v="ingredients">Ingrediënten</button><button class="tab ${view==='directions'?'active':''}" data-v="directions">Bereiding</button><button class="tab ${view==='edit'?'active':''}" data-v="edit">Wijzigen</button></div><div id="recipeViewBody">${view==='ingredients'?ingredients(r):view==='directions'?`<div class="panel directions">${esc(r.directions||'Nog geen bereidingswijze.')}</div>`:editForm(r,false)}</div>`;
   detail.querySelector('#backList').onclick=backList;
   detail.querySelector('#favoriteRecipe')?.addEventListener('click',()=>{const m=saveMetaFor(r.id,{favorite:!metaFor(r.id).favorite});const b=detail.querySelector('#favoriteRecipe');if(b){b.textContent=m.favorite?'★ Favoriet':'☆ Favoriet';b.classList.toggle('active',m.favorite)}});
@@ -931,7 +933,7 @@ function renderSmartRecipePicker(){
   if(smartRecipeTime!=='Alles')rows=rows.filter(r=>recipeHomeTime(r)===smartRecipeTime);
   if(smartRecipeSource!=='Alles')rows=rows.filter(r=>String(r.source||'').trim()===smartRecipeSource);
   if(smartRecipeMode==='all'){
-    if(smartRecipeSort==='recent')rows.sort((a,b)=>Number(b.addedAt||0)-Number(a.addedAt||0)||String(a.title||'').localeCompare(String(b.title||''),'nl'));
+    if(smartRecipeSort==='recent')rows.sort((a,b)=>((Number(b.addedAt||0)>=RECIPE_RECENT_START?Number(b.addedAt):0)-(Number(a.addedAt||0)>=RECIPE_RECENT_START?Number(a.addedAt):0))||String(a.title||'').localeCompare(String(b.title||''),'nl'));
     else rows.sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'nl'));
   }
   const visible=rows.slice(0,smartRecipeLimit);

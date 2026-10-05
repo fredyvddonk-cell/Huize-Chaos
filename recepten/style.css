@@ -307,3 +307,27 @@
 
 /* V1.4.187 - sortering en bruikbare melding bij filterwaarden die nog in gebruik zijn. */
 .smart-sort{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.smart-sort span{font-weight:700;color:#5d397f}.smart-sort button{border:1px solid #ddd2eb;background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-weight:700}.smart-sort button.active{background:#e8dcf5;border-color:#cbb6e3;color:#5d397f}.filter-usage-card{max-width:min(560px,calc(100vw - 28px))}.filter-usage-recipes{display:grid;gap:8px;margin:12px 0}.filter-usage-recipe{text-align:left;white-space:normal}
+
+
+/* V1.4.188 - receptdetail en sortering compacter. */
+.recipe-serving-control{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin:6px 0 8px;padding:5px 8px;border-radius:10px}
+.recipe-serving-control label{gap:6px;font-size:13px}
+.recipe-serving-control input{width:58px;min-height:32px;padding:4px 6px;border-radius:8px}
+.smart-sort{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin:4px 0 7px;width:max-content;max-width:100%}
+.smart-sort span{font-size:12px;font-weight:650}
+.smart-sort button{min-height:28px;padding:4px 8px;border-radius:9px;font-size:12px;line-height:1.1;font-weight:700;white-space:nowrap}
+@media(max-width:420px){.smart-sort{gap:4px}.smart-sort button{padding:4px 7px;font-size:11.5px}.smart-sort span{font-size:11.5px}}
+.detail{margin-top:9px}
+.detail-head{gap:7px}
+.detail h2{margin-bottom:2px;font-size:23px;line-height:1.15}
+.detail-head small{font-size:11.5px;line-height:1.3}
+.detail-head .actions{gap:5px}
+.detail-head .actions .btn{padding:6px 8px;font-size:12px;border-radius:9px}
+.recipe-source{margin-top:2px!important;font-size:11px!important}
+.recipe-memo-panel{margin:6px 0 8px}
+.recipe-memo-panel label{gap:3px;font-size:11.5px}
+.recipe-memo-panel textarea{min-height:36px;height:36px;padding:7px 8px;resize:vertical}
+.detail>.tabs{margin:8px 0}
+.detail>.tabs .tab{padding:7px 8px;border-radius:10px;font-size:13px}
+.detail>.panel{padding:10px 12px}
+.detail .ing{padding:7px 0}
