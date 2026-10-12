@@ -15,7 +15,21 @@ function stockCheckTime(p){return Number(p.stockCheckedAt)||0;}
 function stockCheckLabel(p){const t=stockCheckTime(p);return t?new Date(t).toLocaleDateString('nl-NL'):'Nog niet gecontroleerd';}
 window.confirmStockProduct=id=>{
   const p=products.find(item=>String(item.id)===String(id));if(!p)return;
-  p.stockCheckedAt=Date.now();save();render();
+  p.stockCheckedAt=Date.now();
+  save();
+  // Werk de zichtbare regel meteen bij, zonder de geopende plank of scrollpositie te verliezen.
+  const button=[...document.querySelectorAll("[data-stock-check]")].find(el=>el.dataset.stockCheck===String(id));
+  if(button){
+    button.textContent="✓ Gecheckt";
+    button.classList.add("is-checked");
+    button.setAttribute("aria-label",`${p.name} gecheckt`);
+    const card=button.closest(".stock-item");
+    const label=card?.querySelector(".stock-last-check");
+    if(label)label.textContent=`${stockLocationName(p)} · ${stockCheckLabel(p)}`;
+  }
+  const visible=stockProductsForView(products.filter(x=>!x.temporary && x.name.toLowerCase().includes(String(search?.value||" ").trim().toLowerCase())));
+  const progress=document.getElementById("stockProgress");
+  if(progress)progress.textContent=`${visible.filter(item=>stockCheckTime(item)).length} van ${visible.length} met controledatum`;
 };
 window.setStockLocationFilter=value=>{
   stockLocationFilter=String(value||'');localStorage.setItem('household-stock-location-filter',stockLocationFilter);
@@ -90,7 +104,7 @@ function stockItemHtml(x){
       </div>
       <div class="stock-actions stock-actions-compact">
         <button type="button" class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" data-stock-status="${esc(String(x.id))}" aria-label="Voorraadstatus van ${esc(x.name)}: ${esc(x.status)}. Tik om te wijzigen.">${x.status}</button>
-        <button type="button" class="stock-confirm ${stockCheckTime(x)?'is-checked':''}" onclick="event.stopPropagation();confirmStockProduct(${JSON.stringify(String(x.id))})" aria-label="${esc(x.name)} gecontroleerd">✓ Check</button>
+        <button type="button" class="stock-confirm ${stockCheckTime(x)?'is-checked':''}" data-stock-check="${esc(String(x.id))}" aria-label="${esc(x.name)} ${stockCheckTime(x)?'gecheckt':'controleren'}">${stockCheckTime(x)?'✓ Gecheckt':'✓ Check'}</button>
         <label class="stock-buy-check stock-buy-red"><input type="checkbox" data-stock-buy="${esc(String(x.id))}" ${x.shopping ? 'checked' : ''}><span>Kopen</span></label>
         <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}" onclick="event.preventDefault();event.stopPropagation();window.sendStockToHutsel && window.sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
       </div>
@@ -367,6 +381,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('stockLocationFilter')?.addEventListener('change',event=>setStockLocationFilter(event.target.value));
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
+  });
+  document.addEventListener('click', event => {
+    const button=event.target.closest?.('button[data-stock-check]');
+    if(!button)return;
+    event.preventDefault();event.stopPropagation();
+    window.confirmStockProduct(button.dataset.stockCheck);
   });
   // V1.4.113: voorraadstatus en Kopen via event-delegatie. Zo blijven beide acties
   // los van elkaar werken, ook op mobiel en na een her-render van de voorraadlijst.

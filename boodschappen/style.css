@@ -1425,7 +1425,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
   }
 }
 
-/* V1.4.195: één praktische voorraadcontrole per plek. */
+/* V1.4.196: één praktische voorraadcontrole per plek. */
 .stock-location-picker{display:flex;align-items:center;gap:7px;margin:5px 0 7px;flex-wrap:wrap;font-size:.79rem}
 .stock-location-picker[hidden],.field[hidden],.manage-bulk-actions label[hidden],.manage-inline-fields label[hidden],.manage-stock-info-label[hidden]{display:none!important}
 .stock-location-picker select{min-width:115px;max-width:65vw;border:1px solid #d7cdea;border-radius:8px;padding:5px 7px;background:white;color:#514267;font:inherit}
