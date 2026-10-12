@@ -1,5 +1,5 @@
-// V1.4.194 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
-// V1.4.194 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
+// V1.4.195 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
+// V1.4.195 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
 // V1.4.187 - Receptsortering A-Z/laatst toegevoegd; veilige eenheidsparser; filterverwijdering toont gebruikte recepten.
 // V1.4.187 - Receptfilters beheerbaar; zoeken + filteren gecombineerd; bronfilter; weekmenu-ingrediënten gereserveerd voor voorraadadvies.
 // V1.4.187 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.

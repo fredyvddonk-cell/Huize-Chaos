@@ -7,8 +7,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.194">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.194">
+  <link rel="stylesheet" href="style.css?v=1.4.195">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.195">
 </head>
 <body>
   <main class="app">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.194</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.195</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
@@ -47,18 +47,23 @@
     </div>
 
     <div id="stockControls" class="stock-check-controls" hidden>
-      <div class="stock-check-mode" role="group" aria-label="Controlemoment">
-        <button type="button" data-stock-check="week" class="active">Weekcheck</button>
-        <button type="button" data-stock-check="month">Maandcheck</button>
+      <div class="stock-check-mode" role="group" aria-label="Voorraadweergave">
+        <button type="button" data-stock-view="location" class="active">Voorraad controleren</button>
+        <button type="button" data-stock-view="spices">Alle kruiden</button>
         <details class="stock-filter-menu">
-          <summary>Filter <span aria-hidden="true">▾</span></summary>
-          <div class="stock-filter-popover" role="menu">
-            <button type="button" data-stock-view="all" role="menuitem">Alles binnen deze check</button>
-            <button type="button" data-stock-view="standard" role="menuitem">Standaard voorraad</button>
-            <button type="button" data-stock-view="meal" role="menuitem">Maaltijdvoorraad</button>
-            <button type="button" data-stock-view="location" role="menuitem">Vaste plek</button>
+          <summary>Weergave ▾</summary>
+          <div class="stock-filter-popover">
+            <button type="button" data-stock-view="location">Per vaste plek</button>
+            <button type="button" data-stock-view="all">Per categorie</button>
+            <button type="button" data-stock-view="standard">Standaard voorraad</button>
+            <button type="button" data-stock-view="meal">Maaltijdvoorraad</button>
+            <button type="button" data-stock-view="spices">Alle kruiden en specerijen</button>
           </div>
         </details>
+      </div>
+      <div id="stockLocationPicker" class="stock-location-picker">
+        <label for="stockLocationFilter">Plek</label><select id="stockLocationFilter"></select>
+        <span id="stockProgress" class="stock-progress" aria-live="polite"></span>
       </div>
     </div>
 
@@ -211,7 +216,7 @@
           <label for="stockLocation">Vaste plek</label>
           <select id="stockLocation"><option value="">Niet ingesteld</option></select>
         </div>
-        <div class="field">
+        <div class="field" hidden>
           <label for="checkCycle">Controleren bij</label>
           <select id="checkCycle">
             <option value="week">Weekcheck</option>
@@ -221,7 +226,7 @@
           </select>
         </div>
       </div>
-      <div class="stock-classification-help">De plek zegt waar het ligt. Het checkmoment bepaalt alleen wanneer Huize Chaos het aan je toont.</div>
+      <div class="stock-classification-help">Kies de vaste plek. De oude checkmomenten worden niet meer gebruikt.</div>
 
       <div class="field">
         <label for="category">Categorie</label>
@@ -365,12 +370,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.194"></script>
-  <script src="js/shopping.js?v=1.4.194"></script>
-  <script src="js/stock.js?v=1.4.194"></script>
-  <script src="js/hutsel.js?v=1.4.194"></script>
-  <script src="js/insight.js?v=1.4.194"></script>
-  <script type="module" src="js/firebase.js?v=1.4.194"></script>
+  <script src="js/app.js?v=1.4.195"></script>
+  <script src="js/shopping.js?v=1.4.195"></script>
+  <script src="js/stock.js?v=1.4.195"></script>
+  <script src="js/hutsel.js?v=1.4.195"></script>
+  <script src="js/insight.js?v=1.4.195"></script>
+  <script type="module" src="js/firebase.js?v=1.4.195"></script>
 
-<script src="../hc-module-nav.js?v=1.4.194"></script><script src="../hc-sync-indicator.js?v=1.4.194"></script></body>
+<script src="../hc-module-nav.js?v=1.4.195"></script><script src="../hc-sync-indicator.js?v=1.4.195"></script></body>
 </html>

@@ -1,20 +1,38 @@
 let expandedStockCategories = new Set(JSON.parse(localStorage.getItem('household-expanded-stock') || '[]'));
 // Voorraadfilters zijn tijdelijk. Een Weekcheck of Maandcheck opent altijd
 // met alle producten binnen die check, nooit met een oud opgeslagen filter.
-let stockView = 'all';
-localStorage.removeItem('household-stock-view');
-let stockCheckMode = localStorage.getItem('household-stock-check-mode') || 'week';
-if (!['week','month'].includes(stockCheckMode)) stockCheckMode = 'week';
-
+// Eén controle per vaste plek; oude checkCycle-gegevens blijven bewaard voor compatibiliteit.
+let stockView = 'location';
+let stockLocationFilter = localStorage.getItem('household-stock-location-filter') || '';
 const STOCK_VIEW_HELP = {
-  standard: 'Je vaste controlelijst volgens je oude Plan to Eat-indeling. Alleen zout en peper staan bij kruiden.',
-  meal: 'Houdbare maaltijdproducten die je in huis hebt. Huize Chaos gebruikt deze automatisch bij recepten; aantallen controleer je zelf.',
-  location: 'Je zichtbare voorraad gegroepeerd op vaste plek.',
-  rare: 'Producten die je maar af en toe hoeft te controleren.',
-  work: 'Producten die alleen relevant zijn bij Wat kan ik maken.'
+  standard: 'Standaard voorraad', meal: 'Maaltijdvoorraad',
+  location: 'Per vaste plek', spices: 'Alle kruiden en specerijen'
 };
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
-
+function stockSpice(p){return String(p.category||'').toLocaleLowerCase('nl').includes('kruiden') || /\b(kruidenmix|rub|specerij)\b/i.test(String(p.name||''));}
+function stockLocationName(p){return String(p.stockLocation||'').trim() || 'Nog indelen';}
+function stockCheckTime(p){return Number(p.stockCheckedAt)||0;}
+function stockCheckLabel(p){const t=stockCheckTime(p);return t?new Date(t).toLocaleDateString('nl-NL'):'Nog niet gecontroleerd';}
+window.confirmStockProduct=id=>{
+  const p=products.find(item=>String(item.id)===String(id));if(!p)return;
+  p.stockCheckedAt=Date.now();save();render();
+};
+window.setStockLocationFilter=value=>{
+  stockLocationFilter=String(value||'');localStorage.setItem('household-stock-location-filter',stockLocationFilter);
+  expandedStockCategories.clear(); if(stockLocationFilter)expandedStockCategories.add(stockLocationFilter);
+  saveStockExpansion();render();
+};
+function updateStockLocationPicker(){
+  const picker=document.getElementById('stockLocationPicker');
+  if(!picker)return;
+  picker.hidden=stockView!=='location';
+  const select=document.getElementById('stockLocationFilter');
+  const locations=[...new Set(products.filter(p=>!p.temporary).map(stockLocationName))]
+    .sort((a,b)=>a==='Nog indelen'?1:b==='Nog indelen'?-1:a.localeCompare(b,'nl',{numeric:true}));
+  if(stockLocationFilter&&!locations.includes(stockLocationFilter))stockLocationFilter='';
+  select.innerHTML='<option value="">Alle plekken</option>'+locations.map(loc=>`<option value="${esc(loc)}" ${loc===stockLocationFilter?'selected':''}>${esc(loc)}</option>`).join('');
+  document.getElementById('stockProgress').textContent='';
+}
 function saveStockExpansion() {
   localStorage.setItem('household-expanded-stock', JSON.stringify([...expandedStockCategories]));
 }
@@ -31,16 +49,16 @@ window.toggleAllStock = () => {
   if (expandedStockCategories.size) {
     expandedStockCategories.clear();
   } else {
-    const visible = stockProductsForView(products);
-    const groupKey = stockView === 'location' ? 'stockLocation' : 'category';
-    groups(visible, groupKey).forEach(([groupName]) => expandedStockCategories.add(groupName || 'Niet ingesteld'));
+    const visible=stockProductsForView(products);
+    if(stockView==='location')visible.forEach(p=>expandedStockCategories.add(stockLocationName(p)));
+    else groups(visible,'category').forEach(([name])=>expandedStockCategories.add(name||'Overig'));
   }
   saveStockExpansion();
   render();
 };
 
 window.setStockView = next => {
-  if (!['all','standard','meal','location'].includes(next)) return;
+  if (!['all','standard','meal','location','spices'].includes(next)) return;
   stockView = next;
   expandedStockCategories.clear();
   saveStockExpansion();
@@ -49,23 +67,9 @@ window.setStockView = next => {
   render();
 };
 
-window.setStockCheckMode = next => {
-  if (!['week','month'].includes(next)) return;
-  stockCheckMode = next;
-  localStorage.setItem('household-stock-check-mode', stockCheckMode);
-  // Elke check start bewust op 'Alles binnen deze check'.
-  stockView = 'all';
-  localStorage.removeItem('household-stock-view');
-  expandedStockCategories.clear();
-  saveStockExpansion();
-  render();
-};
-
 function updateStockViewControls(){
-  document.querySelectorAll('[data-stock-check]').forEach(button => button.classList.toggle('active', button.dataset.stockCheck === stockCheckMode));
-  document.querySelectorAll('[data-stock-view]').forEach(button => button.classList.toggle('active', button.dataset.stockView === stockView));
-  const filter = document.querySelector('.stock-filter-menu');
-  if (filter) filter.classList.toggle('active', stockView !== 'all');
+  document.querySelectorAll('[data-stock-view]').forEach(button=>button.classList.toggle('active',button.dataset.stockView===stockView));
+  updateStockLocationPicker();
 }
 
 function stockBadges(product){ return ''; }
@@ -82,9 +86,11 @@ function stockItemHtml(x){
         <div class="name">${esc(x.name)}</div>
         ${stockBadges(x)}
         ${memoHtml(x)}
+        <div class="stock-last-check">${esc(stockLocationName(x))} · ${esc(stockCheckLabel(x))}</div>
       </div>
       <div class="stock-actions stock-actions-compact">
         <button type="button" class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" data-stock-status="${esc(String(x.id))}" aria-label="Voorraadstatus van ${esc(x.name)}: ${esc(x.status)}. Tik om te wijzigen.">${x.status}</button>
+        <button type="button" class="stock-confirm ${stockCheckTime(x)?'is-checked':''}" onclick="event.stopPropagation();confirmStockProduct(${JSON.stringify(String(x.id))})" aria-label="${esc(x.name)} gecontroleerd">✓ Check</button>
         <label class="stock-buy-check stock-buy-red"><input type="checkbox" data-stock-buy="${esc(String(x.id))}" ${x.shopping ? 'checked' : ''}><span>Kopen</span></label>
         <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}" onclick="event.preventDefault();event.stopPropagation();window.sendStockToHutsel && window.sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
       </div>
@@ -241,27 +247,15 @@ function bindStockSwipeActions(){
 }
 
 function stockProductsForView(arr){
-  const all=(arr||[]);
-  // Tijdens zoeken altijd in ALLE producten zoeken, onafhankelijk van
-  // Weekcheck/Maandcheck en het actieve voorraadfilter.
-  const globalSearch = typeof search !== 'undefined' && String(search?.value || '').trim();
-  if(globalSearch) return all;
-  // Zonder zoekterm blijven Weekcheck/Maandcheck leidend. Filter verfijnt alleen
-  // binnen het gekozen controlemoment en vervangt de check dus nooit.
-  let visible=all.filter(p=>p.checkCycle===stockCheckMode);
-  if(stockView==='standard') visible=visible.filter(p=>p.stockRole==='standard');
-  else if(stockView==='meal') visible=visible.filter(p=>p.stockRole==='meal');
-  else if(stockView==='location') visible=visible;
-  else visible=visible;
-
-  // Een product dat vanuit zoeken is gekozen, moet altijd één keer zichtbaar zijn,
-  // ook wanneer het buiten de huidige check/filter valt. Bij de volgende gewone
-  // render geldt de normale Weekcheck/Maandcheck-filtering weer.
-  const jumpId=String(window.__hcPendingProductJumpId||'');
-  if(jumpId && !visible.some(p=>String(p.id)===jumpId)){
-    const target=all.find(p=>String(p.id)===jumpId);
-    if(target) visible=[...visible,target];
-  }
+  const all=arr||[];
+  const query=typeof search!=='undefined'&&String(search?.value||'').trim();
+  // Zoeken blijft altijd wereldwijd, ongeacht de gekozen vaste plek.
+  if(query)return all;
+  if(stockView==='spices')return all.filter(stockSpice);
+  let visible=all;
+  if(stockView==='location'&&stockLocationFilter)visible=visible.filter(p=>stockLocationName(p)===stockLocationFilter);
+  if(stockView==='standard')visible=visible.filter(p=>p.stockRole==='standard');
+  if(stockView==='meal')visible=visible.filter(p=>p.stockRole==='meal');
   return visible;
 }
 
@@ -269,7 +263,7 @@ function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
-    const emptyText = stockView==='meal' ? `Geen producten in Maaltijdvoorraad voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.` : `Geen producten voor de ${stockCheckMode==='week'?'Weekcheck':'Maandcheck'}.`;
+    const emptyText='Geen producten voor deze selectie.';
     content.innerHTML = `<div class="empty">${emptyText}</div>`;
     return;
   }
@@ -280,7 +274,7 @@ function renderStock(arr) {
     // V1.4.103: de actuele productcategorie is leidend. De oude PTE-indeling
     // bepaalt alleen welke producten standaardvoorraad zijn, niet waar een
     // handmatig verplaatst product wordt weergegeven.
-    const preferredOrder=[...STANDARD_STOCK_LAYOUT.map(([category])=>category),...(categories||[])];
+    const preferredOrder=stockView==='spices'?[]:[...STANDARD_STOCK_LAYOUT.map(([category])=>category),...(categories||[])];
     const order=[...new Set(preferredOrder)];
     const grouped=new Map();
     visible.forEach(product=>{
@@ -295,7 +289,7 @@ function renderStock(arr) {
     });
     rows=categoryNames.map(category=>{
       const items=grouped.get(category).sort(sortProducts);
-      const collapsed=!expandedStockCategories.has(category);
+      const collapsed=stockView==='spices'?false:!expandedStockCategories.has(category);
       return `<section class="stock-category ${collapsed?'collapsed':''}">
         <div class="shopping-group-head stock-category-head">
           <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(category)}')"><span>${esc(category)}</span><span>${collapsed?'⌄':'⌃'}</span></button>
@@ -304,19 +298,21 @@ function renderStock(arr) {
       </section>`;
     }).join('');
   }else{
-    const groupKey=stockView==='location'?'stockLocation':'category';
-    rows=groups(visible,groupKey).map(([rawName,items])=>{
-      const categoryName=rawName||(stockView==='location'?'Locatie nog instellen':'Overig');
-      const collapsed=!expandedStockCategories.has(categoryName);
+    const grouped=new Map();
+    visible.forEach(p=>{const key=stockLocationName(p);if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p)});
+    rows=[...grouped.entries()].sort((a,b)=>a[0]==='Nog indelen'?1:b[0]==='Nog indelen'?-1:a[0].localeCompare(b[0],'nl',{numeric:true})).map(([categoryName,items])=>{
+      const collapsed=stockLocationFilter ? false : !expandedStockCategories.has(categoryName);
       return `<section class="stock-category ${collapsed?'collapsed':''}">
         <div class="shopping-group-head stock-category-head ${stockView==='location'?'stock-location-head':''}">
           <button class="stock-category-toggle" type="button" onclick="toggleStockCategory('${encodeURIComponent(categoryName)}')"><span>${esc(categoryName)}</span><span>${collapsed?'⌄':'⌃'}</span></button>
         </div>
-        <div class="shopping-group-body">${items.sort(sortProducts).map(stockItemHtml).join('')}</div>
+        <div class="shopping-group-body">${items.sort((a,b)=>String(a.name).localeCompare(String(b.name),'nl',{sensitivity:'base'})).map(stockItemHtml).join('')}</div>
       </section>`;
     }).join('');
   }
   const intro=(stockView==='meal')?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Hier blijft je volledige houdbare maaltijdvoorraad zichtbaar. <b>In huis</b> telt mee bij recepten; <b>Niet in huis</b> blijft hier staan zodat je het later eenvoudig weer op In huis kunt zetten.</span></div>`:'';
+  const checked=visible.filter(p=>stockCheckTime(p)).length;
+  const progress=document.getElementById('stockProgress');if(progress)progress.textContent=`${checked} van ${visible.length} met controledatum`;
   content.innerHTML = `${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
   bindStockSwipeActions();
 }
@@ -326,7 +322,7 @@ window.openStockCategoryAdd = encodedCategory => {
   const name = decodeURIComponent(encodedCategory);
   if (stockView === 'location') {
     $('#stockLocation').value = name === 'Locatie nog instellen' ? '' : name;
-    $('#checkCycle').value = stockCheckMode;
+    $('#checkCycle').value = 'week';
   } else {
     $('#category').value = name;
   }
@@ -353,6 +349,7 @@ window.cycleStatus = id => {
   const statuses = ['In huis', 'Niet in huis'];
   x.status = statuses[(statuses.indexOf(x.status) + 1) % statuses.length];
   x.done = false;
+  x.stockCheckedAt = Date.now();
   save();
   render();
 };
@@ -367,9 +364,7 @@ window.toggleStockBuy = (id, checked) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-stock-check]').forEach(button => {
-    button.addEventListener('click', () => setStockCheckMode(button.dataset.stockCheck));
-  });
+  document.getElementById('stockLocationFilter')?.addEventListener('change',event=>setStockLocationFilter(event.target.value));
   document.querySelectorAll('[data-stock-view]').forEach(button => {
     button.addEventListener('click', () => setStockView(button.dataset.stockView));
   });

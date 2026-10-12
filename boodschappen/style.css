@@ -1424,3 +1424,13 @@ body.receipt-reordering #receiptModal{touch-action:none}
     font-size:.84rem!important;
   }
 }
+
+/* V1.4.195: één praktische voorraadcontrole per plek. */
+.stock-location-picker{display:flex;align-items:center;gap:7px;margin:5px 0 7px;flex-wrap:wrap;font-size:.79rem}
+.stock-location-picker[hidden],.field[hidden],.manage-bulk-actions label[hidden],.manage-inline-fields label[hidden],.manage-stock-info-label[hidden]{display:none!important}
+.stock-location-picker select{min-width:115px;max-width:65vw;border:1px solid #d7cdea;border-radius:8px;padding:5px 7px;background:white;color:#514267;font:inherit}
+.stock-progress{font-size:.71rem;color:#786c80}
+.stock-last-check{font-size:.7rem;color:#777080;margin-top:3px}
+.stock-confirm{border:1px solid #cbb9dd;background:#faf8fd;color:#634783;border-radius:8px;padding:6px;font:inherit;font-size:.75rem;white-space:nowrap}
+.stock-confirm.is-checked{background:#eee7f6;color:#594070}
+.stock-actions-compact{flex-wrap:wrap;gap:4px}

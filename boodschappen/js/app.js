@@ -564,7 +564,7 @@ function manageBulkToolbar() {
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
       <button type="button" class="small" onclick="deselectAllManageProducts()" ${hasManageSelection ? '' : 'disabled'}>Alles deselecteren</button>
     </div>
-    ${hasManageSelection ? `<div class="manage-bulk-message">Wijzig ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}; je keuze wordt direct opgeslagen.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product. Kies daarna Categorie, Vaste plek of Controleren bij; de keuze wordt direct opgeslagen.</div>`}
+    ${hasManageSelection ? `<div class="manage-bulk-message">Wijzig ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}; je keuze wordt direct opgeslagen.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product. Kies daarna Categorie of Vaste plek; de keuze wordt direct opgeslagen.</div>`}
     <div class="manage-bulk-actions">
       <label>Categorie
         <div class="manage-bulk-field-row">
@@ -582,7 +582,7 @@ function manageBulkToolbar() {
           </select>
         </div>
       </label>
-      <label>Controleren bij
+      <label hidden>Controleren bij
         <div class="manage-bulk-field-row">
           <select id="manageBulkCheckCycle" ${hasManageSelection ? '' : 'disabled'}>
             <option value="">Kies checkmoment…</option>
@@ -751,7 +751,7 @@ function renderManage(arr) {
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
       ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(this.dataset.manageProductId, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
-      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${manageSelectMode ? `<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label">Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>` : `<div class="manage-inline-fields"><label>Vaste plek<select onchange="updateManageProductLocation(${JSON.stringify(x.id)}, this.value)">${stockLocationOptions(x.stockLocation, true)}</select></label><label>Controleren bij<select onchange="updateManageProductCheckCycle(${JSON.stringify(x.id)}, this.value)">${checkCycleOptions(x.checkCycle)}</select></label></div>`}${memoHtml(x)}</div>
+      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${manageSelectMode ? `<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label" hidden>Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>` : `<div class="manage-inline-fields"><label>Vaste plek<select onchange="updateManageProductLocation(${JSON.stringify(x.id)}, this.value)">${stockLocationOptions(x.stockLocation, true)}</select></label><label hidden>Controleren bij<select onchange="updateManageProductCheckCycle(${JSON.stringify(x.id)}, this.value)">${checkCycleOptions(x.checkCycle)}</select></label></div>`}${memoHtml(x)}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;
 
@@ -1067,9 +1067,10 @@ function initApp() {
       saveShoppingExpansion();
       if(page!=='list') setPage('list'); else render();
     } else {
-      stockView='all';
-      const category=String(product.category||'Overig').trim()||'Overig';
-      expandedStockCategories.add(category);
+      stockView='location';
+      stockLocationFilter=String(product.stockLocation||'').trim()||'Nog indelen';
+      localStorage.setItem('household-stock-location-filter',stockLocationFilter);
+      expandedStockCategories.add(stockLocationFilter);
       saveStockExpansion();
       if(page!=='stock') setPage('stock'); else render();
     }
