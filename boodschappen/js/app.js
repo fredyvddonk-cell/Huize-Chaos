@@ -91,6 +91,7 @@ function migrateProduct(x) {
   product.done = Boolean(product.done);
   product.buyDirectWhenOut = Boolean(product.buyDirectWhenOut);
   product.temporary = Boolean(product.temporary);
+  product.stockExcluded = Boolean(product.stockExcluded);
   product.cloudPending = Boolean(product.cloudPending);
   product.shoppingUpdatedAt = Number(product.shoppingUpdatedAt) || 0;
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
@@ -751,7 +752,7 @@ function renderManage(arr) {
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
       ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(this.dataset.manageProductId, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
-      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${manageSelectMode ? `<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label" hidden>Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>` : `<div class="manage-inline-fields"><label>Vaste plek<select onchange="updateManageProductLocation(${JSON.stringify(x.id)}, this.value)">${stockLocationOptions(x.stockLocation, true)}</select></label><label hidden>Controleren bij<select onchange="updateManageProductCheckCycle(${JSON.stringify(x.id)}, this.value)">${checkCycleOptions(x.checkCycle)}</select></label></div>`}${memoHtml(x)}</div>
+      <div class="main"><div class="name">${esc(x.name)}</div>${meta(x) ? `<div class="meta">${meta(x)}</div>` : ''}${manageSelectMode ? `<div class="manage-stock-info"><span class="manage-stock-info-label">Vaste plek: <strong>${esc(x.stockLocation || 'Nog niet ingesteld')}</strong></span><span class="manage-stock-info-label" hidden>Controleren bij: <strong>${esc(({week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen bij maken'})[x.checkCycle] || 'Nog niet ingesteld')}</strong></span></div>` : `<div class="manage-inline-fields"><label>Vaste plek<select onchange="updateManageProductLocation(${JSON.stringify(x.id)}, this.value)">${stockLocationOptions(x.stockLocation, true)}</select></label><label hidden>Controleren bij<select onchange="updateManageProductCheckCycle(${JSON.stringify(x.id)}, this.value)">${checkCycleOptions(x.checkCycle)}</select></label></div>`}${memoHtml(x)}${x.stockExcluded ? `<button type="button" class="small" onclick="restoreToStock(${JSON.stringify(x.id)})">Terug in Voorraad</button>` : ''}</div>
       ${manageSelectMode ? '' : `<div class="actions"><button class="small" onclick="editProduct(${JSON.stringify(x.id)})">Wijzig</button><button class="small" onclick="removeProduct(${JSON.stringify(x.id)})">Verwijder</button></div>`}
     </div>`).join('')}</div>` : `<div class="empty">${hasSearch ? 'Geen producten gevonden.' : 'Nog geen producten.'}</div>`;
 
@@ -871,6 +872,26 @@ function closeProductDelete() {
 }
 
 window.removeProduct = id => requestProductDelete(id, 'product');
+window.lastStockRemovedId = null;
+window.removeFromStock = id => {
+  const product = products.find(x => String(x.id) === String(id));
+  if (!product || product.stockExcluded) return;
+  product.stockExcluded = true;
+  window.lastStockRemovedId = String(id);
+  product.inventoryUpdatedAt = Date.now();
+  save();
+  render();
+  // De productkaart blijft beschikbaar via Beheer en Boodschappen.
+};
+window.restoreToStock = id => {
+  const product = products.find(x => String(x.id) === String(id));
+  if (!product) return;
+  product.stockExcluded = false;
+  window.lastStockRemovedId = null;
+  product.inventoryUpdatedAt = Date.now();
+  save();render();
+};
+
 
 // Alleen voor de mobiele swipe in Voorraad: direct verwijderen zonder
 // bevestigingsvenster. De gewone verwijderknoppen blijven de veilige

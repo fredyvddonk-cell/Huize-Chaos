@@ -20,12 +20,13 @@ window.confirmStockProduct=id=>{
   // Werk de zichtbare regel meteen bij, zonder de geopende plank of scrollpositie te verliezen.
   const button=[...document.querySelectorAll("[data-stock-check]")].find(el=>el.dataset.stockCheck===String(id));
   if(button){
-    button.textContent="✓ Gecheckt";
+    button.textContent="✓";
+    button.title="Gecontroleerd op "+stockCheckLabel(p);
     button.classList.add("is-checked");
     button.setAttribute("aria-label",`${p.name} gecheckt`);
     const card=button.closest(".stock-item");
     const label=card?.querySelector(".stock-last-check");
-    if(label)label.textContent=`${stockLocationName(p)} · ${stockCheckLabel(p)}`;
+    if(label)label.textContent=stockLocationName(p);
   }
   const visible=stockProductsForView(products.filter(x=>!x.temporary && x.name.toLowerCase().includes(String(search?.value||" ").trim().toLowerCase())));
   const progress=document.getElementById("stockProgress");
@@ -100,13 +101,13 @@ function stockItemHtml(x){
         <div class="name">${esc(x.name)}</div>
         ${stockBadges(x)}
         ${memoHtml(x)}
-        <div class="stock-last-check">${esc(stockLocationName(x))} · ${esc(stockCheckLabel(x))}</div>
+        <div class="stock-last-check">${esc(stockLocationName(x))}</div>
       </div>
       <div class="stock-actions stock-actions-compact">
         <button type="button" class="status stock-status-toggle ${x.status === 'In huis' ? 'good' : 'low'}" data-stock-status="${esc(String(x.id))}" aria-label="Voorraadstatus van ${esc(x.name)}: ${esc(x.status)}. Tik om te wijzigen.">${x.status}</button>
-        <button type="button" class="stock-confirm ${stockCheckTime(x)?'is-checked':''}" data-stock-check="${esc(String(x.id))}" aria-label="${esc(x.name)} ${stockCheckTime(x)?'gecheckt':'controleren'}">${stockCheckTime(x)?'✓ Gecheckt':'✓ Check'}</button>
+        <button type="button" class="stock-confirm ${stockCheckTime(x)?'is-checked':''}" data-stock-check="${esc(String(x.id))}" aria-label="${esc(x.name)} gecontroleerd markeren" title="${esc(stockCheckLabel(x))}">✓</button>
         <label class="stock-buy-check stock-buy-red"><input type="checkbox" data-stock-buy="${esc(String(x.id))}" ${x.shopping ? 'checked' : ''}><span>Kopen</span></label>
-        <button class="to-hutsel stock-hutsel-link" type="button" data-stock-hutsel="${esc(String(x.id))}" onclick="event.preventDefault();event.stopPropagation();window.sendStockToHutsel && window.sendStockToHutsel(${JSON.stringify(String(x.id))})">→ Hutsel</button>
+        <button type="button" class="stock-remove-quick" data-stock-remove="${esc(String(x.id))}" title="Uit Voorraad halen" aria-label="${esc(x.name)} uit Voorraad halen">×</button>
       </div>
     </div>
   </div>`;
@@ -233,7 +234,7 @@ function bindStockSwipeActions(){
         e.preventDefault();
         e.stopPropagation();
         resetPosition();
-        if (id) window.requestProductDelete?.(id, 'product');
+        if (id) window.removeFromStock?.(id);
       });
     }
 
@@ -261,7 +262,7 @@ function bindStockSwipeActions(){
 }
 
 function stockProductsForView(arr){
-  const all=arr||[];
+  const all=(arr||[]).filter(p=>!p.stockExcluded);
   const query=typeof search!=='undefined'&&String(search?.value||'').trim();
   // Zoeken blijft altijd wereldwijd, ongeacht de gekozen vaste plek.
   if(query)return all;
@@ -273,12 +274,17 @@ function stockProductsForView(arr){
   return visible;
 }
 
+function stockUndoHtml(){
+  const id=window.lastStockRemovedId;
+  const product=id&&products.find(x=>String(x.id)===String(id)&&x.stockExcluded);
+  return product?`<div class="stock-undo-message">${esc(product.name)} uit Voorraad gehaald <button type="button" onclick="restoreToStock(${JSON.stringify(String(product.id))})">Herstellen</button></div>`:'';
+}
 function renderStock(arr) {
   updateStockViewControls();
   const visible = stockProductsForView(arr);
   if (!visible.length) {
     const emptyText='Geen producten voor deze selectie.';
-    content.innerHTML = `<div class="empty">${emptyText}</div>`;
+    content.innerHTML = `${stockUndoHtml()}<div class="empty">${emptyText}</div>`;
     return;
   }
 
@@ -327,7 +333,7 @@ function renderStock(arr) {
   const intro=(stockView==='meal')?`<div class="stock-meal-intro"><strong>Eerst opmaken</strong><span>Hier blijft je volledige houdbare maaltijdvoorraad zichtbaar. <b>In huis</b> telt mee bij recepten; <b>Niet in huis</b> blijft hier staan zodat je het later eenvoudig weer op In huis kunt zetten.</span></div>`:'';
   const checked=visible.filter(p=>stockCheckTime(p)).length;
   const progress=document.getElementById('stockProgress');if(progress)progress.textContent=`${checked} van ${visible.length} met controledatum`;
-  content.innerHTML = `${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
+  content.innerHTML = `${stockUndoHtml()}${intro}<div class="stock-tools"><button class="clear" type="button" onclick="toggleAllStock()">${expandedStockCategories.size?'Alles inklappen':'Alles uitklappen'}</button></div>${rows}`;
   bindStockSwipeActions();
 }
 
@@ -402,6 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!input)return;
     event.stopPropagation();
     window.toggleStockBuy(input.dataset.stockBuy,input.checked);
+  });
+  document.addEventListener('click', event => {
+    const button=event.target.closest?.('button[data-stock-remove]');
+    if(!button)return;
+    event.preventDefault();event.stopPropagation();
+    window.removeFromStock?.(button.dataset.stockRemove);
   });
   updateStockViewControls();
 });
