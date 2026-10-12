@@ -1,5 +1,5 @@
-// V1.4.193 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
-// V1.4.193 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
+// V1.4.194 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
+// V1.4.194 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
 // V1.4.187 - Receptsortering A-Z/laatst toegevoegd; veilige eenheidsparser; filterverwijdering toont gebruikte recepten.
 // V1.4.187 - Receptfilters beheerbaar; zoeken + filteren gecombineerd; bronfilter; weekmenu-ingrediënten gereserveerd voor voorraadadvies.
 // V1.4.187 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
@@ -32,7 +32,7 @@ function filterOptionsChangedAt(){return Number(localStorage.getItem(FILTER_OPTI
 function applyFilterOptions(next,changedAt=0){filterOptions=normalizedFilterOptions(next);localStorage.setItem(FILTER_OPTIONS_KEY,JSON.stringify(filterOptions));if(changedAt)localStorage.setItem(FILTER_OPTIONS_CHANGED_KEY,String(changedAt));RECIPE_CATEGORIES=filterOptions.categories;RECIPE_TYPES=filterOptions.types;MAIN_INGREDIENT_OPTIONS=filterOptions.mains;HOME_TIME_OPTIONS=filterOptions.times;invalidateRecipeCaches();renderSmartRecipePicker()}
 let filterOptions=loadFilterOptions(),RECIPE_CATEGORIES=filterOptions.categories,RECIPE_TYPES=filterOptions.types,MAIN_INGREDIENT_OPTIONS=filterOptions.mains,HOME_TIME_OPTIONS=filterOptions.times;
 function saveFilterOptions(){localStorage.setItem(FILTER_OPTIONS_CHANGED_KEY,String(Date.now()));applyFilterOptions(filterOptions,filterOptionsChangedAt());scheduleSync()}
-let allRecipesCache=null,allRecipesByIdCache=null,recipeMetaArrayCache=null,recipeMetaMapCache=null,recipeClassCache=new Map(),stockFitCache=new Map(),stockIngredientMatchCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',smartRecipeSort='az',recipeListScrollY=0;
+let allRecipesCache=null,allRecipesByIdCache=null,recipeMetaArrayCache=null,recipeMetaMapCache=null,recipeClassCache=new Map(),stockFitCache=new Map(),stockIngredientMatchCache=new Map(),smartRecipeMode='all',smartRecipeLimit=24,smartRecipeTime='Alles',smartRecipeSort='recent',recipeListScrollY=0;
 function invalidateRecipeCaches(){allRecipesCache=null;allRecipesByIdCache=null;recipeClassCache.clear();stockFitCache.clear()}
 function invalidateRecipeMetaCache(){recipeMetaArrayCache=null;recipeMetaMapCache=null}
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -937,9 +937,14 @@ function renderSmartRecipePicker(){
   if(smartRecipeMain!=='Alles')rows=rows.filter(r=>recipeMainIngredient(r)===smartRecipeMain);
   if(smartRecipeTime!=='Alles')rows=rows.filter(r=>recipeHomeTime(r)===smartRecipeTime);
   if(smartRecipeSource!=='Alles')rows=rows.filter(r=>String(r.source||'').trim()===smartRecipeSource);
-  if(smartRecipeMode==='all'){
-    if(smartRecipeSort==='recent')rows.sort((a,b)=>((Number(b.addedAt||0)>=RECIPE_RECENT_START?Number(b.addedAt):0)-(Number(a.addedAt||0)>=RECIPE_RECENT_START?Number(a.addedAt):0))||String(a.title||'').localeCompare(String(b.title||''),'nl'));
-    else rows.sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'nl'));
+  // Sortering is een keuze van de gebruiker, ook bij de andere weergaven.
+  // Alleen toevoegingen sinds 5 oktober tellen als recent; oudere recepten krijgen
+  // geen verzonnen datum. Gelijke of ontbrekende datums sorteren alfabetisch.
+  if(smartRecipeSort==='recent'){
+    const recentTime=r=>{const n=Number(r.addedAt||0);return Number.isFinite(n)&&n>=RECIPE_RECENT_START?n:0};
+    rows.sort((a,b)=>recentTime(b)-recentTime(a)||String(a.title||'').localeCompare(String(b.title||''),'nl'));
+  }else{
+    rows.sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'nl'));
   }
   const visible=rows.slice(0,smartRecipeLimit);
   const button=r=>`<button class="smart-recipe ${r.photo?'has-photo':''}" type="button" data-smart-recipe="${esc(r.id)}">${r.photo?`<img class="smart-recipe-photo" src="${esc(r.photo)}" alt="">`:''}<span>${metaFor(r.id).favorite?'★ ':''}${esc(r.title)}</span><small>${esc(labelFor(r))}</small></button>`;
