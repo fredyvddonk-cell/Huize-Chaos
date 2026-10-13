@@ -1,5 +1,5 @@
-// V1.4.197 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
-// V1.4.197 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
+// V1.4.199 - receptfilterbeheer (categorie/soort/hoofdingrediënt/tijd) synchroniseert via Firebase tussen apparaten.
+// V1.4.199 - Receptweergave compacter; sortering klein; recente sortering telt pas vanaf 5 oktober 2026.
 // V1.4.187 - Receptsortering A-Z/laatst toegevoegd; veilige eenheidsparser; filterverwijdering toont gebruikte recepten.
 // V1.4.187 - Receptfilters beheerbaar; zoeken + filteren gecombineerd; bronfilter; weekmenu-ingrediënten gereserveerd voor voorraadadvies.
 // V1.4.187 - Per recept lokaal bestand importeren (DOCX/TXT/PDF/foto), altijd eerst controleren.
@@ -474,6 +474,10 @@ function ingredientMatchesProduct(ingredient,product){
   if(ingredientIsGf&&!isGlutenFreeProduct(product))return remember(false);
   if(isGlutenSensitiveBread(raw)&&!ingredientIsGf&&isGlutenFreeProduct(product))return remember(false);
   const a=normFood(raw),b=normFood(product.name);
+  const colorWords=['rood','rode','geel','gele','groen','groene','wit','witte'];
+  const baseColor=w=>({rode:'rood',gele:'geel',groene:'groen',witte:'wit'}[w]||w);
+  const ca=a.split(' ').filter(w=>colorWords.includes(w)).map(baseColor),cb=b.split(' ').filter(w=>colorWords.includes(w)).map(baseColor);
+  if(ca.length&&cb.length&&!ca.some(c=>cb.includes(c)))return remember(false);
   const aliases=Array.isArray(product?.aliases)?product.aliases:[];
   if(a&&aliases.some(alias=>normFood(alias)===a))return remember(true);
   if(!a||!b)return remember(false);
@@ -561,9 +565,9 @@ async function addPicnicItemsToShopping(recipe,button){
   let added=0,already=0;
   for(const item of items){
     const key=normFood(item.ingredient);
-    let product=products.find(p=>normFood(p.name)===key||(Array.isArray(p.aliases)&&p.aliases.some(a=>normFood(a)===key)));
+    let product=products.find(p=>p.stockRole!=='hidden' && !p.temporary && (normFood(p.name)===key||(Array.isArray(p.aliases)&&p.aliases.some(a=>normFood(a)===key))) ) || products.find(p=>p.stockRole==='hidden' && normFood(p.name)===key);
     if(!product){
-      product={id:Date.now()+added,name:item.ingredient,category:'Overig',quantity:'',unit:'',store:'Picnic',memo:item.memo||'',status:'Niet in huis',shopping:false,done:false,temporary:false,stockRole:'hidden'};
+      product={id:Date.now()+added,name:item.ingredient,category:'Overig',quantity:'',unit:'',store:'Picnic',memo:item.memo||'',status:'Niet in huis',shopping:false,done:false,temporary:true,stockRole:'hidden'};
       products.push(product);
     }
     if(product.shopping){already++;continue}
@@ -611,7 +615,7 @@ function normalizedUnit(u){
 function qtyNumber(v){const n=parseFloat(String(v??'').replace(',','.'));return Number.isFinite(n)?n:null}
 function toBaseAmount(qty,unit){const n=qtyNumber(qty),u=normalizedUnit(unit);if(n==null)return null;if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
 function stockCoverage(ingredient,preferredProductId='',glutenMode=''){
-  const allProducts=stockProducts().filter(p=>p.stockRole!=='hidden');
+  const allProducts=stockProducts().filter(p=>p.stockRole!=='hidden' && !p.temporary && !p.stockExcluded);
   const preferredId=String(preferredProductId||ingredient?.stockProductId||'');
   const pasta=isPastaIngredient(ingredient?.ingredient);
   let matches=(pasta?pastaStockOptionsForIngredient(ingredient?.ingredient,true):allProducts.filter(p=>ingredientMatchesProduct(ingredient.ingredient,p))).filter(p=>p.status==='In huis');

@@ -148,6 +148,10 @@ function recipeIngredientMatchesProduct(ingredient,product){
   if(ingredientGf&&!recipeIsGlutenFreeProduct(product))return false;
   if(recipeIsSensitiveBread(raw)&&!ingredientGf&&recipeIsGlutenFreeProduct(product))return false;
   const a=recipeNormFood(ingredient),b=recipeNormFood(product?.name);if(!a||!b)return false;
+  const colors=['rood','rode','geel','gele','groen','groene','wit','witte'];
+  const canonicalColor=w=>({rode:'rood',gele:'geel',groene:'groen',witte:'wit'}[w]||w);
+  const ac=a.split(' ').filter(w=>colors.includes(w)).map(canonicalColor),bc=b.split(' ').filter(w=>colors.includes(w)).map(canonicalColor);
+  if(ac.length&&bc.length&&!ac.some(c=>bc.includes(c)))return false;
   const words=x=>x.split(/\s+/).filter(Boolean),aw=words(a),bw=words(b),subset=(need,have)=>need.length>0&&need.every(w=>have.includes(w));
   const aDressing=aw.some(w=>w.includes('dressing')),bDressing=bw.some(w=>w.includes('dressing'));
   if(aDressing||bDressing){if(!(aDressing&&bDressing))return false;const ad=aw.filter(w=>!w.includes('dressing')),bd=bw.filter(w=>!w.includes('dressing'));if(!ad.length||!bd.length||!(subset(ad,bd)||subset(bd,ad)))return false}
@@ -158,7 +162,7 @@ function recipeIngredientMatchesProduct(ingredient,product){
 function recipeUnit(u){const x=String(u||'').trim().toLowerCase();return ({gram:'g',gr:'g',kilogram:'kg',milliliter:'ml',liter:'l',stuk:'stuks',potje:'pot',potten:'pot',blikje:'blik',blikjes:'blik',zakje:'zak',zakjes:'zak',pakje:'pak',pakjes:'pak',flesje:'fles',flesjes:'fles'}[x]||x)}
 function recipeAmount(q,u){const n=parseFloat(String(q??'').replace(',','.'));if(!Number.isFinite(n))return null;u=recipeUnit(u);if(u==='kg')return {n:n*1000,u:'g'};if(u==='l')return {n:n*1000,u:'ml'};return {n,u}}
 function recipeStockCoverage(i){
-  const all=products||[];
+  const all=(products||[]).filter(p=>p.stockRole!=='hidden' && !p.temporary && !p.stockExcluded);
   const preferredRaw=i.stockProductId?all.find(x=>String(x.id)===String(i.stockProductId)):null;
   const preferred=preferredRaw&&preferredRaw.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,preferredRaw)?preferredRaw:null;
   const p=preferred||all.find(x=>x.status==='In huis'&&recipeIngredientMatchesProduct(i.ingredient,x));
@@ -215,24 +219,8 @@ window.markRecipeIngredientBought=(planId,index,checked)=>{
   p.changedAt=Date.now();
   localStorage.setItem('huize-chaos-recipe-weeks-v1',JSON.stringify(plans));
 
-  // V1.3.116 - gekocht receptingrediënt wordt één keer als 'In huis' in Voorraad gezet.
-  // Exacte hoeveelheden worden bewust niet overgenomen.
-  if(checked){
-    const name=String(ingredient.ingredient||'').trim();
-    if(name){
-      let stock=window.findExistingHuizeChaosProductByName?.(name)||(products||[]).find(x=>recipeIngredientMatchesProduct(name,x));
-      if(stock){
-        stock.status='In huis';
-        stock.shopping=false;
-        stock.done=false;
-      }else{
-        const meta=inferShoppingMeta(name);
-        const nextId=Math.max(0,...(products||[]).map(x=>Number(x.id)||0))+1;
-        products.push(migrateProduct({id:nextId,name,category:ingredient.category||meta.category||'Overig',quantity:'',unit:'',store:ingredient.store||meta.store||'',memo:'',status:'In huis',shopping:false,done:false}));
-      }
-      save();
-    }
-  }
+  // Afvinken betekent gekocht, niet automatisch thuis ontvangen of gecontroleerd.
+  // Voorraadwijzigingen verlopen uitsluitend via het voorraadbeheer.
   render();
 };
 window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
@@ -240,8 +228,10 @@ window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='u
 
 function renderShopping(allProducts) {
   const wl=document.getElementById('shoppingWeekLabel');if(wl)wl.textContent=weekLabel();
-  const arr = allProducts.filter(x => x.shopping);
   const sourceRows=[...occasionShoppingRows(),...recipeShoppingRows()];
+  // Receptregels hebben voorrang: toon hetzelfde product niet nogmaals als losse boodschap.
+  // Bestaande producten blijven bewaard, ook bij een handmatig toegevoegd product.
+  const arr = allProducts.filter(x => x.shopping && !(x.stockRole==='hidden' && sourceRows.some(r => r.sourceType==='recipe' && recipeIngredientMatchesProduct(r.name,x))));
   const done = arr.filter(x => x.done).length + sourceRows.filter(x=>x.done).length;
   const occasionCount=sourceRows.length;
 

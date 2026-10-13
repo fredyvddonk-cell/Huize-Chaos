@@ -22,8 +22,52 @@ const occasionsRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'occasions')
 const inventoryRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'products');
 const recipesRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'recipes');
 const hutselRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'hutsel');
+const locationOrderRef = doc(db, 'households', HOUSEHOLD_ID, 'insight', 'stockLocationOrder');
 const RECIPE_WEEK_KEY = 'huize-chaos-recipe-weeks-v1';
 const RECIPE_WEEK_DELETED_KEY = 'huize-chaos-recipe-weeks-deleted-v1';
+
+const LOCATION_ORDER_TIME_KEY='household-stock-location-order-updated-at';
+let locationOrderTimer=0;
+let applyingLocationOrder=false;
+let stopLocationOrder=null;
+function localLocationOrderTime(){return Number(localStorage.getItem(LOCATION_ORDER_TIME_KEY))||0;}
+function applyRemoteLocationOrder(data){
+  if(!Array.isArray(data?.locations))return;
+  const remoteTime=Number(data.changedAt)||0;
+  if(remoteTime<localLocationOrderTime()) {scheduleLocationOrderSync();return;}
+  applyingLocationOrder=true;
+  window.applyHuizeChaosStockLocations?.(data.locations);
+  localStorage.setItem(LOCATION_ORDER_TIME_KEY,String(remoteTime));
+  applyingLocationOrder=false;
+}
+async function syncLocationOrderNow(){
+  if(!user||!role||applyingLocationOrder)return;
+  const localTime=localLocationOrderTime();
+  const snapshot=await getDoc(locationOrderRef);
+  const remoteTime=Number(snapshot.data()?.changedAt)||0;
+  if(snapshot.exists() && remoteTime>localTime){applyRemoteLocationOrder(snapshot.data());return;}
+  if(!localTime && snapshot.exists()){applyRemoteLocationOrder(snapshot.data());return;}
+  await setDoc(locationOrderRef,{locations:window.getHuizeChaosStockLocations?.()||[],changedAt:localTime||Date.now(),updatedBy:user.uid});
+}
+function scheduleLocationOrderSync(){
+  if(!user||!role||applyingLocationOrder)return;
+  clearTimeout(locationOrderTimer);
+  locationOrderTimer=setTimeout(()=>syncLocationOrderNow().catch(e=>console.error('Locatievolgorde sync mislukt',e)),400);
+}
+window.addEventListener('huize-chaos-locations-changed',()=>{
+  localStorage.setItem(LOCATION_ORDER_TIME_KEY,String(Date.now()));
+  scheduleLocationOrderSync();
+});
+async function startLocationOrderSync(){
+  if(!user||!role)return;
+  const snap=await getDoc(locationOrderRef);
+  if(snap.exists())applyRemoteLocationOrder(snap.data());
+  else if(localLocationOrderTime())scheduleLocationOrderSync();
+  stopLocationOrder?.();
+  stopLocationOrder=onSnapshot(locationOrderRef,snapshot=>{
+    if(snapshot.exists())applyRemoteLocationOrder(snapshot.data());
+  },e=>console.error('Locatievolgorde live sync mislukt',e));
+}
 
 let role = '';
 let user = null;
@@ -370,7 +414,7 @@ function applySnapshot(snapshot) {
       product = products.find(x => String(x.id) === String(data.localId) && x.shopping);
     }
     if (!product) {
-      product = { id: Date.now() + counter++, status: 'In huis', shopping: true, buyDirectWhenOut: false };
+      product = { id: Date.now() + counter++, status: 'Niet in huis', shopping: true, buyDirectWhenOut: false, temporary: Boolean(data.temporary), stockRole: data.temporary ? 'hidden' : 'standard' };
       products.push(product);
     }
     const localShoppingChanged=Number(product.shoppingUpdatedAt)||0;
@@ -645,6 +689,7 @@ async function openFor(currentUser) {
   await startInsightSync();
   await startOccasionsSync();
   await startInventorySync();
+  await startLocationOrderSync();
   await startRecipeWeeksSync();
   await startHutselSync();
   refreshItemsFromServer().catch(error => {

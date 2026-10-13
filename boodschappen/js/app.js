@@ -85,7 +85,7 @@ function migrateProduct(x) {
   product.store = String(product.store || '');
   product.category = String(product.category || '');
   const oldStatus = product.status;
-  product.status = ({'Voldoende':'In huis','Aanvullen':'Niet in huis','Op':'Niet in huis','Kopen':'Niet in huis'}[oldStatus] || oldStatus || 'In huis');
+  product.status = ({'Voldoende':'In huis','Aanvullen':'Niet in huis','Op':'Niet in huis','Kopen':'Niet in huis'}[oldStatus] || oldStatus || (product.stockRole === 'hidden' || product.temporary ? 'Niet in huis' : 'In huis'));
   if (!['In huis','Niet in huis'].includes(product.status)) product.status = 'In huis';
   product.shopping = Boolean(product.shopping || oldStatus === 'Op' || oldStatus === 'Kopen');
   product.done = Boolean(product.done);
@@ -96,10 +96,7 @@ function migrateProduct(x) {
   product.shoppingUpdatedAt = Number(product.shoppingUpdatedAt) || 0;
   product.aliases = Array.isArray(product.aliases) ? [...new Set(product.aliases.map(v => String(v || '').trim()).filter(Boolean))] : [];
   product.stockLocation = String(product.stockLocation || '');
-  if (product.stockRole === 'hidden') {
-    product.stockRole = 'standard';
-    product.inventoryUpdatedAt = Math.max(Date.now(), Number(product.inventoryUpdatedAt) || 0);
-  } else if (!['standard','meal'].includes(product.stockRole)) {
+  if (!['standard','meal','hidden'].includes(product.stockRole)) {
     product.stockRole = defaultStockRole(product);
   }
   if (!['week','month','work','rare'].includes(product.checkCycle)) {
@@ -703,11 +700,40 @@ window.updateManageProductCheckCycle = (id, value) => {
 
 function stockLocationRows() {
   return `<div class="manage-add"><input id="newStockLocation" placeholder="Nieuwe vaste plek"><button onclick="addStockLocation()">+</button></div>` +
-    stockLocations.map(location => {
+    `<div class="location-order-help">Sleep via ≡ om de volgorde aan te passen. Met de pijlen kan het ook.</div>` +
+    stockLocations.map((location,index) => {
       const count = products.filter(product => product.stockLocation === location).length;
-      return `<div class="manage-row"><span>${esc(location)} <small>(${count})</small></span><button onclick="renameStockLocation('${encodeURIComponent(location)}')">Wijzig</button><button onclick="deleteStockLocation('${encodeURIComponent(location)}')">Verwijder</button></div>`;
+      const encoded=encodeURIComponent(location);
+      return `<div class="manage-row location-sort-row" data-location-order="${esc(location)}">
+        <span class="location-drag" role="button" tabindex="0" aria-label="Sleep ${esc(location)}" title="Verschuif locatie">≡</span>
+        <span class="location-sort-name">${esc(location)} <small>(${count})</small></span>
+        <button type="button" class="location-move" aria-label="${esc(location)} omhoog" ${index===0?'disabled':''} onclick="moveStockLocation('${encoded}',-1)">↑</button>
+        <button type="button" class="location-move" aria-label="${esc(location)} omlaag" ${index===stockLocations.length-1?'disabled':''} onclick="moveStockLocation('${encoded}',1)">↓</button>
+        <button onclick="renameStockLocation('${encoded}')">Wijzig</button><button onclick="deleteStockLocation('${encoded}')">Verwijder</button></div>`;
     }).join('');
 }
+window.moveStockLocation=(encoded,direction)=>{
+  const name=decodeURIComponent(encoded),i=stockLocations.indexOf(name),j=i+direction;
+  if(i<0||j<0||j>=stockLocations.length)return;
+  [stockLocations[i],stockLocations[j]]=[stockLocations[j],stockLocations[i]];
+  save();window.dispatchEvent(new Event('huize-chaos-locations-changed'));render();
+};
+// Pointer Events werken ook op een Android-telefoon; alleen in Beheer slepen.
+let locationDragStart=null;
+document.addEventListener('pointerdown',event=>{
+  const handle=event.target.closest('.location-drag');if(!handle)return;
+  locationDragStart={from:handle.closest('[data-location-order]')?.dataset.locationOrder,x:event.clientX,y:event.clientY};
+});
+document.addEventListener('pointerup',event=>{
+  if(!locationDragStart)return;
+  const start=locationDragStart;locationDragStart=null;
+  if(Math.abs(event.clientY-start.y)<12)return;
+  const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-location-order]');
+  const from=stockLocations.indexOf(start.from),to=stockLocations.indexOf(target?.dataset.locationOrder);
+  if(from<0||to<0||from===to)return;
+  stockLocations.splice(to,0,stockLocations.splice(from,1)[0]);save();window.dispatchEvent(new Event('huize-chaos-locations-changed'));render();
+});
+document.addEventListener('pointercancel',()=>{locationDragStart=null});
 window.addStockLocation = () => {
   const input = document.getElementById('newStockLocation');
   const value = String(input?.value || '').trim();
@@ -831,6 +857,13 @@ window.addEventListener('popstate',e=>{
 const initialHistoryState={...history.state,hcPage:page,hcOverlay:'',hcInsightCategory:''};
 history.replaceState(initialHistoryState,'',location.href);
 huizeChaosHistoryState=initialHistoryState;
+window.getHuizeChaosStockLocations=()=>[...stockLocations];
+window.applyHuizeChaosStockLocations=locations=>{
+  if(!Array.isArray(locations))return;
+  stockLocations=[...new Set([...locations,...stockLocations].map(x=>String(x||'').trim()).filter(Boolean))];
+  localStorage.setItem('household-stock-locations',JSON.stringify(stockLocations));
+  refreshStockLocationSelect();render();
+};
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {

@@ -1,0 +1,8 @@
+Huize Chaos V1.4.200
+- Behoud functies uit V1.4.198 en V1.4.199.
+- Picnic-boodschappenregels blijven buiten de eigen voorraad en krijgen niet automatisch In huis.
+- Receptgerelateerde (tijdelijke/verborgen) boodschappen tellen niet als aanwezige voorraad.
+- Bij geplande recepten geen tweede Picnic-boodschappenregel tonen. Zelf toegevoegde boodschappen blijven zichtbaar.
+- Voorraadvergelijking maakt geen automatische gelijkstelling van rode en gele varianten als beide gespecificeerd zijn.
+- Bestaande voorraad niet automatisch verwijderen of corrigeren: controleer eventuele eerder gemaakte regels onder Nog indelen.
+- Niet getest met live Firebase of daadwerkelijk winkelmandje.

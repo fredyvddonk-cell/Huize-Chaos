@@ -11,6 +11,14 @@ const STOCK_VIEW_HELP = {
 const CHECK_LABEL = {week:'Weekcheck',month:'Maandcheck',work:'Alleen bij Wat kan ik maken?',rare:'Zelden'};
 function stockSpice(p){return String(p.category||'').toLocaleLowerCase('nl').includes('kruiden') || /\b(kruidenmix|rub|specerij)\b/i.test(String(p.name||''));}
 function stockLocationName(p){return String(p.stockLocation||'').trim() || 'Nog indelen';}
+function compareStockLocationNames(a,b){
+  if(a==='Nog indelen')return b==='Nog indelen'?0:1;
+  if(b==='Nog indelen')return -1;
+  const ai=stockLocations.indexOf(a),bi=stockLocations.indexOf(b);
+  if(ai>=0&&bi>=0)return ai-bi;
+  if(ai>=0)return -1;if(bi>=0)return 1;
+  return a.localeCompare(b,'nl',{numeric:true});
+}
 function stockCheckTime(p){return Number(p.stockCheckedAt)||0;}
 function stockCheckLabel(p){const t=stockCheckTime(p);return t?new Date(t).toLocaleDateString('nl-NL'):'Nog niet gecontroleerd';}
 window.confirmStockProduct=id=>{
@@ -42,8 +50,8 @@ function updateStockLocationPicker(){
   if(!picker)return;
   picker.hidden=stockView!=='location';
   const select=document.getElementById('stockLocationFilter');
-  const locations=[...new Set(products.filter(p=>!p.temporary).map(stockLocationName))]
-    .sort((a,b)=>a==='Nog indelen'?1:b==='Nog indelen'?-1:a.localeCompare(b,'nl',{numeric:true}));
+  const locations=[...new Set(products.filter(p=>!p.temporary && p.stockRole!=='hidden').map(stockLocationName))]
+    .sort(compareStockLocationNames);
   if(stockLocationFilter&&!locations.includes(stockLocationFilter))stockLocationFilter='';
   select.innerHTML='<option value="">Alle plekken</option>'+locations.map(loc=>`<option value="${esc(loc)}" ${loc===stockLocationFilter?'selected':''}>${esc(loc)}</option>`).join('');
   document.getElementById('stockProgress').textContent='';
@@ -262,7 +270,7 @@ function bindStockSwipeActions(){
 }
 
 function stockProductsForView(arr){
-  const all=(arr||[]).filter(p=>!p.stockExcluded);
+  const all=(arr||[]).filter(p=>!p.stockExcluded && !p.temporary && p.stockRole!=='hidden');
   const query=typeof search!=='undefined'&&String(search?.value||'').trim();
   // Zoeken blijft altijd wereldwijd, ongeacht de gekozen vaste plek.
   if(query)return all;
@@ -320,7 +328,7 @@ function renderStock(arr) {
   }else{
     const grouped=new Map();
     visible.forEach(p=>{const key=stockLocationName(p);if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p)});
-    rows=[...grouped.entries()].sort((a,b)=>a[0]==='Nog indelen'?1:b[0]==='Nog indelen'?-1:a[0].localeCompare(b[0],'nl',{numeric:true})).map(([categoryName,items])=>{
+    rows=[...grouped.entries()].sort((a,b)=>compareStockLocationNames(a[0],b[0])).map(([categoryName,items])=>{
       const collapsed=stockLocationFilter ? false : !expandedStockCategories.has(categoryName);
       return `<section class="stock-category ${collapsed?'collapsed':''}">
         <div class="shopping-group-head stock-category-head ${stockView==='location'?'stock-location-head':''}">
