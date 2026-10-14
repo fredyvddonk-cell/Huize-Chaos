@@ -768,6 +768,39 @@ window.deleteStockLocation = encoded => {
   render();
 };
 
+// Handmatige gegevensoverdracht: export maakt een momentopname zonder wijzigingen.
+window.exportVoorraad = () => {
+  const payload = {format:'huize-chaos-voorraad',schema:1,exportedAt:new Date().toISOString(),
+    products:products.map(x=>({...x})), stores:[...stores], categories:[...categories], stockLocations:[...stockLocations]};
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download='Huize-Chaos-Voorraad-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+window.importVoorraad = async input => {
+  const file=input.files?.[0]; if(!file)return;
+  try {
+    const data=JSON.parse(await file.text());
+    if(data.format!=='huize-chaos-voorraad'||data.schema!==1||!Array.isArray(data.products)||
+       !data.products.every(p=>p&&typeof p.name==='string'&&p.name.trim()&&p.id!==undefined)) throw Error('Geen geldig Huize Chaos voorraadbestand.');
+    const incoming=data.products.map(migrateProduct);
+    const currentIds=new Set(products.map(p=>String(p.id)));
+    const existingById=new Map(products.map(p=>[String(p.id),p]));
+    const newItems=incoming.filter(p=>!currentIds.has(String(p.id)));
+    const changed=incoming.filter(p=>currentIds.has(String(p.id))&&JSON.stringify(existingById.get(String(p.id)))!==JSON.stringify(p));
+    const ok=confirm(`Importbestand: ${incoming.length} producten.\n${newItems.length} nieuw, ${changed.length} bestaande producten met verschillen.\n\nBij doorgaan worden bestaande producten met hetzelfde ID vervangen. Maak eerst een export als reservekopie. Doorgaan?`);
+    if(!ok)return;
+    const merged=new Map(products.map(p=>[String(p.id),p]));
+    incoming.forEach(p=>merged.set(String(p.id),p));
+    products=[...merged.values()];
+    if(Array.isArray(data.stockLocations)) stockLocations=[...new Set([...stockLocations,...data.stockLocations.filter(x=>typeof x==='string'&&x.trim())])];
+    if(Array.isArray(data.categories)) categories=[...new Set([...categories,...data.categories.filter(x=>typeof x==='string'&&x.trim())])];
+    if(Array.isArray(data.stores)) stores=[...new Set([...stores,...data.stores.filter(x=>typeof x==='string'&&x.trim())])];
+    save();render();alert('Import verwerkt. Controleer de synchronisatiestatus.');
+  } catch(err){alert('Import niet uitgevoerd: '+err.message)}
+  finally{input.value=''}
+};
 function renderManage(arr) {
   const hasSearch = Boolean(search.value.trim());
   if (hasSearch) openManageSection = 'products';
@@ -786,7 +819,7 @@ function renderManage(arr) {
   const locations = stockLocationRows();
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
-  content.innerHTML = manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Vaste plekken','locations',locations) + accordion('Winkels','stores',shops);
+  content.innerHTML = `<div class="manage-add"><button type="button" class="small" onclick="exportVoorraad()">Voorraad exporteren</button><label class="small" style="cursor:pointer">Voorraad importeren <input type="file" accept=".json,application/json" onchange="importVoorraad(this)" style="display:none"></label></div>` + manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Vaste plekken','locations',locations) + accordion('Winkels','stores',shops);
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};

@@ -1,4 +1,4 @@
-Huize Chaos V1.4.200
+Huize Chaos V1.4.201
 - Behoud functies uit V1.4.198 en V1.4.199.
 - Picnic-boodschappenregels blijven buiten de eigen voorraad en krijgen niet automatisch In huis.
 - Receptgerelateerde (tijdelijke/verborgen) boodschappen tellen niet als aanwezige voorraad.
