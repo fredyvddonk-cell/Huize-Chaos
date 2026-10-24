@@ -1,4 +1,4 @@
-Huize Chaos V1.4.202
+Huize Chaos V1.4.202.1
 - Inventarisatie 14 oktober als expliciete vervangactie in Boodschappen.
 - Maak vooraf een voorraadexport; klik onderaan op Inventarisatie 14 oktober overnemen.
 - Bestaande boodschappenregels en niet-voedselproducten blijven behouden.

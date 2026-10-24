@@ -1,0 +1,7 @@
+Huize Chaos V1.4.202.1 (tijdelijke voorraadbeheer-update)
+- Filteren op vaste plek bij bulkselectie
+- Geselecteerde producten verwijderen met dubbele bevestiging
+- Volledige productlijst leegmaken met typen WISSEN en bevestiging
+- Bulkverplaatsing en categoriewijziging vragen bevestiging
+- Versienummer overal zichtbaar
+Let op: volledige lijst leegmaken verwijdert ook boodschappenproducten en diepvriesproducten. Maak eerst export.

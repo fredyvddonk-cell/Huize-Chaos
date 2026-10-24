@@ -476,6 +476,7 @@ let manageSelectMode = false;
 let manageSelectedProducts = new Set();
 let manageBulkMessage = '';
 let manageCategoryFilter = '';
+let manageLocationFilter = '';
 window.toggleManageSection = key => {
   openManageSection = openManageSection === key ? '' : key;
   localStorage.setItem('household-manage-section', openManageSection);
@@ -543,7 +544,7 @@ function manageBulkToolbar() {
   const selectedCount = manageSelectedProducts.size;
   const hasManageSelection = selectedCount >= 1;
   if (!manageSelectMode) {
-    return `<div class="manage-bulk-start"><button type="button" class="small manage-select-button" onclick="toggleManageSelectionMode()">Selecteren</button><span>Meerdere producten tegelijk indelen</span></div>`;
+    return `<div class="manage-bulk-start"><button type="button" class="small manage-select-button" onclick="toggleManageSelectionMode()">Selecteren</button><span>Selecteer, wijzig of verwijder meerdere producten</span></div>`;
   }
   return `<div class="manage-bulk-toolbar">
     <div class="manage-bulk-top">
@@ -557,12 +558,18 @@ function manageBulkToolbar() {
           ${categories.map(category => `<option value="${esc(category)}" ${manageCategoryFilter === category ? 'selected' : ''}>${esc(category)}</option>`).join('')}
         </select>
       </label>
+      <label>Vaste plek
+        <select onchange="setManageLocationFilter(this.value)">
+          <option value="">Alle vaste plekken</option>
+          ${stockLocations.map(location => `<option value="${esc(location)}" ${manageLocationFilter === location ? 'selected' : ''}>${esc(location)}</option>`).join('')}
+        </select>
+      </label>
     </div>
     <div class="manage-bulk-selection-actions">
       <button type="button" class="small" onclick="selectAllVisibleManageProducts()">Alles selecteren</button>
       <button type="button" class="small" onclick="deselectAllManageProducts()" ${hasManageSelection ? '' : 'disabled'}>Alles deselecteren</button>
     </div>
-    ${hasManageSelection ? `<div class="manage-bulk-message">Wijzig ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}; je keuze wordt direct opgeslagen.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product. Kies daarna Categorie of Vaste plek; de keuze wordt direct opgeslagen.</div>`}
+    ${hasManageSelection ? `<div class="manage-bulk-message">Wijzig ${selectedCount} geselecteerd product${selectedCount === 1 ? '' : 'en'}; je keuze wordt pas na bevestiging opgeslagen.</div>` : `<div class="manage-bulk-message">Selecteer minimaal 1 product. Kies daarna Categorie of Vaste plek; de keuze wordt pas na bevestiging opgeslagen.</div>`}
     <div class="manage-bulk-actions">
       <label>Categorie
         <div class="manage-bulk-field-row">
@@ -592,6 +599,9 @@ function manageBulkToolbar() {
         </div>
       </label>
     </div>
+    <div class="manage-bulk-selection-actions">
+      <button type="button" class="small" ${hasManageSelection ? '' : 'disabled'} onclick="deleteSelectedManageProducts()">Geselecteerde producten verwijderen (${selectedCount})</button>
+    </div>
     ${manageBulkMessage ? `<div class="manage-bulk-message">${esc(manageBulkMessage)}</div>` : ''}
   </div>`;
 }
@@ -603,6 +613,7 @@ window.toggleManageSelectionMode = () => {
   manageSelectedProducts.clear();
   manageBulkMessage = '';
   manageCategoryFilter = '';
+  manageLocationFilter = '';
   if (manageSelectMode) {
     openManageSection = 'products';
     localStorage.setItem('household-manage-section', openManageSection);
@@ -632,8 +643,43 @@ window.setManageCategoryFilter = value => {
   manageBulkMessage = '';
   render();
 };
+window.setManageLocationFilter = value => {
+  manageLocationFilter = String(value || '');
+  manageBulkMessage = '';
+  render();
+};
+function confirmBulkUpdate(kind, value) {
+  const count = manageSelectedProducts.size;
+  return count > 0 && confirm(`Je gaat ${kind} van ${count} geselecteerde producten wijzigen naar "${value}".\n\nWil je deze wijziging toepassen?`);
+}
+window.deleteSelectedManageProducts = () => {
+  const ids = new Set(manageSelectedProducts);
+  const count = products.filter(product => ids.has(String(product.id))).length;
+  if (!count) return;
+  if (!confirm(`LET OP: Je gaat ${count} geselecteerde producten definitief verwijderen uit Voorraad en Beheer.\n\nMaak eerst een voorraadexport als reservekopie.\n\nDoorgaan?`)) return;
+  if (!confirm(`Laatste bevestiging: echt ${count} producten verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+  products.forEach(product => { if (ids.has(String(product.id))) window.markInventoryProductDeleted?.(product.id); });
+  products = products.filter(product => !ids.has(String(product.id)));
+  manageSelectedProducts.clear();
+  manageBulkMessage = `${count} producten verwijderd.`;
+  save(); render();
+};
+window.clearEntireInventory = () => {
+  const count = products.length;
+  if (!count) { alert('De productlijst is al leeg.'); return; }
+  if (!confirm(`LET OP: Je gaat ALLE ${count} producten wissen, ook huishoudproducten, diepvriesproducten en boodschappenproducten.\n\nRecepten, instellingen en andere HC-modules blijven bestaan. Maak eerst een voorraadexport!\n\nWil je verder?`)) return;
+  const typed = prompt(`Typ WISSEN om alle ${count} producten definitief te verwijderen:`);
+  if (typed !== 'WISSEN') { alert('Wissen geannuleerd.'); return; }
+  if (!confirm(`Definitieve bevestiging: ${count} producten verwijderen?`)) return;
+  products.forEach(product => window.markInventoryProductDeleted?.(product.id));
+  products = [];
+  manageSelectedProducts.clear();
+  manageBulkMessage = '';
+  save(); render();
+  alert('De productlijst is leeggemaakt. Controleer de synchronisatie voordat je importeert.');
+};
 window.applyManageBulkCategory = value => {
-  if (!value || !manageSelectedProducts.size) return;
+  if (!value || !confirmBulkUpdate('de categorie', value)) return;
   products.forEach(product => {
     if (manageSelectedProducts.has(String(product.id))) product.category = value;
   });
@@ -642,7 +688,7 @@ window.applyManageBulkCategory = value => {
   render();
 };
 window.applyManageBulkLocation = value => {
-  if (!value || !manageSelectedProducts.size) return;
+  if (!value || !confirmBulkUpdate('de vaste plek', value)) return;
   products.forEach(product => {
     if (manageSelectedProducts.has(String(product.id))) product.stockLocation = value;
   });
@@ -651,7 +697,7 @@ window.applyManageBulkLocation = value => {
   render();
 };
 window.applyManageBulkCheckCycle = value => {
-  if (!value || !manageSelectedProducts.size) return;
+  if (!value || !confirmBulkUpdate('het checkmoment', value)) return;
   const labels = {week:'Weekcheck',month:'Maandcheck',rare:'Zelden checken',work:'Alleen meenemen bij ‘Wat kan ik maken?’'};
   products.forEach(product => {
     if (manageSelectedProducts.has(String(product.id))) product.checkCycle = value;
@@ -807,7 +853,10 @@ function renderManage(arr) {
   const categoryFiltered = manageSelectMode && manageCategoryFilter
     ? arr.filter(product => product.category === manageCategoryFilter)
     : arr;
-  const sorted = categoryFiltered.slice().sort(sortProducts);
+  const locationFiltered = manageSelectMode && manageLocationFilter
+    ? categoryFiltered.filter(product => String(product.stockLocation || '') === manageLocationFilter)
+    : categoryFiltered;
+  const sorted = locationFiltered.slice().sort(sortProducts);
   const productsHtml = sorted.length ? `<div class="manage-product-list">${sorted.map(x => `
     <div class="item manage-product-item ${manageSelectedProducts.has(String(x.id)) ? 'selected' : ''}">
       ${manageSelectMode ? `<label class="manage-product-select"><input type="checkbox" autocomplete="off" data-manage-product-id="${esc(String(x.id))}" ${manageSelectedProducts.has(String(x.id)) ? 'checked' : ''} onchange="toggleManageProductSelection(this.dataset.manageProductId, this.checked)" aria-label="Selecteer ${esc(x.name)}"><span></span></label>` : ''}
@@ -819,7 +868,7 @@ function renderManage(arr) {
   const locations = stockLocationRows();
   const shops = `<div class="manage-add"><input id="newStore" placeholder="Nieuwe winkel"><button onclick="addStore()">+</button></div>${stores.map(c=>`<div class="manage-row"><span>${esc(c)}</span><button onclick="renameStore('${encodeURIComponent(c)}')">Wijzig</button><button onclick="deleteStore('${encodeURIComponent(c)}')">Verwijder</button></div>`).join('')}`;
 
-  content.innerHTML = `<div class="manage-add"><button type="button" class="small" onclick="exportVoorraad()">Voorraad exporteren</button><label class="small" style="cursor:pointer">Voorraad importeren <input type="file" accept=".json,application/json" onchange="importVoorraad(this)" style="display:none"></label></div>` + manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Vaste plekken','locations',locations) + accordion('Winkels','stores',shops);
+  content.innerHTML = `<div class="manage-add"><button type="button" class="small" onclick="exportVoorraad()">Voorraad exporteren</button><button type="button" class="small" onclick="clearEntireInventory()">Volledige productlijst leegmaken</button><label class="small" style="cursor:pointer">Voorraad importeren <input type="file" accept=".json,application/json" onchange="importVoorraad(this)" style="display:none"></label></div>` + manageBulkToolbar() + accordion('Producten','products',productsHtml) + accordion('Categorieën','categories',cats) + accordion('Vaste plekken','locations',locations) + accordion('Winkels','stores',shops);
   bindCategoryDrag();
 }
 window.addCategory=()=>{const v=$('#newCategory').value.trim();if(v&&!categories.includes(v)){categories.push(v);save();refreshCats();render();}};
