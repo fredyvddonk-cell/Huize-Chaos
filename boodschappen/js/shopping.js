@@ -25,12 +25,15 @@ function renderHcWeekCheck(){
   const host=document.getElementById('hcWeeklyCheck'); if(!host)return;
   host.hidden=false;
   const rows=products.filter(p=>p.stockRole==='standard'&&!p.temporary&&!p.stockExcluded)
-    .sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+    .sort((a,b)=>(a.stockLocation||'Nog niet ingesteld').localeCompare(b.stockLocation||'Nog niet ingesteld','nl',{numeric:true}) || a.name.localeCompare(b.name,'nl'));
   const state=hcWeekCheckState();
+  const groups=new Map();
+  rows.forEach(p=>{const place=p.stockLocation||'Nog niet ingesteld';if(!groups.has(place))groups.set(place,[]);groups.get(place).push(p);});
+  const groupedRows=[...groups].map(([place,items])=>`<section class="hc-weekcheck-place"><h3 style="margin:12px 0 5px;font-size:1rem">${esc(place)}</h3>${items.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #ddd"><input type="checkbox" ${state.checked[String(p.id)]?'checked':''} onchange="hcToggleWeekCheck(${JSON.stringify(p.id)},this.checked)"><span>${esc(p.name)}</span></label>`).join('')}</section>`).join('');
   const count=rows.filter(p=>state.checked[String(p.id)]).length;
   const expanded=localStorage.getItem('hc-weekcheck-expanded')==='yes';
   host.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>Weekboodschappen · ${count}/${rows.length} in huis</strong><button type="button" onclick="localStorage.setItem('hc-weekcheck-expanded',${expanded?'\'no\'':'\'yes\''});render()">${expanded?'Verbergen':'Controleren'}</button></div>`+
-    (expanded?`<p style="margin:6px 0">Vink aan wat je al in huis hebt. Niet aangevinkt = nog controleren of kopen. Maaltijdvoorraad staat hier niet tussen.</p><div style="max-height:310px;overflow:auto">${rows.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #ddd"><input type="checkbox" ${state.checked[String(p.id)]?'checked':''} onchange="hcToggleWeekCheck(${JSON.stringify(p.id)},this.checked)"><span>${esc(p.name)}</span></label>`).join('')}</div><button type="button" onclick="hcAddWeekMissing()">Niet-afgevinkte producten op boodschappenlijst zetten</button>`:'');
+    (expanded?`<p style="margin:6px 0">Vink aan wat je al in huis hebt. Niet aangevinkt = nog controleren of kopen. Maaltijdvoorraad staat hier niet tussen.</p><div style="max-height:310px;overflow:auto">${groupedRows}</div><button type="button" onclick="hcAddWeekMissing()">Niet-afgevinkte producten op boodschappenlijst zetten</button>`:'');
 }
 
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
