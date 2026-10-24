@@ -897,6 +897,13 @@ window.applyHuizeChaosStockLocations=locations=>{
   localStorage.setItem('household-stock-locations',JSON.stringify(stockLocations));
   refreshStockLocationSelect();render();
 };
+window.replaceHC202Locations=locations=>{
+ if(!Array.isArray(locations))return;
+ stockLocations=[...new Set(locations.map(x=>String(x||'').trim()).filter(Boolean))];
+ localStorage.setItem('household-stock-locations',JSON.stringify(stockLocations));
+ window.dispatchEvent(new Event('huize-chaos-locations-changed'));
+ refreshStockLocationSelect();render();
+};
 window.renderHuizeChaos = () => render();
 window.getHuizeChaosProducts = () => products;
 window.replaceHuizeChaosProducts = nextProducts => {

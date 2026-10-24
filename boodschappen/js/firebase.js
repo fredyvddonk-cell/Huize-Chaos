@@ -216,6 +216,40 @@ async function syncInventoryNow(){
   mergeInventoryFromCloud(products,deleted);
 }
 
+// Herstelactie: maak oude voedingsregistraties expliciet ongeldig in de cloud.
+// Alleen lokale filtering is niet voldoende: sync voegt oude records anders weer toe.
+window.replaceHC202InventorySafely=async rows=>{
+ if(!user || !role || !inventoryCloudReady) throw new Error('Meld je eerst aan en wacht tot de synchronisatie gereed is.');
+ if(!Array.isArray(rows)||rows.length<250) throw new Error('De gecontroleerde inventarisatie is niet volledig geladen.');
+ const local=window.getHuizeChaosProducts();
+ const snap=await getDoc(inventoryRef);
+ const remote=Array.isArray(snap.data()?.products)?snap.data().products:[];
+ const all=new Map([...remote,...local].map(p=>[String(p.id),p]));
+ const keepCategories=new Set(['Schoonmaak & huishouden','Persoonlijke verzorging','Keukenbenodigdheden','Huisdier','Huisdieren','Koopzegels']);
+ const keep=p=>keepCategories.has(p.category)||p.category==='Diepvries'||/^(Vriezer|Diepvries)$/i.test(String(p.stockLocation||''));
+ const kept=[...all.values()].filter(keep);
+ const keptIds=new Set(kept.map(p=>String(p.id)));
+ const shoppingOnly=[...all.values()].filter(p=>!keptIds.has(String(p.id))&&(p.shopping||p.done)).map(p=>({...p,stockExcluded:true,stockRole:'shopping',stockLocation:'',status:'Niet in huis'}));
+ const deleted={...(snap.data()?.deletedProducts||{}),...inventoryDeleted()};
+ const now=Date.now();
+ for(const p of all.values())if(!keptIds.has(String(p.id)))deleted[String(p.id)]=now;
+ let nextId=Math.max(now,...[...all.values()].map(p=>Number(p.id)||0))+1;
+ const incoming=rows.map(r=>({id:nextId++,name:r.name,category:(r.stockLocation==='Kruidenrek'||r.stockLocation==='Kast 2.3'&&/kruiden|peper|bouillon|tijm|sumak|kerrie|dragon|lavas|laurier|zout|rozemarijn|nootmuskaat|basilicum/i.test(r.name))?'Kruiden':'Bewaarproducten (voorraad)',stockLocation:r.stockLocation,status:r.status,memo:r.memo||'',stockRole:'standard',stockExcluded:false,temporary:false,inventoryUpdatedAt:now,shopping:false,done:false}));
+ // Boodschappenregels blijven bestaan, maar mogen geen oude voedselvoorraad terugbrengen.
+ const final=[...incoming,...kept,...shoppingOnly.filter(p=>!deleted[String(p.id)] || (p.shopping||p.done))];
+ // Een boodschappenkopie met een verwijderde ID mag niet de voorraad terugbrengen.
+ for(const p of shoppingOnly)delete deleted[String(p.id)];
+ const clean=dedupeInventoryRows(final,deleted);
+ await setDoc(inventoryRef,{products:clean.map(inventoryProductData),deletedProducts:deleted,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false});
+ saveInventoryDeleted(deleted);
+ applyingInventoryCloud=true;
+ window.replaceHuizeChaosProducts(clean);
+ applyingInventoryCloud=false;
+ const locations=[...new Set(clean.map(p=>p.stockLocation).filter(Boolean))];
+ window.replaceHC202Locations?.(locations);
+ return {incoming:incoming.length,preserved:kept.length+shoppingOnly.length};
+};
+
 function scheduleInventorySync(){
   if(applyingInventoryCloud) return;
   clearTimeout(inventorySyncTimer);
