@@ -1,3 +1,38 @@
+
+// Weekboodschappen: een compacte controle van standaardvoorraad, zonder maaltijdvoorraad.
+// Iedere kalenderweek start een nieuwe controle; productstatussen worden via de bestaande sync bewaard.
+function hcWeekCheckKey(){
+  const d=new Date(), day=(d.getDay()+6)%7;
+  d.setHours(12,0,0,0); d.setDate(d.getDate()-day);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function hcWeekCheckState(){
+  const key='hc-weekcheck-'+hcWeekCheckKey();
+  try{return {key,checked:JSON.parse(localStorage.getItem(key)||'{}')}}catch(_){return {key,checked:{}}}
+}
+window.hcToggleWeekCheck=function(id,checked){
+  const state=hcWeekCheckState(); state.checked[String(id)]=Boolean(checked);
+  localStorage.setItem(state.key,JSON.stringify(state.checked));
+  render();
+};
+window.hcAddWeekMissing=function(){
+  const state=hcWeekCheckState();
+  products.filter(p=>p.stockRole==='standard'&&!p.temporary&&!p.stockExcluded&&p.stockRole!=='hidden'&&!state.checked[String(p.id)])
+    .forEach(p=>{p.shopping=true;p.done=false;});
+  save();render();
+};
+function renderHcWeekCheck(){
+  const host=document.getElementById('hcWeeklyCheck'); if(!host)return;
+  host.hidden=false;
+  const rows=products.filter(p=>p.stockRole==='standard'&&!p.temporary&&!p.stockExcluded)
+    .sort((a,b)=>a.name.localeCompare(b.name,'nl'));
+  const state=hcWeekCheckState();
+  const count=rows.filter(p=>state.checked[String(p.id)]).length;
+  const expanded=localStorage.getItem('hc-weekcheck-expanded')==='yes';
+  host.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>Weekboodschappen · ${count}/${rows.length} in huis</strong><button type="button" onclick="localStorage.setItem('hc-weekcheck-expanded',${expanded?'\'no\'':'\'yes\''});render()">${expanded?'Verbergen':'Controleren'}</button></div>`+
+    (expanded?`<p style="margin:6px 0">Vink aan wat je al in huis hebt. Niet aangevinkt = nog controleren of kopen. Maaltijdvoorraad staat hier niet tussen.</p><div style="max-height:310px;overflow:auto">${rows.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #ddd"><input type="checkbox" ${state.checked[String(p.id)]?'checked':''} onchange="hcToggleWeekCheck(${JSON.stringify(p.id)},this.checked)"><span>${esc(p.name)}</span></label>`).join('')}</div><button type="button" onclick="hcAddWeekMissing()">Niet-afgevinkte producten op boodschappenlijst zetten</button>`:'');
+}
+
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
 let shoppingStoreFilter = localStorage.getItem('household-shopping-store-filter') || 'all';
 
@@ -227,6 +262,7 @@ window.addEventListener('huize-chaos-recipe-weeks-changed',()=>{if(typeof page!=
 window.addEventListener('huize-chaos-occasions-changed',()=>{if(typeof page!=='undefined'&&page==='list')render()});
 
 function renderShopping(allProducts) {
+  renderHcWeekCheck();
   const wl=document.getElementById('shoppingWeekLabel');if(wl)wl.textContent=weekLabel();
   const sourceRows=[...occasionShoppingRows(),...recipeShoppingRows()];
   // Receptregels hebben voorrang: toon hetzelfde product niet nogmaals als losse boodschap.
