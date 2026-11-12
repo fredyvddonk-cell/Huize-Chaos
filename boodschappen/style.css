@@ -1452,3 +1452,19 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .location-move{min-width:27px;padding:5px!important}
 .location-move:disabled{opacity:.27}
 .location-order-help{font-size:12px;color:#70677a;margin:3px 0 7px}
+
+/* V1.4.202.10 - compacte kassabonregels, details alleen op verzoek */
+#receiptModal .receipt-product-row{display:grid;grid-template-columns:58px minmax(0,1fr) 100px auto;align-items:center;gap:5px 9px;padding:9px 10px;border-bottom:1px solid #e9e3ee}
+#receiptModal .receipt-product-row .receipt-row-tools{grid-column:1;grid-row:1}
+#receiptModal .receipt-product-row .receipt-cell-product{grid-column:2;grid-row:1;min-width:0}
+#receiptModal .receipt-product-row .receipt-cell-price{grid-column:3;grid-row:1}
+#receiptModal .receipt-product-row .receipt-details-toggle{grid-column:4;grid-row:1;border:1px solid #d9cbe8;border-radius:9px;background:#fff;color:#6333ad;padding:8px 10px;font-weight:700;cursor:pointer}
+#receiptModal .receipt-product-row .receipt-row-summary{grid-column:2/-1;grid-row:2;font-size:11px;color:#6b6170;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#receiptModal .receipt-product-row .receipt-row-details{grid-column:1/-1;grid-row:3;display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:#faf7fc;border:1px solid #e9e0ef;border-radius:10px}
+#receiptModal .receipt-product-row.receipt-details-open .receipt-row-details{display:grid}
+#receiptModal .receipt-row-details .receipt-cell-cat,#receiptModal .receipt-row-details .receipt-cell-ynab{grid-column:auto;grid-row:auto}
+#receiptModal .receipt-row-details .receipt-cell-action{grid-column:2;grid-row:auto;justify-self:end}
+#receiptModal .receipt-row-details .receipt-action-product-toggle,#receiptModal .receipt-row-details .receipt-regular-toggle{grid-column:auto;grid-row:auto}
+#receiptModal .receipt-row-details .receipt-stock-link,#receiptModal .receipt-row-details .receipt-line-calculator{grid-column:1/-1;grid-row:auto}
+#receiptModal .receipt-row-details .receipt-line-calculator[hidden]{display:none!important}
+@media(max-width:650px){#receiptModal .receipt-product-row{grid-template-columns:45px minmax(0,1fr) 76px auto;gap:5px;padding:8px 4px}#receiptModal .receipt-product-row .receipt-details-toggle{padding:7px 5px;font-size:11px}#receiptModal .receipt-product-row .receipt-row-details{grid-template-columns:1fr}#receiptModal .receipt-row-details .receipt-cell-cat,#receiptModal .receipt-row-details .receipt-cell-ynab,#receiptModal .receipt-row-details .receipt-cell-action,#receiptModal .receipt-row-details .receipt-action-product-toggle,#receiptModal .receipt-row-details .receipt-regular-toggle{grid-column:1;grid-row:auto}#receiptModal .receipt-product-row .receipt-row-summary{grid-column:2/-1}}
