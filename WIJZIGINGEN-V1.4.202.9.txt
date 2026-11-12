@@ -1,4 +1,4 @@
-V1.4.202.10 — kassabonverwerking
+V1.4.202.11 — kassabonverwerking
 - Onthoudt gekozen voorraadkoppeling per winkel en bonproduct, ook keuze Niet aan voorraad koppelen.
 - Koppelingen worden toegevoegd aan bestaande Firebase-inzichtsynchronisatie.
 - Bij ophalen worden lokaal recentere koppelingen behouden.

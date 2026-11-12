@@ -1,0 +1,7 @@
+V1.4.202.11 — kassabonweergave
+- Rustige kassabonregels met omschrijving, aantal en totaal.
+- Geen herhaalde veldlabels of grote Details-knoppen.
+- Details via chevron.
+- Aantal gekoppeld aan bestaande rekentool.
+- Bestaande voorraadkoppelingen en categorieën behouden.
+- Nieuw voorraadartikel aanmaken vanuit kassabon is nog niet ingebouwd.
