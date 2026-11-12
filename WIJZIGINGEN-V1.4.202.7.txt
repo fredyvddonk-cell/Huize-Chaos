@@ -1,0 +1,7 @@
+V1.4.202.7 – Eerste verbetering Inzicht
+- Bevestigde voorraadkoppelingen worden per winkel en productnaam lokaal onthouden.
+- Ook de keuze Niet aan voorraad koppelen wordt onthouden.
+- Bij een volgende bon wordt de eerdere keuze automatisch voorgesteld.
+- Ongeldige verwijderde voorraadproducten worden niet automatisch gekoppeld.
+- Bestaande bonnen en voorraad worden niet gemigreerd of gewist.
+LET OP: lokaal opgeslagen voorkeuren synchroniseren nog niet tussen apparaten.
