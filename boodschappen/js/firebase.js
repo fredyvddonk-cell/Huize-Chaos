@@ -585,7 +585,7 @@ function scheduleSync() {
 
 
 function hasMeaningfulInsightData(data) {
-  return Boolean((data?.receipts?.length) || Number(data?.budgetWeek) || Number(data?.budgetMonth) || Object.keys(data?.categoryMemory || {}).length);
+  return Boolean((data?.receipts?.length) || Number(data?.budgetWeek) || Number(data?.budgetMonth) || Object.keys(data?.categoryMemory || {}).length || Object.keys(data?.receiptStockLinks || {}).length);
 }
 
 async function syncInsightNow() {
