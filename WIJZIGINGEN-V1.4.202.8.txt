@@ -1,0 +1,11 @@
+Huize Chaos V1.4.202.8 - versieherstel
+12 november 2026
+
+- Zichtbare versienummers in hoofdscherm en modules gelijkgezet op V1.4.202.8.
+- Cache-busting queryversies voor bestaande 202.x-verwijzingen bijgewerkt.
+- Cache-namen van hoofdapp en boodschappenmodule vernieuwd.
+- Geen wijzigingen aan Firebase-configuratie, recepten, voorraad of functionele JavaScript-logica.
+- Historische wijzigingsbestanden behouden.
+- Oude ingesloten 1.1.1-projectkopie en .git.zip niet opgenomen.
+
+LET OP: dit is een broncodeback-up, geen gegarandeerde back-up van cloud- of lokale gebruikersgegevens.
