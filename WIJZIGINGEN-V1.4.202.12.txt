@@ -1,0 +1,6 @@
+V1.4.202.12 — mobiele kassabonweergave
+- Herstelt mobiele kolomposities met gerichte CSS-overschrijvingen.
+- Productomschrijving links; aantal en totaal rechts, zonder overlap.
+- Regels compacter en selectieknoppen minder hoog.
+- Uitklapbare details en bestaande bonfuncties blijven behouden.
+- Nieuw voorraadartikel direct vanuit bon blijft een aparte toekomstige verbetering.
