@@ -1,4 +1,4 @@
-V1.4.202.12 — kassabonweergave
+V1.4.202.13 — kassabonweergave
 - Rustige kassabonregels met omschrijving, aantal en totaal.
 - Geen herhaalde veldlabels of grote Details-knoppen.
 - Details via chevron.

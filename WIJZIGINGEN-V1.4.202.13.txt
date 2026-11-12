@@ -1,0 +1,4 @@
+V1.4.202.13 — kassabondetails mobiel
+Voorraadkoppeling eerst; overige velden onder Meer opties.
+Invoervelden volle breedte; hoeveelheid toevoegen verborgen in de interface.
+Nieuw voorraadartikel direct aanmaken is nog niet ingebouwd.
