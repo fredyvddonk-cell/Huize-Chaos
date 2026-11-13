@@ -1,0 +1,7 @@
+V1.4.202.17 — Correctie Picnic-PDF prijzen en verrekening
+
+- Herkent ook gesplitste prijsfragmenten met een afwijkende verticale uitlijning, zoals € 3,15 en € 1,59.
+- Verwerkt een negatieve verrekening van Picnic-tegoed als aparte correctieregel.
+- Test met Picnic-PDF van 9 november 2026: 19 productregels plus 1 verrekening, berekend totaal € 46,85.
+- Geen automatische kunstmatige correctie van bonverschillen.
+- Overige functies en Android PDF-deelfunctie behouden.
