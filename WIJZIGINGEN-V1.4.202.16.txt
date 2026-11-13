@@ -1,0 +1,8 @@
+V1.4.202.16 — Picnic-PDF productherkenning
+
+- Herstelt de positieherkenning van Picnic-producten in via Outlook geprinte PDF-bonnen.
+- Herkent 19 artikelen, aantallen en de uiteindelijke actieprijzen in de aangeleverde bon van 9 november 2026.
+- Herkent verrekening van Picnic-tegoed als afzonderlijke correctieregel, niet als voorraadartikel.
+- Controlevoorbeeld: 19 artikelen + 1 verrekening, totaal €46,85.
+- Bestaande PDF-deelfunctie van V1.4.202.15 blijft behouden.
+- Testresultaat is gebaseerd op de aangeleverde PDF; andere Picnic-opmaken kunnen afwijken.
