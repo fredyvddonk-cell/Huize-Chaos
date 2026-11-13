@@ -1,0 +1,7 @@
+V1.4.202.18 — Picnic statiegeldcorrectie
+
+- De negatieve regel Verrekening Picnic-tegoed heet voortaan Verrekend statiegeld (Picnic-tegoed).
+- Deze regel valt onder Niet-boodschappen, zodat de verrekening niet als productkorting of gekochte boodschappen telt.
+- Het negatieve bedrag blijft meetellen in de boncontrole.
+- Versienummers en boodschappen-cache bijgewerkt.
+- Bestaande PDF-uitlezing en overige functies behouden.
