@@ -1,0 +1,6 @@
+V1.4.202.20 — Verbeterde kassabonherkenning
+- AH: productregels, bonuskorting, koopzegels en echt betaalde totaal afzonderlijk herkennen.
+- Picnic parser behouden.
+- Algemene PDF/foto-uitlezer behouden voor Jumbo en andere winkels.
+- Waarschuwing wanneer AH boncontrole niet klopt.
+- Diepvriesspecialist: voorbeeldfoto nog niet automatisch end-to-end gevalideerd.

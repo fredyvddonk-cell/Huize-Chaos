@@ -1453,7 +1453,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .location-move:disabled{opacity:.27}
 .location-order-help{font-size:12px;color:#70677a;margin:3px 0 7px}
 
-/* V1.4.202.19 - compacte kassabonregels, details alleen op verzoek */
+/* V1.4.202.20 - compacte kassabonregels, details alleen op verzoek */
 #receiptModal .receipt-product-row{display:grid;grid-template-columns:58px minmax(0,1fr) 100px auto;align-items:center;gap:5px 9px;padding:9px 10px;border-bottom:1px solid #e9e3ee}
 #receiptModal .receipt-product-row .receipt-row-tools{grid-column:1;grid-row:1}
 #receiptModal .receipt-product-row .receipt-cell-product{grid-column:2;grid-row:1;min-width:0}
@@ -1469,7 +1469,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 #receiptModal .receipt-row-details .receipt-line-calculator[hidden]{display:none!important}
 @media(max-width:650px){#receiptModal .receipt-product-row{grid-template-columns:45px minmax(0,1fr) 76px auto;gap:5px;padding:8px 4px}#receiptModal .receipt-product-row .receipt-details-toggle{padding:7px 5px;font-size:11px}#receiptModal .receipt-product-row .receipt-row-details{grid-template-columns:1fr}#receiptModal .receipt-row-details .receipt-cell-cat,#receiptModal .receipt-row-details .receipt-cell-ynab,#receiptModal .receipt-row-details .receipt-cell-action,#receiptModal .receipt-row-details .receipt-action-product-toggle,#receiptModal .receipt-row-details .receipt-regular-toggle{grid-column:1;grid-row:auto}#receiptModal .receipt-product-row .receipt-row-summary{grid-column:2/-1}}
 
-/* V1.4.202.19: rustige kassabonweergave */
+/* V1.4.202.20: rustige kassabonweergave */
 #receiptModal .receipt-products-head{display:grid!important;grid-template-columns:minmax(0,1fr) 64px 95px 34px!important;gap:10px;padding:10px 12px;font-size:12px;color:#756d7a;background:#fff;border-bottom:1px solid #e8e4e9}
 #receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 64px 95px 34px!important;gap:3px 10px!important;padding:10px 12px!important;min-height:53px;background:#fff;border-bottom:1px solid #ece9ef!important}
 #receiptModal .receipt-product-row .receipt-row-tools{grid-column:1;grid-row:1;display:none}
@@ -1489,7 +1489,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 #receiptModal .receipt-products-wrap{border:1px solid #eee8f2;border-radius:10px;overflow:hidden}
 @media(max-width:650px){#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 48px 72px 27px!important;gap:3px!important;padding:8px 5px!important}#receiptModal .receipt-product-row .receipt-cell-product input{font-size:13px}#receiptModal .receipt-product-row .receipt-row-details{grid-template-columns:1fr}}
 
-/* V1.4.202.19 — mobile-first receipt grid: override legacy !important column rules */
+/* V1.4.202.20 — mobile-first receipt grid: override legacy !important column rules */
 #receiptModal .receipt-products-wrap{width:100%;min-width:0;overflow:hidden!important}
 #receiptModal .receipt-products-head,#receiptModal .receipt-product-row{box-sizing:border-box;width:100%;min-width:0;grid-template-columns:minmax(0,1fr) 44px 68px 25px!important;column-gap:4px!important;row-gap:0!important;align-items:center!important}
 #receiptModal .receipt-products-head{padding:6px 8px!important;font-size:11px!important}
@@ -1520,7 +1520,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
  #receiptModal .receipt-bulk-toolbar{position:static!important}
 }
 
-/* V1.4.202.19: mobiel bruikbare uitklapdetails */
+/* V1.4.202.20: mobiel bruikbare uitklapdetails */
 #receiptModal .receipt-row-details{display:none;grid-template-columns:minmax(0,1fr)!important;gap:7px!important;padding:9px!important;min-width:0!important;width:100%!important;box-sizing:border-box!important}
 #receiptModal .receipt-details-open .receipt-row-details{display:grid!important}
 #receiptModal .receipt-row-details .receipt-stock-link{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-column:1/-1!important;min-width:0!important;width:100%!important;gap:6px!important;padding:8px!important;box-sizing:border-box!important}
@@ -1535,7 +1535,7 @@ body.receipt-reordering #receiptModal{touch-action:none}
 #receiptModal .receipt-more-options .receipt-cell-action{justify-self:end!important;width:auto!important}
 @media(max-width:650px){#receiptModal .receipt-row-details{padding:7px!important}#receiptModal .receipt-row-details .receipt-stock-link{padding:7px!important}#receiptModal .receipt-more-options select{font-size:14px!important;min-height:40px!important;padding:6px!important}#receiptModal .receipt-more-options label{font-size:12px!important}}
 
-/* V1.4.202.19 — compacte kassabon, mobiel en desktop */
+/* V1.4.202.20 — compacte kassabon, mobiel en desktop */
 #receiptModal .receipt-row-details{gap:5px!important;padding:6px!important;background:#faf8fc!important;border:1px solid #e9e3ee!important;border-radius:10px!important}
 #receiptModal .receipt-row-details .receipt-stock-link{padding:0!important;border:0!important;background:transparent!important;gap:3px!important}
 #receiptModal .receipt-row-details .receipt-stock-link>label{font-size:12px!important;font-weight:650!important}
