@@ -1,0 +1,7 @@
+V1.4.202.19 — AH PDF-uitleesfout hersteld
+
+- Verwijzing naar ontbrekende functies isAlbertHeijnReceipt en parseAlbertHeijnReceipt verwijderd.
+- Niet-Picnic PDF-bonnen gebruiken weer de bestaande algemene bonuitlezer.
+- Picnic-specifieke PDF-uitlezer ongewijzigd behouden.
+- Versie en cacheverwijzingen vernieuwd.
+- Controle van artikelherkenning met een echte AH-PDF blijft nodig.

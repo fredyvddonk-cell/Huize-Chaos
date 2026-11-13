@@ -1,4 +1,4 @@
-V1.4.202.18 — Correctie Picnic-PDF prijzen en verrekening
+V1.4.202.19 — Correctie Picnic-PDF prijzen en verrekening
 
 - Herkent ook gesplitste prijsfragmenten met een afwijkende verticale uitlijning, zoals € 3,15 en € 1,59.
 - Verwerkt een negatieve verrekening van Picnic-tegoed als aparte correctieregel.
