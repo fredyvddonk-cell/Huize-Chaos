@@ -1,0 +1,8 @@
+V1.4.202.15 — PDF delen vanuit OneNote naar kassabonnen
+- Android-deelactie verwerkt PDF of afbeelding ook als het formulier een andere bestandsveldnaam gebruikt.
+- De hoofdapp stuurt de gedeelde PDF rechtstreeks naar Voorraad & Boodschappen.
+- Bij ontbreken van een bestand verschijnt een duidelijke foutmelding.
+- De kassabon opent als concept in het bestaande controleformulier; pas Opslaan maakt de bon definitief.
+- Cache- en zichtbare versienummers vernieuwd.
+- Geen Outlook/OneNote accountkoppeling of extra kosten nodig.
+Let op: daadwerkelijke Android/PWA-integratie vereist een test na installatie via GitHub Pages.
