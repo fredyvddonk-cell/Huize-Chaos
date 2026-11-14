@@ -1,0 +1,8 @@
+V1.4.202.21 — Verbeterde fotoherkenning kassabonnen
+- Extra OCR-poging met vergrote, contrastversterkte middenstrook van de bon.
+- Vergelijk meerdere uitleespogingen en kies de meest complete, controleerbare uitkomst.
+- BTW-, subtotaal- en betaalregels niet als product opnemen.
+- Onvolledige of niet-sluitende bonnen tonen een waarschuwing.
+- AH, Picnic en Jumbo parser en bestaande functies behouden.
+- Geen betaalde OCR-dienst toegevoegd.
+- Fotoherkenning blijft afhankelijk van leesbaarheid en OCR-kwaliteit.

@@ -172,12 +172,12 @@ function applyReceiptCalc(row){const calc=receiptCalcFromRow(row),group=receiptG
 
 function ensureReceiptBulkToolbar(){const wrap=document.querySelector('#receiptProductRows');if(!wrap||document.querySelector('#receiptBulkToolbar'))return;const bar=document.createElement('div');bar.id='receiptBulkToolbar';bar.className='receipt-bulk-toolbar';bar.innerHTML='<strong>Meerdere producten</strong><button type="button" id="receiptBulkCalc">Korting toepassen op selectie</button><button type="button" id="receiptBulkClear">Selectie wissen</button>';wrap.parentNode.insertBefore(bar,wrap);bar.querySelector('#receiptBulkClear').onclick=()=>document.querySelectorAll('.receipt-line-select').forEach(x=>x.checked=false);bar.querySelector('#receiptBulkCalc').onclick=()=>{const rows=[...document.querySelectorAll('.receipt-product-row')].filter(r=>r.querySelector('.receipt-line-select')?.checked);if(!rows.length){alert('Selecteer eerst de producten waarop dezelfde korting geldt.');return}document.querySelectorAll('.receipt-product-row').forEach(r=>delete r.dataset.bulkCalc);const first=rows[0];first.dataset.bulkCalc='1';if(!first.classList.contains('receipt-details-open'))first.querySelector('.receipt-details-toggle')?.click();const box=first.querySelector('.receipt-line-calculator');box.hidden=false;prefillReceiptCalc(first);updateReceiptCalcUi(first);first.scrollIntoView({behavior:'smooth',block:'center'});};}
 function addProductRow(line={}){line=receiptLineWithRememberedLink(line,document.querySelector('#receiptStore')?.value||'');const wrap=document.querySelector('#receiptProductRows');if(!wrap)return;ensureReceiptBulkToolbar();const inferredQty=parseReceiptNumber(line.qty)??(()=>{const m=String(line.name||'').trim().match(/^(\d+(?:[,.]\d+)?)\s+/);return m?parseReceiptNumber(m[1]):1})(),inferredUnit=parseReceiptNumber(line.unitPrice)??((parseReceiptNumber(line.originalPrice??line.price)!==null&&inferredQty>0)?parseReceiptNumber(line.originalPrice??line.price)/inferredQty:null),calc={qty:inferredQty??'',unitPrice:inferredUnit??'',...(line.calc||{})};const row=document.createElement('div');row.className='receipt-product-row';row.dataset.lineId=String(line.lineId||crypto.randomUUID());const linkedStock=line.stockLinkConfirmed&&!line.stockProductId?null:stockProductForReceiptLine(line),stockAddQty=inferredStockAddQty(line,linkedStock);const baseOriginal=line.originalPrice!==undefined&&line.originalPrice!==''?line.originalPrice:line.price;if(baseOriginal!==undefined&&baseOriginal!=='')row.dataset.originalPrice=String(baseOriginal);row.innerHTML=`<div class="receipt-row-tools"><input type="checkbox" class="receipt-line-select" aria-label="Selecteer product"><button type="button" class="receipt-drag-handle" aria-label="Sleep product naar andere positie" title="Sleep om te verplaatsen">⠿</button></div><div class="receipt-cell receipt-cell-product"><label>Product *</label><input class="receipt-line-name" value="${esc(line.name||'')}" placeholder="Product"></div><div class="receipt-cell receipt-cell-price"><label>Bedrag *</label><input class="receipt-line-price receipt-line-price-calc" inputmode="decimal" value="${line.price!==undefined&&line.price!==''?esc(String(line.price).replace('.',',')):''}" placeholder="0,00" readonly role="button" aria-label="Open rekenscherm voor dit bedrag"></div><div class="receipt-cell receipt-cell-cat"><label>Huize Chaos</label><select class="receipt-line-cat">${categoryOptions(CATS.includes(line.category)?line.category:catFor(line.name||''))}</select></div><div class="receipt-cell receipt-cell-ynab"><label>YNAB</label><select class="receipt-line-ynab">${ynabOptions(YNAB_CATS.includes(line.ynabCategory)?line.ynabCategory:ynabForCategory(line.category||catFor(line.name||'')))}</select></div><div class="receipt-cell receipt-cell-action"><label>Acties</label><button type="button" class="receipt-delete-line" aria-label="Productregel verwijderen">⌫</button></div><label class="receipt-action-product-toggle"><input type="checkbox" class="receipt-line-action-product" ${line.isActionProduct?'checked':''}><span>Actieproduct</span></label><label class="receipt-regular-toggle"><input type="checkbox" class="receipt-line-exclude-regular" ${line.excludeFromRegularWeek?'checked':''}><span>Niet meenemen in reguliere weekboodschappen</span></label><div class="receipt-stock-link"><label>Voorraadproduct<input type="search" class="receipt-line-stock-search" placeholder="Zoek voorraadproduct…" autocomplete="off"><select class="receipt-line-stock">${stockLinkOptions(linkedStock?.id||'')}</select></label><label>Toevoegen aan voorraad<input class="receipt-line-stock-qty" inputmode="decimal" value="${esc(String(stockAddQty??'').replace('.',','))}" placeholder="hoeveelheid"><small class="receipt-stock-unit">${esc(linkedStock?.unit||'')}</small></label></div><div class="receipt-line-calculator" hidden><div class="receipt-calc-grid"><label>Aantal<input class="receipt-calc-qty" inputmode="decimal" value="${esc(String(calc.qty??'' ).replace('.',','))}" placeholder="5"></label><label>Normale stukprijs<input class="receipt-calc-unit" inputmode="decimal" value="${esc(String(calc.unitPrice??'').replace('.',','))}" placeholder="8,99"></label><label>Actie<select class="receipt-calc-type">${receiptCalcOptions(calc.type||'')}</select></label><label class="receipt-calc-value-wrap" hidden><span class="receipt-calc-value-label">Korting</span><input class="receipt-calc-value" inputmode="decimal" value="${esc(String(calc.value??'').replace('.',','))}" placeholder="25"></label><div class="receipt-calc-bundle-wrap" hidden><label>Aantal per actie<input class="receipt-calc-bundle-qty" inputmode="decimal" value="${esc(String(calc.bundleQty??'').replace('.',','))}" placeholder="3"></label><label>Actieprijs<input class="receipt-calc-bundle-price" inputmode="decimal" value="${esc(String(calc.bundlePrice??'').replace('.',','))}" placeholder="10,00"></label></div><div class="receipt-calc-second"><label>2e korting<select class="receipt-calc-type2">${receiptCalcOptions(calc.type2||'')}</select></label><label class="receipt-calc-value2-wrap"><span class="receipt-calc-value2-label">Waarde</span><input class="receipt-calc-value2" inputmode="decimal" value="${esc(String(calc.value2??'').replace('.',','))}" placeholder="bijv. 35"></label><div class="receipt-calc-bundle2-wrap" hidden><label>Aantal per actie<input class="receipt-calc-bundle-qty2" inputmode="decimal" value="${esc(String(calc.bundleQty2??'').replace('.',','))}" placeholder="4"></label><label>Actieprijs<input class="receipt-calc-bundle-price2" inputmode="decimal" value="${esc(String(calc.bundlePrice2??'').replace('.',','))}" placeholder="4,00"></label></div></div><label class="receipt-line-memo-wrap">Memo bij dit product<textarea class="receipt-line-memo" rows="2" placeholder="Bijv. voor dochter, wordt terugbetaald...">${esc(line.memo||'')}</textarea></label></div><div class="receipt-calc-bottom"><small class="receipt-calc-result">Vul aantal en normale stukprijs in.</small><button type="button" class="receipt-calc-done">Klaar</button></div></div>`;
-// V1.4.202.20: compacte kassabonregel. Bestaande invoervelden blijven ongewijzigd
+// V1.4.202.21: compacte kassabonregel. Bestaande invoervelden blijven ongewijzigd
 // zodat opslaan, categoriseren en voorraadkoppelingen blijven werken.
 const details=document.createElement('div');
 details.className='receipt-row-details';
 details.id='receipt-details-'+row.dataset.lineId.replace(/[^a-zA-Z0-9_-]/g,'');
-// V1.4.202.20: voorraad eerst, overige instellingen achter Meer opties.
+// V1.4.202.21: voorraad eerst, overige instellingen achter Meer opties.
 const more=document.createElement('div');more.className='receipt-more-options';more.hidden=true;
 const stock=row.querySelector('.receipt-stock-link');
 if(stock)details.appendChild(stock);
@@ -199,7 +199,7 @@ calcQty?.addEventListener('input',()=>{const n=parseReceiptNumber(calcQty.value)
 row.append(toggle,summary,details);setOpen(false);updateSummary();
 toggle.addEventListener('click',()=>setOpen(!row.classList.contains('receipt-details-open')));
 row.addEventListener('change',updateSummary);row.addEventListener('input',e=>{if(e.target.closest('.receipt-row-details'))updateSummary()});
-// V1.4.202.20: één zoekveld met expliciete resultaten en een nieuwe-voorraadkeuze.
+// V1.4.202.21: één zoekveld met expliciete resultaten en een nieuwe-voorraadkeuze.
 const stockSearch=row.querySelector('.receipt-line-stock-search'),stockSelect=row.querySelector('.receipt-line-stock');
 const stockPicker=document.createElement('div');stockPicker.className='receipt-stock-results';stockPicker.hidden=true;
 stockSearch?.insertAdjacentElement('afterend',stockPicker);
@@ -405,20 +405,42 @@ function mergeJumboPhotoProducts(best,productText){
   if(found.length>(best.lines||[]).length)best={...best,lines:found,raw:`${best.raw||''}\n${cleaned}`};
   return best;
 }
+// V1.4.202.21: meermaals lezen van een gefotografeerde bon, inclusief vergrote
+// middenstrook. Nooit een btw-regel als artikel accepteren of een totaal gokken.
+function receiptPhotoSafe(parsed){
+  if(!parsed)return parsed;
+  const lines=(parsed.lines||[]).filter(v=>!/(?:^|\s)(?:BTW|NETTO|BRUTO|SUBTOTAAL|PINNEN|BETAALD|TOTAAL|A\s*:?\s*9%)(?:\s|$|:)/i.test(v.name||'')&&!/\b(?:9%|21%)\s+\d+[,.]\d{2}/.test(v.name||''));
+  const sum=+lines.reduce((n,v)=>n+(Number(v.price)||0),0).toFixed(2);
+  const total=parsed.total;
+  return {...parsed,lines,needsReview:total===null||!lines.length||Math.abs(sum+(parsed.koopzegels||0)+(parsed.statiegeld||0)-total)>0.02};
+}
+async function receiptPhotoCrop(file){
+  const bitmap=await createImageBitmap(file),w=bitmap.width,h=bitmap.height;
+  // Bewaar het midden van het beeld met de bon; vergroot kleine kassaletters.
+  const sx=Math.round(w*.12),sw=Math.round(w*.76),sy=Math.round(h*.12),sh=Math.round(h*.78);
+  const scale=Math.min(3,3200/sw,4200/sh),canvas=document.createElement('canvas');
+  canvas.width=Math.round(sw*scale);canvas.height=Math.round(sh*scale);
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(bitmap,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  const im=ctx.getImageData(0,0,canvas.width,canvas.height),d=im.data;
+  for(let i=0;i<d.length;i+=4){const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];const v=Math.max(0,Math.min(255,(g-125)*1.9+150));d[i]=d[i+1]=d[i+2]=v}
+  ctx.putImageData(im,0,0);bitmap.close?.();return canvas;
+}
+function receiptPhotoQuality(p){
+  const lines=p?.lines||[],total=p?.total;
+  const sum=lines.reduce((n,v)=>n+(Number(v.price)||0),0)+(p?.koopzegels||0)+(p?.statiegeld||0);
+  const balanced=total!==null&&Math.abs(sum-total)<.03;
+  return lines.length*12+(total!==null?20:0)+(p?.store?5:0)+(p?.date?5:0)+(balanced?100:0)-(lines.length<2?40:0);
+}
 async function parseReceiptImage(file){
-  const raw=await ocrImage(file,pc=>setReadStatus(`Bon wordt uitgelezen… ${pc}%`,'busy'));let best=isAhReceipt(raw)?parseAhReceipt(raw):parseReceiptText(raw);
-  if((best.lines||[]).length<4||best.total===null){
-    try{setReadStatus('Bon wordt extra gecontroleerd…','busy');const canvas=await enhanceReceiptImage(file);const raw2=await ocrImage(canvas,pc=>setReadStatus(`Bon wordt extra gecontroleerd… ${pc}%`,'busy'));const alt=isAhReceipt(raw2)?parseAhReceipt(raw2):parseReceiptText(raw2);if(receiptParseScore(alt)>receiptParseScore(best))best=alt}catch(err){console.warn('Extra fotoherkenning overgeslagen',err)}
+  const raw=await ocrImage(file,pc=>setReadStatus(`Bon wordt uitgelezen… ${pc}%`,'busy'));
+  const parse=text=>receiptPhotoSafe(isAhReceipt(text)?parseAhReceipt(text):parseReceiptText(text));
+  let best=parse(raw);
+  if((best.lines||[]).length<6||best.total===null||best.needsReview){
+    try{setReadStatus('Foto wordt extra gecontroleerd…','busy');const canvas=await enhanceReceiptImage(file);const alt=parse(await ocrImage(canvas,pc=>setReadStatus(`Extra controle… ${pc}%`,'busy')));if(receiptPhotoQuality(alt)>receiptPhotoQuality(best))best=alt}catch(err){console.warn('Extra fotoherkenning overgeslagen',err)}
+    try{setReadStatus('Kleine kassaletters worden vergroot…','busy');const canvas=await receiptPhotoCrop(file);const alt=parse(await ocrImage(canvas,pc=>setReadStatus(`Vergrote bon lezen… ${pc}%`,'busy')));if(receiptPhotoQuality(alt)>receiptPhotoQuality(best))best=alt}catch(err){console.warn('Vergrote bonherkenning overgeslagen',err)}
   }
-  // Jumbo zelfscanbonnen zijn vaak gekreukt of licht gefotografeerd.
-  // Als de algemene OCR te weinig artikelen vindt, lees het artikelgedeelte apart.
   if(detectStore(best.raw||raw)==='Jumbo'&&((best.lines||[]).length<6||best.total===null)){
-    try{
-      setReadStatus('Jumbo-artikelen worden extra gecontroleerd…','busy');
-      const productCanvas=await cropJumboProductArea(file);
-      const productRaw=await ocrImage(productCanvas,pc=>setReadStatus(`Jumbo-artikelen worden extra gecontroleerd… ${pc}%`,'busy'));
-      best=mergeJumboPhotoProducts(best,productRaw);
-    }catch(err){console.warn('Extra Jumbo-artikelherkenning overgeslagen',err)}
+    try{setReadStatus('Jumbo-artikelen worden extra gecontroleerd…','busy');const canvas=await cropJumboProductArea(file);const productRaw=await ocrImage(canvas,pc=>setReadStatus(`Jumbo-artikelen controleren… ${pc}%`,'busy'));best=receiptPhotoSafe(mergeJumboPhotoProducts(best,productRaw))}catch(err){console.warn('Extra Jumbo-artikelherkenning overgeslagen',err)}
   }
   best.__parsedReceipt=true;return best;
 }
@@ -533,7 +555,7 @@ function parsePicnicPdfPages(pageItems,rawText){
   const excluded=parsed.filter(l=>NON_GROCERY_CATS.has(l.category)).reduce((a,l)=>a+l.price,0);
   return{__parsedReceipt:true,store:'Picnic',date,total,baseTotal:total,originalTotal:total,koopzegels:0,statiegeld:0,excludedPurchases:+excluded.toFixed(2),lines:parsed,raw:rawText}
 }
-// V1.4.202.20: AH-kassabonnen worden apart gelezen; generieke bonnen behouden hun parser.
+// V1.4.202.21: AH-kassabonnen worden apart gelezen; generieke bonnen behouden hun parser.
 // Alleen expliciete productregels vóór het eerste subtotaal worden meegenomen.
 function isAhReceipt(text){return /\b(?:ALBERT\s+HEIJN|AH\s+BROOD|BONUSKAART)\b/i.test(text)&&/\b(?:AANTAL|OMSCHRIJVING|SUBTOTAAL)\b/i.test(text)}
 function parseAhReceipt(text){
@@ -598,7 +620,7 @@ function resetReceiptRecognitionFields(){
   const rows=document.querySelector('#receiptProductRows');
   if(rows){rows.innerHTML='';addProductRow({})}
 }
-async function readReceiptFile(file){if(!file||readingReceipt)return null;readingReceipt=true;let parsed=null;const saveBtn=document.querySelector('#receiptForm button[type="submit"]');if(saveBtn)saveBtn.disabled=true;setReadStatus('Bon wordt uitgelezen…','busy');try{const extracted=await extractReceipt(file);parsed=extracted&&extracted.__parsedReceipt?extracted:parseReceiptText(extracted);applyParsed(parsed);renderReceiptDebug(parsed);const found=[parsed.store&&'winkel',parsed.date&&'datum',parsed.total!==null&&'totaal',parsed.lines.length&&`${parsed.lines.length} productregels`].filter(Boolean);if(parsed.needsReview)setReadStatus('Bon gelezen, maar de bedragen sluiten niet aan. Controleer de regels en het totaal voordat je opslaat.','warning');else if(found.length)setReadStatus(`Uitgelezen: ${found.join(', ')}. Controleer de gegevens en pas ze zo nodig aan.`,'success');else setReadStatus('De bon is uitgelezen, maar er konden weinig gegevens automatisch worden herkend. Vul de ontbrekende gegevens handmatig aan.','warning');return parsed;}catch(err){console.error('Bon uitlezen mislukt',err);setReadStatus(err?.message||'Bon uitlezen is niet gelukt. Je kunt de gegevens handmatig invullen.','error');return null;}finally{readingReceipt=false;if(saveBtn)saveBtn.disabled=false}}
+async function readReceiptFile(file){if(!file||readingReceipt)return null;readingReceipt=true;let parsed=null;const saveBtn=document.querySelector('#receiptForm button[type="submit"]');if(saveBtn)saveBtn.disabled=true;setReadStatus('Bon wordt uitgelezen…','busy');try{const extracted=await extractReceipt(file);parsed=extracted&&extracted.__parsedReceipt?extracted:parseReceiptText(extracted);applyParsed(parsed);renderReceiptDebug(parsed);const found=[parsed.store&&'winkel',parsed.date&&'datum',parsed.total!==null&&'totaal',parsed.lines.length&&`${parsed.lines.length} productregels`].filter(Boolean);if(parsed.needsReview)setReadStatus('Bon niet volledig herkend. Controleer het totaal en de productregels voordat je opslaat.','warning');else if(found.length)setReadStatus(`Uitgelezen: ${found.join(', ')}. Controleer de gegevens en pas ze zo nodig aan.`,'success');else setReadStatus('De bon is uitgelezen, maar er konden weinig gegevens automatisch worden herkend. Vul de ontbrekende gegevens handmatig aan.','warning');return parsed;}catch(err){console.error('Bon uitlezen mislukt',err);setReadStatus(err?.message||'Bon uitlezen is niet gelukt. Je kunt de gegevens handmatig invullen.','error');return null;}finally{readingReceipt=false;if(saveBtn)saveBtn.disabled=false}}
 
 
 async function takeSharedReceipt(){
