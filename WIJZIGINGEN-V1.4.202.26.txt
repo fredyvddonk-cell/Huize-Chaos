@@ -1,0 +1,1 @@
+V1.4.202.26 – Bonvoorbeeld wordt leeggemaakt bij openen en sluiten van de boninvoer. Bij aanpassen van een opgeslagen bon wordt uitsluitend de bijbehorende bon geladen. Zoom van 50% tot 350%; Passend herstelt 100%. Verouderde asynchrone voorbeelden worden genegeerd.
