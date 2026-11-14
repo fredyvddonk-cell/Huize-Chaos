@@ -1,0 +1,1 @@
+V1.4.202.30 – Bulkselectie sluit volledig af zonder wijzigingen. Kortingen worden in een apart invoerpaneel bevestigd en proportioneel verdeeld. Productdetails blijven gesloten.

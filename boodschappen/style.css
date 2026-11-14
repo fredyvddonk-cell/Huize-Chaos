@@ -1614,3 +1614,12 @@ body.receipt-reordering #receiptModal{touch-action:none}
 #receiptModal .receipt-product-rows.receipt-selection-mode .receipt-drag-handle{display:none!important}
 #receiptModal .receipt-product-rows.receipt-selection-mode .receipt-line-select{display:block!important}
 @media(max-width:650px){#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 40px 65px 25px!important;column-gap:4px!important;padding-left:6px!important;padding-right:6px!important}#receiptModal .receipt-product-rows.receipt-selection-mode .receipt-product-row{padding-left:32px!important}}
+
+/* V1.4.202.30: aparte korting, zonder productdetails te openen */
+.receipt-bulk-discount{max-width:670px;padding:16px;margin:8px 0 14px;border:1px solid #d9c9ef;border-radius:12px;background:#faf7ff}
+.receipt-bulk-discount p{margin:8px 0;color:#625a70}
+.receipt-bulk-discount-fields{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.receipt-bulk-discount-fields label{display:flex;flex-direction:column;gap:5px;flex:1;min-width:145px}
+.receipt-bulk-discount-fields input,.receipt-bulk-discount-fields select{width:100%;padding:10px;border:1px solid #d9c9ef;border-radius:8px}
+.receipt-bulk-discount-buttons{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+#receiptBulkDiscountError{color:#a21c32}
