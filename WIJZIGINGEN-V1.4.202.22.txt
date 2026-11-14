@@ -1,0 +1,1 @@
+V1.4.202.22 – Foto-kassabonnen: meerdere OCR-resultaten vergelijken; btw-/totaalregels filteren; onzekere bedragen en conflicterende OCR-resultaten ter controle markeren. Geen bedragen stilzwijgend corrigeren. AH/Picnic-functies behouden.
