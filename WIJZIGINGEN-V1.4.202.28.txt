@@ -1,4 +1,4 @@
-V1.4.202.28
+V1.4.202.29
 - Originele bon start op 50%, zoom 50–350%, knop Passend herstelt 50%.
 - Afzonderlijke bewerkbare bedragen voor statiegeld betaald en emballage retour.
 - Herkenning van Ret Emballage (o.a. Jumbo) en statiegeldretour; geen gewone productregel.
