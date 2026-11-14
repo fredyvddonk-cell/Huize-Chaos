@@ -1,0 +1,1 @@
+V1.4.202.23 – ruimtelijke fotoherkenning van kassabonnen; productblok stopt bij TOTAAL, btw-/betaalregels worden uitgesloten en onafhankelijke prijs-OCR signaleert twijfel. Geen automatische prijsaanpassingen.
