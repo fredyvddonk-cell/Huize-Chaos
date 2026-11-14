@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.202.27</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.202.28</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
@@ -301,6 +301,7 @@
         <div class="receipt-panel receipt-review">
           <div class="field"><label for="receiptTotal">Totaalbedrag bon *</label><div class="money-input"><span>€</span><input id="receiptTotal" inputmode="decimal" required placeholder="0,00"></div><small class="field-help">Vul het totaalbedrag in dat op de bon staat. Huize Chaos controleert dit met de verdeling hieronder.</small><div id="receiptAmountMeta" class="receipt-amount-meta" hidden></div></div>
           <div class="receipt-panel receipt-koopzegels-fields"><div class="field"><label for="receiptKoopzegels">Koopzegels gekocht</label><div class="money-input"><span>€</span><input id="receiptKoopzegels" inputmode="decimal" placeholder="0,00"></div></div><div class="field"><label for="receiptKoopzegelsPaid">Betaald met koopzegels</label><div class="money-input"><span>€</span><input id="receiptKoopzegelsPaid" inputmode="decimal" placeholder="0,00"></div></div></div>
+          <div class="receipt-panel receipt-koopzegels-fields"><div class="field"><label for="receiptStatiegeldBetaald">Statiegeld betaald</label><div class="money-input"><span>€</span><input id="receiptStatiegeldBetaald" inputmode="decimal" placeholder="0,00"></div></div><div class="field"><label for="receiptStatiegeldRetour">Emballage retour</label><div class="money-input"><span>€</span><input id="receiptStatiegeldRetour" inputmode="decimal" placeholder="0,00"></div></div></div>
           <div class="field"><label for="receiptNote">Opmerking <small>(optioneel)</small></label><input id="receiptNote" placeholder="Bijv. actiebon, zelfscan, opmerking voor later..."><small class="field-help">Alleen voor jezelf, niet zichtbaar in het overzicht.</small></div>
         </div>
       </section>
@@ -316,7 +317,7 @@
       </section>
 
       <div class="modal-actions receipt-actions"><button type="button" id="receiptCancel" class="btn secondary">Annuleren</button><button type="button" id="receiptSave" class="btn primary">▣ Opslaan bon</button></div>
-      </div><aside id="receiptDesktopSummary" class="receipt-desktop-summary"><div id="receiptDesktopSummaryInfo"><h3>Herkende bon</h3><p class="receipt-summary-empty">Kies een bon om de gegevens te controleren.</p></div><div class="receipt-preview-heading"><strong>Originele bon</strong><div class="receipt-zoom-controls" aria-label="Bon vergroten"><button type="button" id="receiptZoomOut" aria-label="Bon verkleinen">−</button><output id="receiptZoomLevel" aria-live="polite">100%</output><button type="button" id="receiptZoomIn" aria-label="Bon vergroten">+</button><button type="button" id="receiptZoomReset" aria-label="Zoom herstellen">Passend</button></div></div><div id="receiptDesktopPreview" class="receipt-desktop-preview" aria-label="Originele bon, scroll om te bekijken"></div></aside>
+      </div><aside id="receiptDesktopSummary" class="receipt-desktop-summary"><div id="receiptDesktopSummaryInfo"><h3>Herkende bon</h3><p class="receipt-summary-empty">Kies een bon om de gegevens te controleren.</p></div><div class="receipt-preview-heading"><strong>Originele bon</strong><div class="receipt-zoom-controls" aria-label="Bon vergroten"><button type="button" id="receiptZoomOut" aria-label="Bon verkleinen">−</button><output id="receiptZoomLevel" aria-live="polite">50%</output><button type="button" id="receiptZoomIn" aria-label="Bon vergroten">+</button><button type="button" id="receiptZoomReset" aria-label="Zoom herstellen">Passend</button></div></div><div id="receiptDesktopPreview" class="receipt-desktop-preview" aria-label="Originele bon, scroll om te bekijken"></div></aside>
     </form>
   </div>
 
