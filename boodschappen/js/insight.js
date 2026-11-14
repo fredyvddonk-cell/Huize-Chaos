@@ -170,7 +170,7 @@ function prefillReceiptCalc(row){const qtyInput=row.querySelector('.receipt-calc
 function updateReceiptCalcUi(row){const calc=receiptCalcFromRow(row),group=receiptGroupData(row),useGroup=(group.matches.length>1||group.qty>1)&&group.prices.length>0&&group.prices.every(v=>v>0),result=calcReceiptLine(calc,useGroup?group.prices:null),valueWrap=row.querySelector('.receipt-calc-value-wrap'),bundleWrap=row.querySelector('.receipt-calc-bundle-wrap'),valueLabel=row.querySelector('.receipt-calc-value-label'),value2Wrap=row.querySelector('.receipt-calc-value2-wrap'),bundle2Wrap=row.querySelector('.receipt-calc-bundle2-wrap'),value2Label=row.querySelector('.receipt-calc-value2-label'),out=row.querySelector('.receipt-calc-result');if(valueWrap)valueWrap.hidden=!(calc.type==='percent'||calc.type==='euro');if(bundleWrap)bundleWrap.hidden=calc.type!=='bundle';if(valueLabel)valueLabel.textContent=calc.type==='percent'?'Kortingspercentage':'Korting €';if(value2Wrap)value2Wrap.hidden=calc.type2==='bundle'||!(calc.type2==='percent'||calc.type2==='euro');if(bundle2Wrap)bundle2Wrap.hidden=calc.type2!=='bundle';if(value2Label)value2Label.textContent=calc.type2==='percent'?'Kortingspercentage':'Korting €';if(out)out.innerHTML=result?`${useGroup&&result.variablePrices?'<strong>Verschillende productprijzen meegenomen.</strong> · ':''}Normaal ${money(result.normal)} · korting ${money(result.discount)}${result.discountPct?` (${String(result.discountPct).replace('.',',')}%)`:''} · <strong>betaald ${money(result.paid)}</strong>`:'Vul aantal en normale stukprijs in.';return result}
 function applyReceiptCalc(row){const calc=receiptCalcFromRow(row),group=receiptGroupData(row),useGroup=(group.matches.length>1||group.qty>1)&&group.prices.length>0&&group.prices.every(v=>v>0),result=calcReceiptLine(calc,useGroup?group.prices:null);updateReceiptCalcUi(row);if(!result)return;if(useGroup&&result.paidItems){group.matches.forEach(r=>{if(!r.dataset.originalPrice)r.dataset.originalPrice=String(receiptOriginalLinePrice(r))});const perRow=new Map();group.items.forEach((item,i)=>perRow.set(item.row,(perRow.get(item.row)||0)+(result.paidItems[i]||0)));group.matches.forEach(r=>{const price=r.querySelector('.receipt-line-price'),v=perRow.get(r)||0;if(price)price.value=v.toFixed(2).replace('.',',')})}else{if(!row.dataset.originalPrice)row.dataset.originalPrice=String(receiptOriginalLinePrice(row));const price=row.querySelector('.receipt-line-price');if(price)price.value=String(result.paid.toFixed(2)).replace('.',',')}recalculateReceiptGroceryTotal();updateReceiptSummary({total:parseReceiptNumber(document.querySelector('#receiptTotal')?.value)||0,lines:collectLines(),store:document.querySelector('#receiptStore')?.value,date:document.querySelector('#receiptDate')?.value})}
 
-// V1.4.202.30: bulk korting werkt zelfstandig; productdetails blijven gesloten.
+// V1.4.202.31: bulk korting werkt zelfstandig; productdetails blijven gesloten.
 function ensureReceiptBulkToolbar(){
  const wrap=document.querySelector('#receiptProductRows');
  if(!wrap||document.querySelector('#receiptBulkToolbar'))return;
@@ -187,36 +187,45 @@ function ensureReceiptBulkToolbar(){
  clear.onclick=()=>{closeDiscount();wrap.querySelectorAll('.receipt-line-select').forEach(x=>x.checked=false);update()};
  calc.onclick=()=>{
   const rows=selected();if(!rows.length)return;closeDiscount();
-  const normal=rows.reduce((sum,r)=>sum+(parseReceiptNumber(r.querySelector('.receipt-line-price')?.value)||0),0);
+  const originalCents=rows.map(r=>Math.max(0,Math.round((parseReceiptNumber(r.querySelector('.receipt-line-price')?.value)||0)*100)));
+  const normal=originalCents.reduce((a,b)=>a+b,0)/100;
   const dialog=document.createElement('div');dialog.id='receiptBulkDiscountDialog';dialog.className='receipt-bulk-discount';
-  dialog.innerHTML=`<strong>Korting voor ${rows.length} geselecteerde producten</strong><p>Huidig totaal: ${money(normal)}. De korting wordt naar verhouding over de productregels verdeeld.</p><div class="receipt-bulk-discount-fields"><label>Soort korting<select id="receiptBulkDiscountType"><option value="euro">Bedrag (€)</option><option value="percent">Percentage (%)</option></select></label><label>Korting<input id="receiptBulkDiscountValue" inputmode="decimal" placeholder="0,00" aria-label="Kortingsbedrag of percentage"></label></div><p id="receiptBulkDiscountError" role="alert" hidden></p><div class="receipt-bulk-discount-buttons"><button type="button" id="receiptBulkDiscountCancel">Annuleren</button><button type="button" id="receiptBulkDiscountApply">Korting bevestigen</button></div>`;
+  const options=receiptCalcOptions('');
+  dialog.innerHTML=`<strong>Korting voor ${rows.length} geselecteerde producten</strong><p>Huidig totaal: ${money(normal)}. Kortingen worden na elkaar berekend. Controleer de uitkomst met de kassabon.</p><div class="receipt-bulk-discount-fields"><label>1e korting<select id="receiptBulkType1">${options}</select></label><label id="receiptBulkValueWrap1" hidden>Waarde<input id="receiptBulkValue1" inputmode="decimal" placeholder="bijv. 35"></label><label id="receiptBulkBundleWrap1" hidden>Aantal per actie<input id="receiptBulkBundleQty1" inputmode="numeric" placeholder="bijv. 3">Actieprijs<input id="receiptBulkBundlePrice1" inputmode="decimal" placeholder="bijv. 10,00"></label><label>2e korting (bijv. houdbaarheid)<select id="receiptBulkType2">${options}</select></label><label id="receiptBulkValueWrap2" hidden>Waarde<input id="receiptBulkValue2" inputmode="decimal" placeholder="bijv. 35"></label><label id="receiptBulkBundleWrap2" hidden>Aantal per actie<input id="receiptBulkBundleQty2" inputmode="numeric" placeholder="bijv. 3">Actieprijs<input id="receiptBulkBundlePrice2" inputmode="decimal" placeholder="bijv. 10,00"></label></div><p id="receiptBulkDiscountPreview" aria-live="polite"></p><p id="receiptBulkDiscountError" role="alert" hidden></p><div class="receipt-bulk-discount-buttons"><button type="button" id="receiptBulkDiscountCancel">Annuleren</button><button type="button" id="receiptBulkDiscountApply">Korting bevestigen</button></div>`;
   bar.insertAdjacentElement('afterend',dialog);
-  dialog.querySelector('#receiptBulkDiscountCancel').onclick=closeDiscount;
-  dialog.querySelector('#receiptBulkDiscountApply').onclick=()=>{
-   const type=dialog.querySelector('#receiptBulkDiscountType').value,value=parseReceiptNumber(dialog.querySelector('#receiptBulkDiscountValue').value),error=dialog.querySelector('#receiptBulkDiscountError');
-   const discount=type==='percent'?normal*(value||0)/100:value;
-   if(value===null||value<=0||discount>normal||normal<=0||(type==='percent'&&value>100)){error.hidden=false;error.textContent='Vul een geldige korting in die niet hoger is dan het geselecteerde totaal.';return;}
-   const originalCents=rows.map(r=>Math.round((parseReceiptNumber(r.querySelector('.receipt-line-price')?.value)||0)*100));
-   const totalCents=originalCents.reduce((a,b)=>a+b,0),discountCents=Math.min(totalCents,Math.round(discount*100));
-   let remaining=discountCents;
-   rows.forEach((r,i)=>{
-    const share=i===rows.length-1?remaining:Math.min(remaining,Math.round(discountCents*originalCents[i]/totalCents));remaining-=share;
-    const price=r.querySelector('.receipt-line-price');if(price)price.value=((originalCents[i]-share)/100).toFixed(2).replace('.',',');
-   });
-   recalculateReceiptGroceryTotal();updateReceiptSummary({total:parseReceiptNumber(document.querySelector('#receiptTotal')?.value)||0,lines:collectLines(),store:document.querySelector('#receiptStore')?.value,date:document.querySelector('#receiptDate')?.value});
-   stopSelection();
+  const field=id=>dialog.querySelector('#receiptBulk'+id);
+  const calcDiscount=()=>{
+   const type=field('Type1').value,type2=field('Type2').value;
+   const getValue=n=>parseReceiptNumber(field('Value'+n).value);
+   const validate=(kind,n)=>{if(!kind)return true;if(kind==='percent')return getValue(n)!==null&&getValue(n)>=0&&getValue(n)<=100;if(kind==='euro')return getValue(n)!==null&&getValue(n)>=0;if(kind==='bundle')return parseReceiptNumber(field('BundleQty'+n).value)>0&&parseReceiptNumber(field('BundlePrice'+n).value)>=0;return true};
+   if(!type||!validate(type,1)||!validate(type2,2))return null;
+   // Expand quantities for multi-buy offers; distribute each row's original amount over its units.
+   const itemPrices=[],owner=[];
+   rows.forEach((r,i)=>{const q=parseReceiptNumber(r.querySelector('.receipt-line-count')?.value)||1;const qty=Math.max(1,Math.min(100,Math.round(q)));const cents=originalCents[i];for(let j=0;j<qty;j++){itemPrices.push((Math.floor(cents/qty)+(j<cents%qty?1:0))/100);owner.push(i)}});
+   const params={type,value:field('Value1').value,bundleQty:field('BundleQty1').value,bundlePrice:field('BundlePrice1').value,type2,value2:field('Value2').value,bundleQty2:field('BundleQty2').value,bundlePrice2:field('BundlePrice2').value};
+   const result=calcReceiptLine(params,itemPrices);if(!result||result.paid<0||result.paid>normal+0.001)return null;
+   const paidItems=result.paidItems||[];const target=Math.round(result.paid*100);const grouped=rows.map(()=>0);
+   if(paidItems.length===owner.length){paidItems.forEach((v,i)=>grouped[owner[i]]+=v)}else{const proportional=allocateReceiptPaidItems(originalCents.map(c=>c/100),result.paid);proportional.forEach((v,i)=>grouped[i]=v)}
+   // Preserve the exact rounded total across all rows.
+   let remainder=target-grouped.reduce((a,v)=>a+Math.round(v*100),0);
+   const cents=grouped.map(v=>Math.round(v*100));if(cents.length)cents[cents.length-1]+=remainder;
+   return {result,cents};
   };
-  dialog.querySelector('#receiptBulkDiscountValue').focus();
+  const updatePreview=()=>{for(const n of [1,2]){const type=field('Type'+n).value;field('ValueWrap'+n).hidden=!['euro','percent'].includes(type);field('BundleWrap'+n).hidden=type!=='bundle'}const calc=calcDiscount(),preview=field('DiscountPreview');preview.textContent=calc?`Korting ${money(calc.result.discount)} · Nieuw totaal ${money(calc.result.paid)}. ${rows.map((r,i)=>`${r.querySelector('.receipt-line-name')?.value||'Product'}: ${money(calc.cents[i]/100)}`).join(' · ')}`:'Kies een actie en vul de benodigde waarden in.'};
+  dialog.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',updatePreview);el.addEventListener('change',updatePreview)});
+  field('DiscountCancel').onclick=closeDiscount;
+  field('DiscountApply').onclick=()=>{const calc=calcDiscount(),error=field('DiscountError');if(!calc){error.hidden=false;error.textContent='Controleer de kortingssoort, aantallen en bedragen. De korting mag het totaal niet overschrijden.';return}rows.forEach((r,i)=>{const price=r.querySelector('.receipt-line-price');if(price)price.value=(calc.cents[i]/100).toFixed(2).replace('.',',')});recalculateReceiptGroceryTotal();updateReceiptSummary({total:parseReceiptNumber(document.querySelector('#receiptTotal')?.value)||0,lines:collectLines(),store:document.querySelector('#receiptStore')?.value,date:document.querySelector('#receiptDate')?.value});stopSelection()};
+  updatePreview();field('Type1').focus();
  };
  update();
 }
 function addProductRow(line={}){line=receiptLineWithRememberedLink(line,document.querySelector('#receiptStore')?.value||'');const wrap=document.querySelector('#receiptProductRows');if(!wrap)return;ensureReceiptBulkToolbar();const inferredQty=parseReceiptNumber(line.qty)??(()=>{const m=String(line.name||'').trim().match(/^(\d+(?:[,.]\d+)?)\s+/);return m?parseReceiptNumber(m[1]):1})(),inferredUnit=parseReceiptNumber(line.unitPrice)??((parseReceiptNumber(line.originalPrice??line.price)!==null&&inferredQty>0)?parseReceiptNumber(line.originalPrice??line.price)/inferredQty:null),calc={qty:inferredQty??'',unitPrice:inferredUnit??'',...(line.calc||{})};const row=document.createElement('div');row.className='receipt-product-row';row.dataset.lineId=String(line.lineId||crypto.randomUUID());const linkedStock=line.stockLinkConfirmed&&!line.stockProductId?null:stockProductForReceiptLine(line),stockAddQty=inferredStockAddQty(line,linkedStock);const baseOriginal=line.originalPrice!==undefined&&line.originalPrice!==''?line.originalPrice:line.price;if(baseOriginal!==undefined&&baseOriginal!=='')row.dataset.originalPrice=String(baseOriginal);row.innerHTML=`<div class="receipt-row-tools"><input type="checkbox" class="receipt-line-select" aria-label="Selecteer product"><button type="button" class="receipt-drag-handle" aria-label="Sleep product naar andere positie" title="Sleep om te verplaatsen">⠿</button></div><div class="receipt-cell receipt-cell-product"><label>Product *</label><input class="receipt-line-name" value="${esc(line.name||'')}" placeholder="Product"></div><div class="receipt-cell receipt-cell-price"><label>Bedrag *</label><input class="receipt-line-price receipt-line-price-calc" inputmode="decimal" value="${line.price!==undefined&&line.price!==''?esc(String(line.price).replace('.',',')):''}" placeholder="0,00" aria-label="Totaalbedrag van deze productregel aanpassen"></div><div class="receipt-cell receipt-cell-cat"><label>Huize Chaos</label><select class="receipt-line-cat">${categoryOptions(CATS.includes(line.category)?line.category:catFor(line.name||''))}</select></div><div class="receipt-cell receipt-cell-ynab"><label>YNAB</label><select class="receipt-line-ynab">${ynabOptions(YNAB_CATS.includes(line.ynabCategory)?line.ynabCategory:ynabForCategory(line.category||catFor(line.name||'')))}</select></div><div class="receipt-cell receipt-cell-action"><label>Acties</label><button type="button" class="receipt-delete-line" aria-label="Productregel verwijderen">⌫</button></div><label class="receipt-action-product-toggle"><input type="checkbox" class="receipt-line-action-product" ${line.isActionProduct?'checked':''}><span>Actieproduct</span></label><label class="receipt-regular-toggle"><input type="checkbox" class="receipt-line-exclude-regular" ${line.excludeFromRegularWeek?'checked':''}><span>Niet meenemen in reguliere weekboodschappen</span></label><div class="receipt-stock-link"><label>Voorraadproduct<input type="search" class="receipt-line-stock-search" placeholder="Zoek voorraadproduct…" autocomplete="off"><select class="receipt-line-stock">${stockLinkOptions(linkedStock?.id||'')}</select></label><label>Toevoegen aan voorraad<input class="receipt-line-stock-qty" inputmode="decimal" value="${esc(String(stockAddQty??'').replace('.',','))}" placeholder="hoeveelheid"><small class="receipt-stock-unit">${esc(linkedStock?.unit||'')}</small></label></div><div class="receipt-line-calculator" hidden><div class="receipt-calc-grid"><label>Aantal<input class="receipt-calc-qty" inputmode="decimal" value="${esc(String(calc.qty??'' ).replace('.',','))}" placeholder="5"></label><label>Normale stukprijs<input class="receipt-calc-unit" inputmode="decimal" value="${esc(String(calc.unitPrice??'').replace('.',','))}" placeholder="8,99"></label><label>Actie<select class="receipt-calc-type">${receiptCalcOptions(calc.type||'')}</select></label><label class="receipt-calc-value-wrap" hidden><span class="receipt-calc-value-label">Korting</span><input class="receipt-calc-value" inputmode="decimal" value="${esc(String(calc.value??'').replace('.',','))}" placeholder="25"></label><div class="receipt-calc-bundle-wrap" hidden><label>Aantal per actie<input class="receipt-calc-bundle-qty" inputmode="decimal" value="${esc(String(calc.bundleQty??'').replace('.',','))}" placeholder="3"></label><label>Actieprijs<input class="receipt-calc-bundle-price" inputmode="decimal" value="${esc(String(calc.bundlePrice??'').replace('.',','))}" placeholder="10,00"></label></div><div class="receipt-calc-second"><label>2e korting<select class="receipt-calc-type2">${receiptCalcOptions(calc.type2||'')}</select></label><label class="receipt-calc-value2-wrap"><span class="receipt-calc-value2-label">Waarde</span><input class="receipt-calc-value2" inputmode="decimal" value="${esc(String(calc.value2??'').replace('.',','))}" placeholder="bijv. 35"></label><div class="receipt-calc-bundle2-wrap" hidden><label>Aantal per actie<input class="receipt-calc-bundle-qty2" inputmode="decimal" value="${esc(String(calc.bundleQty2??'').replace('.',','))}" placeholder="4"></label><label>Actieprijs<input class="receipt-calc-bundle-price2" inputmode="decimal" value="${esc(String(calc.bundlePrice2??'').replace('.',','))}" placeholder="4,00"></label></div></div><label class="receipt-line-memo-wrap">Memo bij dit product<textarea class="receipt-line-memo" rows="2" placeholder="Bijv. voor dochter, wordt terugbetaald...">${esc(line.memo||'')}</textarea></label></div><div class="receipt-calc-bottom"><small class="receipt-calc-result">Vul aantal en normale stukprijs in.</small><button type="button" class="receipt-calc-done">Klaar</button></div></div>`;
-// V1.4.202.29: compacte kassabonregel. Bestaande invoervelden blijven ongewijzigd
+// V1.4.202.31: compacte kassabonregel. Bestaande invoervelden blijven ongewijzigd
 // zodat opslaan, categoriseren en voorraadkoppelingen blijven werken.
 const details=document.createElement('div');
 details.className='receipt-row-details';
 details.id='receipt-details-'+row.dataset.lineId.replace(/[^a-zA-Z0-9_-]/g,'');
-// V1.4.202.29: voorraad eerst, overige instellingen achter Meer opties.
+// V1.4.202.31: voorraad eerst, overige instellingen achter Meer opties.
 const more=document.createElement('div');more.className='receipt-more-options';more.hidden=true;
 const stock=row.querySelector('.receipt-stock-link');
 if(stock)details.appendChild(stock);
@@ -238,7 +247,7 @@ calcQty?.addEventListener('input',()=>{const n=parseReceiptNumber(calcQty.value)
 row.append(toggle,summary,details);setOpen(false);updateSummary();
 toggle.addEventListener('click',()=>setOpen(!row.classList.contains('receipt-details-open')));
 row.addEventListener('change',updateSummary);row.addEventListener('input',e=>{if(e.target.closest('.receipt-row-details'))updateSummary()});
-// V1.4.202.29: één zoekveld met expliciete resultaten en een nieuwe-voorraadkeuze.
+// V1.4.202.31: één zoekveld met expliciete resultaten en een nieuwe-voorraadkeuze.
 const stockSearch=row.querySelector('.receipt-line-stock-search'),stockSelect=row.querySelector('.receipt-line-stock');
 const stockPicker=document.createElement('div');stockPicker.className='receipt-stock-results';stockPicker.hidden=true;
 stockSearch?.insertAdjacentElement('afterend',stockPicker);
@@ -275,7 +284,7 @@ const syncActionProductVisual=()=>row.classList.toggle('receipt-action-product',
 syncActionProductVisual();
 actionProductToggle?.addEventListener('change',syncActionProductVisual);
 row.querySelector('.receipt-line-stock')?.addEventListener('change',e=>{const p=products.find(x=>String(x.id)===String(e.target.value)),unit=row.querySelector('.receipt-stock-unit');if(unit)unit.textContent=p?.unit||'';const q=row.querySelector('.receipt-line-stock-qty');if(q)q.value=''});const openCalc=()=>{document.querySelectorAll('.receipt-product-row').forEach(r=>{if(r!==row){const other=r.querySelector('.receipt-line-calculator');if(other)other.hidden=true;delete r.dataset.bulkCalc}});delete row.dataset.bulkCalc;const box=row.querySelector('.receipt-line-calculator');box.hidden=false;prefillReceiptCalc(row);updateReceiptCalcUi(row);box.scrollIntoView({behavior:'smooth',block:'nearest'})};
-// V1.4.202.29: bedrag is direct te bewerken; het rekenscherm blijft via de details beschikbaar.
+// V1.4.202.31: bedrag is direct te bewerken; het rekenscherm blijft via de details beschikbaar.
 priceInput.addEventListener('focus',()=>{priceInput.select()});
 priceInput.addEventListener('input',()=>{recalculateReceiptGroceryTotal()});
 priceInput.addEventListener('change',()=>{
@@ -519,9 +528,9 @@ function mergeJumboPhotoProducts(best,productText){
   if(found.length>(best.lines||[]).length)best={...best,lines:found,raw:`${best.raw||''}\n${cleaned}`};
   return best;
 }
-// V1.4.202.29: meermaals lezen van een gefotografeerde bon, inclusief vergrote
+// V1.4.202.31: meermaals lezen van een gefotografeerde bon, inclusief vergrote
 // middenstrook. Nooit een btw-regel als artikel accepteren of een totaal gokken.
-// V1.4.202.29: conservatieve boncontrole. Een btw-tabel is nooit een artikel.
+// V1.4.202.31: conservatieve boncontrole. Een btw-tabel is nooit een artikel.
 function receiptPhotoSafe(parsed){
   if(!parsed)return parsed;
   const rejected=[];
@@ -579,7 +588,7 @@ function receiptPhotoQuality(p){
   const balanced=total!==null&&Math.abs(sum-total)<.03;
   return lines.length*12+(total!==null?20:0)+(p?.store?5:0)+(p?.date?5:0)+(balanced?100:0)-(lines.length<2?40:0);
 }
-// V1.4.202.29: ruimtelijke analyse van kassabonfoto's. Tekst onder TOTAAL
+// V1.4.202.31: ruimtelijke analyse van kassabonfoto's. Tekst onder TOTAAL
 // hoort niet bij de artikelen; herken losse prijsstroken apart en meld twijfel.
 async function photoPositionCandidate(file){
   if(!window.Tesseract)return null;
@@ -750,7 +759,7 @@ function parsePicnicPdfPages(pageItems,rawText){
   const excluded=parsed.filter(l=>NON_GROCERY_CATS.has(l.category)).reduce((a,l)=>a+l.price,0);
   return{__parsedReceipt:true,store:'Picnic',date,total,baseTotal:total,originalTotal:total,koopzegels:0,statiegeld:0,excludedPurchases:+excluded.toFixed(2),lines:parsed,raw:rawText}
 }
-// V1.4.202.29: AH-kassabonnen worden apart gelezen; generieke bonnen behouden hun parser.
+// V1.4.202.31: AH-kassabonnen worden apart gelezen; generieke bonnen behouden hun parser.
 // Alleen expliciete productregels vóór het eerste subtotaal worden meegenomen.
 function isAhReceipt(text){return /\b(?:ALBERT\s+HEIJN|AH\s+BROOD|BONUSKAART)\b/i.test(text)&&/\b(?:AANTAL|OMSCHRIJVING|SUBTOTAAL)\b/i.test(text)}
 function parseAhReceipt(text){
