@@ -1,0 +1,1 @@
+V1.4.202.25 – Kassabonnen: het bedrag per productregel is rechtstreeks bewerkbaar. Boncontrole en samenvatting worden bij invoer bijgewerkt. De originele bon blijft naast de productregels. Het rekenscherm blijft beschikbaar via de details van de productregel.
