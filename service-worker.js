@@ -1,5 +1,5 @@
-const CACHE='huize-chaos-v1-4-202-24';
-const ASSETS=["./", "./index.html", "./style.css?v=1.4.202.23", "./hc-theme.css?v=1.4.202.23", "./hc-module-nav.js?v=1.4.202.23", "./hc-sync-indicator.js?v=1.4.202.23", "./home-firebase.js?v=1.4.202.23", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./assets/huize-chaos-wordmark-v1111.png", "./boodschappen/", "./boodschappen/index.html", "./boodschappen/style.css?v=1.4.202.23", "./boodschappen/js/app.js?v=1.4.202.23", "./boodschappen/js/shopping.js?v=1.4.202.23", "./boodschappen/js/stock.js?v=1.4.202.23", "./boodschappen/js/hutsel.js?v=1.4.202.23", "./boodschappen/js/insight.js?v=1.4.202.23", "./boodschappen/js/firebase.js?v=1.4.202.23", "./boodschappen/assets/shopping-icon.png", "./boodschappen/assets/huize-chaos-wordmark-v1111.png", "./gezinsplanner/", "./gezinsplanner/index.html", "./gezinsplanner/style.css?v=1.4.117", "./gezinsplanner/planner-v131.css?v=1.4.202.23", "./gezinsplanner/app.js?v=1.4.202.23", "./gezinsplanner/firebase.js?v=1.4.202.23", "./recepten/", "./recepten/index.html", "./recepten/style.css?v=1.4.202.23", "./recepten/app.js?v=1.4.202.23", "./recepten/recipes-data.js", "./gelegenheden/", "./gelegenheden/index.html", "./gelegenheden/style.css?v=1.4.117", "./gelegenheden/app.js?v=1.4.117", "./notities/", "./notities/index.html", "./notities/style.css?v=1.4.117", "./notities/app.js?v=1.4.202.23", "./auto/", "./auto/index.html", "./auto/style.css?v=1.4.117", "./auto/app.js?v=1.4.117", "./auto/firebase.js?v=1.4.117", "./aankopen/", "./aankopen/index.html", "./aankopen/style.css?v=1.4.202.23", "./aankopen/app.js?v=1.4.202.23"];
+const CACHE='huize-chaos-v1-4-202-33';
+const ASSETS=["./", "./index.html", "./style.css?v=1.4.202.33", "./hc-theme.css?v=1.4.202.33", "./hc-module-nav.js?v=1.4.202.33", "./hc-sync-indicator.js?v=1.4.202.33", "./home-firebase.js?v=1.4.202.33", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./assets/huize-chaos-wordmark-v1111.png", "./boodschappen/", "./boodschappen/index.html", "./boodschappen/style.css?v=1.4.202.33", "./boodschappen/js/app.js?v=1.4.202.33", "./boodschappen/js/shopping.js?v=1.4.202.33", "./boodschappen/js/stock.js?v=1.4.202.33", "./boodschappen/js/hutsel.js?v=1.4.202.33", "./boodschappen/js/insight.js?v=1.4.202.33", "./boodschappen/js/firebase.js?v=1.4.202.33", "./boodschappen/assets/shopping-icon.png", "./boodschappen/assets/huize-chaos-wordmark-v1111.png", "./gezinsplanner/", "./gezinsplanner/index.html", "./gezinsplanner/style.css?v=1.4.117", "./gezinsplanner/planner-v131.css?v=1.4.202.33", "./gezinsplanner/app.js?v=1.4.202.33", "./gezinsplanner/firebase.js?v=1.4.202.33", "./recepten/", "./recepten/index.html", "./recepten/style.css?v=1.4.202.33", "./recepten/app.js?v=1.4.202.33", "./recepten/recipes-data.js", "./gelegenheden/", "./gelegenheden/index.html", "./gelegenheden/style.css?v=1.4.117", "./gelegenheden/app.js?v=1.4.117", "./notities/", "./notities/index.html", "./notities/style.css?v=1.4.117", "./notities/app.js?v=1.4.202.33", "./auto/", "./auto/index.html", "./auto/style.css?v=1.4.117", "./auto/app.js?v=1.4.117", "./auto/firebase.js?v=1.4.117", "./aankopen/", "./aankopen/index.html", "./aankopen/style.css?v=1.4.202.33", "./aankopen/app.js?v=1.4.202.33"];
 const SHARED_RECEIPT_CACHE='huize-chaos-shared-receipts-v1';
 const SHARED_CONTENT_CACHE='huize-chaos-shared-content-v1';
 async function handleSharedContent(request){
@@ -8,21 +8,30 @@ async function handleSharedContent(request){
   try{
     const formData=await request.formData();
     const files=[...formData.values()].filter(x=>x&&typeof x.arrayBuffer==='function'&&x.size>0);
-    const file=files.find(x=>x.type==='application/pdf'||/\.pdf$/i.test(x.name||''))||files.find(x=>x.type.startsWith('image/')||/\.(png|jpe?g|webp)$/i.test(x.name||''));
+    const file=files.find(x=>x.type==='application/pdf'||/\.pdf$/i.test(x.name||''))
+      ||files.find(x=>x.type.startsWith('image/')||/\.(png|jpe?g|webp)$/i.test(x.name||''));
     if(file){
-      const keyUrl=new URL('__shared-receipt__',landingUrl);
+      // A unique token prevents two shares overwriting each other before the app opens.
+      const token=crypto.randomUUID();
+      const keyUrl=new URL('__shared-receipt__/'+token,landingUrl);
       const name=file.name|| (file.type==='application/pdf'?'gedeelde-bon.pdf':'gedeelde-bon.jpg');
       const headers=new Headers({'Content-Type':file.type||'application/octet-stream','X-HC-File-Name':encodeURIComponent(name)});
       const cache=await caches.open(SHARED_RECEIPT_CACHE);
       await cache.put(keyUrl.href,new Response(file,{headers}));
+      landingUrl.searchParams.set('share-id',token);
       return Response.redirect(landingUrl.href,303);
     }
-    // Een lege of ongeschikte deelactie mag niet stilzwijgend op het startscherm eindigen.
-    landingUrl.searchParams.set('share-error','Geen PDF of afbeelding ontvangen vanuit OneNote.');
+    // Some supermarket apps share a URL instead of the PDF itself. Do not
+    // pretend this is a receipt: explain what was received to the user.
+    const sharedText=[formData.get('title'),formData.get('text'),formData.get('url')]
+      .filter(x=>typeof x==='string'&&x.trim()).join(' ').trim();
+    landingUrl.searchParams.set('share-error',sharedText
+      ?'Er is alleen een link of tekst gedeeld, geen PDF of afbeelding. Open de bon in Jumbo of AH en deel het bestand, of sla de bon op als PDF en kies deze in HC.'
+      :'Geen PDF of afbeelding ontvangen. Deel de digitale bon als bestand vanuit Jumbo of AH.');
     return Response.redirect(landingUrl.href,303);
   }catch(err){
     console.error('Ontvangen gedeelde bon mislukt',err);
-    landingUrl.searchParams.set('share-error','Ontvangen van het gedeelde bestand is mislukt.');
+    landingUrl.searchParams.set('share-error','Ontvangen van het gedeelde bestand is mislukt. Kies de bon eventueel handmatig.');
     return Response.redirect(landingUrl.href,303);
   }
 }

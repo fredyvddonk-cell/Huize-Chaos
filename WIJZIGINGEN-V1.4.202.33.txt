@@ -1,0 +1,9 @@
+Huize Chaos V1.4.202.33 — AH en Jumbo delen naar HC
+
+- Bestaande Android Web Share Target voor PDF en afbeeldingen behouden.
+- Gedeelde bon wordt direct geopend bij Inzicht > Bon toevoegen en ingelezen.
+- Unieke opslagcode per deelactie voorkomt overschrijven van een eerder gedeelde bon.
+- Wanneer AH of Jumbo alleen tekst of een link deelt, toont HC een duidelijke melding in plaats van een lege import als succes te melden.
+- Cacheversie en actieve versieaanduidingen bijgewerkt naar V1.4.202.33.
+
+Let op: installeren als webapp via Chrome op Android is vereist voor verschijnen in het deelmenu. De exacte deelmogelijkheden van AH en Jumbo verschillen per app en moeten op het toestel worden getest. Link-only delen levert geen bonbestand op.
