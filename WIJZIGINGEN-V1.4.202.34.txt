@@ -1,0 +1,8 @@
+Huize Chaos V1.4.202.34 — herstel bonverwerking (testversie)
+- Producthoeveelheden op aparte x-prijs-regels worden opgeslagen als aantallen.
+- Koopzegels: aantal x stukprijs wordt eerst berekend, ook als de regel onder het label staat.
+- Verschil tussen herkende regels en kassabon markeert de bon voor controle.
+- Boodschappen-serviceworker verwerkt gedeelde bestanden met unieke tokens en duidelijke foutmelding, gelijk aan de hoofdserviceworker.
+- Startscherm stuurt ontvangen share-target query door naar de bonmodule.
+- Versie en cache vernieuwd.
+Let op: OCR kan nog steeds productregels missen; import vanuit AH/Jumbo moet op telefoon worden getest.
