@@ -1,4 +1,4 @@
-const CACHE='huize-chaos-boodschappen-v1-4-202-36';
+const CACHE='huize-chaos-boodschappen-v1-4-202-37';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 const SHARED_RECEIPT_CACHE='huize-chaos-shared-receipts-v1';
 const SHARED_CONTENT_CACHE='huize-chaos-shared-content-v1';
