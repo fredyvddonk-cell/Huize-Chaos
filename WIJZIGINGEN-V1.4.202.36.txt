@@ -1,0 +1,7 @@
+V1.4.202.36 — AH/Jumbo delen: navigatieherstel
+- De boodschappenmodule gebruikt nu hetzelfde hoofdmanifest als de hoofdapp, zodat er geen tweede PWA-identiteit is.
+- Binnenkomende deelacties kiezen Inzicht vóór de normale scherminitialisatie.
+- De deel-URL blijft beschikbaar tijdens het verwerken.
+- De serviceworker gebruikt een nieuwe cacheversie en een modulespecifieke offline fallback.
+- Geen wijzigingen aan de Picnic OCR-parser; die blijft apart te verbeteren.
+Test: deel een AH- en Jumbo-bon via de Android-deelfunctie. Het bonscherm moet zichtbaar blijven; een tekstlink kan niet automatisch als PDF worden gelezen.

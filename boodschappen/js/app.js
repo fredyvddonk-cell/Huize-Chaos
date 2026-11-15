@@ -925,6 +925,13 @@ function setPage(nextPage,{fromHistory=false}={}) {
   if(sectionMenu) sectionMenu.open=false;
   window.closeShoppingSectionMenu?.();
 }
+// V1.4.202.36: keep the share destination active during startup.
+if(new URLSearchParams(location.search).has('share-target')){
+  page='insight';
+  localStorage.setItem('household-page','insight');
+  sessionStorage.setItem('hc-household-page-session','insight');
+  render();
+}
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{
   const previousOverlay=huizeChaosHistoryState?.hcOverlay||'';
