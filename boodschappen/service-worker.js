@@ -28,6 +28,7 @@ async function handleSharedContent(request){
     landingUrl.searchParams.set('share-error',sharedText
       ?'Er is alleen een link of tekst gedeeld, geen PDF of afbeelding. Open de bon in Jumbo of AH en deel het bestand, of sla de bon op als PDF en kies deze in HC.'
       :'Geen PDF of afbeelding ontvangen. Deel de digitale bon als bestand vanuit Jumbo of AH.');
+    if(sharedText){landingUrl.searchParams.set('share-text',sharedText.slice(0,1500));}
     return Response.redirect(landingUrl.href,303);
   }catch(err){
     console.error('Ontvangen gedeelde bon mislukt',err);

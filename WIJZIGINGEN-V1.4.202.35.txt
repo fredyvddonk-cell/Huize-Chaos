@@ -1,0 +1,6 @@
+V1.4.202.35
+- Deelactie vanuit Android PWA opent rechtstreeks de boodschappenmodule.
+- Bij gedeelde tekst of links wordt de ontvangen inhoud zichtbaar ter diagnose; een link wordt niet ten onrechte als bon behandeld.
+- PDF met screenshots: OCR tot 8 pagina’s in plaats van 3; hogere renderresolutie.
+- Cache- en moduleversies bijgewerkt.
+- Nog te testen op telefoon: AH/Jumbo deelactie en Picnic OCR.
