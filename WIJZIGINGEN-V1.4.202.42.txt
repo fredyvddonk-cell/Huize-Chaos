@@ -1,0 +1,5 @@
+V1.4.202.42 – Bonimport Jumbo
+- Winkelvoorvoegsel Jumbo/AH verwijderen bij importregels.
+- Melk HV 21 corrigeren naar Melk HV 2l in productcontext.
+- Hoeveelheidsregels met Pp niet als afzonderlijk product opnemen.
+- Koopzegels, statiegeld en bestaande voorraad niet gewijzigd.
