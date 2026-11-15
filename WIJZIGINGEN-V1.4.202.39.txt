@@ -1,0 +1,4 @@
+V1.4.202.39
+- Jumbo: berekeningsregels (zoals 4 x 1,19) aan voorafgaand product koppelen.
+- Inhoudsmaat 1,5l niet als prijs behandelen; OCR-variant 1,51 herstellen wanneer de volgende regel een berekening bevat.
+- Statiegeldherkenning uit V.38 behouden.
