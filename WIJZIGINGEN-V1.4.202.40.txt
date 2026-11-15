@@ -1,0 +1,5 @@
+V1.4.202.40
+- Bon toevoegen: Annuleren en Terug naar Inzicht sluiten de bon zonder opslaan en openen Inzicht.
+- Tijdelijke bonvelden en preview worden opgeruimd.
+- Synchronisatie-uitroepteken is een echte synchronisatiefoutindicator; niet verborgen. Controleer de onderliggende synchronisatiestatus.
+- Jumbo/Picnic OCR ongewijzigd.

@@ -1,4 +1,4 @@
-Huize Chaos V1.4.202.39
+Huize Chaos V1.4.202.40
 - Voorkomt dat een inkomende Android-deelactie vanuit AH/Jumbo door de standalone-opstartcontrole wordt doorgestuurd naar het startscherm.
 - Houdt de bonmodule actief voor ontvangen gedeelde gegevens.
 - Cache- en versienummers bijgewerkt.
