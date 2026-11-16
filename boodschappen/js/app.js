@@ -930,7 +930,7 @@ if(new URLSearchParams(location.search).has('share-target')){
   page='insight';
   localStorage.setItem('household-page','insight');
   sessionStorage.setItem('hc-household-page-session','insight');
-  render();
+  // Rendering happens in initApp after DOMContentLoaded, once search/content exist.
 }
 window.setHuizeChaosPage = nextPage => setPage(nextPage);
 window.addEventListener('popstate',e=>{

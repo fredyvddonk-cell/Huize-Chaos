@@ -1,0 +1,6 @@
+V1.4.202.51
+- Voorkomt render() vóór DOMContentLoaded bij gedeelde bonnen (share-target).
+- Firebase-functies kunnen daardoor zonder onderbreking worden geregistreerd.
+- Cacheparameters van modulescripts vernieuwd naar 1.4.202.51.
+- Bestaande bonopslagbeveiliging behouden.
+- Online synchronisatie vereist praktijktest.
