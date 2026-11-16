@@ -1,0 +1,6 @@
+V1.4.202.43
+- AH +statiegeld: herkenning van bedrag en aantal x stukprijs uitgebreid.
+- AH/Jumbo winkelvoorvoegsels worden ook na alternatieve OCR-verwerking uit geimporteerde namen gehaald.
+- Bij Annuleren en Terug naar Inzicht blijft synchronisatiefout zichtbaar; oorzaak niet bewezen opgelost.
+- Ontbrekende Melk HV 2l op telefoon: nog niet bewezen opgelost.
+- Reeds werkende functies behouden.
