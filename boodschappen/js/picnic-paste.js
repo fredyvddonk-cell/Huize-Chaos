@@ -1,4 +1,4 @@
-/* V1.4.202.47 – Picnic-bontekst: gestructureerde regels, geen OCR. */
+/* V1.4.202.48 – Picnic-bontekst: gestructureerde regels, geen OCR. */
 (function(root){
 'use strict';
 function parsePicnicPastedText(raw){
@@ -15,14 +15,12 @@ function parsePicnicPastedText(raw){
  const warnings=[],products=[];
  for(let j=0;j<starts.length;j++){
    const s=starts[j],next=starts[j+1],segment=body.slice(s.second+1,next?next.first:body.length);
-   // Het cijfer direct vóór de eerste productnaam is het aantal.
-   // Picnic plaatst het aantal na de prijs, niet vóór de volgende productnaam.
-   // Daardoor werd bijvoorbeeld '2' van het rundergehakt aan de kruidenmix gekoppeld.
-   let qty=1;
-   if(segment.length && /^\d{1,3}$/.test(segment[segment.length-1]) &&
-      segment.length>=2 && segment[segment.length-2]==='.'){
-     qty=Number(segment.pop());
-   }
+   // Picnic zet het aantal direct vóór de tweemaal gekopieerde productnaam.
+   // Het laatste cijfer van dit segment is vaak juist het aantal van het VOLGENDE product.
+   // Daarom nooit de laatste regel van het huidige product als zijn aantal gebruiken.
+   // Losse cijfers zijn in de gekopieerde Picnic-layout niet eenduidig als aantal te herkennen.
+   // Kies veilig 1; de gebruiker kan aantallen in de boncontrole aanpassen.
+   const qty=1;
    const prices=[];
    for(let k=0;k<segment.length;k++){
      if(/^\d{1,4}$/.test(segment[k])&&/^\d{2}$/.test(segment[k+1]||'')&&segment[k+2]==='.'){

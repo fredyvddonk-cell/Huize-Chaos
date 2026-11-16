@@ -1643,8 +1643,8 @@ body.receipt-reordering #receiptModal{touch-action:none}
 .receipt-bulk-discount-buttons .receipt-bulk-apply{background:#7340b5;color:#fff;border-color:#7340b5}
 @media(max-width:650px){.receipt-bulk-discount{padding:14px}.receipt-bulk-discount-fields{grid-template-columns:minmax(0,1fr);gap:12px}.receipt-bulk-stage{padding:12px}.receipt-bulk-discount-buttons{display:grid;grid-template-columns:1fr 1fr}.receipt-bulk-discount-buttons button{padding:10px 6px;font-size:.9rem}}
 
-/* V1.4.202.47 */
+/* V1.4.202.48 */
 .receipt-paste-box{border:1px solid #e2d9eb;border-radius:16px;padding:16px;margin:12px 0;background:#faf8fc}.receipt-paste-box textarea{width:100%;box-sizing:border-box;min-height:100px;margin:10px 0;border:1px solid #dcd6e4;border-radius:12px;padding:12px;font:inherit}.receipt-paste-box button{margin-top:4px}
 
-/* V1.4.202.47 – geplakte bon als leesbare bron */
+/* V1.4.202.48 – geplakte bon als leesbare bron */
 #receiptModal .receipt-preview-text{white-space:pre-wrap;overflow-wrap:anywhere;box-sizing:border-box;max-width:none;max-height:none;min-width:240px;margin:0 auto;padding:16px;background:#fff;color:#302b37;font:13px/1.5 ui-monospace,Consolas,monospace}
