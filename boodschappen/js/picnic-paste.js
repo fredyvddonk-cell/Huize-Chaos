@@ -1,4 +1,4 @@
-/* V1.4.202.48 – Picnic-bontekst: gestructureerde regels, geen OCR. */
+/* V1.4.202.49 – Picnic-bontekst: gestructureerde regels, geen OCR. */
 (function(root){
 'use strict';
 function parsePicnicPastedText(raw){
@@ -31,7 +31,7 @@ function parsePicnicPastedText(raw){
    const promo=segment.some(x=>/^(?:family|\d+% (?:vervang)?korting|\d+ voor €)/i.test(x));
    if(price===null)warnings.push('Prijs ontbreekt: '+s.name);
    if(/\d+ voor €/.test(segment.join(' ')))warnings.push('Combinatieaanbieding controleren: '+s.name);
-   products.push({name:s.name,qty,price:price??0,originalPrice:prices.length>1?prices[0]:undefined,category:'',memo:price===null?'Prijs ontbreekt: handmatig controleren':(/\d+ voor €/.test(segment.join(' '))?'Combinatieaanbieding: prijsverdeling controleren':''),isActionProduct:promo||prices.length>1});
+   products.push({name:s.name.replace(/^Picnic\s+/i,''),qty,price:price??0,originalPrice:prices.length>1?prices[0]:undefined,category:'',memo:price===null?'Prijs ontbreekt: handmatig controleren':(/\d+ voor €/.test(segment.join(' '))?'Combinatieaanbieding: prijsverdeling controleren':''),isActionProduct:promo||prices.length>1});
  }
  if(products.length<2)throw new Error('Geen herkenbare Picnic-productlijst gevonden. Kopieer de volledige bontekst.');
  const dateMatch=String(raw).match(/(?:bezorging van|bezorgd op)\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
