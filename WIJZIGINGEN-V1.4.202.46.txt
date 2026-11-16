@@ -1,0 +1,1 @@
+V1.4.202.46 – Picnic bontekst: aantallen gekoppeld aan product, prijzen gescheiden van statiegeld, datumherkenning, 2 decimalen, ontbrekend eindtotaal blijft leeg, volledige geplakte tekst als bonvoorbeeld. PDF-voorbeeld toont alle pagina’s. Controleer kortingsverrekening handmatig.
