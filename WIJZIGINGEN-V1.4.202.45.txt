@@ -1,0 +1,1 @@
+V1.4.202.45 – Nieuwe Picnic-import via bontekst plakken. Productnamen, aantallen en losse prijscijfers worden gelezen; ontbrekende prijzen moeten handmatig worden gecontroleerd. Bestaande bestandsimport behouden.
