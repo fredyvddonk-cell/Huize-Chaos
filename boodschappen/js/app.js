@@ -925,7 +925,7 @@ function setPage(nextPage,{fromHistory=false}={}) {
   if(sectionMenu) sectionMenu.open=false;
   window.closeShoppingSectionMenu?.();
 }
-// V1.4.202.46: keep the share destination active during startup.
+// V1.4.202.47: keep the share destination active during startup.
 if(new URLSearchParams(location.search).has('share-target')){
   page='insight';
   localStorage.setItem('household-page','insight');

@@ -1,0 +1,1 @@
+V1.4.202.47: Picnic tekstimport herkent betaald totaal uit “Totaal Al betaald via iDeal”, herkent aantallen na productprijs in plaats van voor de volgende productnaam, en onderscheidt verrekend van nieuw opgebouwd Picnic-tegoed. 1Fruit combinatiekorting blijft handmatig te controleren.

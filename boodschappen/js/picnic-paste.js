@@ -1,9 +1,9 @@
-/* V1.4.202.46 – Picnic-bontekst: gestructureerde regels, geen OCR. */
+/* V1.4.202.47 – Picnic-bontekst: gestructureerde regels, geen OCR. */
 (function(root){
 'use strict';
 function parsePicnicPastedText(raw){
  const lines=String(raw||'').replace(/\r/g,'').split('\n').map(s=>s.trim()).filter(Boolean);
- const financial=/^(?:statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|ingeleverd statiegeld|eindtotaal|voordeel|totaal betaald)$/i;
+ const financial=/^(?:statiegeld|flessen en blikjes|tasjes|verrekening picnic-tegoed|subtotaal|ingeleverd statiegeld|eindtotaal|voordeel|totaal(?:\s+al)?\s+betaald(?:\s+via\s+ideal)?|picnic-tegoed)$/i;
  const stop=lines.findIndex(s=>financial.test(s));
  const body=stop<0?lines:lines.slice(0,stop);
  const starts=[];
@@ -16,10 +16,13 @@ function parsePicnicPastedText(raw){
  for(let j=0;j<starts.length;j++){
    const s=starts[j],next=starts[j+1],segment=body.slice(s.second+1,next?next.first:body.length);
    // Het cijfer direct vóór de eerste productnaam is het aantal.
-   const qtyToken=body[s.first-1];
-   const qty=/^\d{1,3}$/.test(qtyToken||'')?Number(qtyToken):1;
-   // Het laatste losse cijfer vóór het volgende product hoort bij dat volgende product.
-   if(next&&segment.length&&/^\d{1,3}$/.test(segment[segment.length-1]))segment.pop();
+   // Picnic plaatst het aantal na de prijs, niet vóór de volgende productnaam.
+   // Daardoor werd bijvoorbeeld '2' van het rundergehakt aan de kruidenmix gekoppeld.
+   let qty=1;
+   if(segment.length && /^\d{1,3}$/.test(segment[segment.length-1]) &&
+      segment.length>=2 && segment[segment.length-2]==='.'){
+     qty=Number(segment.pop());
+   }
    const prices=[];
    for(let k=0;k<segment.length;k++){
      if(/^\d{1,4}$/.test(segment[k])&&/^\d{2}$/.test(segment[k+1]||'')&&segment[k+2]==='.'){
@@ -36,16 +39,18 @@ function parsePicnicPastedText(raw){
  const dateMatch=String(raw).match(/(?:bezorging van|bezorgd op)\s+(?:maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)?\s*(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(20\d{2})/i);
  const months=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
  const date=dateMatch?`${dateMatch[3]}-${String(months.indexOf(dateMatch[2].toLowerCase())+1).padStart(2,'0')}-${dateMatch[1].padStart(2,'0')}`:'';
- function financialAmount(label){const i=lines.findIndex(x=>x.toLowerCase()===label);if(i<0)return null;const a=lines.slice(i+1,i+5);const m=a.join(' ').match(/^(-?\d+)\s+(\d{2})\s*\./);return m?Math.round((Number(m[1])*100+(Number(m[1])<0?-1:1)*Number(m[2])))/100:null;}
+ function financialAmount(label){const i=lines.findIndex(x=>x.toLowerCase()===label);if(i<0)return null;const a=lines.slice(i+1,i+5);const m=a.join(' ').match(/^([+-]?\d+)\s+(\d{2})\s*\./);return m?Math.round((Number(m[1])*100+(Number(m[1])<0?-1:1)*Number(m[2])))/100:null;}
  const subtotal=financialAmount('subtotaal');
- const paid=financialAmount('eindtotaal')??financialAmount('totaal betaald');
+ const paid=financialAmount('eindtotaal')??financialAmount('totaal betaald')??financialAmount('totaal al betaald via ideal');
  const deposit=financialAmount('statiegeld');
  const returned=financialAmount('ingeleverd statiegeld');
  const credit=financialAmount('verrekening picnic-tegoed');
+ const earnedCredit=financialAmount('picnic-tegoed');
  if(paid===null)warnings.push('Betaald eindtotaal ontbreekt: handmatig invullen');
- if(credit!==null&&credit!==0)warnings.push('Picnic-tegoed ('+credit.toFixed(2)+') apart controleren; niet als product geboekt');
+ if(credit!==null&&credit!==0)warnings.push('Verrekend Picnic-tegoed ('+credit.toFixed(2)+') apart controleren; niet als product geboekt');
+ if(earnedCredit!==null&&earnedCredit!==0)warnings.push('Nieuw Picnic-tegoed ('+earnedCredit.toFixed(2)+') is voor een volgende bestelling; niet bij deze bon optellen');
  if(subtotal!==null)warnings.push('Subtotaal volgens Picnic: € '+subtotal.toFixed(2));
- return {__parsedReceipt:true,store:'Picnic',date,total:paid,originalTotal:paid,baseTotal:paid,lines:products,statiegeldBetaald:deposit??0,statiegeldRetour:returned??0,needsReview:true,recognitionWarnings:warnings,raw:String(raw),pasteMode:true,financial:{subtotal,deposit,returned,credit}};
+ return {__parsedReceipt:true,store:'Picnic',date,total:paid,originalTotal:paid,baseTotal:paid,lines:products,statiegeldBetaald:deposit??0,statiegeldRetour:returned??0,needsReview:true,recognitionWarnings:warnings,raw:String(raw),pasteMode:true,financial:{subtotal,deposit,returned,credit,earnedCredit}};
 }
 root.parsePicnicPastedText=parsePicnicPastedText;
 if(typeof module!=='undefined'&&module.exports)module.exports=parsePicnicPastedText;
