@@ -590,12 +590,22 @@ function hasMeaningfulInsightData(data) {
 
 // Pending bonnen blijven lokaal staan tot de server de wijziging bevestigt.
 const RECEIPT_PENDING_KEY='hc-receipts-pending-v1';
+const RECEIPT_DELETED_KEY='hc-receipts-deleted-v1';
+function localDeletedReceipts(){try{const v=JSON.parse(localStorage.getItem(RECEIPT_DELETED_KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch(_){return {}}}
+function mergeDeletedReceipts(remote){
+  const remoteDeleted=(remote?.deletedReceipts&&typeof remote.deletedReceipts==='object')?remote.deletedReceipts:{};
+  const deleted={...remoteDeleted};
+  for(const [id,when] of Object.entries(localDeletedReceipts()))deleted[id]=Math.max(Number(deleted[id])||0,Number(when)||0);
+  localStorage.setItem(RECEIPT_DELETED_KEY,JSON.stringify(deleted));
+  return {...remote,deletedReceipts:deleted,receipts:(remote?.receipts||[]).filter(r=>!Object.prototype.hasOwnProperty.call(deleted,String(r.id)))};
+}
+
 function pendingReceiptIds(){try{return JSON.parse(localStorage.getItem(RECEIPT_PENDING_KEY)||'[]')}catch(_){return []}}
 function pendingReceipts(){const ids=new Set(pendingReceiptIds());return (window.getHuizeChaosInsightData?.().receipts||[]).filter(r=>ids.has(String(r.id)))}
 function mergePendingReceipts(remote){
   const pending=pendingReceipts();if(!pending.length)return remote;
   const merged={...remote,receipts:[...(remote.receipts||[])]};
-  for(const receipt of pending){const i=merged.receipts.findIndex(r=>String(r.id)===String(receipt.id));if(i<0)merged.receipts.push(receipt);else if(Number(receipt.changedAt||0)>Number(merged.receipts[i].changedAt||0))merged.receipts[i]=receipt}
+  for(const receipt of pending){if(Object.prototype.hasOwnProperty.call(merged.deletedReceipts,String(receipt.id)))continue;const i=merged.receipts.findIndex(r=>String(r.id)===String(receipt.id));if(i<0)merged.receipts.push(receipt);else if(Number(receipt.changedAt||0)>Number(merged.receipts[i].changedAt||0))merged.receipts[i]=receipt}
   return merged;
 }
 let insightWriting=false;
@@ -613,6 +623,9 @@ async function syncInsightNow() {
     const pending=pendingReceiptIds();
     const confirmed=pending.filter(id=>(server?.receipts||[]).some(r=>String(r.id)===id));
     if(confirmed.length){localStorage.setItem(RECEIPT_PENDING_KEY,JSON.stringify(pending.filter(id=>!confirmed.includes(id))));window.dispatchEvent(new CustomEvent('huize-chaos-receipt-sync-confirmed',{detail:{ids:confirmed}}))}
+    const deleted=localDeletedReceipts();
+    const remaining=Object.keys(deleted).filter(id=>(server?.receipts||[]).some(r=>String(r.id)===id));
+    if(remaining.length)throw new Error('Verwijdering van bonnen nog niet bevestigd: '+remaining.length);
     setSyncStatus('Gesynchroniseerd');
     if(insightLocalDirty)scheduleInsightSync();
     return true;
@@ -653,7 +666,7 @@ async function startInsightSync() {
     window.applyHuizeChaosInsightData?.(mergePendingReceipts(snapshot.data()));
     applyingInsightCloud=false;
   },error=>console.error('Inzicht live synchronisatie mislukt',error));
-  if(pendingReceiptIds().length)scheduleInsightSync();
+  if(pendingReceiptIds().length||Object.keys(localDeletedReceipts()).length)scheduleInsightSync();
 }
 window.addEventListener('huize-chaos-insight-changed',scheduleInsightSync);
 

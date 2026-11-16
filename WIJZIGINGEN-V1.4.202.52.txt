@@ -1,0 +1,1 @@
+V1.4.202.52 — Verwijderregistratie voor bonnen, filtering van verwijderde bon-ID’s bij serverupdates en controle op online verwijdering.
