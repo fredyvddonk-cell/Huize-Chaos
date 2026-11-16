@@ -1,0 +1,1 @@
+V1.4.202.44: Picnic PDF-import hersteld: aantallen uit linker kolom, volledige productnamen, actieprijzen en bonbedragen op basis van PDF-posities. Statiegeldretour apart; subtotalen en eindtotalen geen productregels. Getest met de Picnic Outlook-PDF van 15 november 2026 (23 productregels, producten €49,23; retour €0,39; betaald €48,84). Bestaande functies behouden.

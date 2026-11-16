@@ -1,6 +1,6 @@
-// V1.4.202.43 - compacte, eerlijke synchronisatiestatus naast het versienummer.
+// V1.4.202.44 - compacte, eerlijke synchronisatiestatus naast het versienummer.
 (() => {
-  const VERSION = 'V1.4.202.43';
+  const VERSION = 'V1.4.202.44';
   const VERSION_SELECTORS = ['.module-version', '.version', '.hc-version'];
   const SYNC_SELECTORS = ['#recipeSyncStatus', '#occasionSyncStatus', '#syncStatus', '#sync'];
 
