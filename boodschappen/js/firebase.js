@@ -588,50 +588,74 @@ function hasMeaningfulInsightData(data) {
   return Boolean((data?.receipts?.length) || Number(data?.budgetWeek) || Number(data?.budgetMonth) || Object.keys(data?.categoryMemory || {}).length || Object.keys(data?.receiptStockLinks || {}).length);
 }
 
+// Pending bonnen blijven lokaal staan tot de server de wijziging bevestigt.
+const RECEIPT_PENDING_KEY='hc-receipts-pending-v1';
+function pendingReceiptIds(){try{return JSON.parse(localStorage.getItem(RECEIPT_PENDING_KEY)||'[]')}catch(_){return []}}
+function pendingReceipts(){const ids=new Set(pendingReceiptIds());return (window.getHuizeChaosInsightData?.().receipts||[]).filter(r=>ids.has(String(r.id)))}
+function mergePendingReceipts(remote){
+  const pending=pendingReceipts();if(!pending.length)return remote;
+  const merged={...remote,receipts:[...(remote.receipts||[])]};
+  for(const receipt of pending){const i=merged.receipts.findIndex(r=>String(r.id)===String(receipt.id));if(i<0)merged.receipts.push(receipt);else if(Number(receipt.changedAt||0)>Number(merged.receipts[i].changedAt||0))merged.receipts[i]=receipt}
+  return merged;
+}
+let insightWriting=false;
 async function syncInsightNow() {
-  if (!user || !role || !insightCloudReady || applyingInsightCloud || !window.getHuizeChaosInsightData) return;
-  const data = window.getHuizeChaosInsightData();
-  await setDoc(insightRef, { ...data, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: true });
-  insightLocalDirty = false;
+  if (!user || !role || !insightCloudReady || applyingInsightCloud || !window.getHuizeChaosInsightData) return false;
+  if(insightWriting){insightLocalDirty=true;return false}
+  insightWriting=true;
+  try{
+    const data=window.getHuizeChaosInsightData();
+    insightLocalDirty=false;
+    await setDoc(insightRef,{...data,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:true});
+    // Bevestiging is pas geldig na servercontrole (niet alleen lokale Firestore-cache).
+    const verified=await getDocsFromServer(collection(db,'households',HOUSEHOLD_ID,'insight'));
+    const server=verified.docs.find(d=>d.id==='shared')?.data();
+    const pending=pendingReceiptIds();
+    const confirmed=pending.filter(id=>(server?.receipts||[]).some(r=>String(r.id)===id));
+    if(confirmed.length){localStorage.setItem(RECEIPT_PENDING_KEY,JSON.stringify(pending.filter(id=>!confirmed.includes(id))));window.dispatchEvent(new CustomEvent('huize-chaos-receipt-sync-confirmed',{detail:{ids:confirmed}}))}
+    setSyncStatus('Gesynchroniseerd');
+    if(insightLocalDirty)scheduleInsightSync();
+    return true;
+  }catch(error){insightLocalDirty=true;setSyncStatus('Syncfout', 'error');throw error}
+  finally{insightWriting=false}
 }
-
-
 function scheduleInsightSync() {
-  if (applyingInsightCloud) return;
-  insightLocalDirty = true;
-  if (!insightCloudReady) return;
+  if(applyingInsightCloud)return;
+  insightLocalDirty=true;
+  if(!insightCloudReady)return;
   clearTimeout(insightSyncTimer);
-  insightSyncTimer = setTimeout(() => syncInsightNow().catch(error => {
-    console.error('Synchronisatie Inzicht mislukt', error);
-    setSyncStatus('Syncfout', 'error');
-  }), 300);
+  insightSyncTimer=setTimeout(()=>syncInsightNow().catch(error=>{
+    console.error('Synchronisatie Inzicht mislukt',error);
+    setSyncStatus('Syncfout','error');
+    // Herhaal automatisch zolang de app open is; lokale bonnen blijven behouden.
+    insightSyncTimer=setTimeout(()=>syncInsightNow().catch(e=>console.error('Herhaling Inzicht sync mislukt',e)),12000);
+  }),300);
 }
-
+window.huizeChaosRetryReceiptSync=async()=>{
+  if(!user||!role||!insightCloudReady)throw new Error('Geen verbinding met Huize Chaos.');
+  clearTimeout(insightSyncTimer);return syncInsightNow();
+};
 async function startInsightSync() {
-  stopInsight?.();
-  insightCloudReady = false;
-  const first = await getDoc(insightRef);
-  const local = window.getHuizeChaosInsightData?.() || {};
-  if (first.exists()) {
-    applyingInsightCloud = true;
-    window.applyHuizeChaosInsightData?.(first.data());
-    applyingInsightCloud = false;
-  } else if (hasMeaningfulInsightData(local)) {
-    // Veilige eerste migratie: alleen een toestel met bestaande Inzicht-data mag
-    // de nog lege cloud vullen. Een lege laptop kan de telefoon dus niet wissen.
-    await setDoc(insightRef, { ...local, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: false });
+  stopInsight?.();insightCloudReady=false;
+  const first=await getDoc(insightRef);
+  const local=window.getHuizeChaosInsightData?.()||{};
+  if(first.exists()){
+    applyingInsightCloud=true;
+    window.applyHuizeChaosInsightData?.(mergePendingReceipts(first.data()));
+    applyingInsightCloud=false;
+  }else if(hasMeaningfulInsightData(local)){
+    await setDoc(insightRef,{...local,updatedAt:serverTimestamp(),updatedBy:user.uid},{merge:false});
   }
-  insightCloudReady = true;
-  stopInsight = onSnapshot(insightRef, snapshot => {
-    if (!snapshot.exists() || insightLocalDirty) return;
-    applyingInsightCloud = true;
-    window.applyHuizeChaosInsightData?.(snapshot.data());
-    applyingInsightCloud = false;
-  }, error => console.error('Inzicht live synchronisatie mislukt', error));
+  insightCloudReady=true;
+  stopInsight=onSnapshot(insightRef,snapshot=>{
+    if(!snapshot.exists()||insightLocalDirty)return;
+    applyingInsightCloud=true;
+    window.applyHuizeChaosInsightData?.(mergePendingReceipts(snapshot.data()));
+    applyingInsightCloud=false;
+  },error=>console.error('Inzicht live synchronisatie mislukt',error));
+  if(pendingReceiptIds().length)scheduleInsightSync();
 }
-
-window.addEventListener('huize-chaos-insight-changed', scheduleInsightSync);
-
+window.addEventListener('huize-chaos-insight-changed',scheduleInsightSync);
 
 
 async function syncHutselNow(){

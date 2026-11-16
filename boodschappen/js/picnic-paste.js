@@ -1,4 +1,4 @@
-/* V1.4.202.49 – Picnic-bontekst: gestructureerde regels, geen OCR. */
+/* V1.4.202.50 – Picnic-bontekst: gestructureerde regels, geen OCR. */
 (function(root){
 'use strict';
 function parsePicnicPastedText(raw){

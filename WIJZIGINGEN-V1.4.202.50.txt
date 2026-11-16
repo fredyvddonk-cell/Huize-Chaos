@@ -1,0 +1,1 @@
+V1.4.202.50 - Bonnen: lokaal bewaarde bonnen beschermen tegen overschrijven door cloud; serverbevestiging controleren; opnieuw proberen en duidelijke status na opslaan.
