@@ -38,10 +38,11 @@ function renderHcWeekCheck(){
   const groupedRows=[...groups].map(([place,items])=>`<section class="hc-weekcheck-place"><h3 style="margin:12px 0 5px;font-size:1rem">${esc(place)}</h3>${items.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #ddd"><input type="checkbox" ${state.checked[String(p.id)]?'checked':''} onchange="hcToggleWeekCheck(${JSON.stringify(p.id)},this.checked)"><span>${esc(p.name)}</span></label>`).join('')}</section>`).join('');
   const count=rows.filter(p=>state.checked[String(p.id)]).length;
   const expanded=localStorage.getItem('hc-weekcheck-expanded')==='yes';
-  host.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong id="hcWeekCheckCounter">Weekboodschappen · ${count}/${rows.length} in huis</strong><button type="button" onclick="localStorage.setItem('hc-weekcheck-expanded',${expanded?'\'no\'':'\'yes\''});render()">${expanded?'Verbergen':'Controleren'}</button></div>`+
+  host.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong id="hcWeekCheckCounter">Weekboodschappen · ${count}/${rows.length} in huis</strong><button type="button" onclick="hcToggleWeekPanel()">${expanded?'Verbergen':'Controleren'}</button></div>`+
     (expanded?`<p style="margin:6px 0">Vink aan wat je al in huis hebt. Niet aangevinkt = nog controleren of kopen. Maaltijdvoorraad staat hier niet tussen.</p><div style="max-height:310px;overflow:auto">${groupedRows}</div><button type="button" onclick="hcAddWeekMissing()">Niet-afgevinkte producten op boodschappenlijst zetten</button>`:'');
 }
 
+window.hcToggleWeekPanel=()=>{localStorage.setItem('hc-weekcheck-expanded',localStorage.getItem('hc-weekcheck-expanded')==='yes'?'no':'yes');renderHcWeekCheck()};
 let expandedShoppingGroups = new Set(JSON.parse(localStorage.getItem('household-expanded-shopping') || '[]'));
 let shoppingStoreFilter = localStorage.getItem('household-shopping-store-filter') || 'all';
 

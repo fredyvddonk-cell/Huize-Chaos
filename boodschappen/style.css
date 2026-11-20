@@ -1648,3 +1648,9 @@ body.receipt-reordering #receiptModal{touch-action:none}
 
 /* V1.4.202.49 – geplakte bon als leesbare bron */
 #receiptModal .receipt-preview-text{white-space:pre-wrap;overflow-wrap:anywhere;box-sizing:border-box;max-width:none;max-height:none;min-width:240px;margin:0 auto;padding:16px;background:#fff;color:#302b37;font:13px/1.5 ui-monospace,Consolas,monospace}
+/* V1.4.202.53: categorieën direct toegankelijk */
+#receiptModal .receipt-row-summary{display:flex!important;gap:6px;align-items:center;white-space:normal!important;overflow:visible!important;flex-wrap:wrap}
+#receiptModal .receipt-row-summary .receipt-cell{display:block!important;flex:1;min-width:110px; margin:0!important;grid-column:auto!important;grid-row:auto!important}
+#receiptModal .receipt-row-summary label{display:none!important}
+#receiptModal .receipt-row-summary select{display:block!important;width:100%;font-size:12px!important;min-height:28px!important;padding:2px 4px!important}
+button.receipt-view-product{width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #ddd;cursor:pointer;color:inherit}

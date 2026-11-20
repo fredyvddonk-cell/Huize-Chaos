@@ -1,0 +1,8 @@
+V1.4.202.53
+- Categorisatie: specifieke herkenning, onbekend naar Overig, correcties bewaren bij opslaan.
+- HC- en YNAB-categorie direct zichtbaar en wijzigbaar.
+- Feest apart in bonoverzicht en Inzicht; niet in reguliere boodschappen.
+- Weekcontrole direct openen en sluiten.
+- Bon wijzigen sluit eerst het bonoverzicht; product aantikken opent de juiste regel.
+- Geen automatische hercategorisatie van bestaande bonnen.
+- JavaScript-syntax gecontroleerd; browser- en synchronisatietest nog uit te voeren.
