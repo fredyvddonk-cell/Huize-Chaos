@@ -103,7 +103,7 @@ function applyInsightCloudData(data={}){const deleted={...((data.deletedReceipts
 window.getHuizeChaosInsightData=insightCloudData;
 window.applyHuizeChaosInsightData=applyInsightCloudData;
 const esc=s=>String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-const catFor=name=>{const n=normalizeProductName(name).replace(/\bafgeprijsd\b/g,'').trim(),remembered=categoryMemory()[normalizeProductName(name)]||categoryMemory()[n];if(CATS.includes(remembered))return remembered;for(const [c,re] of [['Ontbijt & lunch',/\b(?:glutenvrij bruin|drinkyogh\w*|houmous|hummus|vlokkenmix|jong beleg\w*|boterhamw\w*|grillw\w*|snijworst)\b/],['Dranken',/\b(?:aroma bonen|koffiebonen|appelsap)\b/],['Vlees & vis',/\bharing\b/],['Maaltijden',/\b(?:creme fraiche|crème fraîche|frites|friet)\b/]])if(re.test(n))return c;for(const [c,ks] of Object.entries(KEYWORDS))if(ks.some(k=>{const t=normalizeProductName(k);return n.split(' ').some(w=>w===t||(t.length>=4&&w.startsWith(t)))||(' '+n+' ').includes(' '+t+' ')}))return c;return 'Overig'};
+const catFor=name=>{const n=normalizeProductName(name).replace(/\bafgeprijsd\b/g,'').trim(),remembered=categoryMemory()[normalizeProductName(name)]||categoryMemory()[n];if(CATS.includes(remembered))return remembered;for(const [c,re] of [['Ontbijt & lunch',/\b(?:glutenvrij bruin|drinkyogh\w*|houmous|hummus|vlokkenmix|jong beleg\w*|boterhamw\w*|grillw\w*|snijworst)\b/],['Dranken',/\b(?:aroma bonen|koffiebonen|appelsap)\b/],['Vlees & vis',/\bharing\b/],['Maaltijden',/\b(?:creme fraiche|crème fraîche|frites|friet|mihoen|satesaus|satésaus|geraspte (?:pittige )?kaas)\b/],['Groente & fruit',/\b(?:puntpaprika(?:s)?|bosui|cherrytomaatjes|blauwe bessen|spitskool|ijsbergsla)\b/],['Snacks & lekkers',/\b(?:cashewnoten|speculaasstaaf)\b/]])if(re.test(n))return c;for(const [c,ks] of Object.entries(KEYWORDS))if(ks.some(k=>{const t=normalizeProductName(k);return n.split(' ').some(w=>w===t||(t.length>=4&&w.startsWith(t)))||(' '+n+' ').includes(' '+t+' ')}))return c;return 'Overig'};
 function bounds(){let now=new Date(),start,end,label;if(mode==='week'){let d=new Date(now);d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);start=new Date(d.getFullYear(),d.getMonth(),d.getDate());end=new Date(start);end.setDate(end.getDate()+7);label=`Week van ${start.toLocaleDateString('nl-NL',{day:'numeric',month:'long'})}`;}else{start=new Date(now.getFullYear(),now.getMonth()+offset,1);end=new Date(now.getFullYear(),now.getMonth()+offset+1,1);label=start.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});label=label[0].toUpperCase()+label.slice(1);}return{start,end,label}}
 function filtered(){let {start,end}=bounds();return receipts().filter(r=>r.status!=='pending').filter(r=>{let d=new Date(r.date+'T12:00:00');return d>=start&&d<end})}
 function totals(rs,regularOnly=false){let by=Object.fromEntries(CATS.map(c=>[c,0]));rs.forEach(r=>(r.lines||[]).forEach(l=>{if((l.ynabCategory&&l.ynabCategory!=='Boodschappen')||isOutside(l)||(regularOnly&&isLargeStockPurchase(l)))return;by[CATS.includes(l.category)?l.category:'Overig']+=(+l.price||0)}));return by}
@@ -767,17 +767,29 @@ function parsePicnicPdfPages(pageItems,rawText){
     const v=String(t||'').replace(/[€\s]/g,'').replace('−','-').replace(',','.');
     if(/^[+-]?\d{1,4}\.\d{2}$/.test(v))return Number(v);
     if(/^[+-]?\d{3,5}$/.test(v))return Number(v)/100;
+    if(/^[+-]?\d{1,2}$/.test(v))return Number(v)/100;
     return null;
   };
   const fields=pageItems.map(items=>items.map(i=>({
     x:Number(i.transform?.[4]||0),y:Number(i.transform?.[5]||0),
     text:String(i.str||'').trim()
   })).filter(i=>i.text));
-  const amountNear=(items,y,range=13)=>{
-    const matches=items.filter(i=>i.x>=360&&i.x<440&&Math.abs(i.y-y)<=range)
-      .map(i=>({y:i.y,value:moneyToken(i.text)})).filter(i=>i.value!==null);
-    return matches.sort((a,b)=>Math.abs(a.y-y)-Math.abs(b.y-y))[0]?.value??null;
+  const readPrice=(items,y,range=17)=>{
+    const tokens=items.filter(i=>i.x>=385&&i.x<445&&Math.abs(i.y-y)<=range)
+      .filter(i=>/[0-9]/.test(i.text)).sort((a,b)=>Math.abs(a.y-y)-Math.abs(b.y-y));
+    for(const t of tokens){
+      const direct=moneyToken(t.text);
+      if(direct!==null&&Number.isFinite(direct))return direct;
+      const digits=t.text.replace(/\D/g,'');
+      if(/^\d{1,2}$/.test(digits)){
+        const cent=tokens.find(c=>c!==t&&c.x>t.x+3&&Math.abs(c.y-t.y)<12&&/^\d{2}$/.test(c.text.trim()));
+        if(cent)return Number(digits+'.'+cent.text.trim());
+      }
+    }
+    return null;
   };
+  const amountNear=(items,y,range=17)=>readPrice(items,y,range);
+
   for(let p=0;p<fields.length;p++){
     const items=fields[p],rows=groupPdfItems(pageItems[p],4);
     const order=rows.find(r=>/\border\s+\d/i.test(r.text));
@@ -806,10 +818,13 @@ function parsePicnicPdfPages(pageItems,rawText){
       const main=productParts.filter(r=>r.y>=badge.y-10&&r.y<=badge.y+43);
       const name=main.sort((a,b)=>b.y-a.y).map(r=>r.parts).join(' ').replace(/\s+/g,' ').trim();
       if(!name||!/\p{L}/u.test(name)||/^(?:totaal|subtotaal|bestelling|voordeel|statiegeld|tasjes|verrekening|btw)\b/i.test(name))continue;
-      const prices=items.filter(i=>i.x>=388&&i.x<440&&i.y<=hi&&i.y>=lo)
-        .map(i=>({y:i.y,value:moneyToken(i.text)})).filter(i=>i.value!==null&&i.value>=0&&i.value<500)
+      // Prefer the lowest (discounted) price inside this product's own region.
+      // The PDF prints 1.99 as a '199' glyph plus a raised dot.
+      const priceTokens=items.filter(i=>i.x>=385&&i.x<445&&i.y<=hi&&i.y>=lo&&/[0-9]/.test(i.text));
+      const priceCandidates=priceTokens.map(i=>({y:i.y,value:readPrice(priceTokens,i.y,5)}))
+        .filter(i=>i.value!==null&&i.value>=0&&i.value<500)
         .sort((a,b)=>a.y-b.y);
-      const price=prices.length?prices[0].value:0;
+      const price=priceCandidates.length?priceCandidates[0].value:0;
       parsed.push({name:name.slice(0,110),qty:Number(badge.text),price:+price.toFixed(2),category:catFor(name),__page:p,__y:badge.y});
     }
     for(const r of rows){

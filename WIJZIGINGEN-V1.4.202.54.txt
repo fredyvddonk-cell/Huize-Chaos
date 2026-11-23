@@ -1,0 +1,6 @@
+V1.4.202.54
+- Picnic PDF: verbeterde uitlezing van verhoogde centbedragen en Family-prijzen.
+- Extra productherkenning voor groenten, noten, kaas en Picnic-producten.
+- Versienummer en cacheverwijzingen vernieuwd.
+LET OP: koppeling kassabonnen aan gelegenheden en automatische feest-evaluatie zijn nog NIET geïmplementeerd; die onderdelen vragen verdere ontwikkeling en synchronisatietests.
+Controleer de Picnic-bon handmatig voor opslaan.
