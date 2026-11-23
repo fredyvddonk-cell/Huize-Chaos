@@ -1,4 +1,4 @@
-V1.4.202.54
+V1.4.202.55
 - Picnic PDF: verbeterde uitlezing van verhoogde centbedragen en Family-prijzen.
 - Extra productherkenning voor groenten, noten, kaas en Picnic-producten.
 - Versienummer en cacheverwijzingen vernieuwd.

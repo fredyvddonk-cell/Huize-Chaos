@@ -775,18 +775,25 @@ function parsePicnicPdfPages(pageItems,rawText){
     text:String(i.str||'').trim()
   })).filter(i=>i.text));
   const readPrice=(items,y,range=17)=>{
+    // Picnic PDF: euro and raised cents are separate positioned glyphs.
+    // Never interpret a single euro digit as cents before attempting the pair.
     const tokens=items.filter(i=>i.x>=385&&i.x<445&&Math.abs(i.y-y)<=range)
-      .filter(i=>/[0-9]/.test(i.text)).sort((a,b)=>Math.abs(a.y-y)-Math.abs(b.y-y));
-    for(const t of tokens){
-      const direct=moneyToken(t.text);
-      if(direct!==null&&Number.isFinite(direct))return direct;
-      const digits=t.text.replace(/\D/g,'');
-      if(/^\d{1,2}$/.test(digits)){
-        const cent=tokens.find(c=>c!==t&&c.x>t.x+3&&Math.abs(c.y-t.y)<12&&/^\d{2}$/.test(c.text.trim()));
-        if(cent)return Number(digits+'.'+cent.text.trim());
+      .filter(i=>/[0-9]/.test(i.text));
+    const pairs=[];
+    for(const whole of tokens){
+      const euros=whole.text.trim().replace(/[€\s]/g,'').replace('−','-');
+      if(!/^[+-]?\d{1,3}$/.test(euros))continue;
+      for(const cent of tokens){
+        if(cent===whole||!/^\d{2}$/.test(cent.text.trim()))continue;
+        if(cent.x<=whole.x+3||cent.x-whole.x>35||Math.abs(cent.y-whole.y)>5)continue;
+        pairs.push({value:Number(euros+'.'+cent.text.trim()),distance:Math.abs(whole.y-y),x:whole.x});
       }
     }
-    return null;
+    if(pairs.length){pairs.sort((a,b)=>a.distance-b.distance||a.x-b.x);return pairs[0].value;}
+    const direct=tokens.map(t=>({value:moneyToken(t.text),distance:Math.abs(t.y-y)}))
+      .filter(t=>t.value!==null&&Number.isFinite(t.value));
+    direct.sort((a,b)=>a.distance-b.distance);
+    return direct.length?direct[0].value:null;
   };
   const amountNear=(items,y,range=17)=>readPrice(items,y,range);
 

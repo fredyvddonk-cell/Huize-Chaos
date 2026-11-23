@@ -1,0 +1,5 @@
+V1.4.202.55 – Picnic PDF prijsherstel
+- Lees euro- en centglyphs samen op basis van hun positie voordat een los cijfer als geldbedrag wordt verwerkt.
+- Family-prijzen en betaalde eindtotalen gebruiken dezelfde gecorrigeerde herkenning.
+- AH/Jumbo parser niet gewijzigd.
+- Controleer prijzen en totaal van de Picnic-bon vóór opslaan.
