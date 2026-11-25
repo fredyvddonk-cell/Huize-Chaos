@@ -1,4 +1,4 @@
-let hc57Future=false;
+let hc57Future=true;
 const STORAGE_KEY='huizeChaosPlannerV130';
 const SEED_KEY='huizeChaosCarTasksV131';
 const HOUSE_SEED_KEY='huizeChaosHouseTasksV138';
@@ -632,7 +632,7 @@ function render(){renderHouseholdTime();renderStudy();renderRecurringChecklists(
     const filter=document.getElementById('hc58Filter').value;
     const found=entries.filter(item=>item.type==='appointment'&&(document.getElementById('hc57Past').checked||item.date>=todayKey())&&(filter==='all'||(filter==='work')===(item.category==='work'))&&[item.title,item.note,...participantNames(item)].join(' ').toLocaleLowerCase('nl-NL').includes(query)).sort(appointmentSearchSort);
     els.appointmentSearchStatus.textContent=`${found.length} afspraken gevonden`;
-    let last='';els.appointments.innerHTML=found.map(item=>{const heading=last===item.date?'':`<button class="hc58-date" type="button" data-hc57-day="${escapeHtml(item.date)}">${escapeHtml(dateSearchLabel(item.date))} ›</button>`;last=item.date;return heading+`<button class="hc58-result" type="button" data-edit="${escapeHtml(item.id)}"><span>${escapeHtml(appointmentTime(item))}</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(participantNames(item).join(', '))}</small>${privacyBadge(item)}</span><span>›</span></button>`}).join('')||'<div class="empty">Geen afspraak gevonden</div>';
+    let last='';els.appointments.innerHTML=found.map(item=>{const first=last!==item.date;last=item.date;const date=first?`<button class="hc59-day" type="button" data-hc57-day="${escapeHtml(item.date)}" aria-label="${escapeHtml(dateSearchLabel(item.date))}">${escapeHtml(new Intl.DateTimeFormat('nl-NL',{weekday:'short',day:'numeric',month:'short',year:'2-digit'}).format(new Date(item.date+'T12:00:00')))}</button>`:'';return `<div class="hc59-row"><div class="hc59-when">${date}<small>${escapeHtml(appointmentTime(item))}</small></div><button class="hc59-detail" type="button" data-edit="${escapeHtml(item.id)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(participantNames(item).join(', '))}</small>${privacyBadge(item)}</span><span>›</span></button></div>`}).join('')||'<div class="empty">Geen afspraak gevonden</div>';
   }else{els.appointmentSearchStatus.textContent='';els.appointments.innerHTML=appointments.length?appointments.map(renderAppointment).join(''):'<div class="empty">Geen afspraken voor vandaag</div>'}
   els.tasks.innerHTML=tasks.length?tasks.map(renderTask).join(''):'<div class="empty">Nog geen taken voor vandaag</div>';
   els.upcoming.innerHTML=upcoming.length?upcoming.map(renderUpcoming).join(''):'<div class="empty">Geen geplande items</div>';
@@ -784,7 +784,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function hc57People(){const box=document.getElementById('hc57People');box.replaceChildren();const key=n=>String(n).trim().toLocaleLowerCase('nl-NL');const names=new Map();for(const n of [firstName(window.huizeChaosPlannerUserName||''),...entries.flatMap(participantNames),...parseParticipants(els.participants.value)]){if(n&&!names.has(key(n)))names.set(key(n),key(n).replace(/^./,c=>c.toUpperCase()))}for(const [k,name] of names){const b=document.createElement('button');b.type='button';b.textContent=name;b.setAttribute('aria-pressed',String(parseParticipants(els.participants.value).some(n=>key(n)===k)));b.onclick=()=>{const selected=parseParticipants(els.participants.value);els.participants.value=(selected.some(n=>key(n)===k)?selected.filter(n=>key(n)!==k):[...selected,name]).join(', ');hc57People()};box.append(b)}}
 els.participants.addEventListener('change',hc57People);
 for(const input of [els.time,els.endTime]){input.addEventListener('input',()=>{const digits=input.value.replace(/\D/g,'').slice(0,4);input.value=digits.length>2?digits.slice(0,2)+':'+digits.slice(2):digits;if(digits.length===4&&input===els.time&&input.validity.valid)els.endTime.focus()});input.addEventListener('blur',()=>{if(/^\d{1,2}:\d{2}$/.test(input.value))input.value=input.value.padStart(5,'0')})}
-document.getElementById('hc57Future').onclick=()=>{hc57Future=!hc57Future;document.getElementById('hc57Future').setAttribute('aria-pressed',String(hc57Future));render()};document.getElementById('hc57Past').onchange=render;
+document.getElementById('hc57Past').onchange=render;
 els.appointments.addEventListener('click',e=>{const b=e.target.closest('[data-hc57-day]');if(b){els.dateSearch.value=b.dataset.hc57Day;renderDateSearch();els.dateSearchResults.scrollIntoView({block:'start'})}});
 
 document.getElementById("hc58Filter").onchange=()=>{hc57Future=true;render()};

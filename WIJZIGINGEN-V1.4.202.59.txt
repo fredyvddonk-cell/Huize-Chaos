@@ -1,0 +1,1 @@
+Compact afsprakenoverzicht, automatisch groeiend bereidingsveld, ruimere eenheden, correctie PDF-woorden vóór koppeling, herkenning eenheidsvarianten en praktische weergave-afronding. Geen opslagmigratie.
