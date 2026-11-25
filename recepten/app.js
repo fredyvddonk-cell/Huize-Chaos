@@ -1352,11 +1352,13 @@ function showImportedPhotoRecipeReview(){
 
 // V1.4.107 - Recept importeren uit PDF. Eerst tekstlaag, bij scan-PDF OCR als terugvalroute.
 function parseRecipeDocumentText(text,fileName='Recept'){
-  const raw=String(text||'').replace(/\r/g,'').replace(/[ \t]+/g,' ').trim();
+  const raw=String(text||'').replace(/\r/g,'').split(/wat vond je van dit gerecht/i)[0].replace(/[ \t]+/g,' ').trim();
   const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
   const sectionIndex=(rx)=>lines.findIndex(x=>rx.test(x));
   const ingIdx=sectionIndex(/^(ingrediënten|ingredienten|benodigdheden)(?:\s|$|:)/i);
-  const dirIdx=sectionIndex(/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(?:\s|$|:)/i);
+  let dirIdx=sectionIndex(/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(?:\s|$|:)/i);
+  const implicit=lines.findIndex((x,i)=>i>ingIdx&&/^(?:stap\s*1\b|1[.)]\s+|(?:verwarm|verhit|snijd|kook|bak|meng|pel|was|breng)\s+)/i.test(x));
+  const implicitDirections=implicit>=0&&(dirIdx<0||implicit<dirIdx);if(implicitDirections)dirIdx=implicit;
   const metaRx=/^(recept|hoofdgerecht|bijgerecht|nagerecht|lunch|ontbijt|\d+\s*(?:personen|pers\.?|minuten|min\.?|uur)|bereidingstijd|oventijd|wachten|allergie|voedingswaarden)/i;
   let title='';
   const titleEnd=[ingIdx,dirIdx].filter(i=>i>=0).sort((a,b)=>a-b)[0] ?? Math.min(lines.length,12);
@@ -1378,7 +1380,7 @@ function parseRecipeDocumentText(text,fileName='Recept'){
     .filter(x=>x.length<180&&!/^(bereiding|bereidingswijze|werkwijze|aan de slag)$/i.test(x))
     .map(parseIngredient).filter(x=>x.ingredient&&x.ingredient.length<140);
   let directions='';
-  if(dirIdx>=0) directions=lines.slice(dirIdx+1).filter(x=>!/^voedingswaarden/i.test(x)).join('\n');
+  if(dirIdx>=0) directions=lines.slice(dirIdx+(implicitDirections?0:1)).filter(x=>!/^voedingswaarden/i.test(x)).join('\n');
   const servings=(raw.match(/(?:aantal personen|voor)\s*:?[ ]*(\d+)\s*(?:personen|pers)?/i)||raw.match(/\b(\d+)\s+(?:personen|pers\.)\b/i)||[])[1]||'';
   const time=(raw.match(/(?:bereidingstijd|bereiden)\s*:?[ ]*(\d+)\s*(?:minuten|min\.?)/i)||raw.match(/\b(\d+)\s*minuten\b/i)||[])[1]||'';
   const homeTime=time?(Number(time)<=30?'short':Number(time)<=60?'medium':'long'):'';

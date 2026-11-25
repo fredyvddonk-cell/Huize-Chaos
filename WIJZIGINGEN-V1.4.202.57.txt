@@ -1,0 +1,1 @@
+Compact afspraakformulier, directe tijdinvoer, deelnemersknoppen, toekomstige afspraken zoeken en datum openen. PDF-receptimport: einde feedback en impliciete bereidingsstappen. Geen wijziging aan opslag- of Firebase-code. OCR-prijs en ontbrekende producten niet opgelost.
