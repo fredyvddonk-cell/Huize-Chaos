@@ -788,3 +788,5 @@ document.getElementById('hc57Past').onchange=render;
 els.appointments.addEventListener('click',e=>{const b=e.target.closest('[data-hc57-day]');if(b){els.dateSearch.value=b.dataset.hc57Day;renderDateSearch();els.dateSearchResults.scrollIntoView({block:'start'})}});
 
 document.getElementById("hc58Filter").onchange=()=>{hc57Future=true;render()};
+
+{const b=document.getElementById('hc60AppointmentsToggle'), body=document.getElementById('hc60AppointmentsBody');if(b&&body)b.addEventListener('click',()=>{body.hidden=!body.hidden;b.setAttribute('aria-expanded',String(!body.hidden));b.querySelector('span').textContent=body.hidden?'▸':'▾'});}

@@ -1,0 +1,1 @@
+V1.4.202.60: inklapbare afspraken, compacte ingrediëntcontrole, zoekfilter voorraad, correctie peper/zout en hoeveelheden in nieuwe imports. Geen opslagmigratie.
