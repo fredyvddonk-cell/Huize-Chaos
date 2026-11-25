@@ -356,3 +356,5 @@ html, body{
 .brand{gap:8px}.brand .hc-app-icon{width:44px!important;height:44px!important;object-fit:contain}.brand img:not(.hc-app-icon){height:31px!important;width:auto!important}.sync-status:empty{display:none}
 
 #hc60AppointmentsBody[hidden]{display:none!important}.hc60-toggle{display:flex;align-items:center;gap:8px;background:none;border:0;color:inherit;padding:6px 0;cursor:pointer}.hc60-toggle span{color:#9278bf}.hc60-toggle h2{margin:0}
+
+.hc62-future-label{color:inherit!important;font-weight:650}#hc60AppointmentsToggle{margin-top:8px}#hc62TodayAppointments{margin-bottom:4px}

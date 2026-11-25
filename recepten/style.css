@@ -339,3 +339,5 @@
 .hc60-ing{border-bottom:1px solid #e4ddea;padding:6px 0}.hc60-ing[hidden]{display:none!important}.hc60-ing summary{cursor:pointer;padding:8px 2px;overflow-wrap:anywhere}.hc60-ing-name{font-weight:650}.hc60-link-state{display:block;margin-left:18px;color:#8b4660}.hc60-ing[data-hc60-linked="1"] .hc60-link-state{color:#32705a}.hc60-filter{display:flex;align-items:center;gap:8px;margin:8px 0}.hc60-filter input{width:auto!important}.hc60-ing .ingredient-edit-row{margin-top:8px}.hc60-ing .ingredient-stock-link input{margin:6px 0;width:100%}
 
 .hc60-ing{padding:2px 0}.hc60-ing summary{padding:5px 2px}.hc60-link-state{font-size:.8rem;margin-top:1px}
+
+.hc62-stock-results{display:grid;gap:4px}.hc62-stock-choice{text-align:left;padding:9px;border:1px solid #e4ddea;border-radius:8px;background:var(--card,#fff);color:inherit}.hc60-ing select[hidden]{display:none!important}
