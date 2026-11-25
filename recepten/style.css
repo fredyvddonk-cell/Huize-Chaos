@@ -331,3 +331,5 @@
 .detail>.tabs .tab{padding:7px 8px;border-radius:10px;font-size:13px}
 .detail>.panel{padding:10px 12px}
 .detail .ing{padding:7px 0}
+
+.ing{grid-template-columns:48px 76px minmax(0,1fr) auto!important}.ing>*{min-width:0;overflow-wrap:anywhere}

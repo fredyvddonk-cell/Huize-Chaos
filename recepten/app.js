@@ -212,8 +212,12 @@ function bindEdit(){bindCommonEdit();detail.querySelector('#save').onclick=()=>{
 function showReview(){detail.innerHTML=`<div class="detail-head"><div><div class="review-label">Te controleren</div><h2>${esc(edited.title||'Gedeeld recept')}</h2><small>${esc(sourceLabel(edited))}</small></div><div class="actions"><button class="btn" id="backList">Terug</button></div></div><div class="review-note">Controleer het recept. Je kunt dit nu doen of later op een ander apparaat.</div>${editForm(edited,true)}`;detail.querySelector('#backList').onclick=()=>{savePendingEdit();backList()};bindCommonEdit();detail.querySelector('#keepPending').onclick=()=>{savePendingEdit();backList()};detail.querySelector('#approve').onclick=approvePending;detail.querySelector('#deletePending').onclick=()=>{const id=String(current).replace('pending:','');savePending(pending().filter(x=>String(x.id)!==id));backList()}}
 function savePendingEdit(){const id=String(current).replace('pending:','');const a=pending(),i=a.findIndex(x=>String(x.id)===id);if(i>=0){a[i]={...edited,id};savePending(a)}}
 function approvePending(){readClassificationEdits();if(!edited.title.trim()){alert('Vul eerst een titel in.');return}const id=String(current).replace('pending:',''),clean={...edited,id:'import-'+id,title:edited.title.trim(),ingredients:(edited.ingredients||[]).filter(x=>x.ingredient.trim()),status:'approved',imported:true};clean.addedAt=clean.addedAt||Date.now();saveCustom([...custom(),clean]);savePending(pending().filter(x=>String(x.id)!==id));current=clean.id;edited=JSON.parse(JSON.stringify(clean));showView('ingredients')}
-function parseIngredient(line){let s=String(line||'').replace(/^[-•*]\s*/,'').trim();const m=s.match(/^(\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])?(?:\s*(g|gr|kg|ml|cl|dl|l|el|tl|eetlepel(?:s)?|theelepel(?:s)?|stuks?|stuk|blik(?:je)?|zak(?:je)?|teen|tenen|teentje|teentjes|snuf(?:je)?)(?=\s|$))?\s*(.*)$/i);return{qty:(m?.[1]||'').replace(',','.'),unit:(m?.[2]||'').replace(/eetlepels?/i,'el').replace(/theelepels?/i,'tl'),ingredient:(m?.[3]||s).trim(),memo:''}}
-function parseSharedText(payload){const raw=[payload.title,payload.text].filter(Boolean).join('\n').replace(/\r/g,'').trim(),url=payload.url||raw.match(/https?:\/\/\S+/)?.[0]||'';const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>!/^https?:\/\//.test(x));let title=(payload.title||lines[0]||'Gedeeld recept').replace(/https?:\/\/\S+/g,'').trim();let ingStart=lines.findIndex(x=>/^ingred/i.test(x)),dirStart=lines.findIndex(x=>/^(bereiding|bereidingswijze|werkwijze|instructies?)/i.test(x));let ingLines=[],directions='';if(ingStart>=0){const end=dirStart>ingStart?dirStart:lines.length;ingLines=lines.slice(ingStart+1,end)}if(dirStart>=0)directions=lines.slice(dirStart+1).join('\n');else if(lines.length>1&&ingStart<0)directions=lines.slice(1).join('\n');return{id:crypto.randomUUID(),title,servings:'',ingredients:ingLines.map(parseIngredient).filter(x=>x.ingredient),directions,sourceUrl:url,source:sourceFromUrl(url),status:'pending',sharedAt:new Date().toISOString()}}
+function parseIngredient(line){let s=String(line||'').replace(/^[-•*]\s*/,'').trim();const m=s.match(/^(\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])?(?:\s*(g|gr|kg|ml|cl|dl|l|el|tl|eetlepel(?:s)?|theelepel(?:s)?|stuks?|stuk|krop|kroppen|bos|bossen|bol|bollen|blik(?:je)?|zak(?:je)?|teen|tenen|teentje|teentjes|snuf(?:je)?)(?=\s|$))?\s*(.*)$/i);return hc58Ingredient({qty:(m?.[1]||'').replace(',','.'),unit:(m?.[2]||'').replace(/eetlepels?/i,'el').replace(/theelepels?/i,'tl'),ingredient:(m?.[3]||s).trim(),memo:''})}
+function hc58Ingredient(item){let unit=String(item.unit||'').toLowerCase(),ingredient=item.ingredient; if(/^(?:stuks?|stuk\(s\))$/.test(unit)||!unit){const m=ingredient.match(/^(.*?)\s+(krop|kroppen|bos|bossen|bol|bollen)$/i);if(m&&item.qty){ingredient=m[1];unit=m[2].toLowerCase()}else if(/^stuks?$|^stuk\(s\)$/.test(unit))unit=''}if(item.qty==='1'&&/^elstar appels$/i.test(ingredient))ingredient=ingredient.replace(/appels$/i,'appel');return {...item,unit,ingredient}}
+function hc58Split(line){return line.split(/\s+en\s+(?=\d+(?:[.,]\d+)?\s+(?:g|gram|kg|ml|el|tl|stuks?|teentjes?|krop|bos|bol)\b)/i)}
+function hc58Clean(text){return text.replace(/\bfi\s+jn\b/gi,'fijn').replace(/\bkno\s+fl\s*ook\b/gi,'knoflook').replace(/\s+([,.;:!?])/g,'$1')}
+
+function parseSharedText(payload){const raw=[payload.title,payload.text].filter(Boolean).join('\n').replace(/\r/g,'').trim(),url=payload.url||raw.match(/https?:\/\/\S+/)?.[0]||'';const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>!/^https?:\/\//.test(x));let title=(payload.title||lines[0]||'Gedeeld recept').replace(/https?:\/\/\S+/g,'').trim();let ingStart=lines.findIndex(x=>/^ingred/i.test(x)),dirStart=lines.findIndex(x=>/^(bereiding|bereidingswijze|werkwijze|instructies?)/i.test(x));let ingLines=[],directions='';if(ingStart>=0){const end=dirStart>ingStart?dirStart:lines.length;ingLines=lines.slice(ingStart+1,end)}if(dirStart>=0)directions=lines.slice(dirStart+1).join('\n');else if(lines.length>1&&ingStart<0)directions=lines.slice(1).join('\n');return{id:crypto.randomUUID(),title,servings:'',ingredients:ingLines.flatMap(hc58Split).map(parseIngredient).filter(x=>x.ingredient),directions,sourceUrl:url,source:sourceFromUrl(url),status:'pending',sharedAt:new Date().toISOString()}}
 function sourceFromUrl(url){try{const h=new URL(url).hostname.toLowerCase();if(h.includes('picnic'))return 'Picnic';if(h.includes('ah.nl'))return 'Allerhande';return h.replace(/^www\./,'')}catch(_){return 'Gedeeld'}}
 function findRecipeJson(value){if(!value)return null;if(Array.isArray(value)){for(const x of value){const f=findRecipeJson(x);if(f)return f}}else if(typeof value==='object'){const t=value['@type'];if(t==='Recipe'||(Array.isArray(t)&&t.includes('Recipe')))return value;if(value['@graph'])return findRecipeJson(value['@graph'])}return null}
 function instructionText(v){if(Array.isArray(v))return v.map(x=>typeof x==='string'?x:(x?.text||x?.name||instructionText(x?.itemListElement))).filter(Boolean).join('\n');if(typeof v==='string')return v;return v?.text||''}
@@ -1099,7 +1103,7 @@ if(directRecipe){const r=getRecipe(directRecipe);if(r){weekMenuPanel?.classList.
 function normalizeBulkUnit(unit){
   const u=String(unit||'').trim().toLowerCase().replace(/^stuk\(s\)$/,'stuk');
   const map={'g':'gram','gr':'gram','gram':'gram','eetlepel':'el','eetlepels':'el','tablespoon':'el','tablespoons':'el','tbsp':'el','theelepel':'tl','theelepels':'tl','teaspoon':'tl','teaspoons':'tl','tsp':'tl','stuk':'','stuks':'','stuk(s)':'','zakje(s)':'zakje','zakjes':'zakje','teentje':'teentje','teentjes':'teentjes'};
-  return map[u]||u;
+  return Object.prototype.hasOwnProperty.call(map,u)?map[u]:u;
 }
 function bulkFractionNumber(value){
   const s=String(value||'').trim();
@@ -1128,7 +1132,7 @@ function cleanBulkLines(text){
   }).filter(Boolean).filter(x=>!/^\(?bevat\s*:/i.test(x)&&!/^niet inbegrepen in (?:jouw|je) bezorging$/i.test(x));
 }
 function parseBulkIngredients(text){
-  let lines=cleanBulkLines(text).filter(x=>!/^ingrediënten?$/i.test(x)&&!/^bereiding(?:swijze)?$/i.test(x)&&!/^waarschijnlijk al in huis$/i.test(x));
+  let lines=cleanBulkLines(text).flatMap(hc58Split).filter(x=>!/^ingrediënten?$/i.test(x)&&!/^bereiding(?:swijze)?$/i.test(x)&&!/^waarschijnlijk al in huis$/i.test(x));
   const out=[];
   for(let i=0;i<lines.length;){
     const line=lines[i],next=lines[i+1],after=lines[i+2];
@@ -1149,7 +1153,7 @@ function parseBulkIngredients(text){
   out.filter(x=>x.ingredient||x.qty||x.unit).forEach(x=>{
     if(/^peper\s+en\s+zout$/i.test(String(x.ingredient||'').trim())){
       split.push({...x,ingredient:'Peper'});split.push({...x,ingredient:'Zout'});
-    }else split.push(x);
+    }else split.push(hc58Ingredient(x));
   });
   return split;
 }
@@ -1185,21 +1189,7 @@ function parseBulkDirections(text){
   }
   push();
   if(!steps.length)return '';
-  // Houd de bereiding rustig leesbaar: iedere losse handeling krijgt witruimte.
-  return steps.map((lines,i)=>{
-    const blocks=[];
-    let block=[];
-    const flush=()=>{if(block.length){blocks.push(block.join(' '));block=[]}};
-    for(const line of lines){
-      if(!line){flush();continue}
-      // Een geplakte regel of bullet is meestal één aparte handeling.
-      flush();
-      block.push(line);
-      flush();
-    }
-    flush();
-    return `Stap ${i+1}\n\n${blocks.join('\n\n')}`;
-  }).join('\n\n');
+  return steps.map((lines,i)=>`Stap ${i+1}\n${hc58Clean(lines.filter(Boolean).join(' '))}`).join('\n\n');
 }
 function escapeRegExp(value){return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function stripIngredientAmountsFromDirections(text,ingredients){
@@ -1214,9 +1204,11 @@ function stripIngredientAmountsFromDirections(text,ingredients){
     const unitPattern=unit?escapeRegExp(unit):'';
     const ingredientPattern=escapeRegExp(ingredient).replace(/\\ /g,'\\s+');
     const patterns=[];
+    if(!unitPattern)patterns.push(`\\b${amountPattern}\\s+(?:stuks?\\s+)?${ingredientPattern}\\b`);
     if(unitPattern)patterns.push(`\\b${amountPattern}\\s*${unitPattern}\\s+${ingredientPattern}\\b`);
     if(!unitPattern||countUnits.has(unit.toLowerCase()))patterns.push(`\\b${amountPattern}\\s+${ingredientPattern}\\b`);
     patterns.forEach(pattern=>{out=out.replace(new RegExp(pattern,'gi'),ingredient)});
+    if(!unit){const short=ingredient.replace(/^(?:elstar|eetrijpe)\s+/i,'');if(short!==ingredient)out=out.replace(new RegExp(`\\b${amountPattern}\\s+${escapeRegExp(short)}\\b`,'gi'),short);}
   });
   return out;
 }
@@ -1356,7 +1348,7 @@ function parseRecipeDocumentText(text,fileName='Recept'){
   const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
   const sectionIndex=(rx)=>lines.findIndex(x=>rx.test(x));
   const ingIdx=sectionIndex(/^(ingrediënten|ingredienten|benodigdheden)(?:\s|$|:)/i);
-  let dirIdx=sectionIndex(/^(bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(?:\s|$|:)/i);
+  let dirIdx=sectionIndex(/^(zo maak je het!?|bereiding|bereidingswijze|werkwijze|aan de slag|instructies)(?:\s|$|:)/i);
   const implicit=lines.findIndex((x,i)=>i>ingIdx&&/^(?:stap\s*1\b|1[.)]\s+|(?:verwarm|verhit|snijd|kook|bak|meng|pel|was|breng)\s+)/i.test(x));
   const implicitDirections=implicit>=0&&(dirIdx<0||implicit<dirIdx);if(implicitDirections)dirIdx=implicit;
   const metaRx=/^(recept|hoofdgerecht|bijgerecht|nagerecht|lunch|ontbijt|\d+\s*(?:personen|pers\.?|minuten|min\.?|uur)|bereidingstijd|oventijd|wachten|allergie|voedingswaarden)/i;
@@ -1367,6 +1359,7 @@ function parseRecipeDocumentText(text,fileName='Recept'){
     if(clean.length<4||clean.length>110||metaRx.test(clean)||looksAmount(clean))continue;
     title=clean;break;
   }
+  const picnicTitle=raw.match(/(?:^|\n)Recept:\s*([^\n]+)(?:\n([^\n]+))?/i);if(picnicTitle)title=[picnicTitle[1],picnicTitle[2]&&!/^(?:Van:|Aan:|Verstuurd:)/i.test(picnicTitle[2].trim())?picnicTitle[2]:''].filter(Boolean).join(' ').trim();
   if(!title) title=fileName.replace(/\.(?:pdf|docx|txt)$/i,'').replace(/[-_]+/g,' ').trim();
   // Sommige recept-PDF's zetten de intro op dezelfde regel als de titel. Knip bij een duidelijke tweede zin.
   title=title.replace(/\s+(?=(?:Poffen|Bak|Kook|Snijd|Verwarm|Serveer|Deze|Dit|Een)\b.*[.!?])/i,'\n').split('\n')[0].trim();
@@ -1378,13 +1371,13 @@ function parseRecipeDocumentText(text,fileName='Recept'){
   }
   const ingredients=ingLines.map(x=>x.replace(/^[•·▪◦\-–—]\s*/,''))
     .filter(x=>x.length<180&&!/^(bereiding|bereidingswijze|werkwijze|aan de slag)$/i.test(x))
-    .map(parseIngredient).filter(x=>x.ingredient&&x.ingredient.length<140);
+    .flatMap(hc58Split).map(parseIngredient).filter(x=>x.ingredient&&x.ingredient.length<140);
   let directions='';
   if(dirIdx>=0) directions=lines.slice(dirIdx+(implicitDirections?0:1)).filter(x=>!/^voedingswaarden/i.test(x)).join('\n');
   const servings=(raw.match(/(?:aantal personen|voor)\s*:?[ ]*(\d+)\s*(?:personen|pers)?/i)||raw.match(/\b(\d+)\s+(?:personen|pers\.)\b/i)||[])[1]||'';
   const time=(raw.match(/(?:bereidingstijd|bereiden)\s*:?[ ]*(\d+)\s*(?:minuten|min\.?)/i)||raw.match(/\b(\d+)\s*minuten\b/i)||[])[1]||'';
   const homeTime=time?(Number(time)<=30?'short':Number(time)<=60?'medium':'long'):'';
-  return {title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(directions),ingredients),homeTime,source:'PDF'};
+  return {title,servings,ingredients,directions:stripIngredientAmountsFromDirections(parseBulkDirections(hc58Clean(directions)),ingredients),homeTime,source:'PDF'};
 }
 function pdfItemsToRecipeLines(items){
   const rows=[];
