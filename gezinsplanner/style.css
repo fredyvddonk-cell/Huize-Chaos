@@ -358,3 +358,5 @@ html, body{
 #hc60AppointmentsBody[hidden]{display:none!important}.hc60-toggle{display:flex;align-items:center;gap:8px;background:none;border:0;color:inherit;padding:6px 0;cursor:pointer}.hc60-toggle span{color:#9278bf}.hc60-toggle h2{margin:0}
 
 .hc62-future-label{color:inherit!important;font-weight:650}#hc60AppointmentsToggle{margin-top:8px}#hc62TodayAppointments{margin-bottom:4px}
+
+#hc63Search{border:0;background:transparent;font-size:22px;cursor:pointer;padding:4px 8px}.roster-row.hc63-today{outline:2px solid #9278b9;outline-offset:-2px;border-radius:8px;background:#9278b918}

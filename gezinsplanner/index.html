@@ -6,8 +6,8 @@
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="#957AC1" name="theme-color"/>
 <title>Gezinsplanner · Huize Chaos</title>
-<link href="style.css?v=1.4.202.62" rel="stylesheet"/>
-<link href="planner-v131.css?v=1.4.202.62" rel="stylesheet"/>
+<link href="style.css?v=1.4.202.63" rel="stylesheet"/>
+<link href="planner-v131.css?v=1.4.202.63" rel="stylesheet"/>
 <style>.library-task-row{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.library-add-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:11px;background:#957ac1;color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}.library-add-button:active{transform:scale(.96)}.library-add-button.added{background:#e9e2f4;color:#7353a5;font-size:17px}.library-add-button:disabled{cursor:default}</style>
   <link rel="stylesheet" href="../hc-theme.css?v=1.4.163">
 <style>
@@ -169,7 +169,7 @@
 <a aria-label="Terug naar Huize Chaos" class="brand" href="../">
 <img class="hc-app-icon" alt="" src="../icons/icon-192.png"/><img alt="Huize Chaos" src="../assets/huize-chaos-wordmark-v1111.png"/>
 </a>
-<div class="topbar-meta"><span class="version">V1.4.202.62</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
+<div class="topbar-meta"><span class="version">V1.4.202.63</span><span class="sync-status" id="syncStatus">Niet aangemeld</span></div>
 </header>
 <section class="day-heading hc-page-heading"><div class="planner-heading-line"><h1>Gezinsplanner</h1><button aria-label="Kies een datum" class="calendar-picker-button planner-heading-calendar" id="plannerDateButton" title="Kies een datum" type="button"><span aria-hidden="true">📅</span></button><input aria-label="Kies een datum" class="planner-date-native-input" id="plannerDateSearch" tabindex="-1" type="date"/><div class="today-date planner-heading-date" id="todayDate"></div></div><h2 class="planner-view-title">Vandaag</h2><div class="date-search-status compact-date-status" id="plannerDateSearchStatus"></div><div class="item-list compact-date-results" hidden="" id="plannerDateSearchResults"></div><button class="date-search-clear" hidden="" id="plannerDateClear" type="button">Terug naar vandaag</button><button hidden="" id="plannerDateToday" type="button">Vandaag</button></section>
 <nav aria-label="Gezinsplanner onderdelen" class="planner-tabs planner-tabs-primary">
@@ -198,8 +198,8 @@
 <div class="heading-actions"><button class="add-button compact secondary-add" id="openRoster" type="button">Werkrooster</button><button aria-label="Afspraak toevoegen" class="add-button compact icon-add" data-add="appointment" type="button">+</button></div>
 </div>
 <div class="item-list" id="hc62TodayAppointments"></div><div><button type="button" id="hc60AppointmentsToggle" aria-expanded="false" aria-controls="hc60AppointmentsBody" class="hc60-toggle"><span aria-hidden="true">▸</span><span class="hc62-future-label">Toekomstige afspraken</span></button></div><div id="hc60AppointmentsBody" hidden><div class="appointment-search">
-<span aria-hidden="true">⌕</span>
-<input aria-label="Zoek in alle afspraken" autocomplete="off" id="appointmentSearch" placeholder="Zoek in alle afspraken" type="search"/>
+<button type="button" id="hc63Search" aria-label="Zoeken">⌕</button>
+<input enterkeyhint="search" aria-label="Zoek in alle afspraken" autocomplete="off" id="appointmentSearch" placeholder="Zoek in alle afspraken" type="search"/>
 <button aria-label="Zoekopdracht wissen" hidden="" id="clearAppointmentSearch" type="button">×</button>
 </div>
 <div class="hc57-search"><select id="hc58Filter" aria-label="Type afspraak"><option value="appointments">Afspraken</option><option value="work">Werk</option><option value="all">Alles</option></select><label><input type="checkbox" id="hc57Past"> Ook verleden</label></div><div class="search-status" id="appointmentSearchStatus"></div>
@@ -548,7 +548,7 @@ Kliko aan de straat" rows="9"></textarea>
   </div>
 </div>
 
-<script src="app.js?v=1.4.202.62"></script>
-<script src="firebase.js?v=1.4.202.62" type="module"></script>
-<script src="../hc-module-nav.js?v=1.4.202.62"></script><script src="../hc-sync-indicator.js?v=1.4.202.62"></script></body>
+<script src="app.js?v=1.4.202.63"></script>
+<script src="firebase.js?v=1.4.202.63" type="module"></script>
+<script src="../hc-module-nav.js?v=1.4.202.63"></script><script src="../hc-sync-indicator.js?v=1.4.202.63"></script></body>
 </html>

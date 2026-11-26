@@ -1654,3 +1654,5 @@ body.receipt-reordering #receiptModal{touch-action:none}
 #receiptModal .receipt-row-summary label{display:none!important}
 #receiptModal .receipt-row-summary select{display:block!important;width:100%;font-size:12px!important;min-height:28px!important;padding:2px 4px!important}
 button.receipt-view-product{width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #ddd;cursor:pointer;color:inherit}
+
+#receiptModal .receipt-product-row>.hc63-trash{grid-column:5;grid-row:1;width:26px;height:32px;padding:0;border:0;background:transparent;font-size:16px}#receiptModal .receipt-products-head,#receiptModal .receipt-product-row{grid-template-columns:minmax(0,1fr) 40px 65px 25px 26px!important}.hc63-count{padding:8px 0;font-size:13px}.hc63-count input{max-width:100px;margin-left:8px}.hc63-feast{display:flex;gap:8px;flex-wrap:wrap}.hc63-feast[hidden]{display:none!important}.hc63-feast label{flex:1;min-width:110px}

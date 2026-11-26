@@ -7,8 +7,8 @@
   <link rel="manifest" href="../manifest.webmanifest">
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=1.4.202.62">
-  <link rel="stylesheet" href="../hc-theme.css?v=1.4.202.62">
+  <link rel="stylesheet" href="style.css?v=1.4.202.63">
+  <link rel="stylesheet" href="../hc-theme.css?v=1.4.202.63">
 </head>
 <body>
   <main class="app">
@@ -19,7 +19,7 @@
         <img class="hc-wordmark-image" src="assets/huize-chaos-wordmark-v1111.png" alt="Huize Chaos">
       </a>
       <span id="title" class="sr-only">Boodschappen</span>
-      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.202.62</span></div>
+      <div class="top-actions"><span id="syncStatus" class="sync-status" title="Synchronisatiestatus" hidden></span><span class="version">V1.4.202.63</span></div>
     </div>
     <section class="module-heading hc-page-heading shopping-module-heading"><h1>Voorraad &amp; Boodschappen</h1></section>
 
@@ -317,7 +317,7 @@
         <p class="receipt-step-help">Controleer de producten. Pas aan indien nodig en kies per product de juiste categorie.</p>
         <div class="receipt-products-wrap">
           <div class="receipt-products-head" aria-hidden="true"><span>Omschrijving</span><span>Aantal</span><span>Totaal</span><span></span></div>
-          <div id="receiptProductRows" class="receipt-product-rows"></div>
+          <div class="hc63-count"><label>Aantal producten op originele bon (indien vermeld)<input id="hc63ExpectedCount" type="number" min="0" step="any" placeholder="Onbekend"></label><div id="hc63CountStatus" aria-live="polite"></div></div><div id="receiptProductRows" class="receipt-product-rows"></div>
         </div>
         <button type="button" id="receiptAddLine" class="receipt-add-line">＋ Productregel toevoegen</button>
       </section>
@@ -377,13 +377,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="js/app.js?v=1.4.202.62"></script>
-<script src="js/shopping.js?v=1.4.202.62"></script>
-  <script src="js/stock.js?v=1.4.202.62"></script>
-  <script src="js/hutsel.js?v=1.4.202.62"></script>
-  <script src="js/picnic-paste.js?v=1.4.202.62"></script>
-  <script src="js/insight.js?v=1.4.202.62"></script>
-  <script type="module" src="js/firebase.js?v=1.4.202.62"></script>
+  <script src="js/app.js?v=1.4.202.63"></script>
+<script src="js/shopping.js?v=1.4.202.63"></script>
+  <script src="js/stock.js?v=1.4.202.63"></script>
+  <script src="js/hutsel.js?v=1.4.202.63"></script>
+  <script src="js/picnic-paste.js?v=1.4.202.63"></script>
+  <script src="js/insight.js?v=1.4.202.63"></script>
+  <script type="module" src="js/firebase.js?v=1.4.202.63"></script>
 
-<script src="../hc-module-nav.js?v=1.4.202.62"></script><script src="../hc-sync-indicator.js?v=1.4.202.62"></script></body>
+<script src="../hc-module-nav.js?v=1.4.202.63"></script><script src="../hc-sync-indicator.js?v=1.4.202.63"></script></body>
 </html>
