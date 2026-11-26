@@ -1,0 +1,1 @@
+Versie .64: boncontrole Jumbo/AH, Picnic PDF paginaovergang, statiegeld en tegoed, totaalbedrag, productnamen. Geen datamigratie.
