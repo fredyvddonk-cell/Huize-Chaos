@@ -1,0 +1,1 @@
+Export boodschappen: Inzicht (onderaan) en snelkoppeling via Beheer. Oktober, november, beide, eigen periode of alles. JSON en XLSX met productregels en bonnen apart. Onbekende verpakkingsgroottes en prijzen blijven leeg. Geen wijziging aan opslag of synchronisatie. Alleen lokaal beschikbare opgeslagen bonnen worden geëxporteerd.
